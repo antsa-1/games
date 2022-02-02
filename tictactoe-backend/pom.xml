@@ -1,43 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
 	<groupId>com.tauhka</groupId>
-	<artifactId>tictactoe</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
-
+	<artifactId>tic-tac-toe</artifactId>
+	<version>1.0.1</version>
+	<packaging>jar</packaging>
 	<name>tictactoe</name>
-
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>12</maven.compiler.source>
 		<maven.compiler.target>12</maven.compiler.target>
 	</properties>
-
 	<dependencies>
+		<dependency>
+			<groupId>com.tauhka</groupId>
+			<artifactId>games-core</artifactId>
+			<version>1.0.1</version>
+		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>5.0.0</version>
-
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>5.7.2</version>
-			
+
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>5.7.2</version>
-		
+
 		</dependency>
 		<dependency>
 			<groupId>jakarta.json</groupId>
@@ -115,8 +112,9 @@
 	</dependencies>
 
 	<build>
-		<finalName>tictactoe</finalName>
-		<pluginManagement><!-- lock down plugins versions to avoid using Maven 
+		<finalName>Tictactoe</finalName>
+		<pluginManagement>
+			<!-- lock down plugins versions to avoid using Maven 
 				defaults (may be moved to parent pom) -->
 			<plugins>
 				<plugin>
@@ -137,7 +135,7 @@
 					<version>2.22.1</version>
 				</plugin>
 				<plugin>
-					<artifactId>maven-war-plugin</artifactId>
+					<artifactId>maven-jar-plugin</artifactId>
 					<version>3.2.2</version>
 				</plugin>
 				<plugin>

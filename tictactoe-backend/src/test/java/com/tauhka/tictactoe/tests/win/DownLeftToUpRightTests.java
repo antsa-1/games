@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 
-import com.tauhka.tictactoe.game.GameToken;
-import com.tauhka.tictactoe.game.util.WinnerChecker;
+import com.tauhka.games.core.GameToken;
+import com.tauhka.games.core.twodimen.util.WinnerChecker;
 
 public class DownLeftToUpRightTests {
 

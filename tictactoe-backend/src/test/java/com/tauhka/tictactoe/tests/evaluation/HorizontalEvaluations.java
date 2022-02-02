@@ -6,13 +6,13 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.tauhka.tictactoe.ai.ArtificialUser;
-import com.tauhka.tictactoe.game.GameMode;
-import com.tauhka.tictactoe.game.GameToken;
-import com.tauhka.tictactoe.game.Move;
-import com.tauhka.tictactoe.game.Table;
-import com.tauhka.tictactoe.game.util.MoveEvaluator;
-import com.tauhka.tictactoe.game.util.TicTacToeHelper;
+import com.tauhka.games.core.GameMode;
+import com.tauhka.games.core.GameToken;
+import com.tauhka.games.core.Move;
+import com.tauhka.games.core.Table;
+import com.tauhka.games.core.twodimen.ArtificialUser;
+import com.tauhka.games.core.twodimen.util.MoveEvaluator;
+import com.tauhka.games.core.twodimen.util.TicTacToeHelper;
 
 //--add-exports org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED --add-exports org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
 public class HorizontalEvaluations {
