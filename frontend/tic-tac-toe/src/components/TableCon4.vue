@@ -68,6 +68,12 @@ export default defineComponent({
 			showLastVal:false,
 			soundOn:false,
 			secondsLeft:120,
+			startingPosX:-1,
+			startingPosY:-1,
+			gameBoardWidthAndHeight:-1,
+			arcDiameter:-1,
+			selectedColumn:-1
+
 		}
 	},
 	created() {
@@ -225,9 +231,18 @@ export default defineComponent({
 		},
 		addMouseListeners(){
 			this.canvas.addEventListener("click", this.handleClick, false);
-			this.canvas.addEventListener("mousemove", function(e) { 
-				console.log("Mouse:"+JSON.stringify(e))
+			this.canvas.addEventListener("mousemove", e => {
+			const column = Math.floor((e.offsetX-this.startingPosX)/this.arcDiameter)+1
+			if(column!=this.column && column>0)				
+				this.renderingContext.clearRect( this.column*this.arcDiameter, 36, this.arcDiameter, 20);
+				this.column=column;
+				console.log("Column:"+this.column)
+				//TODO Text to correct color ball
+				this.renderingContext.fillText("O", column*this.arcDiameter, this.arcDiameter);
+				
 			});
+				
+			
 		},
 		drawWinningLine(win:IWin){
 			
@@ -259,16 +274,23 @@ export default defineComponent({
 			
 			this.verticalGap = this.canvas.height / table.x
 		 	this.horizontalGap = this.canvas.width / table.y
-			const arcDiameter=this.canvas.width/table.x
+			this.arcDiameter=this.canvas.width/ (table.x+1)
+			//Testing
+			this.gapBetweenArcs= 28
+			this.gameBoardWidthAndHeight=table.y*this.arcDiameter
+			this.startingPosX=this.gapBetweenArcs-2
+			this.startingPosY=this.arcDiameter
 			
-			const gapBetweenArcs= 28
+			this.renderingContext.beginPath();
+			this.renderingContext.rect(this.startingPosX, this.startingPosY, this.gameBoardWidthAndHeight, (this.gameBoardWidthAndHeight-this.arcDiameter));
+			this.renderingContext.stroke();
 			for(let x=0;x<table.x;x++){
-				for(let y=0;y<table.y+1;y++){
+				for(let y=0;y<table.y;y++){
 					if(y===0){
-						continue; //First row empty for showing next token
+						continue; //First row is empty for showing 'clickable' token
 					}
-					const xCenter=arcDiameter*x+gapBetweenArcs
-					const yCenter=(arcDiameter)*y+gapBetweenArcs
+					const xCenter=this.arcDiameter*x+this.arcDiameter
+					const yCenter=(this.arcDiameter)*y+this.gapBetweenArcs					
 					this.renderingContext.beginPath();
 					this.renderingContext.arc(xCenter, yCenter, 25, 0, 2 * Math.PI);
 					this.renderingContext.stroke();
@@ -316,7 +338,8 @@ export default defineComponent({
 			}				
 		},
 		handleClick(event: MouseEvent) {
-			console.log("handle click")
+			console.log("clicked column:"+this.column)
+			
 		},
 		disableBoard(){
 				this.renderingContext.font = "30px Arial";
