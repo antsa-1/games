@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<header>
-			<h2>TicTacToe with custom board sizes </h2>
+			<h2>Tauhka games welcomes! </h2>
 		</header>
 		<NavbarTop />
 
