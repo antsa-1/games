@@ -1,4 +1,4 @@
-package com.tauhka.games.core.twodimen.util;
+package com.tauhka.games.core.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,5 +40,4 @@ public final class Constants {
 		FORBIDDEN_WORD_PARTS.add("<");
 		FORBIDDEN_WORD_PARTS.add("&lt;");
 	}
-
 }

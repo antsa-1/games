@@ -1,6 +1,7 @@
 module tauhka.core {
 	exports com.tauhka.games.core;
 	exports com.tauhka.games.core.twodimen.util;
+	exports com.tauhka.games.core.util;
 	exports com.tauhka.games.core.twodimen;
 
 	requires jakarta.json;
