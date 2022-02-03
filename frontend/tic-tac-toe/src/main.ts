@@ -4,6 +4,7 @@ import User from './components/User.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
 import Table from './components/Table.vue'
+import TableCon4 from './components/TableCon4.vue'
 import Info from './components/Info.vue'
 import Feedback from './components/Feedback.vue'
 import Registration from './components/Registration.vue'
@@ -70,6 +71,19 @@ const routes: RouteRecordRaw[] = [
         path: '/portal/table/:watch?',
         component: Table,
         name: "Table",
+        props: true,
+        beforeEnter: (to, from, next) => {
+            if (!store.state.user || !store.state.theTable) {
+                next('/');
+            } else {
+                next()
+            }
+        }
+    },
+    {
+        path: '/portal/tablecon4/:watch?',
+        component: TableCon4,
+        name: "TableCon4",
         props: true,
         beforeEnter: (to, from, next) => {
             if (!store.state.user || !store.state.theTable) {

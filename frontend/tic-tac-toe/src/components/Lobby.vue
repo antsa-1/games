@@ -265,6 +265,11 @@ export default defineComponent({
 							this.createTableButtonVisible = false
 							this.removeTableButtonVisible = false
 							this.$store.dispatch("selectTable", data.table).then(() => {
+								if(tableC.gameMode.id>=20){
+									console.log("Opening Connect4Table")
+									this.$router.push({ name: 'TableCon4', id:data.table.id})
+									return
+								}
 								this.$router.push({ name: 'Table', id:data.table.id})
 							})
 						}						
