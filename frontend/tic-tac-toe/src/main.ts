@@ -31,25 +31,25 @@ const routes: RouteRecordRaw[] = [
         redirect: { name: 'Home' }
     },
     {
-        path: '/portal/tictactoe',
+        path: '/portal/games',
         component: Home,
         name: "Home",
     },
 
     {
-        path: '/portal/tictactoe/user',
+        path: '/portal/user',
         component: User,
         name: "User",
         props: true,
     },
     {
-        path: '/portal/tictactoe/registration',
+        path: '/portal/registration',
         component: Registration,
         name: "Registration",
         props: true,
     },
     {
-        path: '/portal/tictactoe/lobby',
+        path: '/portal/lobby',
         component: Lobby,
         name: "Lobby",
         props: true,
@@ -67,7 +67,7 @@ const routes: RouteRecordRaw[] = [
         }
     },
     {
-        path: '/portal/tictactoe/table/:watch?',
+        path: '/portal/table/:watch?',
         component: Table,
         name: "Table",
         props: true,
@@ -80,18 +80,18 @@ const routes: RouteRecordRaw[] = [
         }
     },
     {
-        path: '/portal/tictactoe/terms',
+        path: '/portal/terms',
         component: Info,
         name: "Info",
     },
     {
-        path: '/portal/tictactoe/feedback',
+        path: '/portal/feedback',
         component: Feedback,
         name: "Feedback",
     },
 
     {
-        path: "/portal/tictactoe/:catchAll(.*)",
+        path: "/portal/:catchAll(.*)",
         component: Error,
         name: "Error",
         props: true,
