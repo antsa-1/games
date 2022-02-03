@@ -11,7 +11,7 @@
             <router-link class="nav-link"  :to="{ name: 'Home' }">Home</router-link>
           </li>
           <li class="nav-item">
-            <router-link class="nav-link"  :to="{ name: 'Lobby' }">Play</router-link>
+            <router-link class="nav-link"  :to="{ name: 'Lobby' }">Games</router-link>
           </li>
           <li v-if="!authenticated" class="nav-item">
             <router-link class="nav-link"  :to="{ name: 'Registration' }">Registration</router-link>
