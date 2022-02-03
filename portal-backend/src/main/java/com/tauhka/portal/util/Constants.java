@@ -3,7 +3,8 @@ package com.tauhka.portal.util;
 import java.util.ArrayList;
 import java.util.List;
 
-//Same as tictactoe project's Constants.java. Should be in 1 place and distributed to both projects.
+//03.02.2022, same as GamesCore project's Constants.java. Question of creating .jar from GamesCore-project because of single Constants.class
+// Atm no dependency created to GamesCore -> Portal is independent from Games.
 public final class Constants {
 	public static final int USER_NAME_MIN_LENGTH = 1;
 	public static final int USER_NAME_MAX_LENGTH = 15;
@@ -39,5 +40,4 @@ public final class Constants {
 		FORBIDDEN_WORD_PARTS.add("<");
 		FORBIDDEN_WORD_PARTS.add("&lt;");
 	}
-
 }

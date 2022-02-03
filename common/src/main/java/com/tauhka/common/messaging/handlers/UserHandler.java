@@ -1,8 +1,8 @@
 package com.tauhka.common.messaging.handlers;
 
-import static com.tauhka.common.util.Constants.ANONYM_LOGIN_NAME_START;
-import static com.tauhka.common.util.Constants.ANONYM_LOGIN_TOKEN_START;
-import static com.tauhka.common.util.Constants.NULL;
+import static com.tauhka.games.core.util.Constants.ANONYM_LOGIN_NAME_START;
+import static com.tauhka.games.core.util.Constants.ANONYM_LOGIN_TOKEN_START;
+import static com.tauhka.games.core.util.Constants.NULL;
 
 import java.util.ArrayList;
 import java.util.List;

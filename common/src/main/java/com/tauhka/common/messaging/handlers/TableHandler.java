@@ -1,6 +1,6 @@
 package com.tauhka.common.messaging.handlers;
 
-import static com.tauhka.common.util.Constants.SYSTEM;
+import static com.tauhka.games.core.util.Constants.SYSTEM;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -19,7 +19,6 @@ import com.tauhka.games.core.twodimen.GameResult;
 import jakarta.ejb.ConcurrentAccessException;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
-import jakarta.inject.Inject;
 
 @Default
 @Dependent

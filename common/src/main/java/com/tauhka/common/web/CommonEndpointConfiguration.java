@@ -1,6 +1,6 @@
 package com.tauhka.common.web;
 
-import com.tauhka.common.util.Constants;
+import com.tauhka.games.core.util.Constants;
 
 import jakarta.websocket.server.ServerEndpointConfig;
 
