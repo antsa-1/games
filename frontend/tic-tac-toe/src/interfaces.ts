@@ -49,6 +49,7 @@ export interface IGameMode {
 	id: number,
 	name: string,
 	requiredConnections:number,
+	gameNumber:number,
 }
 export interface IChat {
 	users?: IUser;

@@ -35,36 +35,45 @@
 			</div>			
 			<div class="row">
 				
-				<div v-if="tablesExist" class="col">
+				<table class="table" v-if="tablesExist" >
 				
-					<ul class="list-group">
-						<li v-for="(table, index) in tables" :key="table.id" class="list-group-item" :class="[index%2==0?'bg-info p-2 text-dark bg-opacity-25':'bg-info p-2 text-dark bg-opacity-10']">
-							<svg v-if="isOwnTable(table)" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="green" class="bi bi-table float-start" viewBox="0 0 16 16">
-								<path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2zm15 2h-4v3h4V4zm0 4h-4v3h4V8zm0 4h-4v3h3a1 1 0 0 0 1-1v-2zm-5 3v-3H6v3h4zm-5 0v-3H1v2a1 1 0 0 0 1 1h3zm-4-4h4V8H1v3zm0-4h4V4H1v3zm5-3v3h4V4H6zm4 4H6v3h4V8z"/>
-							</svg>	
-							{{table?.playerA?.name}} - {{table?.playerB?.name}}
-							<br> 
-							({{table.x}}x{{table.y}})
-							<div v-if="!isOwnTable(table)" class="row">
-								<div class="col">
-									<button v-if="playButtonVisible(table)"  :disabled="!createTableButtonVisible" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
-										Play
-									</button>									
-									<button @click="watchTable(table)" :disabled="!createTableButtonVisible || !table.playerA || !table.playerB" type="button" class="btn btn-primary w-30 float-end">
-										Watch
-									</button>	
-								</div>
-							</div>
-							<div v-else class="row">
-								<div class="col">
-									<span class="fw-bold">
-										Your table waiting others to join the table...
-									</span>
-								</div>
-							</div>
-						</li>
-					</ul>
-				</div>
+					
+						<thead>
+							<tr>							
+								<th scope="col">Type</th>
+								<th scope="col">Playing</th>
+								<th scope="col">Size</th>
+								<th scope="col">Action</th>
+							</tr>
+						</thead>
+						<tbody>						
+							<tr v-for="(table, index) in tables" :key="table.id" >						
+								<td v-if="table.gameMode.id!==20" scope="row">
+									X.O 
+								</td>								
+								<td v-else-if="table.gameMode.id>=20" scope="row">
+								 Con 4.
+								</td>
+								<td>
+									{{table.playerA.name}} - {{table.playerB?.name}}
+								</td>
+								<td>
+									Con {{table.gameMode.requiredConnections}}
+								</td>
+								<td>
+									<section v-if="!isOwnTable(table)">
+										<button v-if="playButtonVisible(table)"  :disabled="!createTableButtonVisible" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
+											Play
+										</button>									
+										<button @click="watchTable(table)" :disabled="!createTableButtonVisible || !table.playerA || !table.playerB" type="button" class="btn btn-primary w-30 float-end">
+											Watch
+										</button>	
+									</section>
+								</td>
+							</tr>								
+						</tbody>
+					</table>
+				
 				<div v-else class="col fw-bold">
 					<span class="float-start"> 
 						No tables at the moment. 
@@ -83,6 +92,12 @@
 				</div>
 				<div class="modal-body">
 						<form>
+							<div class="btn-group" role="group" aria-label="Select game" id="select-game">
+								<input type="radio" v-model="selectedGame" value="1" @change="changeSelectedGame"  id="tictactoe" name="tictactoe" class="btn ">
+								<label class="btn " for="tictactoe">TicTacToe</label>
+								<input type="radio" v-model="selectedGame" value="2" @change="changeSelectedGame" id="connect4" name="connect4" class="btn ">	
+								<label class="btn " for="connect4">Connect4</label>						
+							</div>
 							<div class="mb-3" id="v-model-select-dynamic">						
 							<select v-model="selectedGameMode">
 								<option :value="0" :key="0" >
@@ -130,9 +145,10 @@ export default defineComponent({
 			createTableButtonVisible:true,
 			watchTableButtonDisabled:false,
 			removeTableButtonVisible:false,
+			selectedGame:1,
 			selectedGameMode:"0",
 			playAgainstComputerChecked:false,
-			computerLevel:"0"
+			computerLevel:"0",
 		}
 	},
 	computed:{
@@ -143,8 +159,14 @@ export default defineComponent({
 		tables(){
 			return this.$store.getters.tables
 		},
-		gameModes(){		
-			return this.$store.getters.gameModes
+		gameModes(){
+			if(this.selectedGame==="1"){
+				let temp= this.$store.getters.gameModes.filter(gameMode => gameMode.gameId===1)
+				console.log("TEMP:"+JSON.stringify(temp))
+				return temp;
+			}
+			let temp2=this.$store.getters.gameModes.filter(gameMode => gameMode.gameId===2)
+			return temp2;
 		},
 		modalCreateTableDisabled(){
 			return this.selectedGameMode === "0"
@@ -353,6 +375,11 @@ export default defineComponent({
 				
 				this.computerLevel="0";
 			}
+		},
+		changeSelectedGame(event){
+			console.log("ON"+JSON.stringify(event))
+			
+			this.selectedGameMode="0"
 		},
 		removeTable(){
 			
