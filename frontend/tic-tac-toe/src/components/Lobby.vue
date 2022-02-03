@@ -23,7 +23,7 @@
 						Tables
 					</span>
 					<span class="float-end">
-						<button v-if="isCreateTableButtonVisible" type="button" class="btn btn-primary w-30 float-start" data-bs-toggle="modal" data-bs-target="#createTableModal">
+						<button v-if="!hasCreatedTable" type="button" class="btn btn-primary w-30 float-start" data-bs-toggle="modal" data-bs-target="#createTableModal">
 							Create table
 						</button>
 						<button v-if="isRemoveTableButtonVisible" @click="removeTable()" type="button" class="btn btn-primary bg-danger w-30 float-start" >
@@ -61,7 +61,7 @@
 									Con {{table.gameMode.requiredConnections}}
 								</td>
 								<td>
-									<section v-if="!isOwnTable(table)">
+									<section v-if="!hasCreatedTable">
 										<button v-if="playButtonVisible(table)"  :disabled="!createTableButtonVisible" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
 											Play
 										</button>									
@@ -152,7 +152,7 @@ export default defineComponent({
 		}
 	},
 	computed:{
-	
+		
 		users() {
 			return this.$store.getters.users
 		},
@@ -172,12 +172,12 @@ export default defineComponent({
 		tablesExist(){			
 			return this.$store.getters.tables.length > 0
 		},
-		isCreateTableButtonVisible(){
+		hasCreatedTable(){
 			const firstTable:ITable = this.$store.getters.tables[0]
 			if(firstTable && firstTable.playerA){
-				return firstTable.playerA.name!==this.userName
+				return firstTable.playerA.name===this.userName
 			}
-			return true
+			return false
 		},
 		isRemoveTableButtonVisible(){
 			const firstTable:ITable = this.$store.getters.tables[0]
@@ -227,10 +227,10 @@ export default defineComponent({
 					case "CREATE_TABLE":
 						
 						this.$store.dispatch("addTable", data.table)						
-						if (data.table.playerA.name===this.userName){
+						if (data.table.playerA.name===this.userName){							
+							this.createTableButtonVisible = false;
+							this.removeTableButtonVisible = true
 							
-							this.createTableButtonVisible=false;
-							this.removeTableButtonVisible =true
 						}
 						break;
 
@@ -264,6 +264,7 @@ export default defineComponent({
 							tableC.playerB.wins=0
 							this.createTableButtonVisible = false
 							this.removeTableButtonVisible = false
+							this.watchTableButtonVisible = false
 							this.$store.dispatch("selectTable", data.table).then(() => {
 								if(tableC.gameMode.id>=20){
 									console.log("Opening Connect4Table")
