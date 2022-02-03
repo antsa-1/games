@@ -48,11 +48,11 @@
 						</thead>
 						<tbody>						
 							<tr v-for="(table, index) in tables" :key="table.id" >						
-								<td v-if="table.gameMode.id!==20" scope="row">
+								<td v-if="table.gameMode.id<20" scope="row">
 									X.O 
 								</td>								
 								<td v-else-if="table.gameMode.id>=20" scope="row">
-								 Con 4.
+								 4x
 								</td>
 								<td>
 									{{table.playerA.name}} - {{table.playerB?.name}}
@@ -145,7 +145,7 @@ export default defineComponent({
 			createTableButtonVisible:true,
 			watchTableButtonDisabled:false,
 			removeTableButtonVisible:false,
-			selectedGame:1,
+			selectedGame:"1",
 			selectedGameMode:"0",
 			playAgainstComputerChecked:false,
 			computerLevel:"0",
@@ -161,12 +161,9 @@ export default defineComponent({
 		},
 		gameModes(){
 			if(this.selectedGame==="1"){
-				let temp= this.$store.getters.gameModes.filter(gameMode => gameMode.gameId===1)
-				console.log("TEMP:"+JSON.stringify(temp))
-				return temp;
+				return this.$store.getters.gameModes.filter(gameMode => gameMode.gameId===1)
 			}
-			let temp2=this.$store.getters.gameModes.filter(gameMode => gameMode.gameId===2)
-			return temp2;
+			return this.$store.getters.gameModes.filter(gameMode => gameMode.gameId===2)
 		},
 		modalCreateTableDisabled(){
 			return this.selectedGameMode === "0"
@@ -376,9 +373,7 @@ export default defineComponent({
 				this.computerLevel="0";
 			}
 		},
-		changeSelectedGame(event){
-			console.log("ON"+JSON.stringify(event))
-			
+		changeSelectedGame(event){			
 			this.selectedGameMode="0"
 		},
 		removeTable(){

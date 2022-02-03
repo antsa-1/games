@@ -2,6 +2,7 @@ package com.tauhka.games.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public final class GameMode {
 	private final static List<GameMode> GAMEMODES;
@@ -24,7 +25,7 @@ public final class GameMode {
 		GameMode gm7 = new GameMode(TIC_TAC_TOE, 7, 30, 30, 5);// TicTacToes
 		GameMode gm8 = new GameMode(TIC_TAC_TOE, 8, 40, 40, 5);// TicTacToes
 		GameMode gm20 = new GameMode(CONNECT4, 20, 7, 7, 4);// ConnectFour 7x7 board
-		GameMode gm21 = new GameMode(CONNECT4, 20, 10, 10, 4);// ConnectFour 10x10 board
+		GameMode gm21 = new GameMode(CONNECT4, 21, 10, 10, 4);// ConnectFour 10x10 board
 
 		GAMEMODES.add(gm);
 		GAMEMODES.add(gm2);
@@ -49,10 +50,14 @@ public final class GameMode {
 	}
 
 	public static GameMode getGameMode(int id) {
-		if (id < 1 || id > GAMEMODES.size()) {
+		if (id < 1 || id > 100) {
 			throw new IllegalArgumentException("Wrong gameMode:" + id);
 		}
-		return GAMEMODES.get(id - 1);
+		Optional<GameMode> gameMode = GAMEMODES.stream().filter(mode -> mode.id == id).findFirst();
+		if (gameMode.isEmpty()) {
+			throw new IllegalArgumentException("No such gameMode:" + id);
+		}
+		return gameMode.get();
 	}
 
 	public int getId() {
