@@ -39,7 +39,7 @@
 			</div>
 		</div>
 		<div class="col-xs-12 col-sm-8">
-			 <canvas :class="{'bg-secondary':theTable.playerInTurn ==null}" id="canvas" ></canvas>
+			 <canvas :class="{'bg-secondary':theTable.playerInTurn ==null}" id="canvas" style="border:1px solid #000000;"  ></canvas>
     	</div>
 		
 	</div>
@@ -81,10 +81,10 @@ export default defineComponent({
 				this.highlightLastSquareIfSelected()
 			}else if (mutation.type === "changeTurn") {
 				if(state.theTable.playerInTurn.name === this.userName){
-					this.addMouseListener()
+					this.addMouseListeners()
 					this.startReducer()
 				}else{
-					this.removeMouseListener()
+					this.removeMouseListeners()
 					this.stopReducer()
 				}
 			}else if (mutation.type === "rematch" ){			
@@ -219,11 +219,15 @@ export default defineComponent({
 				this.drawToken(lastSquare,"#000000")	
 			}
 		},
-		removeMouseListener(){
+		removeMouseListeners(){
 			this.canvas.removeEventListener("click", this.handleClick, false);
+
 		},
-		addMouseListener(){
+		addMouseListeners(){
 			this.canvas.addEventListener("click", this.handleClick, false);
+			this.canvas.addEventListener("mousemove", function(e) { 
+				console.log("Mouse:"+JSON.stringify(e))
+			});
 		},
 		drawWinningLine(win:IWin){
 			
@@ -235,7 +239,41 @@ export default defineComponent({
 			this.renderingContext.stroke();
 		},
 		initBoard() {
-			console.log("Connect4 table")
+			console.log("Connect4 table"+JSON.stringify(this.theTable))
+			const table: ITable = this.theTable
+			this.canvas = document.getElementById("canvas") 
+			this.renderingContext = this.canvas.getContext("2d");
+			const vpHeight = window.innerHeight;
+			const vpWidth = window.innerWidth;
+			this.addMouseListeners()
+			this.canvas.height=440
+			this.canvas.width=440
+			if(table.x>=10 && table.x<=20){
+				this.canvas.height=620
+				this.canvas.width=620
+			}else if(table.x>20){
+				this.canvas.height=800
+				this.canvas.width=800
+			}
+			this.canvas.addEventListener("click", this.handleClick, false);
+			
+			this.verticalGap = this.canvas.height / table.x
+		 	this.horizontalGap = this.canvas.width / table.y
+			const arcDiameter=this.canvas.width/table.x
+			
+			const gapBetweenArcs= 28
+			for(let x=0;x<table.x;x++){
+				for(let y=0;y<table.y+1;y++){
+					if(y===0){
+						continue; //First row empty for showing next token
+					}
+					const xCenter=arcDiameter*x+gapBetweenArcs
+					const yCenter=(arcDiameter)*y+gapBetweenArcs
+					this.renderingContext.beginPath();
+					this.renderingContext.arc(xCenter, yCenter, 25, 0, 2 * Math.PI);
+					this.renderingContext.stroke();
+				}
+			}
 		},
 		drawBoard(){
 			
@@ -278,22 +316,7 @@ export default defineComponent({
 			}				
 		},
 		handleClick(event: MouseEvent) {
-			const x = Math.floor(event.offsetX/this.verticalGap);
-			const y = Math.floor(event.offsetY/this.horizontalGap);		
-			let clickedSquare: ISquare = {
-				x: x,
-				y: y,
-				coordinates: x.toString().concat(y.toString())
-			};
-			
-			const elementExist =this.theTable.board.find(square => square.coordinates===clickedSquare.coordinates)
-			if(!elementExist){
-				
-				this.removeMouseListener()
-				const obj = { title: "MOVE",x:clickedSquare.x,y:clickedSquare.y};
-				this.user.webSocket.send(JSON.stringify(obj));
-				this.removeMouseListener()		
-			}
+			console.log("handle click")
 		},
 		disableBoard(){
 				this.renderingContext.font = "30px Arial";
