@@ -58,14 +58,14 @@
 									{{table.playerA.name}} - {{table.playerB?.name}}
 								</td>
 								<td>
-									Con {{table.gameMode.requiredConnections}}
+									{{table.gameMode.x}} x {{table.gameMode.y}}
 								</td>
 								<td>
 									<section v-if="!hasCreatedTable">
 										<button v-if="playButtonVisible(table)"  :disabled="!createTableButtonVisible" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
 											Play
 										</button>									
-										<button @click="watchTable(table)" :disabled="!createTableButtonVisible || !table.playerA || !table.playerB" type="button" class="btn btn-primary w-30 float-end">
+										<button @click="watchTable(table)" v-if="table.playerA && table.playerB" type="button" class="btn btn-primary w-30 float-end">
 											Watch
 										</button>	
 									</section>
