@@ -168,21 +168,23 @@ public class Table {
 	}
 
 	// Tuplaklikit jne. -> synchronized plus
-	
-	public synchronized String addGameToken(User user, Integer x, Integer y) {
+
+	public synchronized Move addGameToken(User user, Integer x, Integer y) {
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in board:" + this);
 			// throw new CloseWebSocketExcepetion("Player is not in turn in board:" + this);
 		}
-		GameToken token = this.board[x][y];
+		GameToken token = this.board[x][y - 1];
 		if (token != null) {
 			throw new IllegalArgumentException("Board already has token x:" + x + "+ y:" + y + " _" + this);
 		}
-		token = this.playerInTurn.getGameToken();
+		token = this.playerInTurn.getGameToken(); 
 		this.board[x][y] = token;
 		this.changePlayerInTurn();
 		this.addedTokens++;
-		return token.toString();
+		Move move=new Move(x,y);
+		move.setToken(token);
+		return move;
 	}
 
 	public GameResult checkWinAndDraw() {
@@ -225,6 +227,10 @@ public class Table {
 
 	public void setTimer(int timer) {
 		this.timer = timer;
+	}
+
+	protected void addTokenCount() {
+		this.addedTokens++;
 	}
 
 	@JsonbTransient

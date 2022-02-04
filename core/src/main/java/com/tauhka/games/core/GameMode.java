@@ -11,8 +11,8 @@ public final class GameMode {
 	private final int y, x;
 	private final int requiredConnections;
 	private final int gameId;
-	private static final Integer TIC_TAC_TOE = 1;
-	private static final Integer CONNECT4 = 2;
+	public static final Integer TIC_TAC_TOE = 1;
+	public static final Integer CONNECT4 = 2;
 	static {
 		// Constructor tells number meanings
 		GAMEMODES = new ArrayList<GameMode>();

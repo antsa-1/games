@@ -3,10 +3,14 @@ package com.tauhka.games.core;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class Move {
+import jakarta.json.bind.annotation.JsonbProperty;
 
+public class Move {
+	@JsonbProperty("x")
 	private int x;
+	@JsonbProperty("y")
 	private int y;
+	@JsonbProperty("token")
 	private GameToken token;
 	private BigDecimal value;//For checking win conditions.
 

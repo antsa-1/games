@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import com.tauhka.common.connectfour.ConnectFourTable;
 import com.tauhka.common.messaging.Message;
 import com.tauhka.common.messaging.MessageTitle;
 import com.tauhka.common.web.CommonEndpoint;
@@ -24,8 +25,6 @@ import jakarta.enterprise.inject.Default;
 @Dependent
 public class TableHandler {
 
-
-
 	public Message createTable(Message message, CommonEndpoint endpoint) {
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
 		stream = stream.filter(table -> table.isPlayer(endpoint.getUser()));
@@ -33,8 +32,14 @@ public class TableHandler {
 		if (tableOptional.isPresent()) {
 			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser() + " table:" + tableOptional.get());
 		}
+		Table table = null;
 		GameMode gameMode = GameMode.getGameMode(Integer.parseInt(message.getMessage()));
-		Table table = new Table(endpoint.getUser(), gameMode, false);
+		if (GameMode.CONNECT4 == gameMode.getGameId()) {
+			table = new ConnectFourTable(endpoint.getUser(), gameMode, false);
+		} else {
+			table = new Table(endpoint.getUser(), gameMode, false);
+		}
+
 		CommonEndpoint.TABLES.put(table.getId(), table);
 		if (message.getComputer()) {
 			ArtificialUser user = new ArtificialUser();
@@ -87,12 +92,13 @@ public class TableHandler {
 	public Message addTokenToGame(Message message, User user) {
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
 		stream = stream.filter(table -> table.isPlayer(user));
+		
 		Optional<Table> tableOptional = stream.findFirst(); // Crash if user has earlier table, find wrong one.
 		Message tokenMessage = new Message();
 		if (tableOptional.isPresent()) {
 			int x = message.getX();
 			int y = message.getY();
-			String tokenAdded = tableOptional.get().addGameToken(user, x, y);
+			Move move = tableOptional.get().addGameToken(user, x, y);
 			GameResult result = tableOptional.get().checkWinAndDraw();
 			if (result != null) {
 				tokenMessage.setTitle(MessageTitle.GAME_END);
@@ -100,10 +106,11 @@ public class TableHandler {
 				tokenMessage.setTitle(MessageTitle.MOVE);
 			}
 			tokenMessage.setTable(tableOptional.get());
-			tokenMessage.setMessage(tokenAdded);
+			tokenMessage.setMessage(move.toString());
 			tokenMessage.setWin(result);
-			tokenMessage.setX(x);
-			tokenMessage.setY(y);
+			tokenMessage.setX(move.getX());
+			tokenMessage.setY(move.getY());			
+			tokenMessage.setToken(move.getToken().getAsText());
 			return tokenMessage;
 		}
 		throw new IllegalArgumentException("No table to put token: for:" + user);

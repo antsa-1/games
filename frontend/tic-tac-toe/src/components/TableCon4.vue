@@ -227,7 +227,7 @@ export default defineComponent({
 		},
 		removeMouseListeners(){
 			this.canvas.removeEventListener("click", this.handleClick, false);
-			this.canvas.removeMouseListener("mousemove", this.handleCircleIndicator)	
+			this.canvas.removeEventListener("mousemove", this.handleCircleIndicator)	
 
 		},
 		addMouseListeners(){
@@ -315,37 +315,27 @@ export default defineComponent({
 		drawToken(square: ISquare,color:string) {
 			
 			const token:IGameToken = square.token
-			const x=square.x
-			const y=square.y
-		
-			if(token == IGameToken.X){
-					const xStart=Math.floor(x * this.horizontalGap+ (this.horizontalGap * 0.1))
-					const yStart=Math.floor(y * this.verticalGap +(this.verticalGap * 0.1))
-					if(color){
-						this.renderingContext.strokeStyle = color
-					}
-					this.renderingContext.beginPath()
-					this.renderingContext.moveTo(xStart, yStart)
-					this.renderingContext.lineTo(xStart+	this.horizontalGap- (this.horizontalGap*0.2), yStart+ this.verticalGap-(this.verticalGap*0.2))
-					this.renderingContext.stroke()
-					this.renderingContext.beginPath()
-					this.renderingContext.moveTo(xStart, yStart+	this.verticalGap- (this.verticalGap*0.2))
-					this.renderingContext.lineTo(xStart+	this.horizontalGap- (this.horizontalGap*0.2), yStart)
-					this.renderingContext.stroke()
+			
+			console.log("square:"+JSON.stringify(token.toString()))
+			if(token == IGameToken.O){
+				this.renderingContext.fillStyle = "blue";
+					console.log("BlueToken")
 			}else{
-					if(color){
-						this.renderingContext.strokeStyle = color
-					}
-					const xCenter=	this.horizontalGap/2+ (x*this.horizontalGap)
-					const yCenter=	this.verticalGap/2+ (y*	this.verticalGap)
-					const r = this.verticalGap/2 *0.85
-					this.renderingContext.beginPath();
-					this.renderingContext.arc(xCenter, yCenter, r, 0, 2 * Math.PI);
-					this.renderingContext.stroke(); 
-			}				
+				console.log(("red token"))
+				this.renderingContext.fillStyle = "red";				
+			}
+			const xCenter=this.arcDiameter*square.x+this.gapBetweenArcs
+			const yCenter=(this.arcDiameter)*square.y+this.arcDiameter
+			console.log("xCenter:"+xCenter+" yCenter:"+yCenter)					
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(yCenter,xCenter , 23, 0, 2 * Math.PI);
+			this.renderingContext.stroke();	
+			this.renderingContext.fill();	
 		},
 		handleClick(event: MouseEvent) {
 			console.log("clicked column:"+this.column)
+			const obj = { title: "MOVE",y:this.column-1};		
+			this.user.webSocket.send(JSON.stringify(obj))
 			
 		},
 		disableBoard(){

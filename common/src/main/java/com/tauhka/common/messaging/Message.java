@@ -72,7 +72,7 @@ public class Message implements Serializable {
 		this.computer = computer;
 	}
 
-	public int getX() {
+	public Integer getX() {
 		return x;
 	}
 
@@ -80,7 +80,7 @@ public class Message implements Serializable {
 		this.x = x;
 	}
 
-	public int getY() {
+	public Integer getY() {
 		return y;
 	}
 
