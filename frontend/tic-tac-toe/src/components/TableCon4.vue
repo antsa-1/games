@@ -242,7 +242,11 @@ export default defineComponent({
 				this.column=column;				
 				const xCenter=this.arcDiameter*this.column				
 				const yCenter=this.arcDiameter/2
-				this.renderingContext.fillStyle = "blue";
+				this.renderingContext.fillStyle="red"
+				if(this.theTable.playerA.gameToken===IGameToken.X && this.userName===this.theTable?.playerA.name){
+					this.renderingContext.fillStyle = "blue";
+				}
+				
 				this.renderingContext.beginPath();
 				this.renderingContext.arc(xCenter, yCenter, 23, 0, 2 * Math.PI);
 				
