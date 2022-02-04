@@ -227,22 +227,27 @@ export default defineComponent({
 		},
 		removeMouseListeners(){
 			this.canvas.removeEventListener("click", this.handleClick, false);
+			this.canvas.removeMouseListener("mousemove", this.handleCircleIndicator)	
 
 		},
 		addMouseListeners(){
 			this.canvas.addEventListener("click", this.handleClick, false);
-			this.canvas.addEventListener("mousemove", e => {
-			const column = Math.floor((e.offsetX-this.startingPosX)/this.arcDiameter)+1
-			if(column!=this.column && column>0)				
-				this.renderingContext.clearRect( this.column*this.arcDiameter, 36, this.arcDiameter, 20);
-				this.column=column;
-				console.log("Column:"+this.column)
-				//TODO Text to correct color ball
-				this.renderingContext.fillText("O", column*this.arcDiameter, this.arcDiameter);
+			this.canvas.addEventListener("mousemove", this.handleCircleIndicator)	
+		},
+		handleCircleIndicator(event:MouseEvent){
+			const column = Math.floor((event.offsetX-this.startingPosX)/this.arcDiameter)+1			
+			if(column!=this.column && column>0 && column<=this.theTable.x)	{			
+				const clearRectangleStartX=this.column*(this.arcDiameter/2)
+				this.renderingContext.clearRect( clearRectangleStartX, 0, clearRectangleStartX+this.arcDiameter, this.arcDiameter-3);
+				this.column=column;				
+				const xCenter=this.arcDiameter*this.column				
+				const yCenter=this.arcDiameter/2
+				this.renderingContext.fillStyle = "blue";
+				this.renderingContext.beginPath();
+				this.renderingContext.arc(xCenter, yCenter, 23, 0, 2 * Math.PI);
 				
-			});
-				
-			
+				this.renderingContext.fill();					
+			}
 		},
 		drawWinningLine(win:IWin){
 			
@@ -257,9 +262,7 @@ export default defineComponent({
 			console.log("Connect4 table"+JSON.stringify(this.theTable))
 			const table: ITable = this.theTable
 			this.canvas = document.getElementById("canvas") 
-			this.renderingContext = this.canvas.getContext("2d");
-			const vpHeight = window.innerHeight;
-			const vpWidth = window.innerWidth;
+			this.renderingContext = this.canvas.getContext("2d");		
 			this.addMouseListeners()
 			this.canvas.height=440
 			this.canvas.width=440
