@@ -56,7 +56,7 @@ import Chat from "./Chat.vue";
 
 export default defineComponent({
   components: { Chat },
-  name: "Table",
+  name: "TableConnectFour",
   mixins: [loginMixin],
   props: ["watch"],
   data() {
@@ -126,10 +126,7 @@ export default defineComponent({
         return true;
       } else if (this.theTable.playerInTurn.name !== this.userName) {
         return true;
-      } else if (
-        this.theTable &&
-        this.theTable.board &&
-        this.theTable.board.length < 4
+      } else if (this.theTable && this.theTable.board && this.theTable.board.length < 4
       ) {
         return true;
       }
@@ -142,7 +139,7 @@ export default defineComponent({
     },
     resignButtonVisible() {
       return (
-        this.userName === this.theTable?.playerA?.name ||
+		this.userName === this.theTable?.playerA?.name ||
         this.userName === this.theTable?.playerB?.name
       );
     },
@@ -155,6 +152,7 @@ export default defineComponent({
     this.initBoard();
 
     if (this.watch === "1") {
+		
       this.drawBoard();
     }
   },
@@ -293,7 +291,7 @@ export default defineComponent({
       this.renderingContext.stroke();
     },
     drawBoardLines(table: ITable) {
-      console.log("drawBoardLines x=" + table.x + "   Y=" + table.y);
+    
       for (let x = 0; x < table.x; x++) {
         for (let y = 0; y < table.y + 1; y++) {
           if (y === 0) {
@@ -308,8 +306,10 @@ export default defineComponent({
       }
     },
     drawBoard() {
+	
       let tokens: ISquare[] = this.theTable.board;
       tokens.forEach((element) => {
+		 
         this.drawToken(element);
       });
     },

@@ -81,9 +81,9 @@ const routes: RouteRecordRaw[] = [
         }
     },
     {
-        path: '/portal/tablecon4/:watch?',
+        path: '/portal/connectfour/:watch?',
         component: TableConnectFour,
-        name: "TableCon4",
+        name: "TableConnectFour",
         props: true,
         beforeEnter: (to, from, next) => {
             if (!store.state.user || !store.state.theTable) {
