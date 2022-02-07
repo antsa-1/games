@@ -248,15 +248,13 @@ export default defineComponent({
 		},
 		drawWinningLine(win:IWin){
 			
-			this.renderingContext.beginPath();
-			console.log("WIN:"+JSON.stringify(win))
-			const fromX= (win.fromX+1)*this.arcDiameter-(this.arcDiameter/2)
-			const fromY= (win.fromY+1)*this.arcDiameter
-			const toX= win.toX*this.arcDiameter-(this.arcDiameter/2)
-			const toY= win.toY*this.arcDiameter
-			console.log("WINS "+fromY+" "+fromX+" "+toY+" "+toX +"   "+this.arcDiameter)
-			this.renderingContext.moveTo(fromY,fromX);
-			this.renderingContext.lineTo(toY,toX);
+			this.renderingContext.beginPath();			
+			const fromX= (win.fromY+1)*this.arcDiameter
+			const fromY= (win.fromX+1)*this.arcDiameter+(this.arcDiameter/2)
+			const toX= (win.toY+1)*this.arcDiameter
+			const toY= (win.toX+1)*this.arcDiameter+(this.arcDiameter/2)			
+			this.renderingContext.moveTo(fromX,fromY);
+			this.renderingContext.lineTo(toX,toY);
 			this.renderingContext.strokeStyle = "#00FFFF";
 			this.renderingContext.lineWidth = 5;
 			this.renderingContext.stroke();
@@ -294,8 +292,7 @@ export default defineComponent({
 			this.renderingContext.rect(this.startingPosX, this.startingPosY, this.gameBoardWidth,this.gameBoardHeight)
 			this.renderingContext.stroke();
 		},
-		drawBoardLines(table: ITable){
-			console.log("drawBoardLines x="+table.x+ "   Y="+table.y)
+		drawBoardLines(table: ITable){		
 			for(let x=0;x<table.x;x++){
 				for(let y=0;y<table.y+1;y++){
 					if(y===0){
@@ -325,7 +322,7 @@ export default defineComponent({
 				this.renderingContext.fillStyle = "blue";				
 			}
 			const xCenter=this.arcDiameter*(square.x+1)+this.gapBetweenArcs
-			const yCenter=(this.arcDiameter)*square.y+this.arcDiameter					
+			const yCenter=(this.arcDiameter)*square.y+this.arcDiameter
 			this.renderingContext.beginPath();
 			this.renderingContext.arc(yCenter,xCenter , 23, 0, 2 * Math.PI);
 			this.renderingContext.stroke();	
