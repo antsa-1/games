@@ -61,8 +61,7 @@ export default defineComponent({
 	props:["watch"],
 	data(){
 		return{
-			horizontalGap: null,
-			verticalGap: null,
+
 			canvas:null,
 			renderingContext:null,
 			showLastVal:false,
@@ -70,7 +69,8 @@ export default defineComponent({
 			secondsLeft:120,
 			startingPosX:-1,
 			startingPosY:-1,
-			gameBoardWidthAndHeight:-1,
+			gameBoardHeight:-1,
+			gameBoardWidth:-1,
 			arcDiameter:-1,
 			selectedColumn:-1
 
@@ -249,8 +249,14 @@ export default defineComponent({
 		drawWinningLine(win:IWin){
 			
 			this.renderingContext.beginPath();
-			this.renderingContext.moveTo(win.fromX*this.horizontalGap+this.horizontalGap/2-10, win.fromY*this.verticalGap+this.verticalGap/2);
-			this.renderingContext.lineTo(win.toX*this.horizontalGap+this.horizontalGap/2+10, win.toY*this.verticalGap+this.verticalGap/2);
+			console.log("WIN:"+JSON.stringify(win))
+			const fromX= (win.fromX+1)*this.arcDiameter-(this.arcDiameter/2)
+			const fromY= (win.fromY+1)*this.arcDiameter
+			const toX= win.toX*this.arcDiameter-(this.arcDiameter/2)
+			const toY= win.toY*this.arcDiameter
+			console.log("WINS "+fromY+" "+fromX+" "+toY+" "+toX +"   "+this.arcDiameter)
+			this.renderingContext.moveTo(fromY,fromX);
+			this.renderingContext.lineTo(toY,toX);
 			this.renderingContext.strokeStyle = "#00FFFF";
 			this.renderingContext.lineWidth = 5;
 			this.renderingContext.stroke();
@@ -268,20 +274,30 @@ export default defineComponent({
 				this.canvas.height=800
 				this.canvas.width=800
 			}
-			this.verticalGap = this.canvas.height / table.x
-		 	this.horizontalGap = this.canvas.width / table.y
-			this.arcDiameter=this.canvas.width/ (table.x+1)
-			//Testing
-			this.gapBetweenArcs= 28
-			this.gameBoardWidthAndHeight=table.y*this.arcDiameter
-			this.startingPosX=this.gapBetweenArcs-2
-			this.startingPosY=this.arcDiameter
 			
+			this.arcDiameter=this.canvas.width/ (table.x+1)		
+			this.drawBoardFrame(table)
+			this.drawBoardLines(table)
+			if(this.theTable.playerInTurn?.name === this.userName){				
+				this.addMouseListeners()
+			}
+		},
+		drawBoardFrame(table: ITable){
+			
+			this.gapBetweenArcs= 28
+			this.gameBoardHeight=(table.y+1)*this.arcDiameter
+			this.gameBoardWidth=table.x*this.arcDiameter
+			this.startingPosX=this.gapBetweenArcs
+			this.startingPosY=this.arcDiameter
 			this.renderingContext.beginPath();
-			this.renderingContext.rect(this.startingPosX, this.startingPosY, this.gameBoardWidthAndHeight, (this.gameBoardWidthAndHeight-this.arcDiameter));
+		
+			this.renderingContext.rect(this.startingPosX, this.startingPosY, this.gameBoardWidth,this.gameBoardHeight)
 			this.renderingContext.stroke();
+		},
+		drawBoardLines(table: ITable){
+			console.log("drawBoardLines x="+table.x+ "   Y="+table.y)
 			for(let x=0;x<table.x;x++){
-				for(let y=0;y<table.y;y++){
+				for(let y=0;y<table.y+1;y++){
 					if(y===0){
 						continue; //First row is empty for showing 'clickable' token
 					}
@@ -291,9 +307,6 @@ export default defineComponent({
 					this.renderingContext.arc(xCenter, yCenter, 25, 0, 2 * Math.PI);
 					this.renderingContext.stroke();
 				}
-			}
-			if(this.theTable.playerInTurn.name === this.userName){				
-				this.addMouseListeners()
 			}
 		},
 		drawBoard(){
@@ -311,7 +324,7 @@ export default defineComponent({
 			}else{				
 				this.renderingContext.fillStyle = "blue";				
 			}
-			const xCenter=this.arcDiameter*square.x+this.gapBetweenArcs
+			const xCenter=this.arcDiameter*(square.x+1)+this.gapBetweenArcs
 			const yCenter=(this.arcDiameter)*square.y+this.arcDiameter					
 			this.renderingContext.beginPath();
 			this.renderingContext.arc(yCenter,xCenter , 23, 0, 2 * Math.PI);
