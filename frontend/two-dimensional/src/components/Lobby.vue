@@ -276,7 +276,7 @@ export default defineComponent({
 						}						
 						break;
 					case "MOVE":
-						const square :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.message}
+						const square :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
 						
 						this.$store.dispatch("move", square)
 						this.$store.dispatch("changeTurn", data.table.playerInTurn.name)
