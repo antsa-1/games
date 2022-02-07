@@ -11,21 +11,21 @@ module.exports = {
     // **optional** default: `[{ root: './' }]`
     // support monorepos
     projects: [
-      './tic-tac-toe/', // Shorthand for specifying only the project root location
+      './two-dimensional/', // Shorthand for specifying only the project root location
       {
         // **required**
         // Where is your project?
         // It is relative to `vetur.config.js`.
-        root: './tic-tac-toe/',
+        root: './two-dimensional/',
         // **optional** default: `'package.json'`
         // Where is `package.json` in the project?
         // We use it to determine the version of vue.
         // It is relative to root property.
-        package: './tic-tac-toe/package.json',
+        package: './two-dimensional/package.json',
         // **optional**
         // Where is TypeScript config file in the project?
         // It is relative to root property.
-        tsconfig: './tic-tac-toe/tsconfig.json',
+        tsconfig: './two-dimensional/tsconfig.json',
         // **optional** default: `'./.vscode/vetur/snippets'`
         // Where is vetur custom snippets folders?
         snippetFolder: './.vscode/vetur/snippets',
@@ -35,7 +35,7 @@ module.exports = {
         // It is relative to root property.
         // Notice: It won't actually do it. You need to use `require.context` or `Vue.component`
         globalComponents: [
-          './tic-tac-toe/src/components/**/*.vue'
+          './two-dimensional/src/components/**/*.vue'
         ]
       }
     ]
