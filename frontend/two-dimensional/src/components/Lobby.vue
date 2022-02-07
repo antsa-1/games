@@ -255,8 +255,7 @@ export default defineComponent({
 						
 						this.$store.dispatch("addPlayer", data.who)						
 						break;
-					case "START_GAME":
-						
+					case "START_GAME":						
 						this.$store.dispatch("startGame", data.table)
 						const tableC:ITable=data.table
 						if (tableC.playerA.name===this.userName || tableC.playerB.name===this.userName ){
@@ -266,7 +265,7 @@ export default defineComponent({
 							this.removeTableButtonVisible = false
 							this.watchTableButtonVisible = false
 							this.$store.dispatch("selectTable", data.table).then(() => {
-								if(tableC.gameMode.id>=20){
+								if(tableC.gameMode.gameId===2){
 									console.log("Opening Connect4Table")
 									this.$router.push({ name: 'TableCon4', id:data.table.id})
 									return
@@ -279,7 +278,7 @@ export default defineComponent({
 						const square :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
 						
 						this.$store.dispatch("move", square)
-						this.$store.dispatch("changeTurn", data.table.playerInTurn.name)
+						this.$store.dispatch("changeTurn", data.table.playerInTurn)
 						break;
 					case "WATCH":						
 						this.$store.dispatch("selectTable", data.table).then(() => {

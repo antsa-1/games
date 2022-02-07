@@ -86,7 +86,7 @@ export default defineComponent({
 				this.playMoveNotification()
 				this.highlightLastSquareIfSelected()
 			}else if (mutation.type === "changeTurn") {
-				if(state.theTable.playerInTurn.name === this.userName){
+				if(state.theTable.playerInTurn.name === this.userName){	
 					this.addMouseListeners()
 					this.startReducer()
 				}else{
@@ -99,6 +99,7 @@ export default defineComponent({
 			else if (mutation.type === "updateWinner" ){			
 				const win:IWin = state.theTable.win
 				this.stopReducer()
+				this.removeMouseListeners()
 				this.drawWinningLine(win)
 			}
     	})	
@@ -236,10 +237,9 @@ export default defineComponent({
 				const xCenter=this.arcDiameter*this.column				
 				const yCenter=this.arcDiameter/2
 				this.renderingContext.fillStyle="red"
-				if(this.theTable.playerA.gameToken===IGameToken.X && this.userName===this.theTable?.playerA.name){
+				if(this.theTable?.playerInTurn?.gameToken ===IGameToken.X && this.userName===this.theTable?.playerInTurn.name){
 					this.renderingContext.fillStyle = "blue";
 				}
-				
 				this.renderingContext.beginPath();
 				this.renderingContext.arc(xCenter, yCenter, 23, 0, 2 * Math.PI);
 				
@@ -268,8 +268,6 @@ export default defineComponent({
 				this.canvas.height=800
 				this.canvas.width=800
 			}
-			this.canvas.addEventListener("click", this.handleClick, false);
-			
 			this.verticalGap = this.canvas.height / table.x
 		 	this.horizontalGap = this.canvas.width / table.y
 			this.arcDiameter=this.canvas.width/ (table.x+1)

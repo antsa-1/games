@@ -142,9 +142,9 @@ export const store = createStore<IStoreState>({
 
             state.theTable.board.push(square)
         },
-        changeTurn(state, playerInTurnName: string) {
-            const player: IPlayer = { name: playerInTurnName }
-            state.theTable = { ...state.theTable, playerInTurn: player }
+        changeTurn(state, playerInTurn: IPlayer) {
+           
+            state.theTable = { ...state.theTable, playerInTurn: playerInTurn }
 
         },
         chat(state, message: IChatMessage) {
@@ -271,8 +271,8 @@ export const store = createStore<IStoreState>({
         move(context, square: ISquare) {
             context.commit('move', square)
         },
-        changeTurn(context, name: string) {
-            context.commit('changeTurn', name)
+        changeTurn(context, playerInTurn: IPlayer) {
+            context.commit('changeTurn', playerInTurn)
         },
         chat(context, message: IChatMessage) {
             context.commit('chat', message)

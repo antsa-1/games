@@ -46,6 +46,7 @@ export interface IWinSquares {
 	square: ISquare[]
 }
 export interface IGameMode {
+	gameId:number,
 	id: number,
 	name: string,
 	requiredConnections:number,
