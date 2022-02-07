@@ -307,7 +307,7 @@ export default defineComponent({
 						this.$store.dispatch("leaveTable", data.who.name)
 						break;
 					case "GAME_END":
-							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.message}							
+							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}							
 							this.$store.dispatch("move", lastSquare)							
 							if(data.win.draw){
 								const gameResult:IGameResult={table:data.table,win:data.win}
