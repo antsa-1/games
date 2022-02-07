@@ -101,8 +101,8 @@ export default defineComponent({
 				this.stopReducer()
 				this.drawWinningLine(win)
 			}
-    	})
-		if(this.theTable.playerInTurn?.name===this.userName){
+    	})		
+		if(this.theTable.playerInTurn?.name===this.userName){		
 			this.startTime=120
 			this.startReducer()
 		}
@@ -200,18 +200,15 @@ export default defineComponent({
 		},
 		playMoveNotification(){
 			if(this.soundOn){
-				const audioCtx = new (window.AudioContext )();
-
-				const oscillator = audioCtx.createOscillator();
-
+				const audioCtx = new window.AudioContext;
+				const oscillator = audioCtx.createOscillator()
 				oscillator.type = "sine";
-				oscillator.frequency.setValueAtTime(446, audioCtx.currentTime); // value in hertz
-				
+				oscillator.frequency.setValueAtTime(446, audioCtx.currentTime) // value in hertz				
 				oscillator.connect(audioCtx.destination);
 				oscillator.start();
 				setTimeout(
 					()=> {
-					oscillator.stop();
+						oscillator.stop();
 					},
 					250
 				);
@@ -263,11 +260,9 @@ export default defineComponent({
 			this.renderingContext.stroke();
 		},
 		initBoard() {
-			console.log("Connect4 table"+JSON.stringify(this.theTable))
 			const table: ITable = this.theTable
 			this.canvas = document.getElementById("canvas") 
-			this.renderingContext = this.canvas.getContext("2d");		
-			this.addMouseListeners()
+			this.renderingContext = this.canvas.getContext("2d");			
 			this.canvas.height=440
 			this.canvas.width=440
 			if(table.x>=10 && table.x<=20){
@@ -303,6 +298,9 @@ export default defineComponent({
 					this.renderingContext.stroke();
 				}
 			}
+			if(this.theTable.playerInTurn.name === this.userName){				
+				this.addMouseListeners()
+			}
 		},
 		drawBoard(){
 			
@@ -312,31 +310,23 @@ export default defineComponent({
 			});
 		},
 	
-		drawToken(square: ISquare,color:string) {
-			
+		drawToken(square: ISquare,color:string) {			
 			const token:IGameToken = square.token
-			
-			console.log("square:"+JSON.stringify(token.toString()))
 			if(token == IGameToken.O){
-				this.renderingContext.fillStyle = "blue";
-					console.log("BlueToken")
-			}else{
-				console.log(("red token"))
 				this.renderingContext.fillStyle = "red";				
+			}else{				
+				this.renderingContext.fillStyle = "blue";				
 			}
 			const xCenter=this.arcDiameter*square.x+this.gapBetweenArcs
-			const yCenter=(this.arcDiameter)*square.y+this.arcDiameter
-			console.log("xCenter:"+xCenter+" yCenter:"+yCenter)					
+			const yCenter=(this.arcDiameter)*square.y+this.arcDiameter					
 			this.renderingContext.beginPath();
 			this.renderingContext.arc(yCenter,xCenter , 23, 0, 2 * Math.PI);
 			this.renderingContext.stroke();	
 			this.renderingContext.fill();	
 		},
-		handleClick(event: MouseEvent) {
-			console.log("clicked column:"+this.column)
+		handleClick(event: MouseEvent) {			
 			const obj = { title: "MOVE",y:this.column-1};		
-			this.user.webSocket.send(JSON.stringify(obj))
-			
+			this.user.webSocket.send(JSON.stringify(obj))			
 		},
 		disableBoard(){
 				this.renderingContext.font = "30px Arial";
