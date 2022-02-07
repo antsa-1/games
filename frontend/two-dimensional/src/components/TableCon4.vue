@@ -101,11 +101,7 @@ export default defineComponent({
 				this.stopReducer()
 				this.drawWinningLine(win)
 			}
-    	})		
-		if(this.theTable.playerInTurn?.name===this.userName){		
-			this.startTime=120
-			this.startReducer()
-		}
+    	})	
 	},
 	computed: {
 		timeLeft(){
