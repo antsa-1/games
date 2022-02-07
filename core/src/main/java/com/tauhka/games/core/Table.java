@@ -174,7 +174,7 @@ public class Table {
 			throw new IllegalArgumentException("Player is not in turn in board:" + this);
 			// throw new CloseWebSocketExcepetion("Player is not in turn in board:" + this);
 		}
-		GameToken token = this.board[x][y - 1];
+		GameToken token = this.board[x][y];
 		if (token != null) {
 			throw new IllegalArgumentException("Board already has token x:" + x + "+ y:" + y + " _" + this);
 		}
