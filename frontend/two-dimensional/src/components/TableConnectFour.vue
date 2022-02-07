@@ -292,7 +292,8 @@ export default defineComponent({
 			this.renderingContext.rect(this.startingPosX, this.startingPosY, this.gameBoardWidth,this.gameBoardHeight)
 			this.renderingContext.stroke();
 		},
-		drawBoardLines(table: ITable){		
+		drawBoardLines(table: ITable){
+			console.log("drawBoardLines x="+table.x+ "   Y="+table.y)
 			for(let x=0;x<table.x;x++){
 				for(let y=0;y<table.y+1;y++){
 					if(y===0){

@@ -4,7 +4,7 @@ import User from './components/User.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
 import Table from './components/Table.vue'
-import TableCon4 from './components/TableCon4.vue'
+import TableConnectFour from './components/TableConnectFour.vue'
 import Info from './components/Info.vue'
 import Feedback from './components/Feedback.vue'
 import Registration from './components/Registration.vue'
@@ -82,7 +82,7 @@ const routes: RouteRecordRaw[] = [
     },
     {
         path: '/portal/tablecon4/:watch?',
-        component: TableCon4,
+        component: TableConnectFour,
         name: "TableCon4",
         props: true,
         beforeEnter: (to, from, next) => {
