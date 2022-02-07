@@ -265,9 +265,8 @@ export default defineComponent({
 							this.removeTableButtonVisible = false
 							this.watchTableButtonVisible = false
 							this.$store.dispatch("selectTable", data.table).then(() => {
-								if(tableC.gameMode.gameId===2){
-									console.log("Opening Connect4Table")
-									this.$router.push({ name: 'TableCon4', id:data.table.id})
+								if(tableC.gameMode.gameId===2){					
+									this.$router.push({ name: 'TableConnectFour', id:data.table.id})
 									return
 								}
 								this.$router.push({ name: 'Table', id:data.table.id})
@@ -280,9 +279,14 @@ export default defineComponent({
 						this.$store.dispatch("move", square)
 						this.$store.dispatch("changeTurn", data.table.playerInTurn)
 						break;
-					case "WATCH":						
-						this.$store.dispatch("selectTable", data.table).then(() => {
+					case "WATCH":
 							this.$router.push({ name: 'Table', params: { watch: "1" } })
+						this.$store.dispatch("selectTable", data.table).then(() => {
+							if(data.table.gameMode.gameId===2){									
+								this.$router.push({ name: 'TableConnectFour', id:data.table.id,params: { watch: "1" }})
+									return
+							}
+								this.$router.push({ name: 'Table', id:data.table.id,params: { watch: "1" }})
 						})		
 						break;
 					case "ADD_WATCHER":						
