@@ -2,6 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.tauhka</groupId>
 	<artifactId>games-core</artifactId>
+	<name>GamesCore</name>
 	<version>1.0.1</version>
 	<packaging>jar</packaging>
 	<properties>

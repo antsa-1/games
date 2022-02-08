@@ -4,7 +4,8 @@
 	<artifactId>games-web</artifactId>
 	<version>1.0.0</version>
 	<packaging>war</packaging>
-	<description>Tauhka common classes</description>
+	<name>GamesWeb</name>
+	<description>GamesWeb</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

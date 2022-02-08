@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.tauhka</groupId>
-	<artifactId>Portal</artifactId>
+	<artifactId>portal</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>portal Maven Webapp</name>
+	<name>PortalWeb</name>
 
 
 	<properties>
