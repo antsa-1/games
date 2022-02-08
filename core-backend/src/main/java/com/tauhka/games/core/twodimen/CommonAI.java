@@ -6,14 +6,14 @@ import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.Move;
 import com.tauhka.games.core.Table;
 import com.tauhka.games.core.twodimen.util.MoveEvaluator;
-import com.tauhka.games.core.twodimen.util.TicTacToeHelper;
+import com.tauhka.games.core.twodimen.util.MoveHelper;
 import com.tauhka.games.core.twodimen.util.WinnerChecker;
 
 public interface CommonAI {
 
 	public default Move calculateBestMove(Table table) {
 		Move move = null;
-		List<Move> availableMoves = TicTacToeHelper.getAvailableMoves(table);
+		List<Move> availableMoves = MoveHelper.getAvailableMoves(table);
 		move = checkOwnWinningCondition(table, availableMoves);
 		if (move != null) {
 			return move;

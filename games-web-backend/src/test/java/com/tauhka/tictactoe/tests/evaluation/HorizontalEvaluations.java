@@ -12,7 +12,7 @@ import com.tauhka.games.core.Move;
 import com.tauhka.games.core.Table;
 import com.tauhka.games.core.twodimen.ArtificialUser;
 import com.tauhka.games.core.twodimen.util.MoveEvaluator;
-import com.tauhka.games.core.twodimen.util.TicTacToeHelper;
+import com.tauhka.games.core.twodimen.util.MoveHelper;
 
 //--add-exports org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED --add-exports org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
 public class HorizontalEvaluations {
@@ -31,7 +31,7 @@ public class HorizontalEvaluations {
 		board[2][0] = GameToken.X;
 		board[3][1] = GameToken.O;
 		table.setBoard(board);
-		List<Move> availableMoves = TicTacToeHelper.getAvailableMoves(table);
+		List<Move> availableMoves = MoveHelper.getAvailableMoves(table);
 		// printBoard(table.getBoard());
 		Move expectedMove = new Move(5, 5);
 
@@ -53,7 +53,7 @@ public class HorizontalEvaluations {
 		board[4][5] = GameToken.X;
 		board[3][1] = GameToken.O;
 		table.setBoard(board);
-		List<Move> availableMoves = TicTacToeHelper.getAvailableMoves(table);
+		List<Move> availableMoves = MoveHelper.getAvailableMoves(table);
 		// printBoard(table.getBoard());
 		Move expectedMove = new Move(4, 3);
 		assertEquals(expectedMove, MoveEvaluator.calculateMove(table, availableMoves));
