@@ -78,25 +78,26 @@ export default defineComponent({
     this.unsubscribe = this.$store.subscribe((mutation, state) => {
       if (mutation.type === "move") {
         const board: ISquare[] = state.theTable.board;
-        this.removeLastSquareHighLightning();
+        this.removeLastSquareHighLightning()
         this.drawToken(this.theTable.board[this.theTable.board.length - 1]);
-        this.playMoveNotification();
-        this.highlightLastSquareIfSelected();
+        this.playMoveNotification()
+        this.highlightLastSquareIfSelected()
       } else if (mutation.type === "changeTurn") {
         if (state.theTable.playerInTurn.name === this.userName) {
-          this.addMouseListeners();
-          this.startReducer();
+          this.addMouseListeners()
+          this.startReducer()
         } else {
-          this.removeMouseListeners();
-          this.stopReducer();
+          this.removeMouseListeners()
+          this.clearCircleIndicatorRow()
+          this.stopReducer()
         }
       } else if (mutation.type === "rematch") {
         this.initBoard();
       } else if (mutation.type === "updateWinner") {
         const win: IWin = state.theTable.win;
-        this.stopReducer();
-        this.removeMouseListeners();
-        this.drawWinningLine(win);
+        this.stopReducer()
+        this.removeMouseListeners()
+        this.drawWinningLine(win)
       }
     });
   },
@@ -106,15 +107,7 @@ export default defineComponent({
     },
     theTable(): ITable {
       return this.$store.getters.theTable;
-    },
-    iconColor() {
-      const watchers = this.$store.getters.theTable.watchers;
-      if (watchers && watchers.length > 1) {
-        return "green";
-      }
-
-      return "#000000";
-    },
+    },   
     watchers() {
       return this.$store.getters.theTable.watchers;
     },
@@ -215,31 +208,26 @@ export default defineComponent({
       this.canvas.addEventListener("mousemove", this.handleCircleIndicator);
     },
     handleCircleIndicator(event: MouseEvent) {
-      const column =
-        Math.floor((event.offsetX - this.startingPosX) / this.arcDiameter) + 1;
+      const column = Math.floor((event.offsetX - this.startingPosX) / this.arcDiameter) + 1;
       if (column != this.column && column > 0 && column <= this.theTable.x) {
         const clearRectangleStartX = this.column * (this.arcDiameter / 2);
-        this.renderingContext.clearRect(
-          clearRectangleStartX,
-          0,
-          clearRectangleStartX + this.arcDiameter,
-          this.arcDiameter - 3
-        );
+        this.renderingContext.clearRect(clearRectangleStartX, 0, clearRectangleStartX + this.arcDiameter, this.arcDiameter - 3 )
         this.column = column;
         const xCenter = this.arcDiameter * this.column;
         const yCenter = this.arcDiameter / 2;
         this.renderingContext.fillStyle = "red";
-        if (
-          this.theTable?.playerInTurn?.gameToken === IGameToken.X &&
-          this.userName === this.theTable?.playerInTurn.name
-        ) {
+        if (this.theTable?.playerInTurn?.gameToken === IGameToken.X && this.userName === this.theTable?.playerInTurn.name) {
           this.renderingContext.fillStyle = "blue";
         }
-        this.renderingContext.beginPath();
-        this.renderingContext.arc(xCenter, yCenter, 23, 0, 2 * Math.PI);
-
-        this.renderingContext.fill();
-      }
+        this.renderingContext.beginPath()
+        this.renderingContext.arc(xCenter, yCenter, 23, 0, 2 * Math.PI)
+        this.renderingContext.fill()
+      } 
+    },
+    clearCircleIndicatorRow(){
+      this.column = -1
+      this.renderingContext.clearRect(0, 0, this.gameBoardWidth, this.arcDiameter - 3 )
+      console.log("Cleared")
     },
     drawWinningLine(win: IWin) {
       this.renderingContext.beginPath();
