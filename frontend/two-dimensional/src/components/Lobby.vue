@@ -93,10 +93,10 @@
 				<div class="modal-body">
 						<form>
 							<div class="btn-group" role="group" aria-label="Select game" id="select-game">
-								<input type="radio" v-model="selectedGame" value="1" @change="changeSelectedGame"  id="tictactoe" name="tictactoe" class="btn ">
-								<label class="btn " for="tictactoe">TicTacToe</label>
-								<input type="radio" v-model="selectedGame" value="2" @change="changeSelectedGame" id="connect4" name="connect4" class="btn ">	
-								<label class="btn " for="connect4">Connect4</label>						
+								<input type="radio" v-model="selectedGame" value="1" @change="changeSelectedGame"  id="tictactoe" name="tictactoe" class="btn">
+								<label class="form-label ms-1" for="tictactoe">TicTacToe</label>
+								<input type="radio" v-model="selectedGame" value="2" @change="changeSelectedGame" id="connect4" name="connect4" class="btn ms-2 pt-1 ">	
+								<label class="form-label ms-1 " for="connect4">Connect 4</label>						
 							</div>
 							<div class="mb-3" id="v-model-select-dynamic">						
 							<select v-model="selectedGameMode">
