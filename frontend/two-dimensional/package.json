@@ -10,7 +10,7 @@
   "dependencies": {
     "@typescript-eslint/experimental-utils": "^5.10.2",
     "core-js": "^3.21.0",
-    "vue": "^3.2.29",
+    "vue": "^3.2.30",
     "vue-router": "^4.0.11",
     "vuex": "^4.0.2"
   },
