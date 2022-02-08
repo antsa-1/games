@@ -13,7 +13,6 @@ public class ConnectFourTable extends Table {
 
 	public ConnectFourTable(User playerA, GameMode gameMode, boolean randomizeStarter) {
 		super(playerA, gameMode, randomizeStarter);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -24,23 +23,23 @@ public class ConnectFourTable extends Table {
 		}
 		GameToken[][] board = super.getBoard();
 		GameMode gameMode = super.getGameMode();
-		int rows = gameMode.getY()-1;
+		int rows = gameMode.getY() - 1;
 		GameToken token = null;
 		while (rows >= 0) {
 			token = board[rows][y];
 			if (token == null) {
 				board[rows][y] = user.getGameToken();
-				
+
 				this.changePlayerInTurn();
 				super.addTokenCount();
 				Move move = new Move(rows, y);
 				move.setToken(user.getGameToken());
-				LOGGER.info("ADDED:"+rows+" -"+y);
+				LOGGER.fine("ConnectFour: added" + rows + " -" + y);
 				return move;
 			}
 			rows--;
 		}
-		LOGGER.info("Column is full, ui- should prevent sending this case.. TODO");
+		LOGGER.info("ConnectFour: Column is full, UI-should prevent this.");
 		return null;
 	}
 }
