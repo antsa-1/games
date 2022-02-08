@@ -39,7 +39,7 @@
 			</div>
 		</div>
 		<div class="col-xs-12 col-sm-8">
-			 <canvas :class="{'bg-secondary':theTable.playerInTurn ==null}" id="canvas" style="border:1px solid #000000;"  ></canvas>
+			 <canvas :class="{'bg-secondary':theTable.playerInTurn ==null}" id="canvas"  ></canvas>
     	</div>
 		
 	</div>
@@ -264,7 +264,7 @@ export default defineComponent({
     },
     drawBoardFrame(table: ITable) {
       this.gapBetweenArcs = 28;
-      this.gameBoardHeight = (table.y + 1) * this.arcDiameter;
+      this.gameBoardHeight = (table.y ) * this.arcDiameter;
       this.gameBoardWidth = table.x * this.arcDiameter;
       this.startingPosX = this.gapBetweenArcs;
       this.startingPosY = this.arcDiameter;
