@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.tauhka</groupId>
 	<artifactId>games-web</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.3</version>
 	<packaging>war</packaging>
 	<name>GamesWeb</name>
 	<description>GamesWeb</description>
@@ -18,10 +18,8 @@
 		<dependency>
 			<groupId>com.tauhka</groupId>
 			<artifactId>games-core</artifactId>
-			<version>1.0.1</version>
-
+			<version>1.0.3</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
@@ -39,20 +37,6 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>5.0.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.7.2</version>
-
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.7.2</version>
-
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/jakarta.ejb/jakarta.ejb-api -->
 		<dependency>
 			<groupId>jakarta.ejb</groupId>
@@ -128,23 +112,23 @@
 				<!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_war_packaging -->
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.0</version>
+					<version>3.9.0</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.22.1</version>
+					<version>2.22.2</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>3.2.2</version>
+					<version>3.3.2</version>
 					<configuration>
 						<!-- 02.02.2022 TODO via variable or relative path. Is for direct usage in Eclipse -->
-						<webappDirectory>C:\Users\test\workspaces\gameportal\games\common\src\main\webapp </webappDirectory>
+						<webappDirectory>C:\Users\test\workspaces\games\games-web\src\main\webapp </webappDirectory>
 					</configuration>
 				</plugin>
 				<plugin>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>2.5.2</version>
+					<version>3.3.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

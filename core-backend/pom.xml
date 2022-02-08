@@ -3,7 +3,7 @@
 	<groupId>com.tauhka</groupId>
 	<artifactId>games-core</artifactId>
 	<name>GamesCore</name>
-	<version>1.0.1</version>
+	<version>1.0.3</version>
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,7 +48,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.0</version>
+					<version>3.9.0</version>
 					<executions>
 						<execution>
 							<id>compile</id>
@@ -71,7 +71,7 @@
 				</plugin>
 				<plugin>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>2.5.2</version>
+					<version>3.3.2</version>
 					<executions>
 						<execution>
 							<id>install</id>
