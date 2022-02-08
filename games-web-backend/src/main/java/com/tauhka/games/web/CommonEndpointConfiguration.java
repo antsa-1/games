@@ -1,4 +1,4 @@
-package com.tauhka.common.web;
+package com.tauhka.games.web;
 
 import com.tauhka.games.core.util.Constants;
 

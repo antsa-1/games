@@ -1,4 +1,4 @@
-package com.tauhka.common.messaging.handlers;
+package com.tauhka.games.messaging.handlers;
 
 import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.Move;

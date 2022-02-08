@@ -1,4 +1,4 @@
-package com.tauhka.common.messaging.handlers;
+package com.tauhka.games.messaging.handlers;
 
 import static com.tauhka.games.core.util.Constants.ANONYM_LOGIN_NAME_START;
 import static com.tauhka.games.core.util.Constants.ANONYM_LOGIN_TOKEN_START;
@@ -12,14 +12,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.tauhka.common.ejb.UserEJBA;
-import com.tauhka.common.messaging.Message;
-import com.tauhka.common.messaging.MessageTitle;
-import com.tauhka.common.web.CloseWebSocketException;
-import com.tauhka.common.web.CommonEndpoint;
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
+import com.tauhka.games.ejb.UserEJBA;
+import com.tauhka.games.messaging.Message;
+import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.web.CloseWebSocketException;
+import com.tauhka.games.web.CommonEndpoint;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;

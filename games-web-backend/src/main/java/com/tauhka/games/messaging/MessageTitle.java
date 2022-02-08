@@ -1,4 +1,4 @@
-package com.tauhka.common.messaging;
+package com.tauhka.games.messaging;
 
 public enum MessageTitle {
 

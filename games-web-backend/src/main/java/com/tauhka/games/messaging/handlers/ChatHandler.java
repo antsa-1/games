@@ -1,11 +1,11 @@
-package com.tauhka.common.messaging.handlers;
+package com.tauhka.games.messaging.handlers;
 
 import java.util.UUID;
 
-import com.tauhka.common.messaging.Message;
-import com.tauhka.common.messaging.MessageTitle;
-import com.tauhka.common.web.CommonEndpoint;
 import com.tauhka.games.core.Table;
+import com.tauhka.games.messaging.Message;
+import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.web.CommonEndpoint;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;

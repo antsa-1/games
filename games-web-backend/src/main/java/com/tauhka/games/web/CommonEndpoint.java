@@ -1,4 +1,4 @@
-package com.tauhka.common.web;
+package com.tauhka.games.web;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -6,14 +6,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.tauhka.common.messaging.Message;
-import com.tauhka.common.messaging.MessageDecoder;
-import com.tauhka.common.messaging.MessageEncoder;
-import com.tauhka.common.messaging.MessageTitle;
-import com.tauhka.common.messaging.handlers.TableHandler;
-import com.tauhka.common.messaging.handlers.UserHandler;
 import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
+import com.tauhka.games.messaging.Message;
+import com.tauhka.games.messaging.MessageDecoder;
+import com.tauhka.games.messaging.MessageEncoder;
+import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.messaging.handlers.TableHandler;
+import com.tauhka.games.messaging.handlers.UserHandler;
 
 import jakarta.inject.Inject;
 import jakarta.websocket.CloseReason;

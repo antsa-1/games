@@ -1,4 +1,4 @@
-package com.tauhka.common.messaging.handlers;
+package com.tauhka.games.messaging.handlers;
 
 import static com.tauhka.games.core.util.Constants.SYSTEM;
 
@@ -6,16 +6,16 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import com.tauhka.common.connectfour.ConnectFourTable;
-import com.tauhka.common.messaging.Message;
-import com.tauhka.common.messaging.MessageTitle;
-import com.tauhka.common.web.CommonEndpoint;
+import com.tauhka.games.connectfour.ConnectFourTable;
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.Move;
 import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.twodimen.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
+import com.tauhka.games.messaging.Message;
+import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.web.CommonEndpoint;
 
 import jakarta.ejb.ConcurrentAccessException;
 import jakarta.enterprise.context.Dependent;

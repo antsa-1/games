@@ -1,4 +1,4 @@
-package com.tauhka.common.web.filter;
+package com.tauhka.games.web.filter;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package com.tauhka.common.connectfour;
+package com.tauhka.games.connectfour;
 
 import java.util.logging.Logger;
 

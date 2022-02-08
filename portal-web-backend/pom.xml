@@ -8,7 +8,7 @@
 	<version>1.0.3</version>
 	<packaging>war</packaging>
 
-	<name>portal-web</name>
+	<name>portal</name>
 
 
 	<properties>
@@ -94,7 +94,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>portal-web</finalName>
+		<finalName>portal</finalName>
 		<pluginManagement>
 			<!-- lock down plugins versions to avoid using Maven 
 				defaults (may be moved to parent pom) -->
