@@ -22,7 +22,18 @@
 
 		</dependency>
 
-
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.8.2</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
@@ -127,7 +138,7 @@
 					<artifactId>maven-war-plugin</artifactId>
 					<version>3.2.2</version>
 					<configuration>
-					<!-- 02.02.2022 TODO via variable or relative path. Is for direct usage in Eclipse -->
+						<!-- 02.02.2022 TODO via variable or relative path. Is for direct usage in Eclipse -->
 						<webappDirectory>C:\Users\test\workspaces\gameportal\games\common\src\main\webapp </webappDirectory>
 					</configuration>
 				</plugin>
