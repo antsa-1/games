@@ -52,3 +52,4 @@ node_modules
 *.class
 *.class
 *.class
+frontend/two-dimensional/dist
