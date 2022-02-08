@@ -3,7 +3,7 @@
   <display-name>GamesWeb</display-name>
   <filter>
     <filter-name>SecurityFilter</filter-name>
-    <filter-class>com.tauhka.common.web.filter.SecurityFilter</filter-class>
+    <filter-class>com.tauhka.games.web.filter.SecurityFilter</filter-class>
   </filter>
 
   <filter-mapping>
