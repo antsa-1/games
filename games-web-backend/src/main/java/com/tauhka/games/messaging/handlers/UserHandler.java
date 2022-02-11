@@ -18,21 +18,20 @@ import com.tauhka.games.core.User;
 import com.tauhka.games.ejb.UserEJBA;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
-import com.tauhka.games.web.CloseWebSocketException;
-import com.tauhka.games.web.CommonEndpoint;
+import com.tauhka.games.web.websocket.CloseWebSocketException;
+import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.websocket.Session;
 
-@Default
+//@Default
 @Dependent
 public class UserHandler {
 	private static final Logger LOGGER = Logger.getLogger(UserHandler.class.getName());
 	private static int anonymCount = 0;
 	@Inject
-	private UserEJBA userEJB;
+	private UserEJBA userEJBa;
 
 	public Message handleLogin(Message message, Session session, CommonEndpoint endpoint) {
 		String name = null;
@@ -43,7 +42,7 @@ public class UserHandler {
 				loginMessage.setToken(ANONYM_LOGIN_TOKEN_START + UUID.randomUUID().toString());
 			} else {
 				UUID userId = UUID.fromString(message.getMessage()); // security check
-				name = userEJB.verifyWebsocketToken(userId.toString());
+				name = userEJBa.verifyWebsocketToken(userId.toString());
 				if (name == null || name.trim().length() < 1) {
 					throw new CloseWebSocketException("Name was not found from logins for:" + userId);
 				}
@@ -53,7 +52,7 @@ public class UserHandler {
 			Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
 			List<Table> tables = stream.filter(table -> table.getPlayerA() == null).collect(Collectors.toList());
 			for (Table t : tables) {
-				LOGGER.fine("Siivotaan p�yt�:" + t);
+				LOGGER.fine("Siivotaan pöytä:" + t);
 				CommonEndpoint.TABLES.remove(t.getId());
 			}
 			User user = new User(name);

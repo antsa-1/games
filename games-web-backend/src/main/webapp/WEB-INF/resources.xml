@@ -4,8 +4,8 @@
 	JdbcDriver org.mariadb.jdbc.Driver
 	JdbcUrl jdbc:mariadb://localhost:3306/games_portal
 	JtaManaged false
-	UserName gameportal-api
-	Password hpgwh99vMbjogI5
+	UserName gamesweb-api
+	Password Ndspkgh9vmKIho#
 	validationQuery="SELECT 1"
     validationQueryTimeout=1000
 	</Resource>

@@ -5,7 +5,7 @@
 
 	<groupId>com.tauhka</groupId>
 	<artifactId>portal-web</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.7</version>
 	<packaging>war</packaging>
 
 	<name>portal</name>
@@ -76,11 +76,7 @@
 
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/jakarta.json/jakarta.json-api -->
-		<dependency>
-			<groupId>jakarta.json</groupId>
-			<artifactId>jakarta.json-api</artifactId>
-			<version>2.0.0</version>
-		</dependency>
+	
 		<dependency>
 			<groupId>jakarta.json.bind</groupId>
 			<artifactId>jakarta.json.bind-api</artifactId>
@@ -111,6 +107,12 @@
 				<plugin>
 					<artifactId>maven-war-plugin</artifactId>
 					<version>3.2.2</version>
+					<configuration>
+						<warSourceExcludes>
+							pom.xml
+							pom.properties
+						</warSourceExcludes>
+					</configuration>
 				</plugin>
 				<plugin>
 					<artifactId>maven-install-plugin</artifactId>

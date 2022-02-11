@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.tauhka.games.core.Table;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
-import com.tauhka.games.web.CommonEndpoint;
+import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;

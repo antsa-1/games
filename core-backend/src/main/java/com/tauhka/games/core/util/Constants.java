@@ -13,7 +13,7 @@ public final class Constants {
 	public static final String ANONYM_LOGIN_NAME_START = "Anonym_";
 	public static final String ANONYM_LOGIN_TOKEN_START = "Anom:";
 	public static final String ENVIRONMENT_PRODUCTION = "PRODUCTION";
-	public static final String WEBSOCKET_PRODUCTION_ORIGIN = "http://localhost:8081"; // TODO replace with real prod. URL
+	public static final String WEBSOCKET_PRODUCTION_ORIGIN = "http://35.217.7.146"; // TODO replace with real prod. URL
 	public static final String WEBSOCKET_LOCALHOST_ORIGIN = "http://localhost:8080"; //
 	public static final String SYSTEM = "System";
 	public static final String NULL = "null";

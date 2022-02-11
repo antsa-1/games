@@ -1,8 +1,7 @@
 <template>
 	<div class="row">
 		<div class="col fw-bold">     		
-				Hi and welcome to play tic-tac-toe
-			
+				Hi!		
     	</div>		
 	</div>
 	<div class="row mt-4">
@@ -14,7 +13,7 @@
 		</div>
 		<div class="col ">			
 			<p class=" text-start">
-				1. Click play on the top navigation bar HHHHHHHHH
+				1. Click play on the top navigation bar
 				<br>
 				2. Join table
 				<br>
@@ -38,8 +37,7 @@
 				2. Type nickname and password
 				<br>
 				3. After registration, login and click play
-				<br>
-				
+				<br>				
 			</p>
 		</div>
 	</div>

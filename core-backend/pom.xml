@@ -3,7 +3,7 @@
 	<groupId>com.tauhka</groupId>
 	<artifactId>games-core</artifactId>
 	<name>GamesCore</name>
-	<version>1.0.4</version>
+	<version>1.0.6</version>
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -60,7 +60,12 @@
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>3.2.2</version>
 					<groupId>org.apache.maven.plugins</groupId>
-				
+					<configuration>
+						<excludes>
+						pom.xml
+						pom.properties
+						</excludes>		
+						</configuration>
 				</plugin>
 				<plugin>
 					<artifactId>maven-install-plugin</artifactId>

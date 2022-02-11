@@ -1,4 +1,4 @@
-package com.tauhka.games.web;
+package com.tauhka.games.web.websocket;
 
 import com.tauhka.games.core.util.Constants;
 

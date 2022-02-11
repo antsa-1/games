@@ -19,7 +19,7 @@ import com.tauhka.portal.web.exeptions.PasswordNotValidException;
 
 // Partly read/used/combined from https://www.baeldung.com/java-password-hashing
 public class PasswordHash {
-	private static final Logger LOGGER = Logger.getLogger(UserEJB.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(PasswordHash.class.getName());
 	private String saltAsHex = null;
 	private String passwordHash = null;
 

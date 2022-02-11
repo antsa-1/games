@@ -20,7 +20,7 @@ import jakarta.ejb.Stateless;
 public class UserEJBA {
 	private static final Logger LOGGER = Logger.getLogger(UserEJBA.class.getName());
 	@Resource(name = "jdbc/MariaDb")
-	private DataSource portalDatasource;
+	private DataSource gamesDataSource;
 	private static final String WEBSOCKET_AUTHENTICATION_QUEURY = "SELECT  a.Player_id, b.UserName,b.id FROM  active_logins a,  users b WHERE a.Login_id =? AND a.Player_id= b.id";
 
 	public String verifyWebsocketToken(String activeLoginToken) {
@@ -32,7 +32,7 @@ public class UserEJBA {
 		Connection con = null;
 		UUID token = UUID.fromString(activeLoginToken);
 		try {
-			con = portalDatasource.getConnection();
+			con = gamesDataSource.getConnection();
 			stmt = con.prepareStatement(WEBSOCKET_AUTHENTICATION_QUEURY);
 			stmt.setString(1, token.toString());
 			ResultSet res = stmt.executeQuery();

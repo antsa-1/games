@@ -1,4 +1,4 @@
-package com.tauhka.games.web;
+package com.tauhka.games.web.websocket;
 
 public class CloseWebSocketException extends RuntimeException {
 

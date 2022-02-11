@@ -1,4 +1,4 @@
-package com.tauhka.games.web;
+package com.tauhka.games.web.websocket;
 
 import java.io.IOException;
 import java.util.UUID;

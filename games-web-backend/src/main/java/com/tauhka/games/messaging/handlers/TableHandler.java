@@ -15,7 +15,7 @@ import com.tauhka.games.core.twodimen.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
-import com.tauhka.games.web.CommonEndpoint;
+import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.ejb.ConcurrentAccessException;
 import jakarta.enterprise.context.Dependent;

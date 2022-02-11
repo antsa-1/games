@@ -1,5 +1,5 @@
 module tauhka.games {
-	exports com.tauhka.games.web;
+	exports com.tauhka.games.web.websocket;
 	exports com.tauhka.games.connectfour;
 	//exports com.tauhka.tictactoe.tests.win;
 	exports com.tauhka.games.ejb;
