@@ -21,6 +21,7 @@ import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.web.websocket.CloseWebSocketException;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
+import jakarta.ejb.EJB;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.websocket.Session;
@@ -30,7 +31,7 @@ import jakarta.websocket.Session;
 public class UserHandler {
 	private static final Logger LOGGER = Logger.getLogger(UserHandler.class.getName());
 	private static int anonymCount = 0;
-	@Inject
+	@EJB // 11.02.2022 Using @Inject did not seem to work in prod-server even though changed beans.xml location META-INF<-->WEB-INF -> Changed to @EJB
 	private UserEJBA userEJBa;
 
 	public Message handleLogin(Message message, Session session, CommonEndpoint endpoint) {
