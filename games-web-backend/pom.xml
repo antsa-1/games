@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.tauhka</groupId>
 	<artifactId>games-web</artifactId>
-	<version>1.0.7</version>
+	<version>1.0.9</version>
 	<packaging>war</packaging>
 	<name>GamesWeb</name>
 	<description>GamesWeb</description>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.tauhka</groupId>
 			<artifactId>games-core</artifactId>
-			<version>1.0.6</version>
+			<version>1.0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -125,10 +125,7 @@
 				<plugin>
 					<artifactId>maven-war-plugin</artifactId>
 					<version>3.3.2</version>
-					<configuration>
-						<!-- 02.02.2022 TODO via variable or relative path. Is for direct usage in Eclipse -->
-						<webappDirectory>C:\Users\test\workspaces\games\games-web\src\main\webapp </webappDirectory>
-					</configuration>
+				
 				</plugin>
 				<plugin>
 					<artifactId>maven-install-plugin</artifactId>

@@ -15,13 +15,12 @@ import java.util.stream.Stream;
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
-import com.tauhka.games.ejb.UserEJBA;
+import com.tauhka.games.ejb.UserEJBC;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.web.websocket.CloseWebSocketException;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
-import jakarta.ejb.EJB;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.websocket.Session;
@@ -31,8 +30,8 @@ import jakarta.websocket.Session;
 public class UserHandler {
 	private static final Logger LOGGER = Logger.getLogger(UserHandler.class.getName());
 	private static int anonymCount = 0;
-	@EJB // 11.02.2022 Using @Inject did not seem to work in prod-server even though changed beans.xml location META-INF<-->WEB-INF -> Changed to @EJB
-	private UserEJBA userEJBa;
+	@Inject // 11.02.2022 Using @Inject did not seem to work in prod-server even though changed beans.xml location META-INF<-->WEB-INF -> Changed to @EJB
+	private UserEJBC userEJBd;
 
 	public Message handleLogin(Message message, Session session, CommonEndpoint endpoint) {
 		String name = null;
@@ -43,7 +42,7 @@ public class UserHandler {
 				loginMessage.setToken(ANONYM_LOGIN_TOKEN_START + UUID.randomUUID().toString());
 			} else {
 				UUID userId = UUID.fromString(message.getMessage()); // security check
-				name = userEJBa.verifyWebsocketToken(userId.toString());
+				name = userEJBd.verifyWebsocketToken(userId.toString());
 				if (name == null || name.trim().length() < 1) {
 					throw new CloseWebSocketException("Name was not found from logins for:" + userId);
 				}

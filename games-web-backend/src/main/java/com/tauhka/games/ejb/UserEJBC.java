@@ -16,9 +16,9 @@ import jakarta.ejb.Stateless;
 //Checks if given UUID has a match in database. Returns userName mapped to token if any.
 //Lot's of different combinations for UUID tokens -> should not be easy to guess nor enumerate.
 // Code does not contain blocking conditions for enumerating UUIDs endlessly, in real app. /prod.env blocking should be implemented in code or with WAF.
-@Stateless(name = "UserEJBA")
-public class UserEJBA {
-	private static final Logger LOGGER = Logger.getLogger(UserEJBA.class.getName());
+@Stateless(name = "UserEJBC")
+public class UserEJBC {
+	private static final Logger LOGGER = Logger.getLogger(UserEJBC.class.getName());
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource gamesDataSource;
 	private static final String WEBSOCKET_AUTHENTICATION_QUEURY = "SELECT  a.Player_id, b.UserName,b.id FROM  active_logins a,  users b WHERE a.Login_id =? AND a.Player_id= b.id";
