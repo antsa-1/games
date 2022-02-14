@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<header>
-			<h2>Tauhka games welcomes! </h2>
+			<h2>Welcome!</h2>
 		</header>
 		<NavbarTop />
 
