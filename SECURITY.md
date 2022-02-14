@@ -18,4 +18,4 @@ Interested hearing about all possible bugs/threats related to code. Especially s
 
 Issues can be created in GitHub issues tab, all are appreciated.
 
-Site is not currently deployed to any cloud environment by me since used cloud provider's free time ended.
+Site is currently deployed @ http://35.217.7.146/portal/index.html
