@@ -2,6 +2,8 @@
 The site with two games, tic-tac-toe and connect four, is currently running @ http://35.217.7.146/portal/index.html 
 <br>
 It is built using Maven from the source codes of the tag "prod-rel-1.0.0" .
+<br>
+![tictactoe](./workspace-setup/ConnectFour.png) 
 
 ## Further development ideas
 
