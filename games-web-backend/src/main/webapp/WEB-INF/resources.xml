@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-<!-- User allowed only from localhost, otherwise it is an error -->
+<!-- User allowed only from localhost, otherwise it is an error --> 
     <Resource id="jdbc/MariaDb" type="javax.sql.DataSource">
 	JdbcDriver org.mariadb.jdbc.Driver
 	JdbcUrl jdbc:mariadb://localhost:3306/games_portal
