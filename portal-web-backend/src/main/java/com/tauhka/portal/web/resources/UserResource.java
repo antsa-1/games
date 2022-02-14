@@ -36,6 +36,9 @@ public class UserResource {
 			LOGGER.fine(LOG_PREFIX_PORTAL + "UserResource: login thread woke up");
 		}
 		try {
+			if (userAndPassWord == null || userAndPassWord.length() > 150) {
+				throw new IllegalArgumentException("Login creds. error");
+			}
 			// TODO check later if direct Mapping in method parameter works
 			Jsonb jsonb = JsonbBuilder.create();
 			Login login = jsonb.fromJson(userAndPassWord, Login.class);

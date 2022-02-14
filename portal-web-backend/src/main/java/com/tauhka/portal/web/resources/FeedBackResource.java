@@ -22,7 +22,7 @@ public class FeedBackResource {
 	@POST
 	public Response feedback(String feedback) {
 
-		LOGGER.entering(LOG_PREFIX_PORTAL + FeedbackEJB.class.getName(), " login");
+		LOGGER.entering(LOG_PREFIX_PORTAL + FeedbackEJB.class.getName(), " feedback");
 		if (feedback == null || feedback.length() < 1 || feedback.length() > 400) {
 			LOGGER.exiting(LOG_PREFIX_PORTAL + FeedbackEJB.class.getName(), " login");
 			return Response.status(Status.BAD_REQUEST).build();
@@ -34,12 +34,12 @@ public class FeedBackResource {
 		}
 		try {
 			feedbackEJB.writeFeedBack(feedback);
-			LOGGER.exiting(LOG_PREFIX_PORTAL + FeedbackEJB.class.getName(), " login2");
+			LOGGER.exiting(LOG_PREFIX_PORTAL + FeedbackEJB.class.getName(), " feedback2");
 			return Response.ok().build();
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "FeedBackResource error ", e);
 		}
-		LOGGER.exiting(LOG_PREFIX_PORTAL + FeedbackEJB.class.getName(), " login3");
+		LOGGER.exiting(LOG_PREFIX_PORTAL + FeedbackEJB.class.getName(), " feedback3");
 		return Response.status(Status.BAD_REQUEST).build();
 	}
 

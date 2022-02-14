@@ -22,10 +22,10 @@ import jakarta.ejb.Stateless;
 @Stateless(name = "FeedbackEJB")
 public class FeedbackEJB {
 	private static final String ENVIRONMENT = System.getProperty("Server_Environment");
-	//Developer machine path windows system
-	private final String fileNameLocal = "C:\\Users\\path-to\\projects\\TicTacToe\\BackEndJava\\feedbak.txt"; //TODO Replace with correct path in dev-machine
-	//Prod machine path with Linux
-	private final String fileNameProd = "/feedbak.txt";  //TODO Replace with correct path in prod-machine
+	// Developer machine path windows system
+	private final String fileNameLocal = "C:\\Users\\path-to\\projects\\TicTacToe\\BackEndJava\\feedbak.txt";
+	// Prod machine path with Linux
+	private final String fileNameProd = "/opt/tomee/feedbak/feedbak.txt";
 	private static final Logger LOGGER = Logger.getLogger(FeedbackEJB.class.getName());
 	private static final String ddMMyyyy = "dd.MM.yyyy HH:mm:ss";
 
@@ -37,7 +37,12 @@ public class FeedbackEJB {
 		} else {
 			path = Paths.get(fileNameLocal);
 		}
-		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+		long bytes = Files.size(path);
+		if (bytes > 104857600) { // 100 MB max
+			throw new RuntimeException("Feedback fileSize exceeded");
+		}
+		try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8, StandardOpenOption.CREATE,
+				StandardOpenOption.APPEND)) {
 			writer.write("\n***** ");
 			DateFormat formatter = new SimpleDateFormat(ddMMyyyy);
 			String today = formatter.format(new Date());
