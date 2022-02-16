@@ -19,4 +19,5 @@ module tauhka.games {
 	requires java.logging;
 	requires java.sql;
 	requires tauhka.core;
+	requires jakarta.transaction;
 }

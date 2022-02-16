@@ -81,7 +81,7 @@ public class CommonEndpoint {
 				gameMessage = tableHandler.removeEndpointOwnTable(this);
 				sendCommonMessage(gameMessage);
 			} else if (message.getTitle() == MessageTitle.MOVE) {
-				gameMessage = tableHandler.addTokenToGame(message, this.getUser());
+				gameMessage = tableHandler.handleNewToken(message, this.getUser());
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
 				if (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
 					Message artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());

@@ -1,5 +1,6 @@
 package com.tauhka.games.core;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -8,6 +9,7 @@ import java.util.logging.Logger;
 
 import com.tauhka.games.core.twodimen.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
+import com.tauhka.games.core.twodimen.GameResultType;
 import com.tauhka.games.core.twodimen.util.TwoDimensionalBoardAdapter;
 import com.tauhka.games.core.twodimen.util.WinnerChecker;
 
@@ -16,6 +18,7 @@ import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.json.bind.annotation.JsonbTypeAdapter;
 
 // Contains two players, board and spectators. Plus some logic.
+
 public class Table {
 	private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
 
@@ -47,6 +50,8 @@ public class Table {
 	private boolean randomizeStarter;
 	@JsonbProperty("gameMode")
 	private GameMode gameMode;
+	@JsonbProperty("gameStartedInstant")
+	private Instant gameStartedInstant;
 	@JsonbTransient
 	private int addedTokens;
 
@@ -64,11 +69,7 @@ public class Table {
 		this.x = this.gameMode.getX();
 		this.y = this.gameMode.getY();
 		this.addedTokens = 0;
-		/*
-		 * if (gameMode.getId() != 20) { // TODO constant or smth. this.gameHandler =
-		 * new TicTacToeGameHandler(); } else { this.gameHandler = new
-		 * ConnectFourGameHandler(); }
-		 */
+
 	}
 
 	@JsonbTransient
@@ -93,6 +94,7 @@ public class Table {
 		}
 		this.playerInTurn = startingPlayer;
 		this.addedTokens = 0;
+		this.gameStartedInstant = Instant.now();
 		return this;
 	}
 
@@ -107,12 +109,18 @@ public class Table {
 		return this.playerInTurn.equals(u);
 	}
 
-	public synchronized User resign(User player) {
+	public synchronized GameResult resign(User player) {
 		if (this.isPlayer(player) && this.playerInTurn != null) {
 			this.playerInTurn = null;
 			User opponent = getOpponent(player);
 			opponent.addWin();
-			return opponent;
+			GameResult gameResult = new GameResult();
+			gameResult.setDraw(false); // deprecated
+			gameResult.setStartInstant(this.gameStartedInstant);
+			gameResult.setPlayer(opponent);
+			gameResult.setPlayerA(this.playerA);
+			gameResult.setPlayerB(this.playerB);
+			gameResult.setResultType(GameResultType.WIN_BY_RESIGNATION);
 		}
 		return null;
 	}
@@ -178,11 +186,11 @@ public class Table {
 		if (token != null) {
 			throw new IllegalArgumentException("Board already has token x:" + x + "+ y:" + y + " _" + this);
 		}
-		token = this.playerInTurn.getGameToken(); 
+		token = this.playerInTurn.getGameToken();
 		this.board[x][y] = token;
 		this.changePlayerInTurn();
 		this.addedTokens++;
-		Move move=new Move(x,y);
+		Move move = new Move(x, y);
 		move.setToken(token);
 		return move;
 	}
@@ -192,17 +200,25 @@ public class Table {
 		GameResult result = WinnerChecker.checkWinner(this.board, requiredTokenConnects);
 		if (result == null) {
 			// No winner, is it a draw?
-			if (addedTokens == gameMode.getX() * gameMode.getY()) {
+			if (isDraw()) {
 				result = new GameResult();
-				result.setDraw(true);
+				result.setDraw(true); // setDraw -> Legacy to UI
+				result.setResultType(GameResultType.DRAW);
+				result.setStartInstant(this.gameStartedInstant);
+				result.setGameMode(this.gameMode);
 				this.playerA.addDraw();
 				this.playerB.addDraw();
 				// this.playerInTurn = null;
 				initRematchForArtificialPlayer();
+				addPlayersToResult(result);
 			}
 			return result;
 		}
 		initRematchForArtificialPlayer();
+		addPlayersToResult(result);
+		result.setResultType(GameResultType.WIN_BY_PLAY);
+		result.setGameMode(this.gameMode);
+		result.setStartInstant(this.gameStartedInstant);
 		if (playerA.getGameToken() == result.getToken()) {
 			result.setPlayer(playerA);
 			playerA.addWin();
@@ -211,6 +227,16 @@ public class Table {
 		result.setPlayer(playerB);
 		playerB.addWin();
 		return result;
+	}
+
+	private void addPlayersToResult(GameResult result) {
+		// Order does not actually matter
+		result.setPlayerA(this.playerA);
+		result.setPlayerB(this.playerB);
+	}
+
+	private boolean isDraw() {
+		return addedTokens == gameMode.getX() * gameMode.getY();
 	}
 
 	public void initRematchForArtificialPlayer() {
@@ -317,6 +343,7 @@ public class Table {
 		this.playerB = playerB;
 		playerB.setGameToken(GameToken.O);
 		playerB.setWins(0);
+		this.gameStartedInstant = Instant.now();
 	}
 
 	public List<User> getWatchers() {
@@ -346,6 +373,10 @@ public class Table {
 		}
 		this.startRematch();
 		return true;
+	}
+
+	public Instant getGameStartedInstant() {
+		return gameStartedInstant;
 	}
 
 }

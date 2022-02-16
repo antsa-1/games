@@ -11,6 +11,7 @@ import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.Move;
 import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.twodimen.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
@@ -19,18 +20,24 @@ import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.ejb.ConcurrentAccessException;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.Default;
+import jakarta.inject.Inject;
 
 @Default
 @Dependent
 public class TableHandler {
+
+	@Inject
+	private Event<GameStatisticsEvent> statisticsEvent;
 
 	public Message createTable(Message message, CommonEndpoint endpoint) {
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
 		stream = stream.filter(table -> table.isPlayer(endpoint.getUser()));
 		Optional<Table> tableOptional = stream.findFirst();
 		if (tableOptional.isPresent()) {
-			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser() + " table:" + tableOptional.get());
+			throw new IllegalArgumentException(
+					"User is already in table:" + endpoint.getUser() + " table:" + tableOptional.get());
 		}
 		Table table = null;
 		GameMode gameMode = GameMode.getGameMode(Integer.parseInt(message.getMessage()));
@@ -84,24 +91,24 @@ public class TableHandler {
 			message.setTable(table);
 			return message;
 		}
-
 		return null;
-
 	}
 
-	public Message addTokenToGame(Message message, User user) {
+	public Message handleNewToken(Message message, User user) {
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
 		stream = stream.filter(table -> table.isPlayer(user));
-		
+
 		Optional<Table> tableOptional = stream.findFirst(); // Crash if user has earlier table, find wrong one.
 		Message tokenMessage = new Message();
 		if (tableOptional.isPresent()) {
 			int x = message.getX();
 			int y = message.getY();
-			Move move = tableOptional.get().addGameToken(user, x, y);
+			Table table = tableOptional.get();
+			Move move = table.addGameToken(user, x, y);
 			GameResult result = tableOptional.get().checkWinAndDraw();
 			if (result != null) {
 				tokenMessage.setTitle(MessageTitle.GAME_END);
+				fireStatisticsEvent(table, result);
 			} else {
 				tokenMessage.setTitle(MessageTitle.MOVE);
 			}
@@ -109,16 +116,24 @@ public class TableHandler {
 			tokenMessage.setMessage(move.toString());
 			tokenMessage.setWin(result);
 			tokenMessage.setX(move.getX());
-			tokenMessage.setY(move.getY());			
+			tokenMessage.setY(move.getY());
 			tokenMessage.setToken(move.getToken().getAsText());
 			return tokenMessage;
 		}
 		throw new IllegalArgumentException("No table to put token: for:" + user);
 	}
 
+	private void fireStatisticsEvent(Table table, GameResult result) {
+		GameStatisticsEvent statsEvent = new GameStatisticsEvent();
+		statsEvent.setGameResult(result);
+
+		statisticsEvent.fireAsync(statsEvent);
+	}
+
 	public Message removeEndpointOwnTable(CommonEndpoint endpoint) {
 		// Using params would be faster...
-		Optional<Table> table = CommonEndpoint.TABLES.values().stream().filter(taabel -> taabel.getPlayerA() != null).filter(taabel -> taabel.getPlayerA().equals(endpoint.getUser())).findFirst();
+		Optional<Table> table = CommonEndpoint.TABLES.values().stream().filter(taabel -> taabel.getPlayerA() != null)
+				.filter(taabel -> taabel.getPlayerA().equals(endpoint.getUser())).findFirst();
 		if (table.isPresent()) {
 			Table removedTable = CommonEndpoint.TABLES.remove(table.get().getId());
 			Message message_ = new Message();
@@ -134,7 +149,8 @@ public class TableHandler {
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
 		if (!table.isWaitingOpponent()) {
-			throw new ConcurrentAccessException("Table is not waiting player " + table + " trying user:" + endpoint.getUser());
+			throw new ConcurrentAccessException(
+					"Table is not waiting player " + table + " trying user:" + endpoint.getUser());
 		}
 		if (table.getPlayerA().equals(endpoint.getUser())) {
 			throw new IllegalArgumentException("Same players to table not possible..");
@@ -178,8 +194,8 @@ public class TableHandler {
 
 		}
 		Table table = tableOptional.get();
-		User winner = table.resign(endpoint.getUser());
-		if (winner != null) {
+		GameResult gameResult = table.resign(endpoint.getUser());
+		if (gameResult.getPlayer() != null) {
 			// For Artificial player set Rematch-state ready
 			if (table.getOpponent(endpoint.getUser()) instanceof ArtificialUser) {
 				table.suggestRematch(table.getOpponent(endpoint.getUser()));
@@ -189,12 +205,13 @@ public class TableHandler {
 			// chatMessage.setTo(t);
 			winnerMessage.setMessage("R"); // R=resignition in UI
 			winnerMessage.setTable(table);
-			winnerMessage.setWho(winner);
+			winnerMessage.setWho(gameResult.getPlayer());
 			winnerMessage.setTitle(MessageTitle.WINNER);
 			return winnerMessage;
 		}
 
-		throw new IllegalArgumentException("resign not possible, is a player?. PlayerIn turn missing?" + endpoint.getUser());
+		throw new IllegalArgumentException(
+				"resign not possible, is a player?. PlayerIn turn missing?" + endpoint.getUser());
 	}
 
 	public Message rematch(CommonEndpoint endpoint) {
@@ -227,7 +244,7 @@ public class TableHandler {
 		message.setTitle(MessageTitle.MOVE);
 		message.setX(move.getX());
 		message.setY(move.getY());
-		return addTokenToGame(message, artificialUser);
+		return handleNewToken(message, artificialUser);
 
 	}
 }

@@ -31,7 +31,7 @@ public class UserHandler {
 	private static final Logger LOGGER = Logger.getLogger(UserHandler.class.getName());
 	private static int anonymCount = 0;
 	@Inject // 11.02.2022 Using @Inject did not seem to work in prod-server even though changed beans.xml location META-INF<-->WEB-INF -> Changed to @EJB
-	private UserEJBC userEJBd;
+	private UserEJBC userEJB;
 
 	public Message handleLogin(Message message, Session session, CommonEndpoint endpoint) {
 		String name = null;
@@ -42,7 +42,7 @@ public class UserHandler {
 				loginMessage.setToken(ANONYM_LOGIN_TOKEN_START + UUID.randomUUID().toString());
 			} else {
 				UUID userId = UUID.fromString(message.getMessage()); // security check
-				name = userEJBd.verifyWebsocketToken(userId.toString());
+				name = userEJB.verifyWebsocketToken(userId.toString());
 				if (name == null || name.trim().length() < 1) {
 					throw new CloseWebSocketException("Name was not found from logins for:" + userId);
 				}
