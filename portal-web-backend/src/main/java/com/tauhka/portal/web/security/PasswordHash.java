@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import com.tauhka.portal.ejb.UserEJB;
 import com.tauhka.portal.util.Constants;
 import com.tauhka.portal.web.exeptions.PasswordNotValidException;
 
