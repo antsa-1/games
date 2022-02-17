@@ -121,6 +121,7 @@ public class Table {
 			gameResult.setPlayerA(this.playerA);
 			gameResult.setPlayerB(this.playerB);
 			gameResult.setResultType(GameResultType.WIN_BY_RESIGNATION);
+			gameResult.setGameId(this.id);
 		}
 		return null;
 	}
@@ -206,6 +207,7 @@ public class Table {
 				result.setResultType(GameResultType.DRAW);
 				result.setStartInstant(this.gameStartedInstant);
 				result.setGameMode(this.gameMode);
+				result.setGameId(this.getId());
 				this.playerA.addDraw();
 				this.playerB.addDraw();
 				// this.playerInTurn = null;
@@ -219,6 +221,7 @@ public class Table {
 		result.setResultType(GameResultType.WIN_BY_PLAY);
 		result.setGameMode(this.gameMode);
 		result.setStartInstant(this.gameStartedInstant);
+		result.setGameId(this.getId());
 		if (playerA.getGameToken() == result.getToken()) {
 			result.setPlayer(playerA);
 			playerA.addWin();

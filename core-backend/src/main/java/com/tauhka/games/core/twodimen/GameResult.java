@@ -1,6 +1,7 @@
 package com.tauhka.games.core.twodimen;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.GameToken;
@@ -36,7 +37,8 @@ public class GameResult {
 	private Instant endInstant = Instant.now();
 	@JsonbTransient
 	private Instant startInstant;
-
+	@JsonbTransient
+	private UUID gameId;
 	@JsonbTransient
 	private GameMode gameMode;
 
@@ -78,6 +80,14 @@ public class GameResult {
 
 	public void setDraw(Boolean draw) {
 		this.draw = draw;
+	}
+
+	public UUID getGameId() {
+		return gameId;
+	}
+
+	public void setGameId(UUID gameId) {
+		this.gameId = gameId;
 	}
 
 	public Instant getStartInstant() {
@@ -142,10 +152,8 @@ public class GameResult {
 
 	@Override
 	public String toString() {
-		return "GameResult [fromX=" + fromX + ", fromY=" + fromY + ", toX=" + toX + ", toY=" + toY + ", token=" + token
-				+ ", player=" + player + ", draw=" + draw + ", resultType=" + resultType + ", playerA=" + playerA
-				+ ", playerB=" + playerB + ", endInstant=" + endInstant + ", startInstant=" + startInstant
-				+ ", gameMode=" + gameMode + "]";
+		return "GameResult [fromX=" + fromX + ", fromY=" + fromY + ", toX=" + toX + ", toY=" + toY + ", token=" + token + ", player=" + player + ", draw=" + draw + ", resultType=" + resultType + ", playerA=" + playerA + ", playerB="
+				+ playerB + ", endInstant=" + endInstant + ", startInstant=" + startInstant + ", gameMode=" + gameMode + "]";
 	}
 
 }

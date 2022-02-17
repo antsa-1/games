@@ -1,6 +1,6 @@
 package com.tauhka.games.messaging.handlers;
 
-import static com.tauhka.games.core.util.Constants.SYSTEM;
+import static com.tauhka.games.core.util.Constants.*;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -50,7 +50,7 @@ public class TableHandler {
 		CommonEndpoint.TABLES.put(table.getId(), table);
 		if (message.getComputer()) {
 			ArtificialUser user = new ArtificialUser();
-			user.setName("Olav_computer");
+			user.setName(OLAV_COMPUTER);
 			table.setPlayerB(user);
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.START_GAME);

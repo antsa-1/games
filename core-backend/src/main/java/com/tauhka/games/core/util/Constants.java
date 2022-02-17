@@ -12,6 +12,7 @@ public final class Constants {
 	public static final int CHAT_MESSAGE_MIN_LENGTH = 1;
 	public static final String ANONYM_LOGIN_NAME_START = "Anonym_";
 	public static final String ANONYM_LOGIN_TOKEN_START = "Anom:";
+	public static final String OLAV_COMPUTER = "Olav_computer";
 	public static final String ENVIRONMENT_PRODUCTION = "PRODUCTION";
 	public static final String WEBSOCKET_PRODUCTION_ORIGIN = "http://35.217.7.146"; // TODO replace with real prod. URL
 	public static final String WEBSOCKET_LOCALHOST_ORIGIN = "http://localhost:8080"; //
@@ -19,7 +20,7 @@ public final class Constants {
 	public static final String NULL = "null";
 	public static final String LOG_PREFIX = "TICTACTOE_";
 	public static final String LOG_PREFIX_PORTAL = LOG_PREFIX + "PORTAL";
-	public static final String LOG_PREFIX_TICTACTOE = LOG_PREFIX + "TICTACTOE";
+	public static final String LOG_PREFIX_GAMES = LOG_PREFIX + "GAMES";
 
 	private static final List<String> FORBIDDEN_WORD_PARTS = new ArrayList<String>();
 	static {
@@ -30,6 +31,8 @@ public final class Constants {
 		FORBIDDEN_WORD_PARTS.add("system");
 		FORBIDDEN_WORD_PARTS.add("System");
 		FORBIDDEN_WORD_PARTS.add("Anonym");
+		FORBIDDEN_WORD_PARTS.add("Anom:");
+		FORBIDDEN_WORD_PARTS.add(OLAV_COMPUTER);
 		FORBIDDEN_WORD_PARTS.add("null");
 		FORBIDDEN_WORD_PARTS.add(".com");
 		FORBIDDEN_WORD_PARTS.add("/");
