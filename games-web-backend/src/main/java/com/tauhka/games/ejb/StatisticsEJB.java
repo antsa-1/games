@@ -15,7 +15,7 @@ import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.twodimen.GameResult;
 
 import jakarta.annotation.Resource;
-import jakarta.ejb.SessionContext;
+import jakarta.ejb.EJBContext;
 import jakarta.ejb.Stateless;
 import jakarta.enterprise.event.ObservesAsync;
 
@@ -28,7 +28,7 @@ public class StatisticsEJB { // To core package?!?!?
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource gamesDataSource;
 	@Resource
-	private SessionContext sessionCtx;
+	private EJBContext ejbContext;
 
 	public void observeGameResult(@ObservesAsync GameStatisticsEvent gameStats) {
 		// If Anonym player then do not update..
@@ -37,8 +37,8 @@ public class StatisticsEJB { // To core package?!?!?
 			throw new IllegalArgumentException("No statistics for database:" + gameStats);// Tells which one was null
 		}
 		if (isRegisteredPlayers(gameStats)) {
-			insertGameResultToDatabase(gameStats);
-			updatePlayerRankings(gameStats);
+			insertGameResultToDatabase(gameStats); //Transactions?
+			updatePlayerRankings(gameStats); // DB trigger after insert?
 			updateRankingsInDatabase(gameStats);
 		}
 
