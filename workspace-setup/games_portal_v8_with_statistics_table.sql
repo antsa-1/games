@@ -2,12 +2,14 @@
 -- Host:                         127.0.0.1
 -- Server version:               10.6.3-MariaDB - mariadb.org binary distribution
 -- Server OS:                    Win64
--- HeidiSQL Version:             11.3.0.6295
+-- HeidiSQL Version:             11.3.0.6371
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
@@ -29,10 +31,7 @@ CREATE TABLE IF NOT EXISTS `active_logins` (
   CONSTRAINT `Player_id_FK` FOREIGN KEY (`Player_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.active_logins: ~0 rows (approximately)
-DELETE FROM `active_logins`;
-/*!40000 ALTER TABLE `active_logins` DISABLE KEYS */;
-/*!40000 ALTER TABLE `active_logins` ENABLE KEYS */;
+-- Data exporting was unselected.
 
 -- Dumping structure for table games_portal.available_games
 CREATE TABLE IF NOT EXISTS `available_games` (
@@ -43,10 +42,7 @@ CREATE TABLE IF NOT EXISTS `available_games` (
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.available_games: ~0 rows (approximately)
-DELETE FROM `available_games`;
-/*!40000 ALTER TABLE `available_games` DISABLE KEYS */;
-/*!40000 ALTER TABLE `available_games` ENABLE KEYS */;
+-- Data exporting was unselected.
 
 -- Dumping structure for table games_portal.pending_registrations
 CREATE TABLE IF NOT EXISTS `pending_registrations` (
@@ -57,34 +53,32 @@ CREATE TABLE IF NOT EXISTS `pending_registrations` (
   `UserName` varchar(50) DEFAULT NULL,
   `Sent` datetime DEFAULT NULL,
   `Expires` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`Id`)
+  PRIMARY KEY (`Id`),
+  KEY `users_tult_idx` (`Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.pending_registrations: ~0 rows (approximately)
-DELETE FROM `pending_registrations`;
-/*!40000 ALTER TABLE `pending_registrations` DISABLE KEYS */;
-/*!40000 ALTER TABLE `pending_registrations` ENABLE KEYS */;
+-- Data exporting was unselected.
 
--- Dumping structure for table games_portal.played_games
-CREATE TABLE IF NOT EXISTS `played_games` (
-  `Game_number` int(11) NOT NULL DEFAULT 0,
-  `Player1_id` varchar(38) NOT NULL,
-  `Player2_id` varchar(38) NOT NULL,
-  `Winner_id` varchar(38) NOT NULL,
-  KEY `GameId_FK` (`Game_number`) USING BTREE,
-  KEY `Player1_FK` (`Player1_id`) USING BTREE,
-  KEY `Player2_FK` (`Player2_id`) USING BTREE,
-  KEY `Winner_FK` (`Winner_id`) USING BTREE,
-  CONSTRAINT `GameId_FK` FOREIGN KEY (`Game_number`) REFERENCES `available_games` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `Player1_FK` FOREIGN KEY (`Player1_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `Player2_FK` FOREIGN KEY (`Player2_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `Winner_FK` FOREIGN KEY (`Winner_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+-- Dumping structure for table games_portal.statistics_games
+CREATE TABLE IF NOT EXISTS `statistics_games` (
+  `game_type` int(11) NOT NULL COMMENT 'TicTacToe=1, C4=2',
+  `playerA_username` varchar(15) NOT NULL,
+  `playerB_username` varchar(15) NOT NULL,
+  `result` int(11) NOT NULL,
+  `start_time` timestamp NULL DEFAULT NULL,
+  `end_time` timestamp NULL DEFAULT NULL,
+  `game_id` varchar(38) NOT NULL,
+  `playerA_id` varchar(38) NOT NULL,
+  `playerB_id` varchar(38) NOT NULL,
+  `winner_id` varchar(38) DEFAULT NULL,
+  KEY `FK_statistics_users` (`playerA_id`),
+  KEY `FK_statistics_users_2` (`playerB_id`),
+  KEY `FK_statistics_users_` (`winner_id`),
+  CONSTRAINT `FK_statistics_users_` FOREIGN KEY (`winner_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_statistics_users_2` FOREIGN KEY (`playerB_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.played_games: ~0 rows (approximately)
-DELETE FROM `played_games`;
-/*!40000 ALTER TABLE `played_games` DISABLE KEYS */;
-/*!40000 ALTER TABLE `played_games` ENABLE KEYS */;
+-- Data exporting was unselected.
 
 -- Dumping structure for table games_portal.users
 CREATE TABLE IF NOT EXISTS `users` (
@@ -103,11 +97,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `Uniikki_email` (`Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.users: ~0 rows (approximately)
-DELETE FROM `users`;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+-- Data exporting was unselected.
 
+/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
