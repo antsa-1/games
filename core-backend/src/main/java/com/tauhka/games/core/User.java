@@ -1,10 +1,12 @@
 package com.tauhka.games.core;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 
-public class User {
+public class User { // Combine with Portal User.java?
 	@JsonbProperty("name")
 	private String name;
 	@JsonbProperty("ranking")
@@ -15,6 +17,9 @@ public class User {
 	private int draws = 0;
 	@JsonbProperty
 	private GameToken gameToken;
+
+	@JsonbTransient
+	private UUID id;
 
 	public String getName() {
 		return name;
@@ -30,6 +35,14 @@ public class User {
 
 	public void addDraw() {
 		this.draws++;
+	}
+
+	public UUID getId() {
+		return id;
+	}
+
+	public void setId(UUID id) {
+		this.id = id;
 	}
 
 	public int getWins() {

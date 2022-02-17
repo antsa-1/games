@@ -42,9 +42,10 @@ public class StatisticsEJB { // To core package?!?!?
 		try {
 			con = gamesDataSource.getConnection();
 			stmt = con.prepareStatement(INSERT_GAME_RESULT_SQL);
-			stmt.setString(1, res.getPlayerA().getName());
-			stmt.setString(2, res.getPlayerB().getName());
-			stmt.setString(3, res.getPlayer().getName());// Winner, can be null if draw
+			stmt.setString(1, res.getPlayerA().getId().toString());
+			stmt.setString(2, res.getPlayerB().getId().toString());
+			// Winner, can be null if draw
+			stmt.setString(3, res.getPlayer() == null ? null : res.getPlayer().getId().toString());
 			stmt.setString(4, res.getGameId().toString());
 			stmt.setInt(5, res.getGameMode().getGameId());
 			stmt.setTimestamp(6, Timestamp.from(res.getStartInstant()));

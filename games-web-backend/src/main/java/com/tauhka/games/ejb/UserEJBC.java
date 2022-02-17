@@ -10,6 +10,8 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.tauhka.games.core.User;
+
 import jakarta.annotation.Resource;
 import jakarta.ejb.Stateless;
 
@@ -23,7 +25,7 @@ public class UserEJBC {
 	private DataSource gamesDataSource;
 	private static final String WEBSOCKET_AUTHENTICATION_QUEURY = "SELECT  a.Player_id, b.UserName,b.id FROM  active_logins a,  users b WHERE a.Login_id =? AND a.Player_id= b.id";
 
-	public String verifyWebsocketToken(String activeLoginToken) {
+	public User verifyWebsocketToken(String activeLoginToken) {
 		LOGGER.info("UserEJBA verifyWebsocketToken" + activeLoginToken);
 		if (activeLoginToken == null) {
 			return null;
@@ -38,7 +40,11 @@ public class UserEJBC {
 			ResultSet res = stmt.executeQuery();
 			if (res.next()) {
 				String namee = res.getString("UserName");
-				return namee;
+				UUID id = UUID.fromString(res.getString("Player_id"));
+				User user = new User();
+				user.setName(namee);
+				user.setId(id);
+				return user;
 			}
 			// Note: ActiveLogin token is directly connected with error message in order
 			// to prevent log injections.
