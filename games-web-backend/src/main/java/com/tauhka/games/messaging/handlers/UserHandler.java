@@ -30,32 +30,30 @@ import jakarta.websocket.Session;
 public class UserHandler {
 	private static final Logger LOGGER = Logger.getLogger(UserHandler.class.getName());
 	private static int anonymCount = 0;
-	@Inject // 11.02.2022 Using @Inject did not seem to work in prod-server even though changed beans.xml location META-INF<-->WEB-INF -> Changed to @EJB
+	@Inject
 	private UserEJBC userEJB;
 
 	public Message handleLogin(Message message, Session session, CommonEndpoint endpoint) {
+		cleanUpGhostTables();
 		String name = null;
+		User user = null;
 		Message loginMessage = new Message();
 		try {
 			if (message.getMessage() == null || message.getMessage().equals(NULL) || message.getMessage().trim().length() < 1 || message.getMessage().startsWith(ANONYM_LOGIN_TOKEN_START)) {
 				name = ANONYM_LOGIN_NAME_START + updateAnonymCount();
+				user = new User(name);
 				loginMessage.setToken(ANONYM_LOGIN_TOKEN_START + UUID.randomUUID().toString());
 			} else {
-				UUID userId = UUID.fromString(message.getMessage()); // security check
-				name = userEJB.verifyWebsocketToken(userId.toString());
-				if (name == null || name.trim().length() < 1) {
-					throw new CloseWebSocketException("Name was not found from logins for:" + userId);
+				UUID activeLoginToken = UUID.fromString(message.getMessage());
+				user = userEJB.verifyWebsocketToken(activeLoginToken.toString());
+
+				if (user.getName().trim().length() < 1) {
+					throw new CloseWebSocketException("Name was not found from logins for:" + activeLoginToken);
 				}
-				loginMessage.setToken(userId.toString());
+				loginMessage.setToken(activeLoginToken.toString());
 			}
-			// CleanUp ghost tables
-			Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
-			List<Table> tables = stream.filter(table -> table.getPlayerA() == null).collect(Collectors.toList());
-			for (Table t : tables) {
-				LOGGER.fine("Siivotaan pöytä:" + t);
-				CommonEndpoint.TABLES.remove(t.getId());
-			}
-			User user = new User(name);
+			List<Table> tables;
+
 			if (CommonEndpoint.ENDPOINTS.containsKey(user)) {
 				// Registered users could replace existing one? But for now
 				throw new CloseWebSocketException("Endpoints has already user:" + user);
@@ -73,6 +71,16 @@ public class UserHandler {
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "LoginHandler common excpetion", e);
 			throw new CloseWebSocketException("LoginHandler exception");
+		}
+	}
+
+	private void cleanUpGhostTables() {
+		// If table without playerA exist -> clean
+		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
+		List<Table> tables = stream.filter(table -> table.getPlayerA() == null).collect(Collectors.toList());
+		for (Table t : tables) {
+			LOGGER.fine("Cleaning table" + t);
+			CommonEndpoint.TABLES.remove(t.getId());
 		}
 	}
 
