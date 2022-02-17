@@ -161,9 +161,9 @@ export default defineComponent({
 		},
 		gameModes(){
 			if(this.selectedGame==="1"){
-				return this.$store.getters.gameModes.filter(gameMode => gameMode.gameId===1)
+				return this.$store.getters.gameModes.filter(gameMode => gameMode.gameNumber===1)
 			}
-			return this.$store.getters.gameModes.filter(gameMode => gameMode.gameId===2)
+			return this.$store.getters.gameModes.filter(gameMode => gameMode.gameNumber===2)
 		},
 		modalCreateTableDisabled(){
 			return this.selectedGameMode === "0"
@@ -265,7 +265,7 @@ export default defineComponent({
 							this.removeTableButtonVisible = false
 							this.watchTableButtonVisible = false
 							this.$store.dispatch("selectTable", data.table).then(() => {
-								if(tableC.gameMode.gameId===2){					
+								if(tableC.gameMode.gameNumber===2){					
 									this.$router.push({ name: 'TableConnectFour', id:data.table.id})
 									return
 								}

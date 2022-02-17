@@ -10,7 +10,7 @@ public final class GameMode {
 	private final String name;
 	private final int y, x;
 	private final int requiredConnections;
-	private final int gameId;
+	private final int gameNumber;
 	public static final Integer TIC_TAC_TOE = 1;
 	public static final Integer CONNECT4 = 2;
 	static {
@@ -39,13 +39,13 @@ public final class GameMode {
 		GAMEMODES.add(gm21);
 	}
 
-	public GameMode(int gameId, int gameModeId, int y, int x, int requiredConnectionsToWin) {
+	public GameMode(int gameNumber, int gameMode, int y, int x, int requiredConnectionsToWin) {
 		super();
-		this.id = gameModeId;
+		this.id = gameMode;
 		this.y = y;
 		this.x = x;
 		this.requiredConnections = requiredConnectionsToWin;
-		this.gameId = gameId;
+		this.gameNumber = gameNumber;
 		this.name = Integer.toString(x) + "x" + Integer.toString(y);
 	}
 
@@ -76,8 +76,8 @@ public final class GameMode {
 		return y;
 	}
 
-	public int getGameId() {
-		return gameId;
+	public int getGameNumber() {
+		return gameNumber;
 	}
 
 	public int getX() {

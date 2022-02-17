@@ -41,7 +41,7 @@ public class TableHandler {
 		}
 		Table table = null;
 		GameMode gameMode = GameMode.getGameMode(Integer.parseInt(message.getMessage()));
-		if (GameMode.CONNECT4 == gameMode.getGameId()) {
+		if (GameMode.CONNECT4 == gameMode.getGameNumber()) {
 			table = new ConnectFourTable(endpoint.getUser(), gameMode, false);
 		} else {
 			table = new Table(endpoint.getUser(), gameMode, false);
