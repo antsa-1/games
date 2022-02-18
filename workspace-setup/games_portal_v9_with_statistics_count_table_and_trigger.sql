@@ -80,6 +80,14 @@ CREATE TABLE IF NOT EXISTS `statistics_games` (
 
 -- Data exporting was unselected.
 
+-- Dumping structure for table games_portal.statistics_game_counts
+CREATE TABLE IF NOT EXISTS `statistics_game_counts` (
+  `connectfours` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT 'total finished games',
+  `tictactoes` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'total finished games'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- Data exporting was unselected.
+
 -- Dumping structure for table games_portal.users
 CREATE TABLE IF NOT EXISTS `users` (
   `UserName` varchar(15) NOT NULL,
@@ -98,6 +106,20 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- Data exporting was unselected.
+
+-- Dumping structure for trigger games_portal.count_trigger
+SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
+DELIMITER //
+CREATE TRIGGER `count_trigger` AFTER INSERT ON `statistics_games` FOR EACH ROW BEGIN
+
+	IF (NEW.game_type <20) THEN
+ 		UPDATE statistics_game_counts SET tictactoes= tictactoes+1;
+	ELSE 
+		UPDATE statistics_game_counts SET connectfours= connectfours+1;
+	END IF;
+END//
+DELIMITER ;
+SET SQL_MODE=@OLDTMP_SQL_MODE;
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
