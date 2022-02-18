@@ -1,9 +1,13 @@
+/**
+ * @author antsa-1 from GitHub
+ */
 import { createApp } from 'vue'
 import TicTacToe from './TicTacToe.vue'
 import User from './components/User.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
 import Table from './components/Table.vue'
+import TopLists from './components/TopLists.vue'
 import TableConnectFour from './components/TableConnectFour.vue'
 import Info from './components/Info.vue'
 import Feedback from './components/Feedback.vue'
@@ -47,6 +51,12 @@ const routes: RouteRecordRaw[] = [
         path: '/portal/registration',
         component: Registration,
         name: "Registration",
+        props: true,
+    },
+    {
+        path: '/portal/toplists',
+        component: TopLists,
+        name: "TopLists",
         props: true,
     },
     {

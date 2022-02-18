@@ -42,6 +42,11 @@
               </router-link>
           </li>
           <li class="nav-item">
+              <router-link  class="nav-link"  :to="{ name: 'TopLists' }">
+                    Top lists
+              </router-link>
+          </li>
+          <li class="nav-item">
               <router-link  class="nav-link"  :to="{ name: 'Feedback' }">
                 Feedback
               </router-link>
