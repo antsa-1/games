@@ -9,8 +9,10 @@ import jakarta.json.bind.annotation.JsonbTransient;
 public class User { // Combine with Portal User.java?
 	@JsonbProperty("name")
 	private String name;
-	@JsonbProperty("ranking")
-	private int ranking = 0;
+	@JsonbProperty("rankingTictactoe")
+	private Double rankingTictactoe = 0d;
+	@JsonbProperty("rankingConnectFour")
+	private Double rankingConnectFour = 0d;
 	@JsonbProperty("wins")
 	private int wins = 0;
 	@JsonbProperty("draws")
@@ -57,6 +59,22 @@ public class User { // Combine with Portal User.java?
 		this.name = name;
 	}
 
+	public Double getRankingTictactoe() {
+		return rankingTictactoe;
+	}
+
+	public void setRankingTictactoe(Double rankingTictactoe) {
+		this.rankingTictactoe = rankingTictactoe;
+	}
+
+	public Double getRankingConnectFour() {
+		return rankingConnectFour;
+	}
+
+	public void setRankingConnectFour(Double rankingConnectFour) {
+		this.rankingConnectFour = rankingConnectFour;
+	}
+
 	public User(String name) {
 		super();
 		this.name = name;
@@ -65,14 +83,6 @@ public class User { // Combine with Portal User.java?
 	@Override
 	public int hashCode() {
 		return Objects.hash(name);
-	}
-
-	public int getRanking() {
-		return ranking;
-	}
-
-	public void setRanking(int ranking) {
-		this.ranking = ranking;
 	}
 
 	public int getDraws() {
@@ -101,7 +111,7 @@ public class User { // Combine with Portal User.java?
 
 	@Override
 	public String toString() {
-		return "User [name=" + name + ", ranking=" + ranking + "]";
+		return "User [name=" + name + ", rankingTictactoe=" + rankingTictactoe + ", rankingConnectFour=" + rankingConnectFour + ", wins=" + wins + ", draws=" + draws + ", gameToken=" + gameToken + ", id=" + id + "]";
 	}
 
 }

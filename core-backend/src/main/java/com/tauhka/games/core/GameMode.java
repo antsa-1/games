@@ -49,6 +49,10 @@ public final class GameMode {
 		this.name = Integer.toString(x) + "x" + Integer.toString(y);
 	}
 
+	public boolean isConnectFour() {
+		return this.gameNumber == 2;
+	}
+
 	public static GameMode getGameMode(int id) {
 		if (id < 1 || id > 100) {
 			throw new IllegalArgumentException("Wrong gameMode:" + id);
