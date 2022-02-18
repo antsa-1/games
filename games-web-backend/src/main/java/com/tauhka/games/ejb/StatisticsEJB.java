@@ -6,6 +6,7 @@ import static com.tauhka.games.core.util.Constants.LOG_PREFIX_GAMES;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.logging.Logger;
 
@@ -24,7 +25,8 @@ public class StatisticsEJB { // To core package?!?!?
 
 	private static final Logger LOGGER = Logger.getLogger(StatisticsEJB.class.getName());
 	private static final String INSERT_GAME_RESULT_SQL = "INSERT INTO statistics_games (playerA_id, playerB_id, winner_id, game_id, game_type,start_time,end_time, result,playerA_username,playerB_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
+	private static final String UPDATE_CONNECT_FOUR_AMOUNT_SQL = "UPDATE statistics_game_counts SET connectfours= connectfours+1";
+	private static final String UPDATE_TICTACTOE_AMOUNT_SQL = "UPDATE statistics_game_counts SET tictactoes= tictactoes+1";
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource gamesDataSource;
 	@Resource
@@ -37,30 +39,42 @@ public class StatisticsEJB { // To core package?!?!?
 			throw new IllegalArgumentException("No statistics for database:" + gameStats);// Tells which one was null
 		}
 		if (isRegisteredPlayers(gameStats)) {
-			insertGameResultToDatabase(gameStats); //Transactions?
-			updatePlayerRankings(gameStats); // DB trigger after insert?
-			updateRankingsInDatabase(gameStats);
+			insertGameResultToDatabase(gameStats); // DB trigger connected to update amounts
+		} else {
+			// Both players are anonym -> update only stats
+			updateGameAmount(gameStats);
+		}
+	}
+
+	// No user input in this sql
+	private void updateGameAmount(GameStatisticsEvent gameStats) {
+		Statement stmt = null;
+		Connection con = null;
+		int gameNumber = gameStats.getGameResult().getGameMode().getGameNumber();
+		try {
+			con = gamesDataSource.getConnection();
+			stmt = con.createStatement();
+
+			int dbRes = stmt.executeUpdate(gameNumber == 1 ? UPDATE_TICTACTOE_AMOUNT_SQL : UPDATE_CONNECT_FOUR_AMOUNT_SQL);
+			if (dbRes > 0) {
+				LOGGER.info(LOG_PREFIX_GAMES + "StatisticsEJB updated gameAmounts for anonymous players game" + gameNumber);
+				return;
+			}
+
+			LOGGER.severe(LOG_PREFIX_GAMES + "StatisticsEJB failed to update gameAmounts:" + gameNumber);
+			return;
+		} catch (SQLException e) {
+			LOGGER.severe(LOG_PREFIX_GAMES + "StatisticsEJB sqle" + e.getMessage());
+		} finally {
+			try {
+				if (con != null) {
+					con.close();
+				}
+			} catch (SQLException e) {
+				LOGGER.severe(LOG_PREFIX_GAMES + "StatisticsEJB finally crashed" + e.getMessage());
+			}
 		}
 
-	}
-
-	private void updatePlayedGamesAmount() {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void updateRankingsInDatabase(GameStatisticsEvent gameStats) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private void updatePlayerRankings(GameStatisticsEvent gameStats) {
-		// Calculate rankings
-
-	}
-
-	private boolean atLeastOnePlayerHasNickname(GameStatisticsEvent gameStats) {
-		return !gameStats.getGameResult().getPlayerA().getName().startsWith(ANONYM_LOGIN_NAME_START) || !gameStats.getGameResult().getPlayerB().getName().startsWith(ANONYM_LOGIN_NAME_START);
 	}
 
 	private boolean isRegisteredPlayers(GameStatisticsEvent gameStats) {
