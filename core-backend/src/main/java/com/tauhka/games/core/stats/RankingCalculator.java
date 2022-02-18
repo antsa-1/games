@@ -41,11 +41,11 @@ public class RankingCalculator {
 		} else {
 			// Decrease 2 points from higher ranked player and add to lower one for now..
 			if (aRanking > bRanking) {
-				aRanking = aRanking - 2;
-				bRanking = bRanking + 2;
+				newRankingA = aRanking - 2;
+				newRankingB = bRanking + 2;
 			} else if (aRanking < bRanking) {
-				aRanking = aRanking + 2;
-				bRanking = bRanking - 2;
+				newRankingA = aRanking + 2;
+				newRankingB = bRanking - 2;
 			}
 			// Equal ranking and draw -> no changes
 
