@@ -5,6 +5,13 @@ import java.util.logging.Logger;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.twodimen.GameResult;
 
+/**
+ * 
+ * ELO-kindish calculator but not exactly.
+ * 
+ * @author antsa-1 from GitHub 22 Feb 2022
+ *
+ */
 public class RankingCalculator {
 	private static final Logger LOGGER = Logger.getLogger(RankingCalculator.class.getName());
 
@@ -28,9 +35,20 @@ public class RankingCalculator {
 		if (playerA.equals(winner)) {
 			newRankingA = aRanking + 16 * (1d - aExpected);// OK
 			newRankingB = bRanking + 16 * (0d - bExpected);
-		} else {
+		} else if (playerB.equals(winner)) {
 			newRankingA = aRanking + 16 * (0d - aExpected);
 			newRankingB = bRanking + 16 * (1d - bExpected);
+		} else {
+			// Decrease 2 points from higher ranked player and add to lower one for now..
+			if (aRanking > bRanking) {
+				aRanking = aRanking - 2;
+				bRanking = bRanking + 2;
+			} else if (aRanking < bRanking) {
+				aRanking = aRanking + 2;
+				bRanking = bRanking - 2;
+			}
+			// Equal ranking and draw -> no changes
+
 		}
 		// 100 minimum
 		if (connectFour) {
