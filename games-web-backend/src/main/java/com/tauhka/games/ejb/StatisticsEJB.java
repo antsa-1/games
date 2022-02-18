@@ -38,16 +38,16 @@ public class StatisticsEJB { // To core package?!?!?
 		if (gameStats == null || gameStats.getGameResult() == null) {
 			throw new IllegalArgumentException("No statistics for database:" + gameStats);// Tells which one was null
 		}
-		if (isRegisteredPlayers(gameStats)) {
+		if (isAtLeastOneRegisteredPlayerinTheGame(gameStats)) {
 			insertGameResultToDatabase(gameStats); // DB trigger connected to update amounts
 		} else {
 			// Both players are anonym -> update only stats
-			updateGameAmount(gameStats);
+			updateGameCount(gameStats);
 		}
 	}
 
 	// No user input in this sql
-	private void updateGameAmount(GameStatisticsEvent gameStats) {
+	private void updateGameCount(GameStatisticsEvent gameStats) {
 		Statement stmt = null;
 		Connection con = null;
 		int gameNumber = gameStats.getGameResult().getGameMode().getGameNumber();
@@ -77,8 +77,8 @@ public class StatisticsEJB { // To core package?!?!?
 
 	}
 
-	private boolean isRegisteredPlayers(GameStatisticsEvent gameStats) {
-		return !gameStats.getGameResult().getPlayerA().getName().startsWith(ANONYM_LOGIN_NAME_START) && !gameStats.getGameResult().getPlayerB().getName().startsWith(ANONYM_LOGIN_NAME_START);
+	private boolean isAtLeastOneRegisteredPlayerinTheGame(GameStatisticsEvent gameStats) {
+		return !gameStats.getGameResult().getPlayerA().getName().startsWith(ANONYM_LOGIN_NAME_START) || !gameStats.getGameResult().getPlayerB().getName().startsWith(ANONYM_LOGIN_NAME_START);
 	}
 
 	private void insertGameResultToDatabase(GameStatisticsEvent gameEvent) {
