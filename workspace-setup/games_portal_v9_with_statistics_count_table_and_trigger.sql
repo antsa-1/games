@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `active_logins` (
   CONSTRAINT `Player_id_FK` FOREIGN KEY (`Player_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Data exporting was unselected.
+-- Dumping data for table games_portal.active_logins: ~0 rows (approximately)
 
 -- Dumping structure for table games_portal.available_games
 CREATE TABLE IF NOT EXISTS `available_games` (
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `available_games` (
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Data exporting was unselected.
+-- Dumping data for table games_portal.available_games: ~0 rows (approximately)
 
 -- Dumping structure for table games_portal.pending_registrations
 CREATE TABLE IF NOT EXISTS `pending_registrations` (
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `pending_registrations` (
   KEY `users_tult_idx` (`Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Data exporting was unselected.
+-- Dumping data for table games_portal.pending_registrations: ~0 rows (approximately)
 
 -- Dumping structure for table games_portal.statistics_games
 CREATE TABLE IF NOT EXISTS `statistics_games` (
@@ -78,15 +78,17 @@ CREATE TABLE IF NOT EXISTS `statistics_games` (
   CONSTRAINT `FK_statistics_users_2` FOREIGN KEY (`playerB_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Data exporting was unselected.
+-- Dumping data for table games_portal.statistics_games: ~0 rows (approximately)
 
 -- Dumping structure for table games_portal.statistics_game_counts
 CREATE TABLE IF NOT EXISTS `statistics_game_counts` (
-  `connectfours` bigint(20) unsigned NOT NULL DEFAULT 0 COMMENT 'total finished games',
-  `tictactoes` int(10) unsigned NOT NULL DEFAULT 0 COMMENT 'total finished games'
+  `connectfours` bigint(20) unsigned DEFAULT NULL COMMENT 'total finished games',
+  `tictactoes` bigint(20) unsigned DEFAULT NULL COMMENT 'total finished games'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Data exporting was unselected.
+-- Dumping data for table games_portal.statistics_game_counts: ~1 rows (approximately)
+INSERT INTO `statistics_game_counts` (`connectfours`, `tictactoes`) VALUES
+	(0, 0);
 
 -- Dumping structure for table games_portal.users
 CREATE TABLE IF NOT EXISTS `users` (
@@ -105,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `Uniikki_email` (`Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Data exporting was unselected.
+-- Dumping data for table games_portal.users: ~0 rows (approximately)
 
 -- Dumping structure for trigger games_portal.count_trigger
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
