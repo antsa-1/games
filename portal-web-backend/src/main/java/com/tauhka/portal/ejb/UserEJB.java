@@ -13,7 +13,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -22,8 +21,8 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import com.tauhka.portal.pojos.User;
-import com.tauhka.portal.pojos.tops.TopPlayer;
 import com.tauhka.portal.pojos.tops.TopLists;
+import com.tauhka.portal.pojos.tops.TopPlayer;
 import com.tauhka.portal.web.security.PasswordHash;
 
 import jakarta.annotation.Resource;
@@ -36,6 +35,7 @@ public class UserEJB {
 	private static final Logger LOGGER = Logger.getLogger(UserEJB.class.getName());
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource portalDatasource;
+	
 	private static final String USERNAME_QUERY = "select UserName,Status,Force_password_change,id,tult,secret from users where username=?";
 	private static final String ACTIVE_LOGIN_INSERT = "insert into active_logins(Login_id,Player_id, User_name) values (?,?,?) ON DUPLICATE KEY UPDATE Login_id=?";
 	private static final String REGISTER_INSERT = "insert into users(UserName,id,Email,Secret,tult) values (?,?,?,?,?)";
@@ -200,7 +200,6 @@ public class UserEJB {
 				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
 			}
 			rs2.close();
-			LOGGER.severe(LOG_PREFIX_PORTAL + "UserEJB register fail part3");
 			return topPlayers;
 
 		} catch (SQLException e) {
