@@ -4,11 +4,11 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { GameToken, User } from "../interfaces";
+import { IGameToken, IUser } from "../interfaces";
 import { loginMixin } from "../mixins/mixins";
 import { useRoute } from 'vue-router';
 interface GameChannel {
-	user: User;
+	user: IUser;
 	lobbyText: string;
 }
 
@@ -21,7 +21,7 @@ export default defineComponent({
 
 	data(): GameChannel {
 		return {
-			user: {},
+			user: {name:""},
 			lobbyText: "qq"
 		};
 	},
@@ -29,7 +29,7 @@ export default defineComponent({
 		usera(){
 			return this.$store.getters.user
 		}
-	}
+	},
 
 	created() {
 	
@@ -38,13 +38,13 @@ export default defineComponent({
 	methods: {
 		connect(token:string): void {
 		
-			usera.webSocket = new WebSocket("ws://localhost:8081/tictactoe/ws");
+			this.usera.webSocket = new WebSocket("ws://localhost:8081/tictactoe/ws");
 		
-			usera.webSocket.onopen = event => {
+			this.usera.webSocket.onopen = event => {
 			
 				this.authenticateSocket(token);
 			};
-			usera.webSocket.onmessage = event => {
+			this.usera.webSocket.onmessage = event => {
 				let data = JSON.parse(event.data);
 				
 			
@@ -58,10 +58,10 @@ export default defineComponent({
 						break;
 				}
 			};
-			usera.webSocket.onerror = event => {
+			this.usera.webSocket.onerror = event => {
 				
 			};
-			usera.webSocket.onclose = event => {
+			this.usera.webSocket.onclose = event => {
 				
 			};
 		},
@@ -71,13 +71,13 @@ export default defineComponent({
 			let title2 = "LOGIN";
 			
 
-			if (usera) {
+			if (this.usera) {
 				const obj = { title: title2, message: token };
 				const myJSON = JSON.stringify(obj);
 				let combinedMessage = JSON.stringify(obj);
 				// const messageJSON = JSON.parse(combinedMessage)
 
-				usera.webSocket.send(combinedMessage);
+				this.usera.webSocket.send(combinedMessage);
 			} else {
 				alert("no connection");
 			}

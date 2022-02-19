@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -21,6 +22,8 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import com.tauhka.portal.pojos.User;
+import com.tauhka.portal.pojos.tops.TopPlayer;
+import com.tauhka.portal.pojos.tops.TopLists;
 import com.tauhka.portal.web.security.PasswordHash;
 
 import jakarta.annotation.Resource;
@@ -37,6 +40,8 @@ public class UserEJB {
 	private static final String ACTIVE_LOGIN_INSERT = "insert into active_logins(Login_id,Player_id, User_name) values (?,?,?) ON DUPLICATE KEY UPDATE Login_id=?";
 	private static final String REGISTER_INSERT = "insert into users(UserName,id,Email,Secret,tult) values (?,?,?,?,?)";
 	private static final String REMOVE_ACTIVE_LOGIN = "delete from active_logins where Login_id= (?)";
+	private static final String TOP_TICTACTOE_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_tictactoe FROM users ORDER BY ranking_tictactoe DESC LIMIT 10;";
+	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_connect_four FROM users ORDER BY ranking_connect_four DESC LIMIT 10;";
 
 	public User login(String name, String password) {
 		LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB login:");
@@ -164,6 +169,55 @@ public class UserEJB {
 			}
 		}
 		throw new RuntimeException("UserEJB runtimeException " + nickName);
+	}
+
+	public TopLists getTopPlayers() {
+
+		PreparedStatement stmt = null;
+		Connection con = null;
+		try {
+			con = portalDatasource.getConnection();
+			stmt = con.prepareStatement(TOP_TICTACTOE_PLAYERS_SQL);
+			ResultSet rs = stmt.executeQuery();
+			TopLists topPlayers = new TopLists();
+			while (rs.next()) {
+				TopPlayer t = new TopPlayer();
+				t.setNickname(rs.getString("UserName"));
+				t.setRankingTicTacToe((int) rs.getDouble("ranking_tictactoe"));
+				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
+				topPlayers.addTicTacToePlayer(t);
+			}
+			rs.close();
+			stmt.close();
+			stmt = con.prepareStatement(TOP_CONNECT_FOUR_PLAYERS_SQL);
+			ResultSet rs2 = stmt.executeQuery();
+
+			while (rs2.next()) {
+				TopPlayer t = new TopPlayer();
+				t.setNickname(rs2.getString("UserName"));
+				t.setRankingConnectFour((int) rs2.getDouble("ranking_connect_four"));
+				topPlayers.addConnectFourPlayer(t);
+				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
+			}
+			rs2.close();
+			LOGGER.severe(LOG_PREFIX_PORTAL + "UserEJB register fail part3");
+			return topPlayers;
+
+		} catch (SQLException e) {
+			LOGGER.severe(LOG_PREFIX_PORTAL + "UserEJB register sqle" + e.getMessage() + e.getErrorCode());
+		} finally {
+			try {
+				if (stmt != null) {
+					stmt.close();
+				}
+				if (con != null) {
+					con.close();
+				}
+			} catch (SQLException e) {
+				LOGGER.severe(LOG_PREFIX_PORTAL + "UserEJB register finally crashed" + e.getMessage());
+			}
+		}
+		throw new RuntimeException("UserEJB topPlayers exception ");
 	}
 
 	public boolean logout(String activeLoginToken) {

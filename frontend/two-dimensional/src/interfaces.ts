@@ -46,11 +46,11 @@ export interface IWinSquares {
 	square: ISquare[]
 }
 export interface IGameMode {
-	gameId:number,
+	gameId: number,
 	id: number,
 	name: string,
-	requiredConnections:number,
-	gameNumber:number,
+	requiredConnections: number,
+	gameNumber: number,
 }
 export interface IChat {
 	users?: IUser;
@@ -99,7 +99,19 @@ export interface IUser {
 	name: string;
 	token?: string;
 	email?: string;
-
 }
 
+export interface ITopLists {
+	connectFours: ITopPlayer[],
+	tictactoes: ITopPlayer[],
+	errorFlag: boolean
+}
+
+export interface ITopPlayer {
+	nickname: string,
+	connectFourCount: number,
+	ticatactoeCount: number,
+	rankingConnectFour: number,
+	rankingTictactoe: number,
+}
 

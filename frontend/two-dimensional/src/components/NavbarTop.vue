@@ -38,15 +38,16 @@
           </li>
           <li class="nav-item">
               <router-link  class="nav-link"  :to="{ name: 'Info' }">
-                    Terms and conditions
+                  Terms and conditions
               </router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item">              
               <router-link  class="nav-link"  :to="{ name: 'TopLists' }">
-                    Top lists
+                <i class="bi bi-megaphone"></i>
+                  Top lists
               </router-link>
           </li>
-          <li class="nav-item">
+          <li class="nav-item">              
               <router-link  class="nav-link"  :to="{ name: 'Feedback' }">
                 Feedback
               </router-link>
