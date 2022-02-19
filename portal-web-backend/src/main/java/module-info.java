@@ -12,8 +12,8 @@ module tauhka.portal {
 	requires jakarta.ejb.api;
 	requires jakarta.inject;
 	requires jakarta.json.bind;
-	requires jakarta.servlet;
 	requires java.logging;
 	requires java.sql;
+	requires transitive jakarta.servlet;
 	requires transitive jakarta.ws.rs;
 }
