@@ -2,8 +2,7 @@
 The site with two games, tic-tac-toe and connect four, is currently running @ http://35.217.7.146/portal/index.html 
 <br>
 ### 19.2.2022
-New deployment with player top-lists, deployed from tag "prod-rel-1.0.1" .
-TODO, check workspace building instructions (are based from only TicTacToe game).
+New deployment with player top-lists. Package "prod-rel-1.0.1" .
 
 ### 14.2.2022
 Initial release
@@ -24,4 +23,4 @@ General:
 * Site runs in "http" -> "https" ?
 * 
 Documentation:
-* Project documentation
+* Project documentation TODO
