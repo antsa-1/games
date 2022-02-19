@@ -1,5 +1,6 @@
 package com.tauhka.portal.pojos.tops;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,8 @@ public class TopLists {
 	private List<TopPlayer> connectFourList;
 	@JsonbProperty("tictactoes")
 	private List<TopPlayer> ticTacToeList;
+	@JsonbProperty("instant")
+	private Instant fetchInstant;
 
 	@JsonbTransient
 	public void addConnectFourPlayer(TopPlayer topPlayer) {
@@ -35,6 +38,14 @@ public class TopLists {
 
 	public List<TopPlayer> getConnectFourList() {
 		return connectFourList;
+	}
+
+	public Instant getFetchInstant() {
+		return fetchInstant;
+	}
+
+	public void setFetchInstant(Instant fetchInstant) {
+		this.fetchInstant = fetchInstant;
 	}
 
 	public void setConnectFourList(List<TopPlayer> connectFourList) {

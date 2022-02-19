@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -35,7 +36,7 @@ public class UserEJB {
 	private static final Logger LOGGER = Logger.getLogger(UserEJB.class.getName());
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource portalDatasource;
-	
+
 	private static final String USERNAME_QUERY = "select UserName,Status,Force_password_change,id,tult,secret from users where username=?";
 	private static final String ACTIVE_LOGIN_INSERT = "insert into active_logins(Login_id,Player_id, User_name) values (?,?,?) ON DUPLICATE KEY UPDATE Login_id=?";
 	private static final String REGISTER_INSERT = "insert into users(UserName,id,Email,Secret,tult) values (?,?,?,?,?)";
@@ -179,13 +180,14 @@ public class UserEJB {
 			con = portalDatasource.getConnection();
 			stmt = con.prepareStatement(TOP_TICTACTOE_PLAYERS_SQL);
 			ResultSet rs = stmt.executeQuery();
-			TopLists topPlayers = new TopLists();
+			TopLists topLists = new TopLists();
+			topLists.setFetchInstant(Instant.now());
 			while (rs.next()) {
 				TopPlayer t = new TopPlayer();
 				t.setNickname(rs.getString("UserName"));
 				t.setRankingTicTacToe((int) rs.getDouble("ranking_tictactoe"));
 				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
-				topPlayers.addTicTacToePlayer(t);
+				topLists.addTicTacToePlayer(t);
 			}
 			rs.close();
 			stmt.close();
@@ -196,11 +198,11 @@ public class UserEJB {
 				TopPlayer t = new TopPlayer();
 				t.setNickname(rs2.getString("UserName"));
 				t.setRankingConnectFour((int) rs2.getDouble("ranking_connect_four"));
-				topPlayers.addConnectFourPlayer(t);
+				topLists.addConnectFourPlayer(t);
 				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
 			}
 			rs2.close();
-			return topPlayers;
+			return topLists;
 
 		} catch (SQLException e) {
 			LOGGER.severe(LOG_PREFIX_PORTAL + "UserEJB register sqle" + e.getMessage() + e.getErrorCode());

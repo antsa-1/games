@@ -1,6 +1,10 @@
 <template>	
 	<div class="row mt-3">
-		<span class="fw-bold "> Hall of fame </span>
+		<p>
+			<span class="fw-bold "> Hall of fame </span>
+			<br>
+			{{dateTime}}
+		</p>
 		<div class="col-xs-12 col-sm-4 mt-3 mt-md-0 pt-3">
 			<span class="fw-bold ">
 				Connect Four
@@ -40,7 +44,8 @@ export default defineComponent({
 		return {			
 			connectFours:[],
 			tictactoes:[],
-			errorFlag:false			
+			errorFlag:false,
+			dateTime:undefined
 		};
 	},
 	computed: {		
@@ -75,6 +80,7 @@ export default defineComponent({
 					data => {						
 						this.connectFours = data.connectFours
 						this.tictactoes  = data.tictactoes
+						this.dateTime= new Date(data.instant).toLocaleString()
 					},
 					(err) => {
 						this.errorFlag = true			

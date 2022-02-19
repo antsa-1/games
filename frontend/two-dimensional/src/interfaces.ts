@@ -104,7 +104,8 @@ export interface IUser {
 export interface ITopLists {
 	connectFours: ITopPlayer[],
 	tictactoes: ITopPlayer[],
-	errorFlag: boolean
+	errorFlag: boolean,
+	dateTime:string
 }
 
 export interface ITopPlayer {
@@ -113,5 +114,6 @@ export interface ITopPlayer {
 	ticatactoeCount: number,
 	rankingConnectFour: number,
 	rankingTictactoe: number,
+	
 }
 
