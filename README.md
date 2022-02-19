@@ -7,8 +7,8 @@ TODO, check workspace building instructions (are based from only TicTacToe game)
 
 ### 14.2.2022
 Initial release
-
 <br>
+
 ![tictactoe](./workspace-setup/ConnectFour.png) 
 
 ## Further development ideas
