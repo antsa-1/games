@@ -48,6 +48,8 @@ public class RankingCalculator {
 				newRankingB = bRanking - 2;
 			}
 			// Equal ranking and draw -> no changes
+			newRankingA = aRanking;
+			newRankingB = bRanking;
 
 		}
 		// 100 minimum
