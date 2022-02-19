@@ -47,7 +47,7 @@
 							</tr>
 						</thead>
 						<tbody>						
-							<tr v-for="(table, index) in tables" :key="table.id" >						
+							<tr v-for="(table) in tables" :key="table.id" >						
 								<td v-if="table.gameMode.id<20" scope="row">
 									X.O 
 								</td>								
