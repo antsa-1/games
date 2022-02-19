@@ -1,9 +1,13 @@
-### 14.2.2022
+
 The site with two games, tic-tac-toe and connect four, is currently running @ http://35.217.7.146/portal/index.html 
 <br>
 ### 19.2.2022
 New deployment with player top-lists, deployed from tag "prod-rel-1.0.1" .
 TODO, check workspace building instructions (are based from only TicTacToe game).
+
+### 14.2.2022
+Initial release
+
 <br>
 ![tictactoe](./workspace-setup/ConnectFour.png) 
 
@@ -11,7 +15,6 @@ TODO, check workspace building instructions (are based from only TicTacToe game)
 
 UI:
 * Add sorting for tables and users, own tab per game for example.
-* Add Game scores: how many wins, against who?
 * Make optional notification sound when user enters/creates new table.
 
 Backend:
