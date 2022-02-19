@@ -17,6 +17,7 @@
 					<span class="float-end"> {{topPlayer.rankingConnectFour}}</span>	
 				</li>
 			</ul>
+			Games {{totalConnectFours}}
 		</div>
 		<div class="col-xs-12 col-sm-4 mt-3 mt-md-0 pt-3">
 			<span class="fw-bold ">
@@ -30,6 +31,7 @@
 					<span class="float-end"> {{topPlayer.rankingTicTacToe}}</span>
 				</li>
 			</ul>
+			Games {{totalTictactoes}}
 		</div>
 	</div>
 </template>
@@ -45,7 +47,9 @@ export default defineComponent({
 			connectFours:[],
 			tictactoes:[],
 			errorFlag:false,
-			dateTime:undefined
+			dateTime:undefined,
+			totalConnectFours:0,
+			totalTictactoes:0
 		};
 	},
 	computed: {		
@@ -81,6 +85,8 @@ export default defineComponent({
 						this.connectFours = data.connectFours
 						this.tictactoes  = data.tictactoes
 						this.dateTime= new Date(data.instant).toLocaleString()
+						this.totalConnectFours=data.totalConnectFours
+						this.totalTictactoes=data.totalTictactoes
 					},
 					(err) => {
 						this.errorFlag = true			

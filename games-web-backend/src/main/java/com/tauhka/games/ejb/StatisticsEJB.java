@@ -6,7 +6,6 @@ import static com.tauhka.games.core.util.Constants.LOG_PREFIX_GAMES;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.UUID;
 import java.util.logging.Logger;

@@ -105,7 +105,9 @@ export interface ITopLists {
 	connectFours: ITopPlayer[],
 	tictactoes: ITopPlayer[],
 	errorFlag: boolean,
-	dateTime:string
+	dateTime:string,
+	totalTictactoes:number,
+	totalConnectFours,
 }
 
 export interface ITopPlayer {

@@ -19,6 +19,10 @@ public class TopLists {
 	private List<TopPlayer> ticTacToeList;
 	@JsonbProperty("instant")
 	private Instant fetchInstant;
+	@JsonbProperty("totalConnectFours")
+	private int totalConnectFours;
+	@JsonbProperty("totalTictactoes")
+	private int totalTictactoes;
 
 	@JsonbTransient
 	public void addConnectFourPlayer(TopPlayer topPlayer) {
@@ -38,6 +42,22 @@ public class TopLists {
 
 	public List<TopPlayer> getConnectFourList() {
 		return connectFourList;
+	}
+
+	public int getTotalConnectFours() {
+		return totalConnectFours;
+	}
+
+	public void setTotalConnectFours(int totalConnectFours) {
+		this.totalConnectFours = totalConnectFours;
+	}
+
+	public int getTotalTictactoes() {
+		return totalTictactoes;
+	}
+
+	public void setTotalTictactoes(int totalTictactoes) {
+		this.totalTictactoes = totalTictactoes;
 	}
 
 	public Instant getFetchInstant() {

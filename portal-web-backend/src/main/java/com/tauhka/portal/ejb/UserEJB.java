@@ -41,8 +41,9 @@ public class UserEJB {
 	private static final String ACTIVE_LOGIN_INSERT = "insert into active_logins(Login_id,Player_id, User_name) values (?,?,?) ON DUPLICATE KEY UPDATE Login_id=?";
 	private static final String REGISTER_INSERT = "insert into users(UserName,id,Email,Secret,tult) values (?,?,?,?,?)";
 	private static final String REMOVE_ACTIVE_LOGIN = "delete from active_logins where Login_id= (?)";
-	private static final String TOP_TICTACTOE_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_tictactoe FROM users ORDER BY ranking_tictactoe DESC LIMIT 10;";
-	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_connect_four FROM users ORDER BY ranking_connect_four DESC LIMIT 10;";
+	private static final String TOP_TICTACTOE_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_tictactoe FROM users ORDER BY ranking_tictactoe DESC LIMIT 20;";
+	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_connect_four FROM users ORDER BY ranking_connect_four DESC LIMIT 20;";
+	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes FROM statistics_game_counts";
 
 	public User login(String name, String password) {
 		LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB login:");
@@ -172,6 +173,8 @@ public class UserEJB {
 		throw new RuntimeException("UserEJB runtimeException " + nickName);
 	}
 
+	// 3 different queries, TODO check optimizing possibilities, although max once
+	// per cache-timeout called
 	public TopLists getTopPlayers() {
 
 		PreparedStatement stmt = null;
@@ -202,6 +205,15 @@ public class UserEJB {
 				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
 			}
 			rs2.close();
+			stmt = con.prepareStatement(SELECT_GAME_COUNTS_SQL);
+			ResultSet rs3 = stmt.executeQuery();
+			if (rs3.next()) {
+				int connectFours = rs3.getInt("connectfours");
+				int tictactoes = rs3.getInt("tictactoes");
+				topLists.setTotalConnectFours(connectFours);
+				topLists.setTotalTictactoes(tictactoes);
+			}
+			rs3.close();
 			return topLists;
 
 		} catch (SQLException e) {
