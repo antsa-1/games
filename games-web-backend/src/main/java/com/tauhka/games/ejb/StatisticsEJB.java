@@ -39,7 +39,7 @@ public class StatisticsEJB { // To core package?!?!?
 	private EJBContext ejbContext;
 
 	public void observeGameResult(@ObservesAsync GameStatisticsEvent gameStats) {
-		// If Anonym player then do not update..
+
 		LOGGER.info("StatisticsEJB should update now database with " + gameStats);
 		if (gameStats == null || gameStats.getGameResult() == null) {
 			throw new IllegalArgumentException("No statistics for database:" + gameStats);// Tells which one was null
@@ -49,6 +49,7 @@ public class StatisticsEJB { // To core package?!?!?
 			RankingCalculator.updateRankings(gameStats.getGameResult());
 			updatePlayerRankingsToDatabase(gameStats);
 		} else {
+			// Anonym players play together
 			updateGameCount(gameStats);
 		}
 	}
@@ -99,14 +100,13 @@ public class StatisticsEJB { // To core package?!?!?
 
 	// No user input in this sql
 	private void updateGameCount(GameStatisticsEvent gameStats) {
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		Connection con = null;
 		int gameNumber = gameStats.getGameResult().getGameMode().getGameNumber();
 		try {
 			con = gamesDataSource.getConnection();
-			stmt = con.createStatement();
-
-			int dbRes = stmt.executeUpdate(gameNumber == 1 ? UPDATE_TICTACTOE_GAMES_COUNT_SQL : UPDATE_CONNECT_FOUR_GAMES_COUNT_SQL);
+			stmt = con.prepareStatement(gameNumber == 1 ? UPDATE_TICTACTOE_GAMES_COUNT_SQL : UPDATE_CONNECT_FOUR_GAMES_COUNT_SQL);
+			int dbRes = stmt.executeUpdate();
 			if (dbRes > 0) {
 				LOGGER.info(LOG_PREFIX_GAMES + "StatisticsEJB updated gameAmounts for anonymous players game" + gameNumber);
 				return;
@@ -172,7 +172,7 @@ public class StatisticsEJB { // To core package?!?!?
 					con.close();
 				}
 			} catch (SQLException e) {
-				LOGGER.severe(LOG_PREFIX_GAMES + "UserEJB finally crashed" + e.getMessage());
+				LOGGER.severe(LOG_PREFIX_GAMES + "StatisticsEJB finally crashed" + e.getMessage());
 			}
 		}
 	}
