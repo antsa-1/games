@@ -18,13 +18,18 @@ public class CorsFilter implements Filter {
 	private static final Logger LOGGER = Logger.getLogger(CorsFilter.class.getName());
 
 	public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
-		//System.out.println("CorsFilter: Environment" + ENVIRONMENT);
+		LOGGER.fine(CorsFilter.class.getName() + " in turn");
 		if (ENVIRONMENT == null) {
 			throw new IllegalArgumentException("Environment is missing");
 		}
+
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
-		
-		((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Origin", " http://localhost:8080"); //For localhost development with different 8080 port.
+		if (ENVIRONMENT.equalsIgnoreCase(Constants.ENVIRONMENT_PRODUCTION)) {
+			// No CORS settings required in prod -> same domain
+			chain.doFilter(request, servletResponse);
+			return;
+		}
+		((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Origin", " http://localhost:8080"); // For localhost development with different 8080 port.
 		((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Methods", "GET, OPTIONS, POST");
 		((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Headers", "content-type, authorization");
 
