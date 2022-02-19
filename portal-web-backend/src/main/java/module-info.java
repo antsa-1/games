@@ -16,4 +16,5 @@ module tauhka.portal {
 	requires java.sql;
 	requires transitive jakarta.servlet;
 	requires transitive jakarta.ws.rs;
+	requires jakarta.cdi;
 }
