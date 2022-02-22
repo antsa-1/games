@@ -28,7 +28,7 @@ public class TopListsResource {
 	private UserEJB userEJB;
 	@Inject
 	private PortalCache cache;
-	private static final int CACHE_WAIT_TIME_SECONDS = 60;
+	private static final int CACHE_WAIT_TIME_SECONDS = 10;
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
