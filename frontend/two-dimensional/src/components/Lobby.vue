@@ -12,10 +12,10 @@
   							<path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
 						</svg>					
 					</div>					
-					<i v-if="user.rankingConnectFour>0" ref="{{index}}" class="bi bi-star float-end tooltipselector" data-bs-toggle="tooltip" data-bs-placement="top" title="ConnectFour ranking">
+					<i v-if="user.rankingConnectFour>0" class="bi bi-star float-end tooltipselector" data-bs-toggle="tooltip" data-bs-placement="top" title="ConnectFour ranking">
 						&nbsp;{{user.rankingConnectFour}}&nbsp;
 					</i>
-					<i v-if="user.rankingTictactoe>0" ref="{{index}}" class="bi bi-suit-diamond float-end tooltipselector" data-bs-toggle="tooltip" data-bs-placement="top" title="TicTacToe ranking">
+					<i v-if="user.rankingTictactoe>0" class="bi bi-suit-diamond float-end tooltipselector" data-bs-toggle="tooltip" data-bs-placement="top" title="TicTacToe ranking">
 						&nbsp;{{user.rankingTictactoe}}&nbsp;
 					</i>
 				</li>
