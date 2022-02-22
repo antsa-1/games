@@ -21,9 +21,9 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import com.tauhka.portal.pojos.User;
-import com.tauhka.portal.pojos.tops.TopLists;
-import com.tauhka.portal.pojos.tops.TopPlayer;
+import com.tauhka.portal.highscore.TopLists;
+import com.tauhka.portal.highscore.TopPlayer;
+import com.tauhka.portal.login.LoginOutput;
 import com.tauhka.portal.web.security.PasswordHash;
 
 import jakarta.annotation.Resource;
@@ -45,7 +45,7 @@ public class UserEJB {
 	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_connect_four FROM users ORDER BY ranking_connect_four DESC LIMIT 20;";
 	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes FROM statistics_game_counts";
 
-	public User login(String name, String password) {
+	public LoginOutput login(String name, String password) {
 		LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB login:");
 
 		if (name == null) {
@@ -74,7 +74,7 @@ public class UserEJB {
 				}
 				boolean pwChange = rs.getBoolean("Force_passWord_change");
 				rs.close();
-				User user = new User();
+				LoginOutput user = new LoginOutput();
 				user.setNickName(namee);
 				user.setStatus(status);
 				user.setForcePasswordChange(pwChange);
@@ -113,7 +113,7 @@ public class UserEJB {
 		throw new RuntimeException("UserEJB was not able to fetch name for " + name);
 	}
 
-	public User register(String nickName, String password, String email) throws DuplicateKeyException {
+	public LoginOutput register(String nickName, String password, String email) throws DuplicateKeyException {
 
 		boolean isForbidden = FORBIDDEN_WORD_PARTS.stream().anyMatch(nickName::equalsIgnoreCase);
 		if (isForbidden) {
@@ -146,7 +146,7 @@ public class UserEJB {
 			int res = stmt.executeUpdate();
 			if (res == 1) {
 				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB registered");
-				User user = new User();
+				LoginOutput user = new LoginOutput();
 				user.setNickName(nickNamea);
 				return user;
 			}

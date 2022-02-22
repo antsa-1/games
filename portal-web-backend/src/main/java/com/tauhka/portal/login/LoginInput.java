@@ -1,9 +1,9 @@
-package com.tauhka.portal.pojos;
+package com.tauhka.portal.login;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 
 //Login data input and output. Email not used atm.
-public class Login {
+public class LoginInput {
 	@JsonbProperty("userName")
 	private String userName;
 	@JsonbProperty("password")
@@ -22,7 +22,7 @@ public class Login {
 		this.email = email;
 	}
 
-	public Login() {
+	public LoginInput() {
 		super();
 	}
 
@@ -34,7 +34,7 @@ public class Login {
 		this.token = token;
 	}
 
-	public Login(String userName, String password) {
+	public LoginInput(String userName, String password) {
 		super();
 		this.userName = userName;
 		this.password = password;

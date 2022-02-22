@@ -1,4 +1,4 @@
-package com.tauhka.portal.pojos.tops;
+package com.tauhka.portal.highscore;
 
 import java.time.Instant;
 import java.util.ArrayList;

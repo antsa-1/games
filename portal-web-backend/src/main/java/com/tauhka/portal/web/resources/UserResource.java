@@ -6,8 +6,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.tauhka.portal.ejb.UserEJB;
-import com.tauhka.portal.pojos.Login;
-import com.tauhka.portal.pojos.User;
+import com.tauhka.portal.login.LoginInput;
+import com.tauhka.portal.login.LoginOutput;
 
 import jakarta.ejb.DuplicateKeyException;
 import jakarta.inject.Inject;
@@ -41,8 +41,8 @@ public class UserResource {
 			}
 			// TODO check later if direct Mapping in method parameter works
 			Jsonb jsonb = JsonbBuilder.create();
-			Login login = jsonb.fromJson(userAndPassWord, Login.class);
-			User user = userEJB.login(login.getUserName(), login.getPassword());
+			LoginInput login = jsonb.fromJson(userAndPassWord, LoginInput.class);
+			LoginOutput user = userEJB.login(login.getUserName(), login.getPassword());
 			if (user != null && user.getStatus().equals(USER_STATUS_ACTIVE)) {
 				LOGGER.exiting(LOG_PREFIX_PORTAL + UserResource.class.getName(), " login");
 				return Response.ok(jsonb.toJson(user)).build();
@@ -66,8 +66,8 @@ public class UserResource {
 		try {
 			// TODO check later if direct Mapping in method parameter works
 			Jsonb jsonb = JsonbBuilder.create();
-			Login login = jsonb.fromJson(userAndPassWordAndEmail, Login.class);
-			User user = userEJB.register(login.getUserName(), login.getPassword(), login.getEmail());
+			LoginInput login = jsonb.fromJson(userAndPassWordAndEmail, LoginInput.class);
+			LoginOutput user = userEJB.register(login.getUserName(), login.getPassword(), login.getEmail());
 			if (user != null) {
 				LOGGER.exiting(LOG_PREFIX_PORTAL + UserResource.class.getName(), " register");
 				return Response.ok(jsonb.toJson(user)).build();
@@ -90,7 +90,7 @@ public class UserResource {
 		try {
 			// TODO check later if direct Mapping in method parameter works
 			Jsonb jsonb = JsonbBuilder.create();
-			Login login = jsonb.fromJson(token, Login.class);
+			LoginInput login = jsonb.fromJson(token, LoginInput.class);
 			userEJB.logout(login.getToken());
 			return Response.ok().build();
 

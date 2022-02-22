@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import com.tauhka.portal.cache.PortalCache;
 import com.tauhka.portal.ejb.UserEJB;
-import com.tauhka.portal.pojos.tops.TopLists;
+import com.tauhka.portal.highscore.TopLists;
 
 import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;

@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
+import com.tauhka.portal.exeptions.PasswordNotValidException;
 import com.tauhka.portal.util.Constants;
-import com.tauhka.portal.web.exeptions.PasswordNotValidException;
 
 // Partly read/used/combined from https://www.baeldung.com/java-password-hashing
 public class PasswordHash {

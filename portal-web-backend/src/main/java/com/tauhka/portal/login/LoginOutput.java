@@ -1,11 +1,12 @@
-package com.tauhka.portal.pojos;
+package com.tauhka.portal.login;
 
 import java.util.UUID;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
 
-public class User {
+//Logged in user's own data not meant to read by others
+public class LoginOutput {
 	@JsonbProperty("name")
 	private String nickName;
 	@JsonbProperty("activeLoginId")

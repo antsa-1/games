@@ -1,6 +1,6 @@
 package com.tauhka.portal.cache;
 
-import com.tauhka.portal.pojos.tops.TopLists;
+import com.tauhka.portal.highscore.TopLists;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
