@@ -45,7 +45,7 @@ public class CommonEndpoint {
 	@OnOpen
 	public void onOpen(Session session, EndpointConfig conf) {
 		LOGGER.log(Level.FINE, "CommonEndpoint onOpen");
-		session.setMaxIdleTimeout(1000 * 60 * 30); // millis
+		session.setMaxIdleTimeout(1000 * 60 * 20); // millis
 		session.setMaxTextMessageBufferSize(1000);
 		session.setMaxBinaryMessageBufferSize(0);
 		this.session = session;
