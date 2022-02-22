@@ -36,7 +36,7 @@ const routes: RouteRecordRaw[] = [
         redirect: { name: 'Home' }
     },
     {
-        path: '/portal/games',
+        path: '/portal/home',
         component: Home,
         name: "Home",
     },
