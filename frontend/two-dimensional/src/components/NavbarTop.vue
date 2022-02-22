@@ -15,27 +15,7 @@
           </li>
           <li v-if="!authenticated" class="nav-item">
             <router-link class="nav-link"  :to="{ name: 'Registration' }">Registration</router-link>
-          </li>
-          <li class="nav-item dropdown">
-         
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-person-fill"></i>
-              User 
-            </a>            
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                 <li v-if="authenticated">                    
-                    <router-link  class="dropdown-item" :to="{ name: 'User' }">Show profile</router-link>
-                </li>
-                <li v-if="authenticated">                    
-                    <router-link @click="logout" class="dropdown-item" :to="{ name: 'User' }">Logout</router-link>
-                </li>
-                  <li v-if="!authenticated">               
-                     <router-link class="dropdown-item" :to="{ name: 'User' }">
-                       Login
-                    </router-link>
-                </li>                         
-            </ul>
-          </li>
+          </li>          
           <li class="nav-item">
               <router-link  class="nav-link"  :to="{ name: 'Info' }">
                   Terms and conditions
@@ -51,7 +31,28 @@
               <router-link  class="nav-link"  :to="{ name: 'Feedback' }">
                 Feedback
               </router-link>
-          </li> 
+          </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown ">          
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="bi bi-person-fill"></i>
+                User 
+              </a>            
+              <ul class="dropdown-menu ms-auto" aria-labelledby="navbarDropdown">
+                  <li v-if="authenticated">                    
+                      <router-link  class="dropdown-item" :to="{ name: 'User' }">Show profile</router-link>
+                  </li>
+                  <li v-if="authenticated">                    
+                      <router-link @click="logout" class="dropdown-item" :to="{ name: 'User' }">Logout</router-link>
+                  </li>
+                    <li v-if="!authenticated">               
+                      <router-link class="dropdown-item" :to="{ name: 'User' }">
+                        Login
+                      </router-link>
+                  </li>                         
+              </ul>
+            </li>
         </ul>
       </div>
     </div>
