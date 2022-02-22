@@ -88,9 +88,9 @@ export interface ITable {
 
 export interface IPlayer {
 	name: string,
-	gameToken?: IGameToken,
-	wins?: number;
-	draws?: number;
+	gameToken?: IGameToken, //GameToken in a table
+	wins?: number; // GameSession wins in a table
+	draws?: number;// GameSession draws in a table
 }
 
 export interface IUser {
@@ -102,20 +102,30 @@ export interface IUser {
 }
 
 export interface ITopLists {
-	connectFours: ITopPlayer[],
-	tictactoes: ITopPlayer[],
+	connectFours: IPlayerStats[],
+	tictactoes: IPlayerStats[],
 	errorFlag: boolean,
-	dateTime:string,
-	totalTictactoes:number,
-	totalConnectFours,
+	dateTime: string,
+	totalTictactoes: number,
+	totalConnectFours: number,
 }
 
-export interface ITopPlayer {
-	nickname: string,
-	connectFourCount: number,
-	ticatactoeCount: number,
+export interface IPlayerStats {
+	name: string,
+	playedConnectFours: number,
+	playedTicTacToesAgainstAI: number,
+	playedConnectFoursAgainstAI: number,
 	rankingConnectFour: number,
-	rankingTictactoe: number,
-	
+	rankingTicTacToe: number,
 }
 
+export interface IProfile {
+	stats: IPlayerStats,
+	text: string,
+}
+
+export interface ISettings {
+	newPlayerSound: boolean,
+	newTicTacToeTableSound: boolean,
+	newConnectFourTableSound: boolean
+}
