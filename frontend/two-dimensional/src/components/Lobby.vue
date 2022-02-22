@@ -7,12 +7,17 @@
 			<ul class="list-group ">						
 				<li v-for="(user, index) in users" :key="user.name" class="list-group-item" :class="[index%2==0?'bg-success p-2 text-dark bg-opacity-25':'bg-success p-2 text-dark bg-opacity-10']">					
 					<div class="float-start ">
-						{{user.name}}
-						
+						{{user.name}}						
 						<svg v-if="user.name===userName" xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
   							<path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-						</svg>
-					</div>
+						</svg>					
+					</div>					
+					<i v-if="user.rankingConnectFour>0" ref="{{index}}" class="bi bi-star float-end tooltipselector" data-bs-toggle="tooltip" data-bs-placement="top" title="ConnectFour ranking">
+						&nbsp;{{user.rankingConnectFour}}&nbsp;
+					</i>
+					<i v-if="user.rankingTictactoe>0" ref="{{index}}" class="bi bi-suit-diamond float-end tooltipselector" data-bs-toggle="tooltip" data-bs-placement="top" title="TicTacToe ranking">
+						&nbsp;{{user.rankingTictactoe}}&nbsp;
+					</i>
 				</li>
 			</ul>
 		</div>
@@ -133,6 +138,9 @@ import { defineComponent } from "vue";
 import { IGameMode, IGameToken, ITable, IUser,ISquare, IChatMessage, IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces";
 import { loginMixin } from "../mixins/mixins";
 import { useRoute } from "vue-router";
+import { Tooltip } from 'bootstrap/dist/js/bootstrap.esm.min.js'
+//import * as bootstrap from 'bootstrap';
+
 import Chat from "./Chat.vue";
 export default defineComponent({
 	
@@ -195,6 +203,13 @@ export default defineComponent({
 		}else{
 			
 		}
+	},
+	mounted(){
+		// Partly from https://therichpost.com/vue-3-bootstrap-5-tooltip-working-example/
+		const tooltips=Array.from(document.querySelectorAll('i[data-bs-toggle="tooltip"]'))
+ 		tooltips.forEach(tooltipNode =>{			 
+			  new Tooltip(tooltipNode)
+		 })
 	},
 	methods: {
 		connect(token: string): void {		
