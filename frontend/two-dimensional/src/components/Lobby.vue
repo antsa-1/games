@@ -6,12 +6,12 @@
 			</span>		
 			<ul class="list-group ">						
 				<li v-for="(user, index) in users" :key="user.name" class="list-group-item" :class="[index%2==0?'bg-success p-2 text-dark bg-opacity-25':'bg-success p-2 text-dark bg-opacity-10']">					
-					<div class="float-start ">
+					<div class="float-start " @click="openProfile(user.name)">
 						{{user.name}}						
 						<svg v-if="user.name===userName" xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
   							<path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-						</svg>					
-					</div>					
+						</svg>
+					</div> 	
 					<i v-if="user.rankingConnectFour>0" class="bi bi-star float-end tooltipselector"  title="ConnectFour ranking">
 						&nbsp;{{user.rankingConnectFour}}&nbsp;
 					</i>
@@ -417,6 +417,15 @@ export default defineComponent({
 			const obj = { title: "WATCH",message:table.id};
 			this.user.webSocket.send(JSON.stringify(obj));
 		},
+		openProfile(userName:string){
+			if(!userName.startsWith("Anonym")){
+				console.log("Profiili")
+				
+				this.$router.push({ name: 'Profile', params: { userName: userName } })
+				let route = this.$router.resolve({ path: "/profile" });
+				//window.open(route.href);
+			}
+		}
 	}
 });
 </script>

@@ -7,6 +7,7 @@ import User from './components/User.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
 import Table from './components/Table.vue'
+import Profile from './components/Profile.vue'
 import TopLists from './components/TopLists.vue'
 import TableConnectFour from './components/TableConnectFour.vue'
 import Info from './components/Info.vue'
@@ -102,6 +103,12 @@ const routes: RouteRecordRaw[] = [
                 next()
             }
         }
+    },
+    {
+        path: '/portal/user/:userName/profile',
+        component: Profile,
+        name: "Profile",
+        props: true,      
     },
     {
         path: '/portal/terms',
