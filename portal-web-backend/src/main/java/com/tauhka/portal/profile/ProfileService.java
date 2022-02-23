@@ -5,6 +5,7 @@ import java.util.UUID;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 import jakarta.transaction.Transactional;
 
 /**
@@ -14,7 +15,7 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class ProfileService {
 
-	@PersistenceContext
+	@PersistenceContext(unitName = "profile-persistence-unit", type = PersistenceContextType.TRANSACTION)
 	private EntityManager em;
 
 	public UserProfile findProfile(UUID id) {

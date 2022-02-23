@@ -1,12 +1,16 @@
 package com.tauhka.portal.highscore;
 
+import java.io.Serializable;
+
 import jakarta.json.bind.annotation.JsonbProperty;
 
 /**
  * @author antsa-1 from GitHub 19 Feb 2022
  **/
 
-public class TopPlayer {
+public class TopPlayer implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	@JsonbProperty("nickname")
 	private String nickname;
 	@JsonbProperty("rankingTicTacToe")
