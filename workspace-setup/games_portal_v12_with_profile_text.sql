@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `active_logins` (
   CONSTRAINT `Player_id_FK` FOREIGN KEY (`Player_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.active_logins: ~3 rows (approximately)
+-- Dumping data for table games_portal.active_logins: ~12 rows (approximately)
 
 -- Dumping structure for table games_portal.available_games
 CREATE TABLE IF NOT EXISTS `available_games` (
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `statistics_games` (
   CONSTRAINT `FK_statistics_users_2` FOREIGN KEY (`playerB_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.statistics_games: ~15 rows (approximately)
+-- Dumping data for table games_portal.statistics_games: ~4 rows (approximately)
 
 -- Dumping structure for table games_portal.statistics_game_counts
 CREATE TABLE IF NOT EXISTS `statistics_game_counts` (
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `statistics_game_counts` (
   `tictactoes` bigint(20) unsigned DEFAULT NULL COMMENT 'total finished games'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.statistics_game_counts: ~1 rows (approximately)
+-- Dumping data for table games_portal.statistics_game_counts: ~0 rows (approximately)
 INSERT INTO `statistics_game_counts` (`connectfours`, `tictactoes`) VALUES
 	(0, 0);
 
@@ -104,12 +104,13 @@ CREATE TABLE IF NOT EXISTS `users` (
   `tult` varchar(50) NOT NULL,
   `ranking_tictactoe` double NOT NULL DEFAULT 1000,
   `ranking_connect_four` double NOT NULL DEFAULT 1000,
+  `profile_text` varchar(250) DEFAULT '',
   PRIMARY KEY (`Id`),
   UNIQUE KEY `Uniikki_username` (`UserName`) USING BTREE,
   UNIQUE KEY `Uniikki_email` (`Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.users: ~3 rows (approximately)
+-- Dumping data for table games_portal.users: ~15 rows (approximately)
 
 -- Dumping structure for trigger games_portal.count_trigger
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
