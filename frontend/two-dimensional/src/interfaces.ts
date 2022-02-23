@@ -122,6 +122,7 @@ export interface IPlayerStats {
 export interface IProfile {
 	stats: IPlayerStats,
 	text: string,
+	memberSince:string
 }
 
 export interface ISettings {
