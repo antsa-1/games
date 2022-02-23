@@ -3,12 +3,15 @@ package com.tauhka.portal.profile;
 import java.io.Serializable;
 import java.util.UUID;
 
+import com.tauhka.portal.highscore.TopPlayer;
+
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Max;
 
 /**
  * @author antsa-1 from GitHub 22 Feb 2022
@@ -30,7 +33,10 @@ public class UserProfile implements Serializable {
 
 	@Column(name = "profile_text")
 	@JsonbProperty("profileText")
+	@Max(value = 250, message = "Profiletext longer than expected")
 	private String profileText;
+
+	private TopPlayer topPlayer; // TODO naming..
 
 	public UUID getId() {
 		return id;
@@ -46,6 +52,14 @@ public class UserProfile implements Serializable {
 
 	public void setProfileText(String profileText) {
 		this.profileText = profileText;
+	}
+
+	public TopPlayer getTopPlayer() {
+		return topPlayer;
+	}
+
+	public void setTopPlayer(TopPlayer topPlayer) {
+		this.topPlayer = topPlayer;
 	}
 
 }

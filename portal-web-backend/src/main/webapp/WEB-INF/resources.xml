@@ -1,13 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
 <!-- User allowed only from localhost, otherwise it is an error -->
-    <Resource id="jdbc/MariaDb" type="javax.sql.DataSource">
-	JdbcDriver org.mariadb.jdbc.Driver
-	JdbcUrl jdbc:mariadb://localhost:3306/games_portal
-	JtaManaged false
-	UserName gameportal-api
-	Password hpgwh99vMbjogI5
-	validationQuery="SELECT 1"
-    validationQueryTimeout=1000
+    <Resource id="jdbc/MariaDB" type="javax.sql.DataSource">
+		JdbcDriver org.mariadb.jdbc.Driver
+		JdbcUrl jdbc:mariadb://localhost:3306/games_portal
+		JtaManaged false
+		UserName gameportal-api
+		Password hpgwh99vMbjogI5
+		validationQuery="SELECT 1"
+	    validationQueryTimeout=1000
 	</Resource>
+	
+	 <Resource id="jdbc/MariaDBXABase" type="XADataSource" class-name="org.mariadb.jdbc.MariaDbDataSource">
+    	Url jdbc:mariadb://localhost:3306/games_portal
+  	</Resource>
+  	
+  	<Resource id="jdbc/MariaDBXA" type="DataSource">
+	    XaDataSource jdbc/MariaDBXABase
+	    JdbcDriver org.mariadb.jdbc.Driver
+		JdbcUrl jdbc:mariadb://localhost:3306/games_portal
+		JtaManaged true
+		UserName gameportal-api
+		Password hpgwh99vMbjogI5
+		InitialSize 10
+      	MaxActive 100
+      	MaxIdle 50
+      	MinIdle 10
+      	AccessToUnderlyingConnectionAllowed true
+      	TestOnBorrow false
+      	TestWhileIdle true
+      	TimeBetweenEvictionRuns 1 minute
+      	MaxWaitTime 0 seconds
+		validationQuery="SELECT 1"
+	    validationQueryTimeout=1000
+  	</Resource>
 </resources>
