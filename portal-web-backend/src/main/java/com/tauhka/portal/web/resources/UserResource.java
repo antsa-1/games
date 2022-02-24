@@ -46,10 +46,14 @@ public class UserResource {
 			if (user != null && user.getStatus().equals(USER_STATUS_ACTIVE)) {
 				LOGGER.exiting(LOG_PREFIX_PORTAL + UserResource.class.getName(), " login");
 				return Response.ok(jsonb.toJson(user)).build();
+			} else {
+				LOGGER.warning(LOG_PREFIX_PORTAL + UserResource.class.getName() + " Login attempt failed for:" + login.getUserName());
 			}
+
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, LOG_PREFIX_PORTAL + "User:login ", e);
 		}
+
 		LOGGER.exiting(LOG_PREFIX_PORTAL + UserResource.class.getName(), " login");
 		return Response.status(Status.BAD_REQUEST).build();
 	}

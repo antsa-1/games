@@ -1,6 +1,10 @@
 package com.tauhka.games.messaging.handlers;
 
-import static com.tauhka.games.core.util.Constants.*;
+import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER;
+import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_CONNECT_FOUR_RANKING;
+import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_ID;
+import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_TICTACTOE_RANKING;
+import static com.tauhka.games.core.util.Constants.SYSTEM;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -36,8 +40,7 @@ public class TableHandler {
 		stream = stream.filter(table -> table.isPlayer(endpoint.getUser()));
 		Optional<Table> tableOptional = stream.findFirst();
 		if (tableOptional.isPresent()) {
-			throw new IllegalArgumentException(
-					"User is already in table:" + endpoint.getUser() + " table:" + tableOptional.get());
+			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser() + " table:" + tableOptional.get());
 		}
 		Table table = null;
 		GameMode gameMode = GameMode.getGameMode(Integer.parseInt(message.getMessage()));
@@ -47,10 +50,13 @@ public class TableHandler {
 			table = new Table(endpoint.getUser(), gameMode, false);
 		}
 
-		CommonEndpoint.TABLES.put(table.getId(), table);
+		CommonEndpoint.TABLES.put(table.getTableId(), table);
 		if (message.getComputer()) {
 			ArtificialUser user = new ArtificialUser();
 			user.setName(OLAV_COMPUTER);
+			user.setRankingTictactoe(OLAV_COMPUTER_TICTACTOE_RANKING);
+			user.setRankingConnectFour(OLAV_COMPUTER_CONNECT_FOUR_RANKING);
+			user.setId(UUID.fromString(OLAV_COMPUTER_ID));
 			table.setPlayerB(user);
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.START_GAME);
@@ -132,10 +138,9 @@ public class TableHandler {
 
 	public Message removeEndpointOwnTable(CommonEndpoint endpoint) {
 		// Using params would be faster...
-		Optional<Table> table = CommonEndpoint.TABLES.values().stream().filter(taabel -> taabel.getPlayerA() != null)
-				.filter(taabel -> taabel.getPlayerA().equals(endpoint.getUser())).findFirst();
+		Optional<Table> table = CommonEndpoint.TABLES.values().stream().filter(taabel -> taabel.getPlayerA() != null).filter(taabel -> taabel.getPlayerA().equals(endpoint.getUser())).findFirst();
 		if (table.isPresent()) {
-			Table removedTable = CommonEndpoint.TABLES.remove(table.get().getId());
+			Table removedTable = CommonEndpoint.TABLES.remove(table.get().getTableId());
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.REMOVE_TABLE);
 			message_.setTable(removedTable);
@@ -149,8 +154,7 @@ public class TableHandler {
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
 		if (!table.isWaitingOpponent()) {
-			throw new ConcurrentAccessException(
-					"Table is not waiting player " + table + " trying user:" + endpoint.getUser());
+			throw new ConcurrentAccessException("Table is not waiting player " + table + " trying user:" + endpoint.getUser());
 		}
 		if (table.getPlayerA().equals(endpoint.getUser())) {
 			throw new IllegalArgumentException("Same players to table not possible..");
@@ -195,7 +199,7 @@ public class TableHandler {
 		}
 		Table table = tableOptional.get();
 		GameResult gameResult = table.resign(endpoint.getUser());
-		if (gameResult.getPlayer() != null) {
+		if (gameResult != null && gameResult.getWinner() != null) {
 			// For Artificial player set Rematch-state ready
 			if (table.getOpponent(endpoint.getUser()) instanceof ArtificialUser) {
 				table.suggestRematch(table.getOpponent(endpoint.getUser()));
@@ -205,13 +209,12 @@ public class TableHandler {
 			// chatMessage.setTo(t);
 			winnerMessage.setMessage("R"); // R=resignition in UI
 			winnerMessage.setTable(table);
-			winnerMessage.setWho(gameResult.getPlayer());
+			winnerMessage.setWho(gameResult.getWinner());
 			winnerMessage.setTitle(MessageTitle.WINNER);
 			return winnerMessage;
 		}
 
-		throw new IllegalArgumentException(
-				"resign not possible, is a player?. PlayerIn turn missing?" + endpoint.getUser());
+		throw new IllegalArgumentException("resign not possible, is a player?. PlayerIn turn missing?" + endpoint.getUser());
 	}
 
 	public Message rematch(CommonEndpoint endpoint) {

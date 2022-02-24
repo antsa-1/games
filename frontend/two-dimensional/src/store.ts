@@ -113,7 +113,7 @@ export const store = createStore<IStoreState>({
         removeTable(state, data: ITable) {
             state.tables = state.tables.filter((table) => {
 
-                return table.id !== data.id;
+                return table.tableId !== data.tableId;
             })
         },
         addPlayer(state, user: IUser) {
@@ -121,7 +121,7 @@ export const store = createStore<IStoreState>({
             state.users.push(user)
         },
         startGame(state, table: ITable) {
-            const index = state.tables.findIndex(element => element.id === table.id);
+            const index = state.tables.findIndex(element => element.tableId === table.tableId);
             state.tables.splice(index, 1, table)
         },
         selectTable(state, table: ITable) {

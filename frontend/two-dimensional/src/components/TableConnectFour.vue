@@ -98,7 +98,10 @@ export default defineComponent({
         this.stopReducer()
         this.removeMouseListeners()
         this.drawWinningLine(win)
-      }
+      }else if(mutation.type === "setDraw"){
+				this.stopReducer()
+        this.removeMouseListeners()
+			}
     });
   },
   computed: {
@@ -334,7 +337,7 @@ export default defineComponent({
       this.user.webSocket.send(JSON.stringify(obj));
     },
     leaveTable() {
-      const obj = { title: "LEAVE_TABLE", message: this.theTable.id };
+      const obj = { title: "LEAVE_TABLE", message: this.theTable.tableId };
       this.user.webSocket.send(JSON.stringify(obj));
     },
   },

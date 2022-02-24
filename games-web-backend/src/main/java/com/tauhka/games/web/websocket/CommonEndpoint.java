@@ -38,7 +38,6 @@ public class CommonEndpoint {
 	@Inject
 	private TableHandler tableHandler;
 
-
 	private Session session;
 	private User user;
 
@@ -191,13 +190,15 @@ public class CommonEndpoint {
 		LOGGER.log(Level.FINE, "CommonEndpoint onClose", closeReason);
 		if (session != null) {
 			try {
-				CommonEndpoint.ENDPOINTS.remove(this.user);
+				if (this.user != null) {
+					CommonEndpoint.ENDPOINTS.remove(this.user);
+				}
 				session.close();
 				UUID owningUser = null;
 				for (Table table : TABLES.values()) {
 					boolean isPlayer = table.removePlayerIfExist(this.user);
 					if (isPlayer) {
-						owningUser = table.getId();
+						owningUser = table.getTableId();
 						break;
 					} else {
 						boolean isWatcher = table.removeWatcherIfExist(this.user);

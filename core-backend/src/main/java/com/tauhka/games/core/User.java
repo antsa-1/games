@@ -13,15 +13,13 @@ public class User { // Combine with Portal User.java?
 	private Double rankingTictactoe = 0d;
 	@JsonbProperty("rankingConnectFour")
 	private Double rankingConnectFour = 0d;
-	@JsonbProperty("wins")
-	private int wins = 0;
-	@JsonbProperty("draws")
-	private int draws = 0;
+
 	@JsonbProperty
 	private GameToken gameToken;
-
 	@JsonbTransient
 	private UUID id;
+	@JsonbTransient
+	private Double initialCalculationsRank = 0d;
 
 	public String getName() {
 		return name;
@@ -31,28 +29,12 @@ public class User { // Combine with Portal User.java?
 		super();
 	}
 
-	public void addWin() {
-		this.wins++;
-	}
-
-	public void addDraw() {
-		this.draws++;
-	}
-
 	public UUID getId() {
 		return id;
 	}
 
 	public void setId(UUID id) {
 		this.id = id;
-	}
-
-	public int getWins() {
-		return wins;
-	}
-
-	public void setWins(int wins) {
-		this.wins = wins;
 	}
 
 	public void setName(String name) {
@@ -85,10 +67,6 @@ public class User { // Combine with Portal User.java?
 		return Objects.hash(name);
 	}
 
-	public int getDraws() {
-		return draws;
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -109,9 +87,12 @@ public class User { // Combine with Portal User.java?
 		this.gameToken = gameToken;
 	}
 
-	@Override
-	public String toString() {
-		return "User [name=" + name + ", rankingTictactoe=" + rankingTictactoe + ", rankingConnectFour=" + rankingConnectFour + ", wins=" + wins + ", draws=" + draws + ", gameToken=" + gameToken + ", id=" + id + "]";
+	public Double getInitialCalculationsRank() {
+		return initialCalculationsRank;
+	}
+
+	public void setInitialCalculationsRank(Double rankingTemp) {
+		this.initialCalculationsRank = rankingTemp;
 	}
 
 }

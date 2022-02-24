@@ -22,15 +22,15 @@ import jakarta.json.bind.annotation.JsonbTypeAdapter;
 public class Table {
 	private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
 
-	@JsonbProperty("id")
-	private UUID id;
+	@JsonbProperty("tableId")
+	private UUID tableId;
 	@JsonbProperty("playerA")
 	private User playerA;
 	@JsonbProperty("playerB")
 	private User playerB;
 	@JsonbProperty("playerInTurn")
 	private User playerInTurn;
-	@JsonbTransient()
+	@JsonbTransient
 	private User rematchPlayer;
 	@JsonbTransient()
 	private User startingPlayer;
@@ -57,10 +57,10 @@ public class Table {
 
 	public Table(User playerA, GameMode gameMode, boolean randomizeStarter) {
 		super();
-		this.id = UUID.randomUUID();
+		this.tableId = UUID.randomUUID();
 		this.playerA = playerA;
 		this.startingPlayer = playerA;
-		this.playerA.setWins(0);
+
 		playerA.setGameToken(GameToken.X);
 		this.randomizeStarter = randomizeStarter;
 		this.playerInTurn = this.playerA;
@@ -113,15 +113,13 @@ public class Table {
 		if (this.isPlayer(player) && this.playerInTurn != null) {
 			this.playerInTurn = null;
 			User opponent = getOpponent(player);
-			opponent.addWin();
 			GameResult gameResult = new GameResult();
-			gameResult.setDraw(false); // deprecated
 			gameResult.setStartInstant(this.gameStartedInstant);
-			gameResult.setPlayer(opponent);
+			gameResult.setWinner(opponent);
 			gameResult.setPlayerA(this.playerA);
 			gameResult.setPlayerB(this.playerB);
 			gameResult.setResultType(GameResultType.WIN_BY_RESIGNATION);
-			gameResult.setGameId(this.id);
+
 		}
 		return null;
 	}
@@ -166,7 +164,7 @@ public class Table {
 		}
 		if (!this.watchers.contains(watcher)) {
 			this.watchers.add(watcher);
-			watcher.setWins(0);
+
 			return true;
 		}
 		return false;
@@ -203,13 +201,10 @@ public class Table {
 			// No winner, is it a draw?
 			if (isDraw()) {
 				result = new GameResult();
-				result.setDraw(true); // setDraw -> Legacy to UI
 				result.setResultType(GameResultType.DRAW);
 				result.setStartInstant(this.gameStartedInstant);
 				result.setGameMode(this.gameMode);
-				result.setGameId(this.getId());
-				this.playerA.addDraw();
-				this.playerB.addDraw();
+
 				// this.playerInTurn = null;
 				initRematchForArtificialPlayer();
 				addPlayersToResult(result);
@@ -221,14 +216,12 @@ public class Table {
 		result.setResultType(GameResultType.WIN_BY_PLAY);
 		result.setGameMode(this.gameMode);
 		result.setStartInstant(this.gameStartedInstant);
-		result.setGameId(this.getId());
+
 		if (playerA.getGameToken() == result.getToken()) {
-			result.setPlayer(playerA);
-			playerA.addWin();
+			result.setWinner(playerA);
 			return result;
 		}
-		result.setPlayer(playerB);
-		playerB.addWin();
+		result.setWinner(playerB);
 		return result;
 	}
 
@@ -291,7 +284,7 @@ public class Table {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id);
+		return Objects.hash(tableId);
 	}
 
 	@Override
@@ -303,7 +296,7 @@ public class Table {
 		if (getClass() != obj.getClass())
 			return false;
 		Table other = (Table) obj;
-		return Objects.equals(id, other.id);
+		return Objects.equals(tableId, other.tableId);
 	}
 
 	public boolean removeWatcherIfExist(User user) {
@@ -314,8 +307,8 @@ public class Table {
 		return playerA;
 	}
 
-	public UUID getId() {
-		return id;
+	public UUID getTableId() {
+		return tableId;
 	}
 
 	public User getPlayerB() {
@@ -345,7 +338,7 @@ public class Table {
 	public void setPlayerB(User playerB) {
 		this.playerB = playerB;
 		playerB.setGameToken(GameToken.O);
-		playerB.setWins(0);
+
 		this.gameStartedInstant = Instant.now();
 	}
 
@@ -355,7 +348,7 @@ public class Table {
 
 	@Override
 	public String toString() {
-		return "TicTacToeTable [id=" + id + ", playerA=" + playerA + ", playerB=" + playerB + "]";
+		return "TicTacToeTable [id=" + tableId + ", playerA=" + playerA + ", playerB=" + playerB + "]";
 	}
 
 	public GameToken[][] getBoard() {

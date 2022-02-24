@@ -80,7 +80,7 @@ public class UserHandler {
 		List<Table> tables = stream.filter(table -> table.getPlayerA() == null).collect(Collectors.toList());
 		for (Table t : tables) {
 			LOGGER.fine("Cleaning table" + t);
-			CommonEndpoint.TABLES.remove(t.getId());
+			CommonEndpoint.TABLES.remove(t.getTableId());
 		}
 	}
 

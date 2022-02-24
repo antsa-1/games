@@ -29,6 +29,7 @@ export interface IWin {
 	toX: number,
 	toY: number,
 	winner: IPlayer,
+	resultType:string
 }
 
 export interface IGameResult {
@@ -80,7 +81,7 @@ export interface ITable {
 	gameMode: IGameMode;
 	board: ISquare[];
 	win?: IWin;
-	id: string;
+	tableId: string;
 	chat: IChat;
 	x: number;
 	y: number;

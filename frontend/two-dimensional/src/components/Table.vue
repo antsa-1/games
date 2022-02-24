@@ -92,8 +92,12 @@ export default defineComponent({
 			}
 			else if (mutation.type === "updateWinner" ){			
 				const win:IWin = state.theTable.win
+				this.removeMouseListener()
 				this.stopReducer()
 				this.drawWinningLine(win)
+			}else if(mutation.type === "setDraw"){
+				this.stopReducer()
+				this.removeMouseListener()
 			}
     	})
 		if(this.theTable.playerInTurn?.name===this.userName){
@@ -353,8 +357,8 @@ export default defineComponent({
 			this.user.webSocket.send(JSON.stringify(obj));	
 		},
 		leaveTable(){
-			const obj ={title:"LEAVE_TABLE", message:this.theTable.id}
-			this.user.webSocket.send(JSON.stringify(obj));
+			const obj ={title:"LEAVE_TABLE", message:this.theTable.tableId}
+			this?.user?.webSocket?.send(JSON.stringify(obj));
 		}
 	},
 	

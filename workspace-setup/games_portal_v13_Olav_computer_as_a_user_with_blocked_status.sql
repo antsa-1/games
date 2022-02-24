@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `active_logins` (
   CONSTRAINT `Player_id_FK` FOREIGN KEY (`Player_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.active_logins: ~12 rows (approximately)
+-- Dumping data for table games_portal.active_logins: ~0 rows (approximately)
 
 -- Dumping structure for table games_portal.available_games
 CREATE TABLE IF NOT EXISTS `available_games` (
@@ -61,24 +61,29 @@ CREATE TABLE IF NOT EXISTS `pending_registrations` (
 
 -- Dumping structure for table games_portal.statistics_games
 CREATE TABLE IF NOT EXISTS `statistics_games` (
-  `game_type` int(11) NOT NULL COMMENT 'TicTacToe=1, C4=2',
-  `playerA_username` varchar(15) NOT NULL,
-  `playerB_username` varchar(15) NOT NULL,
-  `result` int(11) NOT NULL,
   `start_time` timestamp NULL DEFAULT NULL,
   `end_time` timestamp NULL DEFAULT NULL,
-  `game_id` varchar(38) NOT NULL,
-  `playerA_id` varchar(38) DEFAULT NULL,
-  `playerB_id` varchar(38) DEFAULT NULL,
+  `game_type` int(11) NOT NULL COMMENT 'TicTacToe=1, C4=2',
+  `result` int(11) NOT NULL,
+  `playera_username` varchar(15) NOT NULL,
+  `playera_start_ranking` double DEFAULT NULL,
+  `playera_end_ranking` double NOT NULL,
+  `playerb_username` varchar(15) NOT NULL,
+  `playerb_start_ranking` double DEFAULT NULL,
+  `playerb_end_ranking` double NOT NULL,
   `winner_id` varchar(38) DEFAULT NULL,
-  KEY `FK_statistics_users` (`playerA_id`),
-  KEY `FK_statistics_users_2` (`playerB_id`),
+  `game_id` varchar(38) NOT NULL,
+  `playera_id` varchar(38) DEFAULT NULL,
+  `playerb_id` varchar(38) DEFAULT NULL,
+  UNIQUE KEY `game_id` (`game_id`),
   KEY `FK_statistics_users_` (`winner_id`),
+  KEY `FK_statistics_users` (`playera_id`) USING BTREE,
+  KEY `FK_statistics_users_2` (`playerb_id`) USING BTREE,
   CONSTRAINT `FK_statistics_users_` FOREIGN KEY (`winner_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_statistics_users_2` FOREIGN KEY (`playerB_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `FK_statistics_users_2` FOREIGN KEY (`playerb_id`) REFERENCES `users` (`Id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.statistics_games: ~4 rows (approximately)
+-- Dumping data for table games_portal.statistics_games: ~0 rows (approximately)
 
 -- Dumping structure for table games_portal.statistics_game_counts
 CREATE TABLE IF NOT EXISTS `statistics_game_counts` (
@@ -86,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `statistics_game_counts` (
   `tictactoes` bigint(20) unsigned DEFAULT NULL COMMENT 'total finished games'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.statistics_game_counts: ~0 rows (approximately)
+-- Dumping data for table games_portal.statistics_game_counts: ~1 rows (approximately)
 INSERT INTO `statistics_game_counts` (`connectfours`, `tictactoes`) VALUES
 	(0, 0);
 
@@ -110,7 +115,9 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `Uniikki_email` (`Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.users: ~15 rows (approximately)
+-- Dumping data for table games_portal.users: ~3 rows (approximately)
+INSERT INTO `users` (`UserName`, `Id`, `Email`, `Secret`, `Created`, `Modified`, `LastLogin`, `Status`, `Force_password_change`, `tult`, `ranking_tictactoe`, `ranking_connect_four`, `profile_text`) VALUES
+	('Olav_computer', '123e4567-e89b-12d3-a456-426652340000', NULL, '��XP���q�Y�j��.�', '2022-02-21 12:25:51', NULL, NULL, 'BLOCKED', 'false', '9d02518fd9d7cfb73bbc9e24e04a4e23', 1200, 1205, 'Im just a bot!');
 
 -- Dumping structure for trigger games_portal.count_trigger
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';

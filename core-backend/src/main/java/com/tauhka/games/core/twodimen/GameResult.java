@@ -22,13 +22,11 @@ public class GameResult {
 	@JsonbProperty("token")
 	private GameToken token;
 
-	@JsonbProperty("player") // Winner
-	private User player;
+	@JsonbProperty("winner") // Winner
+	private User winner;
 
-	@JsonbProperty("draw")
-	private boolean draw;
-	@JsonbTransient
-	private GameResultType resultType; // Draw is included in GameResult but left for UI atm.
+	@JsonbProperty
+	private GameResultType resultType;
 	@JsonbTransient
 	private User playerA;
 	@JsonbTransient
@@ -41,6 +39,10 @@ public class GameResult {
 	private UUID gameId;
 	@JsonbTransient
 	private GameMode gameMode;
+
+	public GameResult() {
+		this.gameId = UUID.randomUUID();
+	}
 
 	public int getFromX() {
 		return fromX;
@@ -70,24 +72,8 @@ public class GameResult {
 		this.fromY = fromY;
 	}
 
-	public User getPlayer() {
-		return player;
-	}
-
-	public Boolean getDraw() {
-		return draw;
-	}
-
-	public void setDraw(Boolean draw) {
-		this.draw = draw;
-	}
-
 	public UUID getGameId() {
 		return gameId;
-	}
-
-	public void setGameId(UUID gameId) {
-		this.gameId = gameId;
 	}
 
 	public Instant getStartInstant() {
@@ -100,10 +86,6 @@ public class GameResult {
 
 	public Instant getEndInstant() {
 		return endInstant;
-	}
-
-	public void setPlayer(User player) {
-		this.player = player;
 	}
 
 	public void setToX(int toX) {
@@ -150,10 +132,18 @@ public class GameResult {
 		this.gameMode = gameMode;
 	}
 
+	public User getWinner() {
+		return winner;
+	}
+
+	public void setWinner(User winner) {
+		this.winner = winner;
+	}
+
 	@Override
 	public String toString() {
-		return "GameResult [fromX=" + fromX + ", fromY=" + fromY + ", toX=" + toX + ", toY=" + toY + ", token=" + token + ", player=" + player + ", draw=" + draw + ", resultType=" + resultType + ", playerA=" + playerA + ", playerB="
-				+ playerB + ", endInstant=" + endInstant + ", startInstant=" + startInstant + ", gameMode=" + gameMode + "]";
+		return "GameResult [fromX=" + fromX + ", fromY=" + fromY + ", toX=" + toX + ", toY=" + toY + ", token=" + token + ", winner=" + winner + ", resultType=" + resultType + ", playerA=" + playerA + ", playerB=" + playerB
+				+ ", endInstant=" + endInstant + ", startInstant=" + startInstant + ", gameId=" + gameId + ", gameMode=" + gameMode + "]";
 	}
 
 }

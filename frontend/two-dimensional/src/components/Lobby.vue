@@ -320,8 +320,9 @@ export default defineComponent({
 						break;
 					case "GAME_END":
 							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}							
-							this.$store.dispatch("move", lastSquare)							
-							if(data.win.draw){
+							this.$store.dispatch("move", lastSquare)
+							console.log("RES:"+JSON.stringify(data.win))						
+							if(data.win.resultType==="DRAW"){
 								const gameResult:IGameResult={table:data.table,win:data.win}
 								
 								this.$store.dispatch("setDraw",gameResult);
@@ -330,7 +331,7 @@ export default defineComponent({
 							{
 								const updateScoreMessage:IWinMessage =
 								{
-									winner:data.win.player.name,
+									winner:data.win.winner.name,
 									reason: IWinTitle.GAME,
 									winsA:data.table.playerA.wins,
 									winsB:data.table.playerB.wins,
@@ -342,7 +343,8 @@ export default defineComponent({
 									fromY:data.win.fromY,
 									toX:data.win.toX,
 									toY:data.win.toY,
-									winner:{name:data.win.player.name},	
+									resultType:data.win.resultType,
+									winner:{name:data.win.winner.name},	
 								}							
 								this.$store.dispatch("updateWinner", win);
 							}		
@@ -400,7 +402,7 @@ export default defineComponent({
 		},
 		play(table:ITable){
 			
-			const obj = { title: "JOIN_TABLE", message:table.id};
+			const obj = { title: "JOIN_TABLE", message:table.tableId};
 			this.user.webSocket.send(JSON.stringify(obj));
 		},
 		playButtonVisible(table:ITable){
@@ -414,7 +416,7 @@ export default defineComponent({
 		},
 		watchTable(table:ITable){
 			
-			const obj = { title: "WATCH",message:table.id};
+			const obj = { title: "WATCH",message:table.tableId};
 			this.user.webSocket.send(JSON.stringify(obj));
 		},
 		openProfile(userName:string){
