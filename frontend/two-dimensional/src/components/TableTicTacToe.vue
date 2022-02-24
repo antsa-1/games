@@ -56,7 +56,7 @@ import Chat from "./Chat.vue";
 
 export default defineComponent({
 	components: { Chat },
-	name: "Table",
+	name: "TableTicTacToe",
 	mixins: [loginMixin],
 	props:["watch"],
 	data(){

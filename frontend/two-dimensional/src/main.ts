@@ -6,7 +6,7 @@ import TicTacToe from './TicTacToe.vue'
 import User from './components/User.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
-import Table from './components/Table.vue'
+import TableTicTacToe from './components/TableTicTacToe.vue'
 import Profile from './components/Profile.vue'
 import TopLists from './components/TopLists.vue'
 import TableConnectFour from './components/TableConnectFour.vue'
@@ -80,8 +80,8 @@ const routes: RouteRecordRaw[] = [
     },
     {
         path: '/portal/table/:watch?',
-        component: Table,
-        name: "Table",
+        component: TableTicTacToe,
+        name: "TableTicTacToe",
         props: true,
         beforeEnter: (to, from, next) => {
             if (!store.state.user || !store.state.theTable) {
