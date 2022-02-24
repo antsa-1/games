@@ -45,13 +45,12 @@ public class StatisticsEJB { // To core package?!?!?
 			throw new IllegalArgumentException("No statistics for database:" + gameStats);// Tells which one was null
 		}
 		if (isBothPlayersLoggedIn(gameStats)) {
-			RankingCalculator.updateRankings(gameStats.getGameResult());			
-			insertGameResultToDatabase(gameStats); // DB trigger connected to update game counts
+			RankingCalculator.updateRankings(gameStats.getGameResult());
+			insertGameResultToDatabase(gameStats);
 			updatePlayerRankingsToDatabase(gameStats);
 		} else if (isOneRegisteredPlayer(gameStats)) {
-			insertGameResultToDatabase(gameStats); // DB trigger connected to update game counts
+			insertGameResultToDatabase(gameStats);
 		} else {
-			// Computer is playing either loggedIn player or anonym
 			updateGameCount(gameStats);
 		}
 	}
