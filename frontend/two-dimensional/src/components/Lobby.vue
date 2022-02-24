@@ -277,7 +277,7 @@ export default defineComponent({
 									this.$router.push({ name: 'TableConnectFour', id:data.table.id})
 									return
 								}
-								this.$router.push({ name: 'Table', id:data.table.id})
+								this.$router.push({ name: 'TableTicTacToe', id:data.table.id})
 							})
 						}						
 						break;
@@ -294,7 +294,7 @@ export default defineComponent({
 								this.$router.push({ name: 'TableConnectFour', id:data.table.id,params: { watch: "1" }})
 									return
 							}
-								this.$router.push({ name: 'Table', id:data.table.id,params: { watch: "1" }})
+								this.$router.push({ name: 'TableTicTacToe', id:data.table.id,params: { watch: "1" }})
 						})		
 						break;
 					case "ADD_WATCHER":						
