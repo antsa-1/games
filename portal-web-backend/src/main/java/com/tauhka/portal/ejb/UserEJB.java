@@ -37,13 +37,13 @@ public class UserEJB {
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource portalDatasource;
 
-	private static final String USERNAME_QUERY = "select UserName,Status,Force_password_change,id,tult,secret from users where username=?";
-	private static final String ACTIVE_LOGIN_INSERT = "insert into active_logins(Login_id,Player_id, User_name) values (?,?,?) ON DUPLICATE KEY UPDATE Login_id=?";
-	private static final String REGISTER_INSERT = "insert into users(UserName,id,Email,Secret,tult) values (?,?,?,?,?)";
-	private static final String REMOVE_ACTIVE_LOGIN = "delete from active_logins where Login_id= (?)";
-	private static final String TOP_TICTACTOE_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_tictactoe FROM users ORDER BY ranking_tictactoe DESC LIMIT 20;";
-	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT UserName,ranking_connect_four FROM users ORDER BY ranking_connect_four DESC LIMIT 20;";
-	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes FROM statistics_game_counts";
+	private static final String USERNAME_QUERY = "select name,status,force_password_change,id,salt,password from user where name=?";
+	private static final String ACTIVE_LOGIN_INSERT = "insert into login(id,player_id, user_name) values (?,?,?) ON DUPLICATE KEY UPDATE id=?";
+	private static final String REGISTER_INSERT = "insert into user(name,id,email,password,salt) values (?,?,?,?,?)";
+	private static final String REMOVE_ACTIVE_LOGIN = "delete from login where id= (?)";
+	private static final String TOP_TICTACTOE_PLAYERS_SQL = "SELECT DISTINCT name,ranking_tictactoe FROM user ORDER BY ranking_tictactoe DESC LIMIT 20;";
+	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT name,ranking_connectfour FROM user ORDER BY ranking_connectfour DESC LIMIT 20;";
+	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes FROM game_counter";
 
 	public LoginOutput login(String name, String password) {
 		LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB login:");
@@ -63,13 +63,13 @@ public class UserEJB {
 			stmt.setString(1, name);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {
-				String namee = rs.getString("UserName");
+				String namee = rs.getString("name");
 				String status = rs.getString("Status");
 				String userId = rs.getString("id");
-				String tult = rs.getString("tult");
-				String secret = rs.getString("Secret");
+				String salt = rs.getString("salt");
+				String secret = rs.getString("password");
 				PasswordHash passwordHash = new PasswordHash();
-				if (!passwordHash.verifyHash(password, tult, secret)) {
+				if (!passwordHash.verifyHash(password, salt, secret)) {
 					throw new IllegalArgumentException("UserEJB password failure for:" + name);
 				}
 				boolean pwChange = rs.getBoolean("Force_passWord_change");
@@ -187,7 +187,7 @@ public class UserEJB {
 			topLists.setFetchInstant(Instant.now());
 			while (rs.next()) {
 				TopPlayer t = new TopPlayer();
-				t.setNickname(rs.getString("UserName"));
+				t.setNickname(rs.getString("name"));
 				t.setRankingTicTacToe((int) rs.getDouble("ranking_tictactoe"));
 				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
 				topLists.addTicTacToePlayer(t);
@@ -199,8 +199,8 @@ public class UserEJB {
 
 			while (rs2.next()) {
 				TopPlayer t = new TopPlayer();
-				t.setNickname(rs2.getString("UserName"));
-				t.setRankingConnectFour((int) rs2.getDouble("ranking_connect_four"));
+				t.setNickname(rs2.getString("name"));
+				t.setRankingConnectFour((int) rs2.getDouble("ranking_connectfour"));
 				topLists.addConnectFourPlayer(t);
 				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
 			}

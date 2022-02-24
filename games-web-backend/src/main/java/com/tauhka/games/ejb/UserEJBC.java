@@ -23,7 +23,7 @@ public class UserEJBC {
 	private static final Logger LOGGER = Logger.getLogger(UserEJBC.class.getName());
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource gamesDataSource;
-	private static final String WEBSOCKET_AUTHENTICATION_QUEURY = "SELECT  a.Player_id, b.UserName,b.id,b.ranking_tictactoe,b.ranking_connect_four FROM  active_logins a,  users b WHERE a.Login_id =? AND a.Player_id= b.id";
+	private static final String WEBSOCKET_AUTHENTICATION_QUEURY = "SELECT  a.player_id, b.name,b.id,b.ranking_tictactoe,b.ranking_connectfour FROM  login a,  user b WHERE a.id =? AND a.player_id= b.id";
 
 	public User verifyWebsocketToken(String activeLoginToken) {
 		LOGGER.info("UserEJBA verifyWebsocketToken" + activeLoginToken);
@@ -39,12 +39,12 @@ public class UserEJBC {
 			stmt.setString(1, token.toString());
 			ResultSet res = stmt.executeQuery();
 			if (res.next()) {
-				String namee = res.getString("UserName");
-				UUID id = UUID.fromString(res.getString("Player_id"));
+				String namee = res.getString("name");
+				UUID id = UUID.fromString(res.getString("player_id"));
 				User user = new User();
 				user.setName(namee);
 				user.setId(id);
-				user.setRankingConnectFour(res.getDouble("ranking_connect_four"));
+				user.setRankingConnectFour(res.getDouble("ranking_connectfour"));
 				user.setRankingTictactoe(res.getDouble("ranking_tictactoe"));
 				return user;
 			}

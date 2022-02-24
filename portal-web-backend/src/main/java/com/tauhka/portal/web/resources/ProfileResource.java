@@ -3,7 +3,7 @@ package com.tauhka.portal.web.resources;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.tauhka.portal.profile.UserProfile;
+import com.tauhka.portal.profile.Users;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
@@ -36,13 +36,13 @@ public class ProfileResource {
 	public Response getProfile(@PathParam("username") String username) {
 		LOGGER.entering(ProfileResource.class.getName(), "getProfile");
 		try {
-			UserProfile userProfile = em.find(UserProfile.class, username);
+			Users userProfile = em.find(Users.class, username);
 			if (userProfile == null) {
-				Response.status(204).build();
+				return Response.noContent().build();
 			}
 			Jsonb jsonb = JsonbBuilder.create();
 			userProfile.setMemberSince(userProfile.getCreated().toInstant());
-			String userProfileInJSON = jsonb.toJson(userProfile, UserProfile.class);
+			String userProfileInJSON = jsonb.toJson(userProfile, Users.class);
 			return Response.ok(userProfileInJSON).build();
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "TopListsResource failed", e);

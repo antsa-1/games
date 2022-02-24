@@ -24,13 +24,15 @@ import jakarta.validation.constraints.Max;
 
 // TODO THIS CLASS IS MISSING validations to prevent sql-injections/XSS and such.. TODO 
 @Entity
-@Table(name = "Users")
+@Table(name = "User")
 
-public class UserProfile implements Serializable {
+public class Users implements Serializable {
 	private static final long serialVersionUID = 1L;
+	@Column(name = "id")
+	private String id;
 
 	@Id
-	@Column(name = "UserName")
+	@Column(name = "name")
 	private String userName;
 
 	@Column(name = "profile_text")
@@ -38,7 +40,7 @@ public class UserProfile implements Serializable {
 	@Max(value = 250, message = "Profiletext longer than expected")
 	private String profileText;
 
-	@Column(name = "Created")
+	@Column(name = "created")
 	@JsonbTransient
 	private Timestamp created; // Timestamp doesn't work well with JSON-conversion
 
