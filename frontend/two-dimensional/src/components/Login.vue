@@ -4,7 +4,7 @@
 		
 		<div class="row ">
 			<div class="col-md-6 offset-md-3 alert alert-info">
-				Hi {{userName}}
+				Welcome {{userName}}
 				<br>
 				
 			</div>

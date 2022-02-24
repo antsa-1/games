@@ -37,7 +37,7 @@
 	<div v-if="registerDone" class="row" >
 		<div class="col alert alert-success">
 			Registration for nickname {{usrNameTemp}} is complete. You can now 
-			<router-link :to="{ name: 'User' }">
+			<router-link :to="{ name: 'Login' }">
                        login
             </router-link>
 		</div>

@@ -3,7 +3,7 @@
  */
 import { createApp } from 'vue'
 import TicTacToe from './TicTacToe.vue'
-import User from './components/User.vue'
+import Login from './components/Login.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
 import TableTicTacToe from './components/TableTicTacToe.vue'
@@ -43,9 +43,9 @@ const routes: RouteRecordRaw[] = [
     },
 
     {
-        path: '/portal/user',
-        component: User,
-        name: "User",
+        path: '/portal/login',
+        component: Login,
+        name: "Login",
         props: true,
     },
     {
