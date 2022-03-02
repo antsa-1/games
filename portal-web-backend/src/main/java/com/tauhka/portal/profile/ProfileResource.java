@@ -44,6 +44,6 @@ public class ProfileResource {
 		} finally {
 			LOGGER.exiting(ProfileResource.class.getName(), "getProfile");
 		}
-		return Response.serverError().build();
+		return Response.status(400).build();
 	}
 }
