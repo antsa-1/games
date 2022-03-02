@@ -27,7 +27,7 @@ import jakarta.enterprise.event.ObservesAsync;
 public class StatisticsEJB { // To core package?!?!?
 
 	private static final Logger LOGGER = Logger.getLogger(StatisticsEJB.class.getName());
-	private static final String INSERT_GAME_RESULT_SQL = "INSERT INTO game (playera_id, playerb_id, winner_id, game_id, game_type,start_time,end_time, result,playera_username,playerb_username,playera_start_ranking,playera_end_ranking,playerb_start_ranking,playerb_end_ranking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?);";
+	private static final String INSERT_GAME_RESULT_SQL = "INSERT INTO game (playera_id, playerb_id, winner_id, game_id, game_type,start_time,end_time, result,playera_username,playerb_username,playera_start_ranking,playera_end_ranking,playerb_start_ranking,playerb_end_ranking,winner_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?);";
 	private static final String UPDATE_TICTACTOE_GAMES_COUNT_SQL = "UPDATE game_counter SET tictactoes= tictactoes+1";
 	private static final String UPDATE_CONNECT_FOUR_GAMES_COUNT_SQL = "UPDATE game_counter SET connectfours= connectfours+1";
 	private static final String UPDATE_TICTACTOE_PLAYER_RANKINGS_SQL = "UPDATE user SET ranking_tictactoe = CASE WHEN id =? THEN ? WHEN id = ? THEN ? END WHERE id IN (?,?)";
@@ -174,6 +174,7 @@ public class StatisticsEJB { // To core package?!?!?
 			stmt.setDouble(12, endRankingA);
 			stmt.setDouble(13, userB.getInitialCalculationsRank());
 			stmt.setDouble(14, endRankingB);
+			stmt.setString(15, res.getWinner() != null ? res.getWinner().getName() : null);
 			int dbRes = stmt.executeUpdate();
 			if (dbRes > 0) {
 				LOGGER.info(LOG_PREFIX_GAMES + "StatisticsEJB inserted new game result:" + gameEvent);
