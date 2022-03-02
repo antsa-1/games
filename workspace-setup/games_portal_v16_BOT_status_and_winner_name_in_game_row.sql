@@ -35,16 +35,17 @@ CREATE TABLE IF NOT EXISTS `game` (
   `game_id` varchar(38) NOT NULL,
   `playera_id` varchar(38) DEFAULT NULL,
   `playerb_id` varchar(38) DEFAULT NULL,
+  `winner_username` varchar(15) DEFAULT NULL,
   UNIQUE KEY `game_id` (`game_id`),
   KEY `FK_statistics_games_users` (`playera_id`),
   KEY `FK_statistics_games_users_2` (`playerb_id`),
   KEY `FK_statistics_games_users_3` (`winner_id`),
-  CONSTRAINT `FK_statistics_games_users` FOREIGN KEY (`playera_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_statistics_games_users_2` FOREIGN KEY (`playerb_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `FK_statistics_games_users_3` FOREIGN KEY (`winner_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `FK_game_playera_id` FOREIGN KEY (`playera_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_game_playerb_id` FOREIGN KEY (`playerb_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `FK_game_winner_id` FOREIGN KEY (`winner_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.game: ~7 rows (approximately)
+-- Dumping data for table games_portal.game: ~16 rows (approximately)
 
 -- Dumping structure for table games_portal.game_counter
 CREATE TABLE IF NOT EXISTS `game_counter` (
@@ -68,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `login` (
   CONSTRAINT `Player_id_FK` FOREIGN KEY (`player_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.login: ~0 rows (approximately)
+-- Dumping data for table games_portal.login: ~3 rows (approximately)
 
 -- Dumping structure for table games_portal.user
 CREATE TABLE IF NOT EXISTS `user` (
@@ -79,7 +80,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `created` datetime NOT NULL DEFAULT current_timestamp(),
   `modified` datetime DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
-  `status` enum('ACTIVE','PASSIVE','BLOCKED') NOT NULL DEFAULT 'ACTIVE',
+  `status` enum('ACTIVE','INACTIVE','BLOCKED','BOT') NOT NULL DEFAULT 'ACTIVE',
   `force_password_change` enum('true','false') NOT NULL DEFAULT 'false',
   `salt` varchar(50) NOT NULL,
   `ranking_tictactoe` double NOT NULL DEFAULT 1000,
@@ -90,9 +91,9 @@ CREATE TABLE IF NOT EXISTS `user` (
   UNIQUE KEY `Uniikki_email` (`email`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table games_portal.user: ~7 rows (approximately)
+-- Dumping data for table games_portal.user: ~4 rows (approximately)
 INSERT INTO `user` (`name`, `id`, `email`, `password`, `created`, `modified`, `last_login`, `status`, `force_password_change`, `salt`, `ranking_tictactoe`, `ranking_connectfour`, `profile_text`) VALUES
-	('Olav_computer', '123e4567-e89b-12d3-a456-426652340000', NULL, '��XP���q�Y�j��.�', '2022-02-21 12:25:51', NULL, NULL, 'BLOCKED', 'false', '9d02518fd9d7cfb73bbc9e24e04a4e23', 1200, 1205, 'Im just a bot!');
+	('Olav_computer', '123e4567-e89b-12d3-a456-426652340000', NULL, '��XP���q�Y�j��.�', '2022-02-21 12:25:51', NULL, NULL, 'BOT', 'false', '9d02518fd9d7cfb73bbc9e24e04a4e23', 1200, 1205, 'I am just a bot!');
 
 -- Dumping structure for trigger games_portal.count_trigger
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION';
