@@ -31,7 +31,7 @@
       	TestWhileIdle true
       	TimeBetweenEvictionRuns 1 minute
       	MaxWaitTime 0 seconds
-		validationQuery="SELECT 1"
+		validationQuery=SELECT 1
 	    validationQueryTimeout=1000
   	</Resource>
 </resources>

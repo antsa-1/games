@@ -53,6 +53,11 @@ public final class GameMode {
 		return this.gameNumber == 2;
 	}
 
+	public static String getBoardDescription(int gameMode) {
+		GameMode mode = GameMode.getGameMode(gameMode);
+		return mode.getX() + "x" + mode.getY() + " /" + mode.getRequiredConnections();
+	}
+
 	public static GameMode getGameMode(int id) {
 		if (id < 1 || id > 100) {
 			throw new IllegalArgumentException("Wrong gameMode:" + id);

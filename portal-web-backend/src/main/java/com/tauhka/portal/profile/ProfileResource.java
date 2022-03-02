@@ -1,15 +1,11 @@
-package com.tauhka.portal.web.resources;
+package com.tauhka.portal.profile;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.tauhka.portal.profile.Users;
-
+import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.PersistenceContextType;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -27,8 +23,8 @@ import jakarta.ws.rs.core.Response;
 public class ProfileResource {
 	private static final Logger LOGGER = Logger.getLogger(ProfileResource.class.getName());
 
-	@PersistenceContext(unitName = "profile-persistence-unit", type = PersistenceContextType.TRANSACTION)
-	private EntityManager em;
+	@Inject
+	private ProfileService profileService;
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -36,20 +32,18 @@ public class ProfileResource {
 	public Response getProfile(@PathParam("username") String username) {
 		LOGGER.entering(ProfileResource.class.getName(), "getProfile");
 		try {
-			Users userProfile = em.find(Users.class, username);
+			Profile userProfile = profileService.fetchProfile(username);
 			if (userProfile == null) {
 				return Response.noContent().build();
 			}
 			Jsonb jsonb = JsonbBuilder.create();
-			userProfile.setMemberSince(userProfile.getCreated().toInstant());
-			String userProfileInJSON = jsonb.toJson(userProfile, Users.class);
+			String userProfileInJSON = jsonb.toJson(userProfile, User.class);
 			return Response.ok(userProfileInJSON).build();
 		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "TopListsResource failed", e);
+			LOGGER.log(Level.SEVERE, "ProfileResource fetch failed", e);
 		} finally {
 			LOGGER.exiting(ProfileResource.class.getName(), "getProfile");
 		}
-		LOGGER.exiting("TopListsResource", " getTopPlayers");
 		return Response.serverError().build();
 	}
 }

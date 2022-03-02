@@ -5,7 +5,7 @@
 
 	<groupId>com.tauhka</groupId>
 	<artifactId>portal-web</artifactId>
-	<version>1.0.12</version>
+	<version>1.0.13</version>
 	<packaging>war</packaging>
 
 	<name>portal</name>
@@ -18,7 +18,11 @@
 	</properties>
 
 	<dependencies>
-
+		<dependency>
+			<groupId>com.tauhka</groupId>
+			<artifactId>games-core</artifactId>
+			<version>1.0.13</version>
+		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
@@ -44,11 +48,7 @@
 			<version>3.0.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/jakarta.annotation/jakarta.annotation-api -->
-		<dependency>
-			<groupId>jakarta.annotation</groupId>
-			<artifactId>jakarta.annotation-api</artifactId>
-			<version>2.0.0</version>
-		</dependency>
+
 
 		<!-- https://mvnrepository.com/artifact/jakarta.inject/jakarta.inject-api -->
 		<dependency>
@@ -63,11 +63,7 @@
 
 		</dependency>
 
-		<dependency>
-			<groupId>org.mariadb.jdbc</groupId>
-			<artifactId>mariadb-java-client</artifactId>
-			<version>2.7.5</version>
-		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/jakarta.enterprise/jakarta.enterprise.cdi-api -->
 		<dependency>
 			<groupId>jakarta.enterprise</groupId>
@@ -86,25 +82,24 @@
 			<artifactId>yasson</artifactId>
 			<version>2.0.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core-jakarta</artifactId>
+			<version>5.6.5.Final</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/jakarta.persistence/jakarta.persistence-api -->
-		<dependency>
-			<groupId>jakarta.persistence</groupId>
-			<artifactId>jakarta.persistence-api</artifactId>
-			<version>3.0.0</version>
-		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.eclipse.persistence/eclipselink -->
+		<!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-core-jakarta -->
+
+		<!-- https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client -->
 		<dependency>
-			<groupId>org.eclipse.persistence</groupId>
-			<artifactId>eclipselink</artifactId>
-			<version>3.0.2</version>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<version>3.0.3</version>
 		</dependency>
 
-		<dependency>
-			<groupId>jakarta.validation</groupId>
-			<artifactId>jakarta.validation-api</artifactId>
-			<version>3.0.1</version>
-		</dependency>
 
 	</dependencies>
 

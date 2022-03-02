@@ -18,8 +18,8 @@ module tauhka.portal {
 	requires jakarta.persistence;
 	requires jakarta.servlet;
 	requires jakarta.transaction;
-	requires jakarta.validation;
-	requires jakarta.ws.rs;
-	requires java.logging;
-	requires java.sql;
+	requires transitive java.sql;
+	requires transitive jakarta.ws.rs;
+	requires tauhka.core;
+
 }
