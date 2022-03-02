@@ -3,6 +3,8 @@ package com.tauhka.portal.profile;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.tauhka.portal.util.Validators;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -24,19 +26,19 @@ public class ProfileService {
 	@PersistenceContext
 	private EntityManager em;
 
+	// 03.02.2022 NOTE: Username/profiletext(still todo), can contain XSS, SQLi, Html-injections.
+	// Mitigations for SQLi/XSS/HTML-injections -> prepared statements, VUE 3 character escaping
+	// https://vuejs.org/guide/best-practices/security.html#potential-dangers
 	public Profile fetchProfile(String userName) {
-		if (userName.isBlank()) {
-			LOGGER.info("ProfileService no userName");
-			return null;
-		}
-		String userId = getUserId(userName);
+		Validators.validateUserName(userName);
+		String userId = fetchUserId(userName);
 		if (userId == null) {
 			LOGGER.info("ProfileService no userId for" + userName);
 			return null;
 		}
 		User user = em.find(User.class, userId);
-		List<Game> tictactoes = fetchGames(userId, 0, 19, Integer.MIN_VALUE, Integer.MAX_VALUE); // 0-19 reserved for tictactoe types
-		List<Game> connectFours = fetchGames(userId, 20, 30, Integer.MIN_VALUE, Integer.MAX_VALUE);// 20-30 reserved for connectfours types
+		List<Game> tictactoes = fetchGames(userId, 0, 19, Integer.MIN_VALUE, Integer.MAX_VALUE); // 0-19 reserved for tictactoe types boardSize etc.
+		List<Game> connectFours = fetchGames(userId, 20, 30, Integer.MIN_VALUE, Integer.MAX_VALUE);// 20-30 reserved for connectfours types, boardSize etc.
 		user.setTicatactoes(tictactoes);
 		user.setConnectFours(connectFours);
 		return new Profile(user);
@@ -59,7 +61,7 @@ public class ProfileService {
 
 	}
 
-	private String getUserId(String userName) {
+	private String fetchUserId(String userName) {
 		try {
 			String id = (String) em.createNativeQuery("select id from user where name = :name and status in ('ACTIVE','BOT')").setParameter("name", userName).getSingleResult();
 			return id;
