@@ -24,11 +24,11 @@ public class CorsFilter implements Filter {
 		}
 
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
-//		if (ENVIRONMENT.equalsIgnoreCase(Constants.ENVIRONMENT_PRODUCTION)) {
-//			// No CORS settings required in prod -> same domain
-//			chain.doFilter(request, servletResponse);
-//			return;
-//		}
+		if (ENVIRONMENT.equalsIgnoreCase(Constants.ENVIRONMENT_PRODUCTION)) {
+			// No CORS settings required in prod -> same domain
+			chain.doFilter(request, servletResponse);
+			return;
+		}
 		((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Origin", " http://localhost:8080"); // For localhost development with different 8080 port.
 		((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Methods", "GET, OPTIONS, POST");
 		((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Headers", "content-type, authorization");

@@ -19,7 +19,7 @@ public class SecurityFilter implements Filter {
 		HttpServletResponse resp = (HttpServletResponse) servletResponse;
 		resp.addHeader("X-Frame-Options", "DENY");
 		resp.addHeader("X-Content-Type-Options", "nosniff");
-		resp.addHeader("Content-Security-Policy", "default-src 'self'");
+//		resp.addHeader("Content-Security-Policy", "default-src 'self'"); 
 		resp.addHeader("x-xss-protection", "1; mode=block");
 
 		chain.doFilter(request, servletResponse);

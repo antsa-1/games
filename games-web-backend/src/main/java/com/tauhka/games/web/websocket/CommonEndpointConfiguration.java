@@ -17,6 +17,12 @@ public class CommonEndpointConfiguration extends ServerEndpointConfig.Configurat
 		if (ENVIRONMENT == null) {
 			throw new IllegalArgumentException("Environment is missing");
 		}
-		return true;
+		if (originHeaderValue == null) {
+			return false;
+		}
+		if (ENVIRONMENT.equalsIgnoreCase(Constants.ENVIRONMENT_PRODUCTION)) {
+			return originHeaderValue.equals(Constants.WEBSOCKET_PRODUCTION_ORIGIN);
+		}
+		return originHeaderValue.equals(Constants.WEBSOCKET_LOCALHOST_ORIGIN);
 	}
 }
