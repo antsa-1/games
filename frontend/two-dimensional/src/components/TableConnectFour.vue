@@ -338,7 +338,7 @@ export default defineComponent({
     },
     leaveTable() {
       const obj = { title: "LEAVE_TABLE", message: this.theTable.tableId };
-      this.user.webSocket.send(JSON.stringify(obj));
+      this?.user?.webSocket?.send(JSON.stringify(obj));
     },
   },
 });

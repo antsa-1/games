@@ -13,10 +13,10 @@
 						</svg>
 					</div> 	
 					<i v-if="user.rankingConnectFour>0" class="bi bi-star float-end tooltipselector" title="ConnectFour ranking">
-						&nbsp;{{user.rankingConnectFour}}&nbsp;
+						&nbsp;{{fixVal(user.rankingConnectFour)}}&nbsp;
 					</i>
 					<i v-if="user.rankingTictactoe>0" class="bi bi-suit-diamond float-end tooltipselector" title="TicTacToe ranking">
-						&nbsp;{{user.rankingTictactoe}}&nbsp;
+						&nbsp;{{fixVal(user.rankingTictactoe)}}&nbsp;
 					</i>
 				</li>
 			</ul>
@@ -137,6 +137,7 @@
 import { defineComponent } from "vue";
 import { IGameMode, IGameToken, ITable, IUser,ISquare, IChatMessage, IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces";
 import { loginMixin } from "../mixins/mixins";
+import { utilsMixin } from "../mixins/utilsmixin";
 import { useRoute } from "vue-router";
 import { Tooltip } from 'bootstrap/dist/js/bootstrap.esm.min.js'
 //import * as bootstrap from 'bootstrap';
@@ -146,7 +147,7 @@ export default defineComponent({
 	
 	name: "Lobby",
 
-	mixins: [loginMixin],
+	mixins: [loginMixin,utilsMixin],
 
 	data() {
 		return {		
@@ -419,13 +420,9 @@ export default defineComponent({
 			const obj = { title: "WATCH",message:table.tableId};
 			this.user.webSocket.send(JSON.stringify(obj));
 		},
-		openProfile(userName:string){
-			if(!userName.startsWith("Anonym")){
-				console.log("Profiili")
-				
-				this.$router.push({ name: 'Profile', params: { userName: userName } })
-				let route = this.$router.resolve({ path: "/profile" });
-				//window.open(route.href);
+		openProfile(selectedName:string){
+			if(!selectedName.startsWith("Anonym")){
+				this.$router.push({ name: 'Profile', params: { selectedName: selectedName } })	
 			}
 		}
 	}
@@ -433,7 +430,7 @@ export default defineComponent({
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
 .games-profile-link{
 	cursor:pointer
 }

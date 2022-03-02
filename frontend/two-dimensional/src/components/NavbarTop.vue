@@ -41,7 +41,7 @@
               </a>            
               <ul class="dropdown-menu ms-auto" aria-labelledby="navbarDropdown">
                   <li v-if="authenticated">                    
-                      <router-link class="dropdown-item" :to="{ name: 'Profile',params: { userName: userName } }" >Show profile</router-link>                     
+                      <router-link class="dropdown-item" :to="{ name: 'Profile',params: { selectedName: userName } }" >Show profile</router-link>                     
                   </li>
                   <li v-if="authenticated">                    
                       <router-link @click="logout" class="dropdown-item" :to="{ name: 'Login' }">Logout</router-link>

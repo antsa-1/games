@@ -40,7 +40,7 @@ import { defineComponent } from "vue";
 import { loginMixin } from "../mixins/mixins";
 import { IUser } from "../interfaces";
 export default defineComponent({
-	name: "User",
+	name: "Login",
 	mixins: [loginMixin],
 	props: {
 		token: String

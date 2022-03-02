@@ -38,5 +38,5 @@ export const loginMixin = {
 		logout() {
 			return this.$store.dispatch("logout", this.$store.getters.user);			
 		}
-	}
+	},
 };

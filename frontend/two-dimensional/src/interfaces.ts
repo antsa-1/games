@@ -120,10 +120,28 @@ export interface IPlayerStats {
 	rankingTicTacToe: number,
 }
 
-export interface IProfile {
+export interface IProfile extends IFetchResult {
 	stats: IPlayerStats,
 	text: string,
-	memberSince:string
+	memberSince:string,
+	tictactoes:IGame[]
+	connectFours:IGame[]
+}
+export interface IFetchResult{
+	status:number,
+	fetchText:string
+}
+export interface IGame {
+	startInstant: string,
+	endInstant: string,
+	gameType:number,
+	result:number,
+	playerAName:string,
+	playerBUName:string,
+	playerAStartRanking:number,
+	playerBStartRanking:number,
+	playerAEndRanking:number,
+	playerBEndRanking:number,
 }
 
 export interface ISettings {
@@ -131,3 +149,11 @@ export interface ISettings {
 	newTicTacToeTableSound: boolean,
 	newConnectFourTableSound: boolean
 }
+
+export enum GameResult {
+	WIN_BY_PLAY = 1,
+	WIN_BY_TIME,
+	WIN_BY_RESIGNATION,
+	WIN_BY_DISCONNECT,
+	DRAW
+  }

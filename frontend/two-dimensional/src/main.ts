@@ -105,7 +105,7 @@ const routes: RouteRecordRaw[] = [
         }
     },
     {
-        path: '/portal/user/:userName/profile',
+        path: '/portal/user/:selectedName/profile',
         component: Profile,
         name: "Profile",
         props: true,      
