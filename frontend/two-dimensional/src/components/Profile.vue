@@ -1,6 +1,6 @@
 <template>
 
-	<div v-if="userName && memberSince" class="row">
+	<div v-if="memberSince" class="row">
 		<div class="row col-md-6 offset-md-3 alert alert-info text-start">
 			<b>{{selectedName}}  </b>
 			<br>
