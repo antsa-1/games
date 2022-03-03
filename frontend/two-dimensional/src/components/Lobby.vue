@@ -289,7 +289,7 @@ export default defineComponent({
 						this.$store.dispatch("changeTurn", data.table.playerInTurn)
 						break;
 					case "WATCH":
-							this.$router.push({ name: 'Table', params: { watch: "1" } })
+							
 						this.$store.dispatch("selectTable", data.table).then(() => {
 							if(data.table.gameMode.gameNumber===2){									
 								this.$router.push({ name: 'TableConnectFour', id:data.table.id,params: { watch: "1" }})
