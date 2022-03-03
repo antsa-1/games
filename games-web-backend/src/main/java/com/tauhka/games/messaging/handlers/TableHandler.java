@@ -49,7 +49,6 @@ public class TableHandler {
 		} else {
 			table = new Table(endpoint.getUser(), gameMode, false);
 		}
-
 		CommonEndpoint.TABLES.put(table.getTableId(), table);
 		if (message.getComputer()) {
 			ArtificialUser user = new ArtificialUser();
@@ -80,7 +79,11 @@ public class TableHandler {
 		message.setTitle(MessageTitle.LEAVE_TABLE);
 		message.setTable(table);
 		User user = endpoint.getUser();
-		if (table.removePlayerIfExist(user) || table.removeWatcherIfExist(user)) {
+		if (table.removePlayerIfExist(user)) {
+			message.setWho(endpoint.getUser());
+			CommonEndpoint.TABLES.remove(table.getTableId());
+			return message;
+		} else if (table.removeWatcherIfExist(user)) {
 			message.setWho(endpoint.getUser());
 			return message;
 		}
