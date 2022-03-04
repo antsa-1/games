@@ -1,9 +1,11 @@
 
-The site with two games, tic-tac-toe and connect four, is currently running @ http://35.217.7.146/portal/index.html 
+Site is currently running @ http://35.217.7.146/portal/index.html with two games, tic-tac-toe and connect four.
+<br><br>
+![tictactoe](./workspace-setup/architecture_.png)
 <br>
-### 02.03.2022
-New deployment: with read player profile page containing game history. Tag "prod-rel-1.0.2" .
-![tictactoe](./workspace-setup/user-profile-gamehistory.png) 
+### 04.03.2022
+New deployment: with read player profile page containing game history. Tag "prod-rel-1.0.3" .
+
 ### 19.2.2022
 New deployment with player top-lists. Package "prod-rel-1.0.1" .
 
@@ -23,7 +25,7 @@ Backend:
 * New Game?
 
 General:
-* Site runs in "http" -> "https" ?
-* 
-Documentation:
-* Project documentation TODO
+* Site runs with "http" -> "https" 
+
+Documentation
+
