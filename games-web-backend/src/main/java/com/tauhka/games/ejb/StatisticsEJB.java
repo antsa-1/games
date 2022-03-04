@@ -45,18 +45,23 @@ public class StatisticsEJB { // To core package?!?!?
 			throw new IllegalArgumentException("No statistics for database:" + gameStats);// Tells which one was null
 		}
 		if (isBothPlayersLoggedIn(gameStats)) {
+			LOGGER.info("StatisticsEJB Both players loggedIn");
 			RankingCalculator.updateRankings(gameStats.getGameResult());
 			insertGameResultToDatabase(gameStats);
 			updatePlayerRankingsToDatabase(gameStats);
 		} else if (isOneRegisteredPlayer(gameStats)) {
+			LOGGER.info("StatisticsEJB One player loggedIn");
+			setupStartRankingsWithoutCalculations(gameStats);
 			insertGameResultToDatabase(gameStats);
 		} else {
+			LOGGER.info("StatisticsEJB No loggedInPlayers");
 			updateGameCount(gameStats);
 		}
 	}
 
+	// Updates User-table
 	private void updatePlayerRankingsToDatabase(GameStatisticsEvent gameStats) {
-		// Whole method can be replaced with DB-trigger after gameresult insert !?!
+
 		GameResult res = gameStats.getGameResult();
 		PreparedStatement stmt = null;
 		Connection con = null;
@@ -141,9 +146,9 @@ public class StatisticsEJB { // To core package?!?!?
 	private boolean isOneRegisteredPlayer(GameStatisticsEvent gameStats) {
 		User playerA = gameStats.getGameResult().getPlayerA();
 		User playerB = gameStats.getGameResult().getPlayerB();
-
+		boolean computerPlayer = playerB instanceof ArtificialUser;
 		// Computer sits always on playerB position
-		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) || !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START);
+		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) || !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START) && !computerPlayer;
 	}
 
 	private void insertGameResultToDatabase(GameStatisticsEvent gameEvent) {
@@ -197,5 +202,16 @@ public class StatisticsEJB { // To core package?!?!?
 				LOGGER.severe(LOG_PREFIX_GAMES + "StatisticsEJB finally crashed" + e.getMessage());
 			}
 		}
+	}
+
+	private void setupStartRankingsWithoutCalculations(GameStatisticsEvent gameStats) {
+		GameResult result = gameStats.getGameResult();
+		boolean connectFour = result.getGameMode().isConnectFour();
+		User playerA = result.getPlayerA();
+		User playerB = result.getPlayerB();
+		Double aRankingInitial = connectFour ? playerA.getRankingConnectFour() : playerA.getRankingTictactoe();
+		Double bRankingInitial = connectFour ? playerB.getRankingConnectFour() : playerB.getRankingTictactoe();
+		playerA.setInitialCalculationsRank(aRankingInitial);
+		playerB.setInitialCalculationsRank(bRankingInitial);
 	}
 }
