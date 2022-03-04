@@ -23,13 +23,13 @@
 				<span  v-if="theTable.playerA" class="fw-bold" :class="{'text-success':  theTable.playerInTurn?.name=== theTable?.playerA?.name}">
 				 	{{theTable?.playerA?.gameToken}} = {{theTable?.playerA?.name}} 
 				</span> 		
-				<span class="text-primary"> [ w:{{ theTable?.playerA?.wins }} , d:{{ theTable?.playerA?.draws }} ] </span>		
+						
 				<br> vs.
 				<br>
 				 <span v-if="theTable.playerB" class="fw-bold"  :class="{'text-success': theTable.playerInTurn?.name===  theTable?.playerB?.name}">
 					 {{theTable?.playerB?.gameToken}} =  {{theTable?.playerB?.name}}   
 				</span>
-				<span class="text-primary"> [ w:{{ theTable?.playerB?.wins }} , d:{{ theTable?.playerB?.draws }} ]  </span>
+				
 			<span v-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn. </span>
 			<span v-else-if="theTable?.playerInTurn === null" class="text-success"> Game ended </span>	
 			<div v-else class="text-danger"> In turn: {{theTable.playerInTurn?.name}}</div>
