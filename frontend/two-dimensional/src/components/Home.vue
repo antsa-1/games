@@ -6,14 +6,14 @@
 	</div>
 	<div class="row mt-4">
 		<div class="col question">
-			Play anonymous
+			Play without registering
 			<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 25 25">
 				<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
 			</svg>
 		</div>
 		<div class="col ">			
 			<p class=" text-start">
-				1. Click play on the top navigation bar
+				1. Click Games on the top navigation bar
 				<br>
 				2. Join table
 				<br>
@@ -32,7 +32,7 @@
 		</div>
 		<div class="col">			
 			<p class=" text-start">
-				1. Navigate to nickname registration page
+				1. Click Registration
 				<br>
 				2. Type nickname and password
 				<br>
