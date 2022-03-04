@@ -19,7 +19,7 @@ public class User { // Combine with Portal User.java?
 	@JsonbTransient
 	private UUID id;
 	@JsonbTransient
-	private Double initialCalculationsRank = 0d;
+	private Double initialCalculationsRank = -1d;
 
 	public String getName() {
 		return name;
@@ -93,6 +93,11 @@ public class User { // Combine with Portal User.java?
 
 	public void setInitialCalculationsRank(Double rankingTemp) {
 		this.initialCalculationsRank = rankingTemp;
+	}
+
+	@Override
+	public String toString() {
+		return "User [name=" + name + "]";
 	}
 
 }

@@ -142,8 +142,9 @@ public class GameResult {
 
 	@Override
 	public String toString() {
-		return "GameResult [fromX=" + fromX + ", fromY=" + fromY + ", toX=" + toX + ", toY=" + toY + ", token=" + token + ", winner=" + winner + ", resultType=" + resultType + ", playerA=" + playerA + ", playerB=" + playerB
-				+ ", endInstant=" + endInstant + ", startInstant=" + startInstant + ", gameId=" + gameId + ", gameMode=" + gameMode + "]";
+		return "GameResult [token=" + token + ", winner=" + winner + ", resultType=" + resultType + ", playerA=" + playerA + ", playerB=" + playerB + ", endInstant=" + endInstant + ", startInstant=" + startInstant + ", gameId=" + gameId
+				+ ", gameMode=" + gameMode + "]";
 	}
+
 
 }

@@ -96,4 +96,10 @@ public final class GameMode {
 	public static List<GameMode> getGameModes() {
 		return GameMode.GAMEMODES;
 	}
+
+	@Override
+	public String toString() {
+		return "GameMode [id=" + id + ", gameNumber=" + gameNumber + "]";
+	}
+
 }

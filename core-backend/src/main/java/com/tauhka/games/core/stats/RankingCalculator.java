@@ -3,7 +3,6 @@ package com.tauhka.games.core.stats;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.User;
-import com.tauhka.games.core.twodimen.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
 
 /**
@@ -64,6 +63,6 @@ public class RankingCalculator {
 			playerA.setRankingTictactoe(newRankingA < 100 ? 100d : newRankingA);
 			playerB.setRankingTictactoe(newRankingB < 100 ? 100d : newRankingB);
 		}
-		LOGGER.info("RankingCalculator:" + playerA.getName() + " from:" + aRankingInitial + " to:" + newRankingA + " and:" + playerB.getName() + " from:" + bRankingInitial + " to:" + newRankingB);
+		LOGGER.info("RankingCalculator:" + playerA.getName() + " from:" + aRankingInitial + " to:" + newRankingA + " and:" + playerB.getName() + " from:" + bRankingInitial + " to:" + newRankingB + " isConnectFour" + connectFour);
 	}
 }

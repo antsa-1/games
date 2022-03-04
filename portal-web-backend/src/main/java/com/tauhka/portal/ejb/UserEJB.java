@@ -189,7 +189,6 @@ public class UserEJB {
 				TopPlayer t = new TopPlayer();
 				t.setNickname(rs.getString("name"));
 				t.setRankingTicTacToe((int) rs.getDouble("ranking_tictactoe"));
-				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
 				topLists.addTicTacToePlayer(t);
 			}
 			rs.close();
@@ -202,7 +201,6 @@ public class UserEJB {
 				t.setNickname(rs2.getString("name"));
 				t.setRankingConnectFour((int) rs2.getDouble("ranking_connectfour"));
 				topLists.addConnectFourPlayer(t);
-				LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB topPlayersList added");
 			}
 			rs2.close();
 			stmt = con.prepareStatement(SELECT_GAME_COUNTS_SQL);
