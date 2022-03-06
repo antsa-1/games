@@ -13,6 +13,7 @@ public final class GameMode {
 	private final int gameNumber;
 	public static final Integer TIC_TAC_TOE = 1;
 	public static final Integer CONNECT4 = 2;
+	public static final Integer POOL = 3;
 	static {
 		// Constructor tells number meanings
 		GAMEMODES = new ArrayList<GameMode>();
@@ -26,6 +27,7 @@ public final class GameMode {
 		GameMode gm8 = new GameMode(TIC_TAC_TOE, 8, 40, 40, 5);// TicTacToes
 		GameMode gm20 = new GameMode(CONNECT4, 20, 7, 7, 4);// ConnectFour 7x7 board
 		GameMode gm21 = new GameMode(CONNECT4, 21, 10, 10, 4);// ConnectFour 10x10 board
+		GameMode gm22 = new GameMode(POOL, 30, 0, 0, 7);// 8-ball
 
 		GAMEMODES.add(gm);
 		GAMEMODES.add(gm2);
@@ -37,6 +39,7 @@ public final class GameMode {
 		GAMEMODES.add(gm8);
 		GAMEMODES.add(gm20);
 		GAMEMODES.add(gm21);
+		GAMEMODES.add(gm22);
 	}
 
 	public GameMode(int gameNumber, int gameMode, int y, int x, int requiredConnectionsToWin) {

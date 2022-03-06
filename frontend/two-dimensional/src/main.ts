@@ -10,6 +10,7 @@ import TableTicTacToe from './components/TableTicTacToe.vue'
 import Profile from './components/Profile.vue'
 import TopLists from './components/TopLists.vue'
 import TableConnectFour from './components/TableConnectFour.vue'
+import PoolTable from './components/tables/PoolTable.vue'
 import Info from './components/Info.vue'
 import Feedback from './components/Feedback.vue'
 import Registration from './components/Registration.vue'
@@ -95,6 +96,19 @@ const routes: RouteRecordRaw[] = [
         path: '/portal/connectfour/:watch?',
         component: TableConnectFour,
         name: "TableConnectFour",
+        props: true,
+        beforeEnter: (to, from, next) => {
+            if (!store.state.user || !store.state.theTable) {
+                next('/');
+            } else {
+                next()
+            }
+        }
+    },
+    {
+        path: '/portal/pool/:watch?',
+        component: PoolTable,
+        name: "PoolTable",
         props: true,
         beforeEnter: (to, from, next) => {
             if (!store.state.user || !store.state.theTable) {
