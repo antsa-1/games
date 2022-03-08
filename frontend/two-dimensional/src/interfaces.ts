@@ -29,7 +29,7 @@ export interface IWin {
 	toX: number,
 	toY: number,
 	winner: IPlayer,
-	resultType:string
+	resultType: string
 }
 
 export interface IGameResult {
@@ -123,25 +123,36 @@ export interface IPlayerStats {
 export interface IProfile extends IFetchResult {
 	stats: IPlayerStats,
 	text: string,
-	memberSince:string,
-	tictactoes:IGame[]
-	connectFours:IGame[]
+	memberSince: string,
+	tictactoes: IGame[]
+	connectFours: IGame[]
 }
-export interface IFetchResult{
-	status:number,
-	fetchText:string
+export interface IFetchResult {
+	status: number,
+	fetchText: string
 }
 export interface IGame {
 	startInstant: string,
 	endInstant: string,
-	gameType:number,
-	result:number,
-	playerAName:string,
-	playerBUName:string,
-	playerAStartRanking:number,
-	playerBStartRanking:number,
-	playerAEndRanking:number,
-	playerBEndRanking:number,
+	gameType: number,
+	result: number,
+	playerAName: string,
+	playerBUName: string,
+	playerAStartRanking: number,
+	playerBStartRanking: number,
+	playerAEndRanking: number,
+	playerBEndRanking: number,
+}
+
+
+export interface IBall {
+	widthPx: number,
+	heightPx: number,
+	relativePositionX: number,
+	relativePositionY: number,
+	number: number,
+	spritePositionX: number,
+	spritePositionY: number,
 }
 
 export interface ISettings {
@@ -156,4 +167,4 @@ export enum GameResult {
 	WIN_BY_RESIGNATION,
 	WIN_BY_DISCONNECT,
 	DRAW
-  }
+}

@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {IGameMode,IGameToken,	ITable,	IUser,ISquare, IWin} from "../../interfaces";
+import {IGameMode,IGameToken,IBall,	ITable,	IUser,ISquare, IWin} from "../../interfaces";
 import { loginMixin } from "../../mixins/mixins";
 import { useRoute } from "vue-router";
 import Chat from "../Chat.vue";
@@ -41,10 +41,13 @@ export default defineComponent({
 		return{
 			canvas:null,
 			poolTableImage:null,
-			ballSpriteImage:null,
+			
+			
 			cueImage:null,
+			balls:[],
 			canvasMaxWidth:1200,
-			canvasMaxHeight:677
+			canvasMaxHeight:677,
+			ballsLeft :<Array<IBall>>[],
 		}
 	},
 	beforeCreated(){
@@ -188,23 +191,55 @@ export default defineComponent({
 				console.log("canvas change3:"+windowWidth +" x "+height)
 				let imageScale=0.5
 			}		
-			console.log("Final width:"+windowWidth+" x "+height)		
+			console.log("Final width:"+windowWidth+" x "+height)
+			//Sprite is missing where balls 1-16, -> temp?		
 			this.canvas.height = canvasHeight;
 			this.canvas.width = canvasWidth;			
 			this.poolTableImage = document.getElementById("tableImg");
 			this.cueImage = document.getElementById("cueImage");
-			this.ballSpriteImage = document.getElementById("ballsImg");
+			this.balls.push(document.getElementById("1"))
+			this.balls.push(document.getElementById("2"))
+		
+			this.balls.push(document.getElementById("3"))
+			this.balls.push(document.getElementById("4"))
+			this.balls.push(document.getElementById("5"))
+			this.balls.push(document.getElementById("6"))
+			this.balls.push(document.getElementById("7"))
+			this.balls.push(document.getElementById("8"))
+			this.balls.push(document.getElementById("9"))
+			this.balls.push(document.getElementById("10"))
+			this.balls.push(document.getElementById("11"))
+			this.balls.push(document.getElementById("12"))
+			this.balls.push(document.getElementById("13"))
+			this.balls.push(document.getElementById("14"))
+			this.balls.push(document.getElementById("15"))
+			this.balls.push(document.getElementById("16"))
+
+		
 			window.addEventListener("resize", this.resize)
 			const ballWidth = 16
 			const ballHeight = 16
 			//ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		 	this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, canvasWidth, canvasHeight);
 			this.renderingContext.drawImage(this.cueImage,0 , 0, 1447, 814, 0, 0, canvasWidth*0.5, 250);
-			for (let i=0; i<3; i++){
+			let spriteRow=0;
+			for (let i=0; i<16; i++){
 				console.log("i:"+i)
-				this.renderingContext.drawImage(this.ballSpriteImage, i*ballWidth , i*ballHeight, 16, 16, 200, 200, 30, 30);
+				if(i!==8){
+					this.ballsLeft.push(<IBall>{
+										widthPx:ballWidth,
+										heightPx:ballHeight,
+										relativePositionX:canvasWidth *0.75 - (i*ballWidth),
+										relativePositionY:canvasWidth *0.75 + (i*ballHeight),
+										number:i
+									})
+				}
+			
+			
+				console.log("balls:"+i+" "+this.balls[i])
+				this.renderingContext.drawImage(this.balls[i], 0 , 0, 145, 141, 200 +(ballWidth*i), 200 +(ballHeight*i), 30, 30);
 			}
-		},300)
+		},1500)
 		},
 		animate(){
 			
