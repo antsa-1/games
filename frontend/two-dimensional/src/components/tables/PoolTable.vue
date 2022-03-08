@@ -47,7 +47,7 @@ export default defineComponent({
 			balls:[],
 			canvasMaxWidth:1200,
 			canvasMaxHeight:677,
-			ballsLeft :<Array<IBall>>[],
+			ballsRemaining :<Array<IBall>>[],
 		}
 	},
 	beforeCreated(){
@@ -167,29 +167,34 @@ export default defineComponent({
 			console.log("initial size:"+windowWidth+ "x "+height)
 			const table: ITable = this.theTable;
 			this.canvas = document.getElementById("canvas");
-			this.renderingContext = this.canvas.getContext("2d");		
+			this.renderingContext = this.canvas.getContext("2d");
 			let canvasWidth = windowWidth;
 			let canvasHeight = height
+			let ballDiameterPx = 20
 			let imageScale=1
 			if(windowWidth>1400){
 				canvasWidth = this.canvasMaxWidth
 				canvasHeight = this.canvasMaxHeight
+				ballDiameterPx = 35
 			}
 			else if(windowWidth >= 992 ){
 				canvasWidth=700
 				canvasHeight=395
 				let imageScale=0.75
+				ballDiameterPx = 30				
 				console.log("canvasWidth change:"+windowWidth +" x "+height)
 			}else if(windowWidth>768 && windowWidth < 992){
 				canvasWidth=500
 				canvasHeight=282
 				console.log("canvas change2:"+windowWidth +" x "+height)
 				let imageScale=0.65
+				ballDiameterPx = 21
 			}else{
 				canvasWidth=300
 				canvasHeight=169
 				console.log("canvas change3:"+windowWidth +" x "+height)
 				let imageScale=0.5
+				ballDiameterPx = 13 // Not properly visible
 			}		
 			console.log("Final width:"+windowWidth+" x "+height)
 			//Sprite is missing where balls 1-16, -> temp?		
@@ -197,6 +202,7 @@ export default defineComponent({
 			this.canvas.width = canvasWidth;			
 			this.poolTableImage = document.getElementById("tableImg");
 			this.cueImage = document.getElementById("cueImage");
+			this.balls.push(document.getElementById("0")) // cue_ball
 			this.balls.push(document.getElementById("1"))
 			this.balls.push(document.getElementById("2"))
 		
@@ -213,8 +219,6 @@ export default defineComponent({
 			this.balls.push(document.getElementById("13"))
 			this.balls.push(document.getElementById("14"))
 			this.balls.push(document.getElementById("15"))
-			this.balls.push(document.getElementById("16"))
-
 		
 			window.addEventListener("resize", this.resize)
 			const ballWidth = 16
@@ -222,24 +226,21 @@ export default defineComponent({
 			//ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		 	this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, canvasWidth, canvasHeight);
 			this.renderingContext.drawImage(this.cueImage,0 , 0, 1447, 814, 0, 0, canvasWidth*0.5, 250);
-			let spriteRow=0;
+			
 			for (let i=0; i<16; i++){
 				console.log("i:"+i)
-				if(i!==8){
-					this.ballsLeft.push(<IBall>{
+				
+					this.ballsRemaining.push(<IBall>{
 										widthPx:ballWidth,
 										heightPx:ballHeight,
 										relativePositionX:canvasWidth *0.75 - (i*ballWidth),
 										relativePositionY:canvasWidth *0.75 + (i*ballHeight),
 										number:i
 									})
-				}
-			
-			
-				console.log("balls:"+i+" "+this.balls[i])
-				this.renderingContext.drawImage(this.balls[i], 0 , 0, 145, 141, 200 +(ballWidth*i), 200 +(ballHeight*i), 30, 30);
+							
+				this.renderingContext.drawImage(this.balls[i], 0 , 0, 145, 141, 100 +(ballWidth*i), 100 +(ballHeight*i), ballDiameterPx, ballDiameterPx);
 			}
-		},1500)
+		},3000)
 		},
 		animate(){
 			
