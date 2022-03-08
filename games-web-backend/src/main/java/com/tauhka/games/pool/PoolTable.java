@@ -14,6 +14,13 @@ public class PoolTable extends Table {
 		super(playerA, gameMode, randomizeStarter);
 	}
 
-	private int xPosition;
-	private int yPosition;
+	/*	@formatter:off
+	 * 
+	 * 		width
+	 * 		 -------
+	 * 		|		| height
+	 * 		 -------
+	 */
+	private int height2d;
+	private int width2d;
 }

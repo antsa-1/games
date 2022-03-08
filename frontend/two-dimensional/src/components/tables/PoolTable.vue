@@ -16,12 +16,11 @@
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
 			Text
-		</div>
-		<div class="col-xs-12 col-sm-8">
-			 <canvas  id="canvas" ></canvas>
-    	</div>
-		
+		</div>		
 	</div>
+	<div class="col-xs-12 col-sm-8">
+			 <canvas id="canvas" width="400" height="400" style="border:1px solid" ></canvas>
+    	</div>
 	<chat :id="theTable.id"> </chat>
 </template>
 
@@ -40,22 +39,24 @@ export default defineComponent({
 	props:["watch"],
 	data(){
 		return{
-			horizontalGap: null,
-			verticalGap: null,
 			canvas:null,
-			renderingContext:null,
-			showLastVal:false,
-			soundOn:false,
-			secondsLeft:120,
+			poolTableImage:null,
+			ballSpriteImage:null,
+			cueImage:null,
+			canvasMaxWidth:1200,
+			canvasMaxHeight:677
 		}
 	},
-	created() {
+	beforeCreated(){
+	
+	},
+	created() {		
+
 		
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
 			if (mutation.type === "move") {
-				const board : ISquare[]= state.theTable.board
-				this.removeLastSquareHighLightning()
-				this.drawToken(this.theTable.board[this.theTable.board.length -1])
+					
+				this.animate(this.theTable.board[this.theTable.board.length -1])
 				this.playMoveNotification()
 				this.highlightLastSquareIfSelected()
 			}else if (mutation.type === "changeTurn") {
@@ -82,6 +83,12 @@ export default defineComponent({
 		}
 	},
 	computed: {
+		tableWidth(){
+
+		},
+		tableHeight(){
+
+		},
 		timeLeft(){
 			return this.secondsLeft
 		},
@@ -135,8 +142,8 @@ export default defineComponent({
 			return;
 		}
 		this.initBoard()
-		
-		if(this.watch==="1"){
+		this.animate()
+		if(this.watch === "1"){
 			this.drawBoard()
 		}
 	},
@@ -145,6 +152,63 @@ export default defineComponent({
 		this.leaveTable()
   	},
 	methods: {
+		resize(){
+			this.initBoard()
+		},
+		initBoard() {
+			setTimeout(()=>{
+				console.log("temp temp temp, todo todo todo ")
+			
+			let windowWidth = window.innerWidth
+			let height = window.innerHeight
+			console.log("initial size:"+windowWidth+ "x "+height)
+			const table: ITable = this.theTable;
+			this.canvas = document.getElementById("canvas");
+			this.renderingContext = this.canvas.getContext("2d");		
+			let canvasWidth = windowWidth;
+			let canvasHeight = height
+			let imageScale=1
+			if(windowWidth>1400){
+				canvasWidth = this.canvasMaxWidth
+				canvasHeight = this.canvasMaxHeight
+			}
+			else if(windowWidth >= 992 ){
+				canvasWidth=700
+				canvasHeight=395
+				let imageScale=0.75
+				console.log("canvasWidth change:"+windowWidth +" x "+height)
+			}else if(windowWidth>768 && windowWidth < 992){
+				canvasWidth=500
+				canvasHeight=282
+				console.log("canvas change2:"+windowWidth +" x "+height)
+				let imageScale=0.65
+			}else{
+				canvasWidth=300
+				canvasHeight=169
+				console.log("canvas change3:"+windowWidth +" x "+height)
+				let imageScale=0.5
+			}		
+			console.log("Final width:"+windowWidth+" x "+height)		
+			this.canvas.height = canvasHeight;
+			this.canvas.width = canvasWidth;			
+			this.poolTableImage = document.getElementById("tableImg");
+			this.cueImage = document.getElementById("cueImage");
+			this.ballSpriteImage = document.getElementById("ballsImg");
+			window.addEventListener("resize", this.resize)
+			const ballWidth = 16
+			const ballHeight = 16
+			//ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+		 	this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, canvasWidth, canvasHeight);
+			this.renderingContext.drawImage(this.cueImage,0 , 0, 1447, 814, 0, 0, canvasWidth*0.5, 250);
+			for (let i=0; i<3; i++){
+				console.log("i:"+i)
+				this.renderingContext.drawImage(this.ballSpriteImage, i*ballWidth , i*ballHeight, 16, 16, 200, 200, 30, 30);
+			}
+		},300)
+		},
+		animate(){
+			
+		},
 		startReducer(){			
 			if(this.redurcerInterval){
 				this.stopReducer()
@@ -182,15 +246,7 @@ export default defineComponent({
 					250
 				);
 			}
-		},
-		removeLastSquareHighLightning(){
-			if(this.theTable.board.length>1){
-				
-				const board=this.theTable.board
-				const lastSquare:ISquare=board[board.length-2]
-				this.drawToken(lastSquare,"#000000")	
-			}
-		},
+		},		
 		removeMouseListener(){
 			this.canvas.removeEventListener("click", this.handleClick, false);
 		},
@@ -201,17 +257,7 @@ export default defineComponent({
 			
 			console.log("win")
 		},
-		initBoard() {
-			let table: ITable = this.theTable
-			
-		},
-		drawBoard(){
-			
-		 	let tokens:ISquare[]=this.theTable.board
-			tokens.forEach(element => {
-				this.drawToken(element)
-			});
-		},
+	
 	
 		drawToken(square: ISquare,color:string) {
 			

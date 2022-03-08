@@ -1,9 +1,7 @@
-package com.tauhka.portal.web.filter;
+package com.tauhka.games.web.filter;
 
 import java.io.IOException;
 import java.util.logging.Logger;
-
-import com.tauhka.portal.util.Constants;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
