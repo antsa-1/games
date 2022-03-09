@@ -26,12 +26,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {IGameMode,IGameToken,IBall,	ITable,	IUser,ISquare, IWin} from "../../interfaces";
+import {IGameMode,IGameToken,IBall,	ITable,	IStick,ISquare, IPointerLine} from "../../interfaces";
 import { loginMixin } from "../../mixins/mixins";
 import { useRoute } from "vue-router";
 import Chat from "../Chat.vue";
 
-
+const CANVAS_MAXWIDTH = 1200
+const CANVAS_MAX_HEIGHT = 677
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
@@ -40,14 +41,11 @@ export default defineComponent({
 	data(){
 		return{
 			canvas:null,
-			poolTableImage:null,
-			
-			
-			cueImage:null,
-			balls:[],
-			canvasMaxWidth:1200,
-			canvasMaxHeight:677,
+			poolTableImage:null,			
 			ballsRemaining :<Array<IBall>>[],
+			cueBall:<IBall>null,
+			stick:<IStick>null,
+			pointerLine:<IPointerLine>null
 		}
 	},
 	beforeCreated(){
@@ -64,14 +62,14 @@ export default defineComponent({
 				this.highlightLastSquareIfSelected()
 			}else if (mutation.type === "changeTurn") {
 				if(state.theTable.playerInTurn.name === this.userName){
-					this.addMouseListener()
+					this.addMouseListeners()
 					this.startReducer()
 				}else{
-					this.removeMouseListener()
+					this.removeMouseListeners()
 					this.stopReducer()
 				}
 			}else if (mutation.type === "rematch" ){			
-				this.initBoard()			
+				this.initTable()			
 			}
 			else if (mutation.type === "updateWinner" ){			
 				console.log("update winner")
@@ -144,7 +142,7 @@ export default defineComponent({
 			this.$router.push('/error')
 			return;
 		}
-		this.initBoard()
+		this.initTable()
 		this.animate()
 		if(this.watch === "1"){
 			this.drawBoard()
@@ -156,12 +154,28 @@ export default defineComponent({
   	},
 	methods: {
 		resize(){
-			this.initBoard()
-		},
-		initBoard() {
-			setTimeout(()=>{
-				console.log("temp temp temp, todo todo todo ")
+			//TODO, not init all
+			this.initTable()
 			
+		},
+		repaint(){
+			//	TODO some kind of debounce function for heavy painting operation
+			//Table
+			this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, this.canvas.width, this.canvas.height)
+			//Stick
+			this.renderingContext.drawImage(this.stick.image,0 , 0, 4551, 2570, this.stick.positionX , this.stick.positionY, this.canvas.width, this.canvas.height)
+			const ballDiameter=this.cueBall.diameter
+			//Balls
+			for(let i=0;i<this.ballsRemaining.length;i++){
+				this.renderingContext.drawImage(this.ballsRemaining[i].image, 0 , 0, 141,141, this.ballsRemaining[i].positionX, this.ballsRemaining[i].positionY,ballDiameter,ballDiameter);
+			}
+			//Cue
+			this.renderingContext.drawImage(this.cueBall.image, 0 , 0, 141,141, this.cueBall.positionX, this.cueBall.positionY,ballDiameter,ballDiameter);
+		},
+		initTable() {
+			setTimeout(()=>{
+			console.log("temp temp temp, todo todo todo ")
+			this.stick= <IStick>{positionX:100,positionY:100,image:document.getElementById("stickImg")}
 			let windowWidth = window.innerWidth
 			let height = window.innerHeight
 			console.log("initial size:"+windowWidth+ "x "+height)
@@ -173,8 +187,8 @@ export default defineComponent({
 			let ballDiameterPx = 20
 			let imageScale=1
 			if(windowWidth>1400){
-				canvasWidth = this.canvasMaxWidth
-				canvasHeight = this.canvasMaxHeight
+				canvasWidth = CANVAS_MAXWIDTH
+				canvasHeight = CANVAS_MAX_HEIGHT
 				ballDiameterPx = 35
 			}
 			else if(windowWidth >= 992 ){
@@ -196,30 +210,24 @@ export default defineComponent({
 				let imageScale=0.5
 				ballDiameterPx = 13 // Not properly visible
 			}		
-			console.log("Final width:"+windowWidth+" x "+height)
-			//Sprite is missing where balls 1-16, -> temp?		
+			
+				
 			this.canvas.height = canvasHeight
 			this.canvas.width = canvasWidth
 			this.poolTableImage = document.getElementById("tableImg")
-			this.cueImage = document.getElementById("cueImage")	
+		
 			window.addEventListener("resize", this.resize)
 			const ballWidth = 16
-			const ballHeight = 16
-			//ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-		 	this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, canvasWidth, canvasHeight);
-			this.renderingContext.drawImage(this.cueImage,0 , 0, 1447, 814, 0, 0, canvasWidth*0.5, 250);
-			//add cue ball just for now to center
-			let cueBall= <IBall>{
-							widthPx:ballDiameterPx,
-							heightPx:ballDiameterPx,
-							relativePositionX:this.canvas.width*0.25,
-							relativePositionY:this.canvas.height/2,
+			const ballHeight = 16			
+			this.cueBall= <IBall>{
+							diameter:ballDiameterPx,			
+							positionX:this.canvas.width*0.25,
+							positionY:this.canvas.height/2,
 							number:0,
 							color:"white",
 							image:document.getElementById("0")
-			}
-			//this.ballsRemaining.push(cueBall)
-			this.renderingContext.drawImage(cueBall.image, 0 , 0, 141,141, cueBall.relativePositionX, cueBall.relativePositionY,ballDiameterPx,ballDiameterPx);
+			}		
+			
 			for (let i=0; i<16; i++){
 				
 				if(i===0){
@@ -227,15 +235,12 @@ export default defineComponent({
 					continue
 				}
 				let ball=<IBall>(this.createBall(i,ballDiameterPx))
-				console.log(JSON.stringify(ball, null,2))
-				this.ballsRemaining.push(this.createBall(i,ballDiameterPx))
-				////ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-				console.log("I:"+i+ " __"+JSON.stringify(this.ballsRemaining[i-1]))
-				this.renderingContext.drawImage(this.ballsRemaining[i-1].image, 0 , 0, 141,141, this.ballsRemaining[i-1].relativePositionX, this.ballsRemaining[i-1].relativePositionY,ballDiameterPx,ballDiameterPx);
+				this.ballsRemaining.push(this.createBall(i,ballDiameterPx))	
 			}
-	
-			
+			this.addMouseListeners()
+			this.repaint()
 		},300)
+	
 		},
 		animate(){
 			
@@ -253,13 +258,11 @@ export default defineComponent({
 				}
 			}, 1000)
 		},
-
 		createBall(ballNumber:number, ballDiameterPx:number){
 				return <IBall>{
-							widthPx:ballDiameterPx,
-							heightPx:ballDiameterPx,
-							relativePositionX:this.canvas.width*0.65+(ballDiameterPx*0.90*this.calculateRackColumn(ballNumber)),
-							relativePositionY:this.canvas.height/2-(ballDiameterPx*0.5*this.calculateRow(ballNumber)),
+							diameter:ballDiameterPx,
+							positionX:this.canvas.width*0.65+(ballDiameterPx*0.90*this.calculateRackColumn(ballNumber)),
+							positionY:this.canvas.height/2-(ballDiameterPx*0.5*this.calculateRow(ballNumber)),
 							number:ballNumber,
 							color:this.calculateBallColor(ballNumber),
 							image:document.getElementById(ballNumber.toString())
@@ -333,27 +336,69 @@ export default defineComponent({
 				);
 			}
 		},		
-		removeMouseListener(){
+		removeMouseListeners(){
 			this.canvas.removeEventListener("click", this.handleClick, false);
 		},
-		addMouseListener(){
-			this.canvas.addEventListener("click", this.handleClick, false);
-		},
-		drawWinningLine(win:IWin){
-			
-			console.log("win")
-		},
-	
-	
-		drawToken(square: ISquare,color:string) {
-			
+		addMouseListeners(){
+			this.canvas.addEventListener("click", this.handleMouseClick, false)
+			this.canvas.addEventListener("mousemove", this.handleMouseMove) 
+			this.canvas.addEventListener("mousedown", this.handleMouseDown) 
+			this.canvas.addEventListener("mouseup", this.handleMouseUp) 
+		
+		},	
+		drawToken(square: ISquare,color:string) {			
 			
 		},
-		handleClick(event: MouseEvent) {
+		handleMouseClick(event: MouseEvent) {
 			console.log("click")
 		},
+		handleMouseDown(event:MouseEvent){
+			console.log("Mouse down")
+		},
+		handleMouseUp(event:MouseEvent){
+			console.log("Mouse up")
+		},
+		handleMouseMove(event:MouseEvent){
+			console.log("event:"+event.offsetX +" " +event.offsetY)
+		//	this.removePointerLine()
+		//	this.drawPointerLine(event)
+			this.changeStickPosition(event)
+		// This is heavy operations
+		this.repaint()
+		},
+		changeStickPosition(event:MouseEvent){
+			this.stick.positionX = event.offsetX
+			this.stick.positionY = event.offsetY
+		},
+		removePointerLine(){
+			const pl = this.pointerLine
+			if(pl)
+			{
+				console.log("Removing_"+JSON.stringify(pl))
+				this.renderingContext.clearRect(pl.fromX,pl.fromY,pl.toX,pl.toY);	
+			}			
+		},
+		drawPointerLine(event:MouseEvent){
+			if(!event){
+				console.log("No event:")
+				return
+			}
+			this.renderingContext.beginPath();	
+			this.renderingContext.setLineDash([5, 15]);
+			const cueBall = this.cueBall
+			console.log("CueBall:"+JSON.stringify(cueBall))
+			this.renderingContext.moveTo(cueBall.positionX+cueBall.diameter/2, cueBall.positionY+cueBall.diameter/2)
+			this.renderingContext.lineTo(event.offsetX, event.offsetY);
+			this.renderingContext.stroke();
+			this.pointerLine= {
+								fromX:cueBall.positionX+cueBall.diameter/2,
+								fromY:cueBall.positionY+cueBall.diameter/2,
+								toX:event.offsetX,
+								toY:event.offsetY,
+							}
+		},
 		disableBoard(){
-				console.log("disable")
+			console.log("disable")
 		},
 		rematch(){
 			

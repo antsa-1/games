@@ -146,13 +146,23 @@ export interface IGame {
 
 
 export interface IBall {
-	widthPx: number,
-	heightPx: number,
-	relativePositionX: number,
-	relativePositionY: number,
+	diameter: number,
+	positionX: number,
+	positionY: number,
 	number: number,
-	color:string, // Yellow or Red if numbers are not displayed
-	image:HTMLImageElement
+	color: string, // Yellow or Red if numbers are not displayed
+	image: HTMLImageElement
+}
+export interface IStick {
+	positionX: number,
+	positionY: number,	
+	image: HTMLImageElement
+}
+export interface IPointerLine {
+	fromX: number,
+	fromY: number,
+	toX: number,
+	toY: number
 }
 
 export interface ISettings {
