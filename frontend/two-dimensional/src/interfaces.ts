@@ -151,8 +151,8 @@ export interface IBall {
 	relativePositionX: number,
 	relativePositionY: number,
 	number: number,
-	spritePositionX: number,
-	spritePositionY: number,
+	color:string, // Yellow or Red if numbers are not displayed
+	image:HTMLImageElement
 }
 
 export interface ISettings {

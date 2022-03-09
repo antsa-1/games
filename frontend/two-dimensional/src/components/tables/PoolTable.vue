@@ -198,49 +198,44 @@ export default defineComponent({
 			}		
 			console.log("Final width:"+windowWidth+" x "+height)
 			//Sprite is missing where balls 1-16, -> temp?		
-			this.canvas.height = canvasHeight;
-			this.canvas.width = canvasWidth;			
-			this.poolTableImage = document.getElementById("tableImg");
-			this.cueImage = document.getElementById("cueImage");
-			this.balls.push(document.getElementById("0")) // cue_ball
-			this.balls.push(document.getElementById("1"))
-			this.balls.push(document.getElementById("2"))
-		
-			this.balls.push(document.getElementById("3"))
-			this.balls.push(document.getElementById("4"))
-			this.balls.push(document.getElementById("5"))
-			this.balls.push(document.getElementById("6"))
-			this.balls.push(document.getElementById("7"))
-			this.balls.push(document.getElementById("8"))
-			this.balls.push(document.getElementById("9"))
-			this.balls.push(document.getElementById("10"))
-			this.balls.push(document.getElementById("11"))
-			this.balls.push(document.getElementById("12"))
-			this.balls.push(document.getElementById("13"))
-			this.balls.push(document.getElementById("14"))
-			this.balls.push(document.getElementById("15"))
-		
+			this.canvas.height = canvasHeight
+			this.canvas.width = canvasWidth
+			this.poolTableImage = document.getElementById("tableImg")
+			this.cueImage = document.getElementById("cueImage")	
 			window.addEventListener("resize", this.resize)
 			const ballWidth = 16
 			const ballHeight = 16
 			//ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 		 	this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, canvasWidth, canvasHeight);
 			this.renderingContext.drawImage(this.cueImage,0 , 0, 1447, 814, 0, 0, canvasWidth*0.5, 250);
-			
-			for (let i=0; i<16; i++){
-				console.log("i:"+i)
-				
-					this.ballsRemaining.push(<IBall>{
-										widthPx:ballWidth,
-										heightPx:ballHeight,
-										relativePositionX:canvasWidth *0.75 - (i*ballWidth),
-										relativePositionY:canvasWidth *0.75 + (i*ballHeight),
-										number:i
-									})
-							
-				this.renderingContext.drawImage(this.balls[i], 0 , 0, 145, 141, 100 +(ballWidth*i), 100 +(ballHeight*i), ballDiameterPx, ballDiameterPx);
+			//add cue ball just for now to center
+			let cueBall= <IBall>{
+							widthPx:ballDiameterPx,
+							heightPx:ballDiameterPx,
+							relativePositionX:this.canvas.width*0.25,
+							relativePositionY:this.canvas.height/2,
+							number:0,
+							color:"white",
+							image:document.getElementById("0")
 			}
-		},3000)
+			//this.ballsRemaining.push(cueBall)
+			this.renderingContext.drawImage(cueBall.image, 0 , 0, 141,141, cueBall.relativePositionX, cueBall.relativePositionY,ballDiameterPx,ballDiameterPx);
+			for (let i=0; i<16; i++){
+				
+				if(i===0){
+					 // position 0 = cue ball
+					continue
+				}
+				let ball=<IBall>(this.createBall(i,ballDiameterPx))
+				console.log(JSON.stringify(ball, null,2))
+				this.ballsRemaining.push(this.createBall(i,ballDiameterPx))
+				////ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+				console.log("I:"+i+ " __"+JSON.stringify(this.ballsRemaining[i-1]))
+				this.renderingContext.drawImage(this.ballsRemaining[i-1].image, 0 , 0, 141,141, this.ballsRemaining[i-1].relativePositionX, this.ballsRemaining[i-1].relativePositionY,ballDiameterPx,ballDiameterPx);
+			}
+	
+			
+		},300)
 		},
 		animate(){
 			
@@ -258,7 +253,62 @@ export default defineComponent({
 				}
 			}, 1000)
 		},
-		
+
+		createBall(ballNumber:number, ballDiameterPx:number){
+				return <IBall>{
+							widthPx:ballDiameterPx,
+							heightPx:ballDiameterPx,
+							relativePositionX:this.canvas.width*0.65+(ballDiameterPx*0.90*this.calculateRackColumn(ballNumber)),
+							relativePositionY:this.canvas.height/2-(ballDiameterPx*0.5*this.calculateRow(ballNumber)),
+							number:ballNumber,
+							color:this.calculateBallColor(ballNumber),
+							image:document.getElementById(ballNumber.toString())
+					}
+		},
+		calculateBallColor(ballNumber:number){
+			if(ballNumber===8){
+				return "black"
+			}
+			return ballNumber %2 ===0 ? "red":"yellow"
+		},
+		calculateRow(i){		
+			if(i===1 || i===8 || i==5){				
+				return 0
+			}
+			else if( i===5 || i==3 || i===15){				
+				return 1
+			}else if(i===10 || i===2|| i===15){			
+				return -1
+			}
+			else if(i===4 || i===12){
+				return -2
+			}else if(i===6 || i===14){
+				return 2
+			}else if(i===7){
+				return 3
+			}else if(i===9){
+				return -3
+			}else if(i===13){
+				return -4
+			}
+			else if(i===11){
+				return 4
+			}
+			return -4
+		},
+		calculateRackColumn(i){			
+			if(i===1){				
+				return 1
+			}
+			else if(i===10 || i===3){				
+				return 2
+			}else if(i===4 ||  i===8 || i===14 ){				
+				return 3
+			}else if(  i===7 ||i===9||i===2 ||i===15){				
+				return 4
+			}			
+			return 5
+		},
 		stopReducer(){
 			clearInterval(this.redurcerInterval)
 			this.secondsLeft=null
