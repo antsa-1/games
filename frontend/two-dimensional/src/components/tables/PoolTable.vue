@@ -1,6 +1,4 @@
-<!--
- * @author antsa-1 from GitHub 
- -->
+
 <template>
 	<div class="row">
 		<div class="col">
@@ -26,12 +24,12 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {IGameMode,IGameToken,IBall,	ITable,	IStick,ISquare, IPointerLine} from "../../interfaces";
+import {IGameMode,IGameToken,IBall,	ITable,	ICue,IPosition, IPointerLine} from "../../interfaces";
 import { loginMixin } from "../../mixins/mixins";
 import { useRoute } from "vue-router";
 import Chat from "../Chat.vue";
 
-const CANVAS_MAXWIDTH = 1200
+const CANVAS_MAX_WIDTH = 1200
 const CANVAS_MAX_HEIGHT = 677
 export default defineComponent({
 	components: { Chat },
@@ -44,19 +42,17 @@ export default defineComponent({
 			poolTableImage:null,			
 			ballsRemaining :<Array<IBall>>[],
 			cueBall:<IBall>null,
-			stick:<IStick>null,
-			pointerLine:<IPointerLine>null
+			cue:<ICue>null,
+			pointerLine:<IPointerLine>null,
+			mousePoint:<IPosition>null,
 		}
 	},
 	beforeCreated(){
 	
 	},
 	created() {		
-
-		
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
-			if (mutation.type === "move") {
-					
+			if (mutation.type === "move") {					
 				this.animate(this.theTable.board[this.theTable.board.length -1])
 				this.playMoveNotification()
 				this.highlightLastSquareIfSelected()
@@ -153,29 +149,31 @@ export default defineComponent({
 		this.leaveTable()
   	},
 	methods: {
-		resize(){
+		resize(){ 
 			//TODO, not init all
 			this.initTable()
 			
 		},
-		repaint(){
-			//	TODO some kind of debounce function for heavy painting operation
+		repaintAll(){
+			
+			this.renderingContext.clearRect(0,0,this.canvasWidth,this.canvasHeight)
 			//Table
-			this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, this.canvas.width, this.canvas.height)
-			//Stick
-			this.renderingContext.drawImage(this.stick.image,0 , 0, 4551, 2570, this.stick.positionX , this.stick.positionY, this.canvas.width, this.canvas.height)
+			this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, this.canvas.width, this.canvas.height)			
 			const ballDiameter=this.cueBall.diameter
 			//Balls
 			for(let i=0;i<this.ballsRemaining.length;i++){
 				this.renderingContext.drawImage(this.ballsRemaining[i].image, 0 , 0, 141,141, this.ballsRemaining[i].positionX, this.ballsRemaining[i].positionY,ballDiameter,ballDiameter);
 			}
-			//Cue
+			//Cue ball
 			this.renderingContext.drawImage(this.cueBall.image, 0 , 0, 141,141, this.cueBall.positionX, this.cueBall.positionY,ballDiameter,ballDiameter);
+			//Cue
+			this.renderingContext.drawImage(this.cue.image,100 , 0, 1619, 53, this.cue.positionX , this.cue.positionY, 900, 20)
 		},
 		initTable() {
 			setTimeout(()=>{
 			console.log("temp temp temp, todo todo todo ")
-			this.stick= <IStick>{positionX:100,positionY:100,image:document.getElementById("stickImg")}
+			const cuePosition= <IPosition> {x:100,y:100}
+			this.cue= <ICue> { position:cuePosition, image:document.getElementById("cueV2Img")}
 			let windowWidth = window.innerWidth
 			let height = window.innerHeight
 			console.log("initial size:"+windowWidth+ "x "+height)
@@ -187,7 +185,7 @@ export default defineComponent({
 			let ballDiameterPx = 20
 			let imageScale=1
 			if(windowWidth>1400){
-				canvasWidth = CANVAS_MAXWIDTH
+				canvasWidth = CANVAS_MAX_WIDTH
 				canvasHeight = CANVAS_MAX_HEIGHT
 				ballDiameterPx = 35
 			}
@@ -238,7 +236,7 @@ export default defineComponent({
 				this.ballsRemaining.push(this.createBall(i,ballDiameterPx))	
 			}
 			this.addMouseListeners()
-			this.repaint()
+			window.requestAnimationFrame(this.repaintAll)
 		},300)
 	
 		},
@@ -345,9 +343,6 @@ export default defineComponent({
 			this.canvas.addEventListener("mousedown", this.handleMouseDown) 
 			this.canvas.addEventListener("mouseup", this.handleMouseUp) 
 		
-		},	
-		drawToken(square: ISquare,color:string) {			
-			
 		},
 		handleMouseClick(event: MouseEvent) {
 			console.log("click")
@@ -359,16 +354,15 @@ export default defineComponent({
 			console.log("Mouse up")
 		},
 		handleMouseMove(event:MouseEvent){
-			console.log("event:"+event.offsetX +" " +event.offsetY)
-		//	this.removePointerLine()
-		//	this.drawPointerLine(event)
-			this.changeStickPosition(event)
-		// This is heavy operations
-		this.repaint()
+			console.log("cuePosition:"+event.offsetX +" " +event.offsetY)		
+			this.updateCuePosition(event)
+	
+			window.requestAnimationFrame(this.repaintAll)
 		},
-		changeStickPosition(event:MouseEvent){
-			this.stick.positionX = event.offsetX
-			this.stick.positionY = event.offsetY
+	
+		updateCuePosition(event:MouseEvent){
+			this.cue.positionX = event.offsetX
+			this.cue.positionY = event.offsetY
 		},
 		removePointerLine(){
 			const pl = this.pointerLine
@@ -424,3 +418,8 @@ export default defineComponent({
 	visibility:hidden
 }
 </style>
+
+
+<!--
+ * @author antsa-1 from GitHub 
+ -->
