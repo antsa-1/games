@@ -1,7 +1,6 @@
-import { IUser } from "@/interfaces";
+import { ITable } from "@/interfaces";
 
-export const ANONYM = "Anom:"
-export const loginMixin = {
+export const tableMixin = {
 	data() {
 		return {
 			token: null
@@ -33,8 +32,21 @@ export const loginMixin = {
 		},
 		resignButtonVisible(){
 			return this.userName===this.theTable?.playerA?.name || this.userName===this.theTable?.playerB?.name
-		}
+		},
+		theTable(): ITable {
+			return this.$store.getters.theTable;
+		  },  
 
+	},
+	timeLeft(){
+		return this.secondsLeft
+	},
+	theTable() :ITable{
+		
+		return this.$store.getters.theTable;
+	},
+	watchers(){
+		return this.$store.getters.theTable.watchers
 	},
 	created() {
 		if(this.theTable.playerInTurn?.name===this.userName){
