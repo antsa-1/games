@@ -146,8 +146,7 @@ export interface IGame {
 
 export interface IBall {
 	diameter: number,
-	positionX: number,
-	positionY: number,
+	position: IPosition	
 	number: number,
 	color: string, // Yellow or Red if numbers are not displayed
 	image: HTMLImageElement
