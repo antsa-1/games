@@ -25,7 +25,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {IGameMode,IGameToken,IBall,	ITable,	ICue,IPosition, IPointerLine} from "../../interfaces";
-import { loginMixin } from "../../mixins/mixins";
+import { loginMixin, } from "../../mixins/mixins";
+import { tableMixin, } from "../../mixins/tableMixin";
 import { useRoute } from "vue-router";
 import Chat from "../Chat.vue";
 
@@ -34,7 +35,7 @@ const CANVAS_MAX_HEIGHT = 677
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
-	mixins: [loginMixin],
+	mixins: [loginMixin,tableMixin],
 	props:["watch"],
 	data(){
 		return{
@@ -44,11 +45,11 @@ export default defineComponent({
 			cueBall:<IBall>null,
 			cue:<ICue>null,
 			pointerLine:<IPointerLine>null,
-			mousePoint:<IPosition>null,
+			mousePoint:<IPosition>{x:0,y:0},
 		}
 	},
 	beforeCreated(){
-	
+		
 	},
 	created() {		
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
@@ -74,72 +75,14 @@ export default defineComponent({
 				this.removeMouseListener()
 			}
     	})
-		if(this.theTable.playerInTurn?.name===this.userName){
-			this.startTime=120
-			this.startReducer()
-		}
-	},
-	computed: {
-		tableWidth(){
-
-		},
-		tableHeight(){
-
-		},
-		timeLeft(){
-			return this.secondsLeft
-		},
-		theTable() :ITable{
-			
-			return this.$store.getters.theTable;
-		},
-		iconColor(){
-		 	const watchers=this.$store.getters.theTable.watchers
-			 if(watchers && watchers.length>1){
-				 return "green"
-			 }
-
-			 return "#000000"
-		},
-		watchers(){
-			return this.$store.getters.theTable.watchers
-		},
-		resignButtonDisabled(){
-			const table=this.$store.getters.theTable;
-			if(this.watch){
-			
-				return true
-			}else if(this.theTable && !this.theTable.playerInTurn){
-					
-				return true
-			}
-			else if(this.theTable.playerInTurn.name!==this.userName){
-					
-				return true
-			}else if(this.theTable && this.theTable.board&& this.theTable.board.length<4){
-					
-				return true
-			}
-				
-			return false
-		},
-		rematchButtonEnabled(){
-				const table=this.$store.getters.theTable;
-			 return !this.watch && table.playerInTurn ===null
-		},
-		resignButtonVisible(){
-			return this.userName===this.theTable?.playerA?.name || this.userName===this.theTable?.playerB?.name
-		}
 	
 	},
-	mounted() {
-		if(!this.$store.getters.theTable){
-			
-			this.$router.push('/error')
-			return;
-		}
+	computed: {
+
+	},
+	mounted() {	
 		this.initTable()
-		this.animate()
+		
 		if(this.watch === "1"){
 			this.drawBoard()
 		}
@@ -168,6 +111,12 @@ export default defineComponent({
 			this.renderingContext.drawImage(this.cueBall.image, 0 , 0, 141,141, this.cueBall.positionX, this.cueBall.positionY,ballDiameter,ballDiameter);
 			//Cue
 			this.renderingContext.drawImage(this.cue.image,100 , 0, 1619, 53, this.cue.positionX , this.cue.positionY, 900, 20)
+						this.renderingContext.beginPath();	
+			this.renderingContext.setLineDash([5, 15]);
+			console.log("CueBall:"+JSON.stringify(this.cueBall))
+			this.renderingContext.moveTo(this.cueBall.positionX+this.cueBall.diameter/2, this.cueBall.positionY+this.cueBall.diameter/2)
+			this.renderingContext.lineTo(this.mousePoint.x, this.mousePoint.y);
+			this.renderingContext.stroke();
 		},
 		initTable() {
 			setTimeout(()=>{
@@ -240,9 +189,7 @@ export default defineComponent({
 		},300)
 	
 		},
-		animate(){
-			
-		},
+	
 		startReducer(){			
 			if(this.redurcerInterval){
 				this.stopReducer()
@@ -310,33 +257,8 @@ export default defineComponent({
 			}			
 			return 5
 		},
-		stopReducer(){
-			clearInterval(this.redurcerInterval)
-			this.secondsLeft=null
-		},
+		
 	
-		playMoveNotification(){
-			if(this.soundOn){
-				const audioCtx = new (window.AudioContext )();
-
-				const oscillator = audioCtx.createOscillator();
-
-				oscillator.type = "sine";
-				oscillator.frequency.setValueAtTime(446, audioCtx.currentTime); // value in hertz
-				
-				oscillator.connect(audioCtx.destination);
-				oscillator.start();
-				setTimeout(
-					()=> {
-					oscillator.stop();
-					},
-					250
-				);
-			}
-		},		
-		removeMouseListeners(){
-			this.canvas.removeEventListener("click", this.handleClick, false);
-		},
 		addMouseListeners(){
 			this.canvas.addEventListener("click", this.handleMouseClick, false)
 			this.canvas.addEventListener("mousemove", this.handleMouseMove) 
@@ -356,7 +278,8 @@ export default defineComponent({
 		handleMouseMove(event:MouseEvent){
 			console.log("cuePosition:"+event.offsetX +" " +event.offsetY)		
 			this.updateCuePosition(event)
-	
+			this.mousePoint =<IPosition> {x:event.offsetX,y:event.offsetY}
+			this.updatePointerLine(event)
 			window.requestAnimationFrame(this.repaintAll)
 		},
 	
@@ -364,26 +287,14 @@ export default defineComponent({
 			this.cue.positionX = event.offsetX
 			this.cue.positionY = event.offsetY
 		},
-		removePointerLine(){
-			const pl = this.pointerLine
-			if(pl)
-			{
-				console.log("Removing_"+JSON.stringify(pl))
-				this.renderingContext.clearRect(pl.fromX,pl.fromY,pl.toX,pl.toY);	
-			}			
-		},
-		drawPointerLine(event:MouseEvent){
+	
+		updatePointerLine(event:MouseEvent){
 			if(!event){
 				console.log("No event:")
 				return
 			}
-			this.renderingContext.beginPath();	
-			this.renderingContext.setLineDash([5, 15]);
+
 			const cueBall = this.cueBall
-			console.log("CueBall:"+JSON.stringify(cueBall))
-			this.renderingContext.moveTo(cueBall.positionX+cueBall.diameter/2, cueBall.positionY+cueBall.diameter/2)
-			this.renderingContext.lineTo(event.offsetX, event.offsetY);
-			this.renderingContext.stroke();
 			this.pointerLine= {
 								fromX:cueBall.positionX+cueBall.diameter/2,
 								fromY:cueBall.positionY+cueBall.diameter/2,
@@ -391,23 +302,7 @@ export default defineComponent({
 								toY:event.offsetY,
 							}
 		},
-		disableBoard(){
-			console.log("disable")
-		},
-		rematch(){
-			
-			const obj ={title:"REMATCH", message:""}
-			this.user.webSocket.send(JSON.stringify(obj));	
-		},
-		resign(){
-			
-			const obj ={title:"RESIGN", message:this.tablea}
-			this.user.webSocket.send(JSON.stringify(obj));	
-		},
-		leaveTable(){
-			const obj ={title:"LEAVE_TABLE", message:this.theTable.tableId}
-			this?.user?.webSocket?.send(JSON.stringify(obj));
-		}
+	
 	},
 	
 });
