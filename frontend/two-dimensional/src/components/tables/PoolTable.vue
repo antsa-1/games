@@ -24,28 +24,32 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {IGameMode,IGameToken,IBall,	ITable,	ICue,IPosition, IPointerLine} from "../../interfaces";
+import {IGameMode,IGameToken,ITable} from "../../interfaces";
+import {IPoolTable, ICue,IPosition, IBall,IPointerLine} from "../../poolinterfaces";
 import { loginMixin, } from "../../mixins/mixins";
-import { tableMixin, } from "../../mixins/tableMixin";
+import { tablesMixin, } from "../../mixins/tablesMixin";
 import { useRoute } from "vue-router";
 import Chat from "../Chat.vue";
 
 const CANVAS_MAX_WIDTH = 1200
 const CANVAS_MAX_HEIGHT = 677
+const CUE_WIDTH = 1619
+const CUE_HEIGHT = 53
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
-	mixins: [loginMixin,tableMixin],
+	mixins: [loginMixin,tablesMixin],
 	props:["watch"],
-	data(){
+	data():IPoolTable{
 		return{
-			canvas:null,
-			poolTableImage:null,			
-			ballsRemaining :<Array<IBall>>[],
-			cueBall:<IBall>null,
-			cue:<ICue>null,
-			pointerLine:<IPointerLine>null,
-			mousePoint:<IPosition>{x:0,y:0},
+			canvas: undefined,
+			poolTableImage: undefined,			
+			ballsRemaining : [],
+			cueBall: undefined,
+			cue: undefined,
+			pointerLine: undefined,
+			mousePoint: {x:0,y:0},
+			
 		}
 	},
 	beforeCreated(){
@@ -75,7 +79,6 @@ export default defineComponent({
 				this.removeMouseListener()
 			}
     	})
-	
 	},
 	computed: {
 
@@ -102,30 +105,47 @@ export default defineComponent({
 			this.renderingContext.clearRect(0,0,this.canvasWidth,this.canvasHeight)
 			//Table
 			this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, this.canvas.width, this.canvas.height)			
-			const ballDiameter=this.cueBall.diameter
+			const ballDiameter = this.cueBall.diameter
 			//Balls
-			for(let i=0;i<this.ballsRemaining.length;i++){
-				this.renderingContext.drawImage(this.ballsRemaining[i].image, 0 , 0, 141,141, this.ballsRemaining[i].position.x, this.ballsRemaining[i].position.y,ballDiameter,ballDiameter);
-			}
-			console.log(JSON.stringify(this.ballsRemaining))
+		//	for(let i = 0; i < this.ballsRemaining.length; i++){
+		//		this.renderingContext.drawImage(this.ballsRemaining[i].image, 0 , 0, 141,141, this.ballsRemaining[i].position.x, this.ballsRemaining[i].position.y, ballDiameter,ballDiameter);
+		//	}
 			//Cue ball
-			this.renderingContext.drawImage(this.cueBall.image, 0 , 0, 141,141, this.cueBall.position.x, this.cueBall.position.y,ballDiameter,ballDiameter);
-//this.renderingContext.setTransform(2, 0, 0, 2,this.cueBall.position.x, this.cueBall.position.y); // sets scale and origin
-    	//	this.renderingContext.rotate(80);
+			
+			this.renderingContext.translate(this.cueBall.position.x,this.cueBall.position.y+ballDiameter)
+			this.renderingContext.drawImage(this.cueBall.image,-ballDiameter/2+3,-ballDiameter/2-3,ballDiameter,ballDiameter)
+		
 			//Cue
-			this.renderingContext.drawImage(this.cue.image,100 , 0, 1619, 53, this.cue.position.x , this.cue.position.y, 900, 20)
+			this.cue.position.x = this.cueBall.position.x
+			this.cue.position.y = this.cueBall.position.y
+			console.log("CUEBall:"+JSON.stringify(this.cueBall.position)," "+JSON.stringify(this.mousePoint))
+			/*
+				void ctx.drawImage(image, dx, dy);
+				void ctx.drawImage(image, dx, dy, dWidth, dHeight);
+				void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+			*/
+			//moves the canvas and its origin x units horizontally and y units vertically on the grid.		
+			
+			this.renderingContext.fillText("O", 0, 0)
+			this.renderingContext.rotate(-this.cue.angle-(90* (Math.PI/180)))
+			//const test=-22
+			this.renderingContext.drawImage(this.cue.image,-ballDiameter/2, -ballDiameter/2+4,-900,25 )			
+			// Reset current transformation matrix to the identity matrix
+			this.renderingContext.setTransform(1, 0, 0, 1, 0, 0);
+	
 			//Pointer line
-			this.renderingContext.beginPath();	
-			this.renderingContext.setLineDash([5, 15]);			
-			this.renderingContext.moveTo(this.cueBall.position.x+this.cueBall.diameter/2, this.cueBall.position.y+this.cueBall.diameter/2)
-			this.renderingContext.lineTo(this.mousePoint.x, this.mousePoint.y)
-			this.renderingContext.stroke()
+		//	this.renderingContext.beginPath()
+		//	this.renderingContext.setLineDash([5, 15])
+		//	this.renderingContext.moveTo(this.cueBall.position.x+this.cueBall.diameter/2, this.cueBall.position.y+this.cueBall.diameter/2)
+		//	this.renderingContext.lineTo(this.mousePoint.x, this.mousePoint.y)
+		//	this.renderingContext.stroke()
 		},
 		initTable() {
 			setTimeout(()=>{
 			console.log("temp temp temp, todo todo todo ")
 			const cuePosition= <IPosition> {x:100,y:100}
-			this.cue= <ICue> { position:cuePosition, image:document.getElementById("cueV2Img")}
+			const cueOrigin=<IPosition> {x:500,y:10}
+			this.cue= <ICue> { position:cuePosition, image:document.getElementById("cueV2Img"), width:CUE_WIDTH, height:CUE_HEIGHT}
 			let windowWidth = window.innerWidth
 			let height = window.innerHeight
 			console.log("initial size:"+windowWidth+ "x "+height)
@@ -175,12 +195,12 @@ export default defineComponent({
 							number:0,
 							color:"white",
 							image:document.getElementById("0")
-			}		
+			}
 			
 			for (let i=0; i<16; i++){
 				
 				if(i===0){
-					 // position 0 = cue ball
+					
 					continue
 				}
 				let ball=<IBall>(this.createBall(i,ballDiameterPx))
@@ -197,7 +217,7 @@ export default defineComponent({
 				this.stopReducer()
 			}
 			this.secondsLeft = 120;
-			this.redurcerInterval= setInterval(()=>{
+			this.redurcerInterval= setInterval(() => {
 				this.secondsLeft = this.secondsLeft-1
 				if(this.secondsLeft <= 0){
 					this.stopReducer()
@@ -274,22 +294,23 @@ export default defineComponent({
 			console.log("click")
 		},
 		handleMouseDown(event:MouseEvent){
-			console.log("Mouse down")
+			console.log("Mouse down"+event.offsetX +" " +event.offsetY)
 		},
 		handleMouseUp(event:MouseEvent){
-			console.log("Mouse up")
+			console.log("Mouse up"+event.offsetX +" " +event.offsetY)
 		},
 		handleMouseMove(event:MouseEvent){
-			console.log("cuePosition:"+event.offsetX +" " +event.offsetY)		
-			this.updateCuePosition(event)
-			this.mousePoint =<IPosition> {x:event.offsetX,y:event.offsetY}
+			
+			this.mousePoint =<IPosition> {x:event.offsetX, y:event.offsetY}
+			this.updateCue(event)
 			this.updatePointerLine(event)
 			window.requestAnimationFrame(this.repaintAll)
 		},
 	
-		updateCuePosition(event:MouseEvent){
-			this.cue.position.x = event.offsetX
-			this.cue.position.y = event.offsetY
+		updateCue(event:MouseEvent){			
+			let opposite = this.cue.position.x -this.mousePoint.x
+			let adjacent = this.cue.position.y	-this.mousePoint.y
+			this.cue.angle = Math.atan2(opposite, adjacent)	
 		},
 	
 		updatePointerLine(event:MouseEvent){
@@ -297,7 +318,6 @@ export default defineComponent({
 				console.log("No event:")
 				return
 			}
-
 			const cueBall = this.cueBall
 			this.pointerLine= {
 								fromX:cueBall.position.x+cueBall.diameter/2,

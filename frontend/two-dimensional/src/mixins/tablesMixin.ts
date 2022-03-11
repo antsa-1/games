@@ -1,6 +1,6 @@
 import { ITable } from "@/interfaces";
 
-export const tableMixin = {
+export const tablesMixin = {
 	data() {
 		return {
 			token: null

@@ -144,26 +144,6 @@ export interface IGame {
 	playerBEndRanking: number,
 }
 
-export interface IBall {
-	diameter: number,
-	position: IPosition	
-	number: number,
-	color: string, // Yellow or Red if numbers are not displayed
-	image: HTMLImageElement
-}
-export interface ICue {
-	position: IPosition,
-	image: HTMLImageElement
-}
-export interface IPointerLine {
-	startPosition: IPosition,
-	endPosition: IPosition,
-}
-
-export interface IPosition {
-	x: number,
-	y: number
-}
 
 export interface ISettings {
 	newPlayerSound: boolean,
