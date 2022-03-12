@@ -6,7 +6,7 @@ export interface IPoolTable {
     cue: ICue,
     pointerLine: IPointerLine,
     mousePoint: IPosition,
- 
+
 }
 export interface IBall {
     diameter: number,
@@ -18,11 +18,12 @@ export interface IBall {
 export interface ICue {
     position: IPosition,
     image: HTMLImageElement,
-    updateRotation(): number,
     angle: number,
     width: number,
     height: number,
-    
+    force: number,
+    origin: number
+
 }
 export interface IPointerLine {
     startPosition: IPosition,
