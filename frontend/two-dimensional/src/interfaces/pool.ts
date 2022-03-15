@@ -1,36 +1,52 @@
-export interface IPoolTable {
+export interface IPoolComponent {
+    position: IVector2,
+    image: IGameImage,
+}
+export interface IEightBallGame {
     canvas: HTMLCanvasElement,
-    poolTableImage: HTMLImageElement,
     ballsRemaining: Array<IBall>[],
     cueBall: IBall,
     cue: ICue,
-    pointerLine: IPointerLine,
-    mousePoint: IPosition,
-
+    poolTable: IPoolTable,
+    gameOptions: IEightBallGameOptions
 }
-export interface IBall {
+
+export interface IGameImage {
+    image: HTMLImageElement,
+    canvasDimension: IVector2,
+    canvasDestination: IVector2,
+    canvasRotationAngle: IVector2,
+    realDimension: IVector2,
+    visible: boolean
+}
+
+export interface IPoolTable extends IPoolComponent {
+    pointerLine: IPointerLine,
+    mousePoint: IVector2,
+}
+export interface IBall extends IPoolComponent {
+
     diameter: number,
-    position: IPosition,
+    radius: number;
+    velocity: IVector2,
     number: number,
     color: string, // Yellow or Red if numbers are not displayed
-    image: HTMLImageElement
 }
-export interface ICue {
-    position: IPosition,
-    image: HTMLImageElement,
-    angle: number,
-    width: number,
-    height: number,
-    force: number,
-    origin: number
+export interface ICue extends IPoolComponent {
 
+    //  angle: number,
+    force: IVector2,
 }
 export interface IPointerLine {
-    startPosition: IPosition,
-    endPosition: IPosition,
+    startPosition: IVector2,
+    endPosition: IVector2,
+}
+export interface IVector2 {
+    x: number,
+    y: number,
 }
 
-export interface IPosition {
-    x: number,
-    y: number
+export interface IEightBallGameOptions {
+    helperOrigo: boolean,
+    helperLine: boolean
 }

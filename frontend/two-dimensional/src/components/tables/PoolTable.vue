@@ -25,7 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {IGameMode,IGameToken,ITable} from "../../interfaces";
-import {IPoolTable, ICue,IPosition, IBall,IPointerLine} from "../../interfaces/pool";
+import {IPoolTable, ICue,IBall,IPointerLine, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions} from "../../interfaces/pool";
 import { loginMixin, } from "../../mixins/mixins";
 import { tablesMixin, } from "../../mixins/tablesMixin";
 import { useRoute } from "vue-router";
@@ -33,27 +33,26 @@ import Chat from "../Chat.vue";
 
 const CANVAS_MAX_WIDTH = 1200
 const CANVAS_MAX_HEIGHT = 677
-const CUE_WIDTH = 900
-const CUE_HEIGHT = 16
-let interval=undefined
+const CUE_MAX_WIDTH = 900
+const CUE_MAX_HEIGHT = 12
+const BALL_DIAMETER =34
+
+let interval = undefined
 
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
 	mixins: [loginMixin,tablesMixin],
 	props:["watch"],
-	data():IPoolTable{
+	data():IEightBallGame{
 		return{
-			canvas: undefined,
-			poolTableImage: undefined,			
-			ballsRemaining : [],
-			cueBall: undefined,
-			cue: undefined,
-			pointerLine: undefined,
-			mousePoint: {x:0,y:0},
-
-			
-		}
+				canvas: undefined,	
+				ballsRemaining : [],
+				cueBall: undefined,
+				cue: undefined,
+				poolTable: undefined,
+				gameOptions: undefined
+			}
 	},
 	beforeCreated(){
 		
@@ -103,153 +102,170 @@ export default defineComponent({
 			this.initTable()
 			
 		},
+		repaintComponent(component: IPoolComponent){
+			
+			//console.log("Painting:"+JSON.stringify(component))
+			const image = component.image
+			if( !component.image.visible){
+				return
+			}
+			this.renderingContext.translate(component.position.x, component.position.y)
+			if(image.canvasRotationAngle){				
+				this.renderingContext.rotate(image.canvasRotationAngle)
+			}
+		
+			//void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+			if(!image.canvasDestination){
+				image.canvasDestination = <IVector2> {x:0, y:0}
+			}
+			if(this.gameOptions && this.gameOptions.helperOrigo && component.hasOwnProperty('force')){
+
+				this.renderingContext.beginPath()
+				this.renderingContext.moveTo(-200, 0)
+				this.renderingContext.lineTo(200, 0)
+				this.renderingContext.stroke()
+				
+				this.renderingContext.beginPath()
+				this.renderingContext.moveTo(0, -200)
+				this.renderingContext.lineTo(0, 200)
+				this.renderingContext.stroke()
+				
+			}
+			this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
+			this.renderingContext.resetTransform()
+			this.renderingContext.fillText("O", 0, 0)
+		},
 		repaintAll(){
 			
-			this.renderingContext.clearRect(0,0,this.canvasWidth,this.canvasHeight)
+			this.renderingContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
 			//Table
-			this.renderingContext.drawImage(this.poolTableImage,0 , 0, 4551, 2570, 0, 0, this.canvas.width, this.canvas.height)			
-			const ballDiameter = this.cueBall.diameter
-			//Balls
-		//	for(let i = 0; i < this.ballsRemaining.length; i++){
-		//		this.renderingContext.drawImage(this.ballsRemaining[i].image, 0 , 0, 141,141, this.ballsRemaining[i].position.x, this.ballsRemaining[i].position.y, ballDiameter,ballDiameter);
-		//	}
-			//Cue ball
-			
-			this.renderingContext.drawImage(this.cueBall.image,this.cueBall.position.x,this.cueBall.position.y,ballDiameter,ballDiameter)
-		
-			//Cue
+			const t = this.poolTable.image
+			this.repaintComponent(this.poolTable)
+			this.repaintComponent(this.cueBall)
 			this.cue.position.x = this.cueBall.position.x
 			this.cue.position.y = this.cueBall.position.y
+			this.repaintComponent(this.cue)
+			for( let i = 0; i < this.ballsRemaining.length; i++){
+				this.repaintComponent(this.ballsRemaining[i])
+			}
 			
-			this.renderingContext.translate(this.cueBall.position.x+ballDiameter/2, this.cueBall.position.y+ballDiameter/2)
-	
 			/*
 				void ctx.drawImage(image, dx, dy);
 				void ctx.drawImage(image, dx, dy, dWidth, dHeight);
 				void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-			*/
-			//moves the canvas and its origin x units horizontally and y units vertically on the grid.		
-			
-			this.renderingContext.fillText("O", 0, 0)
-			this.renderingContext.rotate(-this.cue.angle-(88.5* (Math.PI/180)))
-			//const test=-2
-			
-			this.renderingContext.drawImage(this.cue.image,-CUE_WIDTH-ballDiameter, -7,this.cue.origin,CUE_HEIGHT )			
-			// Reset current transformation matrix to the identity matrix
-			this.renderingContext.setTransform(1, 0, 0, 1, 0, 0);
+			*/			
+			//this.renderingContext.fillText("O", 0, 0)
 	
-			//Pointer line
-		//	this.renderingContext.beginPath()
-		//	this.renderingContext.setLineDash([5, 15])
-		//	this.renderingContext.moveTo(this.cueBall.position.x, this.cueBall.position.y)
-		//	this.renderingContext.lineTo(this.mousePoint.x, this.mousePoint.y)
-		//	this.renderingContext.stroke()
-			
 		},
 		initTable() {
-			setTimeout(()=>{
-			console.log("temp temp temp, todo todo todo ")
+			setTimeout( () => {
+			
 			
 			let windowWidth = window.innerWidth
 			let height = window.innerHeight
-			console.log("initial size:"+windowWidth+ "x "+height)
+			
 			const table: ITable = this.theTable;
 			this.canvas = document.getElementById("canvas");
 			this.renderingContext = this.canvas.getContext("2d",{ alpha: false });
 			let canvasWidth = windowWidth;
 			let canvasHeight = height
-			let ballDiameterPx = 20
-			let imageScale=1
-			if(windowWidth>1400){
-				canvasWidth = CANVAS_MAX_WIDTH
-				canvasHeight = CANVAS_MAX_HEIGHT
-				ballDiameterPx = 34
-			}
-			else if(windowWidth >= 992 ){
-				canvasWidth=700
-				canvasHeight=395
-				let imageScale=0.75
-				ballDiameterPx = 30				
-				console.log("canvasWidth change:"+windowWidth +" x "+height)
-			}else if(windowWidth>768 && windowWidth < 992){
-				canvasWidth=500
-				canvasHeight=282
-				console.log("canvas change2:"+windowWidth +" x "+height)
-				let imageScale=0.65
-				ballDiameterPx = 21
-			}else{
-				canvasWidth=300
-				canvasHeight=169
-				console.log("canvas change3:"+windowWidth +" x "+height)
-				let imageScale=0.5
-				ballDiameterPx = 13 // Not properly visible
-			}		
-			
-				
+			canvasWidth = CANVAS_MAX_WIDTH
+			canvasHeight = CANVAS_MAX_HEIGHT
 			this.canvas.height = canvasHeight
 			this.canvas.width = canvasWidth
-		
-		
 			window.addEventListener("resize", this.resize)
-			const ballWidth = 16
-			const ballHeight = 16
-			this.cueBall= <IBall>{
-							diameter:ballDiameterPx,			
-							position:<IPosition>{x:this.canvas.width*0.25, y:this.canvas.height/2},						
-							number:0,
-							color:"white",
-							image:document.getElementById("0")
+			let dimsPoolTable: IVector2 = {x: CANVAS_MAX_WIDTH, y: CANVAS_MAX_HEIGHT}
+			let poolTableImage = <IGameImage> {
+												image: <HTMLImageElement>document.getElementById("tableImg"), 
+												canvasDimension: dimsPoolTable,
+												realDimension: {x:4551 ,y: 2570},
+												canvasRotationAngle: { x:0, y:0 },
+												visible: true										
 			}
-			const cuePosition = <IPosition>{x:this.cueBall.position.x-CUE_WIDTH, y:this.cueBall.position.y}
-			this.cue= <ICue> { position:cuePosition, image:document.getElementById("cue3Img"), width:CUE_WIDTH, height:CUE_HEIGHT, force:0,origin:CUE_WIDTH}
-			for (let i=0; i<16; i++){
-				
-				if(i===0){
-					
-					continue
+			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}}
+			let dimsCueBall: IVector2 = {x: BALL_DIAMETER, y: BALL_DIAMETER}
+			let cueBallImage = <IGameImage> {
+												image: <HTMLImageElement>document.getElementById("0"),
+												canvasDimension: dimsCueBall,
+												realDimension: {x: 141, y: 141},
+												canvasRotationAngle: { x:0, y:0 },
+												canvasDestination:{x:- BALL_DIAMETER/2, y: -BALL_DIAMETER/2},
+												visible: true
+			}
+			this.cueBall = <IBall>{
+												image: cueBallImage,
+												diameter: BALL_DIAMETER,
+												radius: BALL_DIAMETER/2,
+												position: <IVector2> {x: 311, y: Math.floor(this.canvas.height / 2)}, //311 is hardcoded for testing purposes
+												number:0,
+												color:"white",
+			}
+			let dimsCue: IVector2 ={x: CUE_MAX_WIDTH, y: CUE_MAX_HEIGHT}
+			let cueImage = <IGameImage> {
+												image: <HTMLImageElement>document.getElementById("cue3Img"),
+												canvasDimension: dimsCue,
+												realDimension:{ x: 1508, y: 22},
+												canvasDestination:{x: (-dimsCue.x-BALL_DIAMETER), y: -dimsCue.y/2},
+												canvasRotationAngle: { x:0, y:0 },
+												visible: true
+			}
+			let cuePosition = <IVector2> { x: this.cueBall.position.x, y: this.cueBall.position.y }	//5	
+			this.cue = <ICue> {position: cuePosition, image: cueImage, force: {x: 0,y: 0}}
+			for (let i = 0; i < 16; i++){
+				if(i !== 0){
+					let ball = <IBall> (this.createBall(i, BALL_DIAMETER))
+					this.ballsRemaining.push(this.createBall(i, BALL_DIAMETER))					
 				}
-				let ball=<IBall>(this.createBall(i,ballDiameterPx))
-				this.ballsRemaining.push(this.createBall(i,ballDiameterPx))	
 			}
-			this.poolTableImage = document.getElementById("tableImg")
+			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true}
 			this.addMouseListeners()
 			window.requestAnimationFrame(this.repaintAll)
-		},300)
-	
+		}, 300)	
 		},
-	
+
 		startReducer(){			
-			if(this.redurcerInterval){
+			if( this.redurcerInterval ){
 				this.stopReducer()
 			}
 			this.secondsLeft = 120;
-			this.redurcerInterval= setInterval(() => {
-				this.secondsLeft = this.secondsLeft-1
+			this.redurcerInterval = setInterval(() => {
+				this.secondsLeft = this.secondsLeft -1
 				if(this.secondsLeft <= 0){
 					this.stopReducer()
 					this.resign()
 				}
 			}, 1000)
 		},
-		createBall(ballNumber:number, ballDiameterPx:number){
-				return <IBall>{
-							diameter:ballDiameterPx,
-							position:<IPosition>{
-								x: this.canvas.width*0.65+(ballDiameterPx*0.90*this.calculateRackColumn(ballNumber)),
-								y: this.canvas.height/2-(ballDiameterPx*0.5*this.calculateRow(ballNumber))
-							},						
-							number:ballNumber,
-							color:this.calculateBallColor(ballNumber),
-							image:document.getElementById(ballNumber.toString())
-					}
-		},
+		createBall(ballNumber:number, ballDiameter:number){
+			const dims: IVector2 = {x: ballDiameter, y: ballDiameter}
+			let position:IVector2 =  {
+										x: this.canvas.width * 0.65 +(ballDiameter * 0.90 * this.calculateRackColumn(ballNumber)),
+										y: this.canvas.height /2 +(ballDiameter * 0.5 * this.calculateRackRow(ballNumber)),
+			}
+			let ballImage = <IGameImage> {
+							image: <HTMLImageElement>document.getElementById(ballNumber.toString()),
+							canvasDimension: dims,
+							realDimension: {x: 141, y: 141},
+							canvasRotationAngle: { x:0, y:0 },
+							canvasDestination:{x:- ballDiameter/2, y: -ballDiameter/2},
+							visible: true
+			}
+			return	<IBall>{
+							image: ballImage,
+							diameter: ballDiameter,
+							radius: ballDiameter /2,
+							position: position,
+							number: ballNumber,
+							color: this.calculateBallColor(ballNumber),
+			}
+		},	
 		calculateBallColor(ballNumber:number){
 			if(ballNumber===8){
 				return "black"
 			}
 			return ballNumber %2 ===0 ? "red":"yellow"
 		},
-		calculateRow(i){		
+		calculateRackRow(i){		
 			if(i===1 || i===8 || i==5){				
 				return 0
 			}
@@ -290,74 +306,82 @@ export default defineComponent({
 		
 	
 		addMouseListeners(){
-			this.canvas.addEventListener("click", this.handleMouseClick, false)
+			
 			this.canvas.addEventListener("mousemove", this.handleMouseMove) 
 			this.canvas.addEventListener("mousedown", this.handleMouseDown) 
 			this.canvas.addEventListener("mouseup", this.handleMouseUp) 
 		
 		},
-		handleMouseClick(event: MouseEvent) {
-			
-			console.log("click")
-		},
+	
 		handleMouseDown(event:MouseEvent){
 			console.log("Mouse down"+event.offsetX +" " +event.offsetY)			
-			interval = setInterval(this.increaseForce, 100)	
+			interval = setInterval(this.increaseForce, 50)	
 		},
-		increaseForce(){
-			console.log("FORCE:"+this.cue.force)
-			this.cue.force=this.cue.force+4
-			this.cue.origin-=3
+		increaseForce(){	
+			this.cue.force = this.cue.force + 5
+			this.cue.image.canvasDestination.x  = this.cue.image.canvasDestination.x - 3
 			requestAnimationFrame(this.repaintAll)
+			
 			if(this.cue.force >= 100){
-				clearInterval(interval)				
+				clearInterval(interval)
 				this.shootBall()
 			}
 		},
-		repaintCue(){
-			this.renderingContext.translate(this.cueBall.position.x+this.cueBall.diameter/2, this.cueBall.position.y+this.cueBall.diameter/2)
 	
-			/*
-				void ctx.drawImage(image, dx, dy);
-				void ctx.drawImage(image, dx, dy, dWidth, dHeight);
-				void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-			*/
-			//moves the canvas and its origin x units horizontally and y units vertically on the grid.		
-			
-			this.renderingContext.fillText("O", 0, 0)
-			this.renderingContext.rotate(-this.cue.angle-(88.5* (Math.PI/180)))
-			//const test=-2
-			console.log("CUE-pos:"+JSON.stringify(this.cue))
-			this.renderingContext.drawImage(this.cue.image,-CUE_WIDTH-this.cueBall.diameter, -7,this.cue.origin,CUE_HEIGHT )	
-		},
 		handleMouseUp(event:MouseEvent){
 			clearInterval(interval)
 			this.shootBall()
 		},
 		handleMouseMove(event:MouseEvent){
 			
-			this.mousePoint =<IPosition> {x:event.offsetX, y:event.offsetY}
+			this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }			
 			this.updateCue(event)
-			this.updatePointerLine(event)
+		//	this.updatePointerLine(event)
 			window.requestAnimationFrame(this.repaintAll)
 		},
 		shootBall(){
 		
-			if(this.cue.force <10 ){
+			if(this.cue.force < 10 ){
 				this.cue.force = 10
 			}
-			this.cue.origin=CUE_WIDTH+15
-			console.log("Shooting "+ this.cue.force+ " angle:"+this.cue.angle)
+			this.cue.image.canvasDestination.x = - CUE_MAX_WIDTH
+			
+
+			this.cueBall.velocity = <IVector2>{x :Math.cos(this.cue.angle),y: Math.sin(this.cue.angle)}
+		
+			//const angle = this.cue.angle
+			this.cue.origin = CUE_MAX_WIDTH
+			
 		//	const obj = { title: "MOVE", force: this.cue.force, angle: this.cue.angle,curve: 0 }; // Canvas size?
       		//this.user.webSocket.send(JSON.stringify(obj));
-			window.requestAnimationFrame(this.repaintAll)
-			this.cue.force = 0
+		//	this.cue.visible = false
+		
+			this.cue.image.visible = false
+			while(this.cue.force > 0){
+					this.cue.force --
+					this.cueBall.position.x += 2
+					this.cueBall.position.y += 0
+					window.requestAnimationFrame(this.repaintAll)
+			}
+				this.updateCue()
+		/*	setTimeout(()=>{
+				this.cue.visible =true
+			}, 1000)
+			*/
+			//this.cue.visible = true
 		},
       
-		updateCue(event:MouseEvent){			
-			let opposite = this.cue.position.x -this.mousePoint.x
-			let adjacent = this.cue.position.y	-this.mousePoint.y
-			this.cue.angle = Math.atan2(opposite, adjacent)	
+		updateCue(event:MouseEvent){
+			this.cue.force = 0
+			let opposite = this.cueBall.position.x - this.mousePoint.x
+			let adjacent = this.cueBall.position.y - this.mousePoint.y
+			if(adjacent === 0){
+				adjacent = 1
+			}
+		//	console.log("x:"+this.cue.position.x +" x2:"+this.mousePoint.x + " opposite="+opposite)
+		//	console.log("y:"+this.cue.position.y +" y2:"+this.mousePoint.y + " adjacent=="+adjacent)
+			const tempAngle = Math.atan2(opposite, adjacent)			
+			this.cue.image.canvasRotationAngle = -tempAngle- (90 * Math.PI/180)			
 		},
 	
 		updatePointerLine(event:MouseEvent){
