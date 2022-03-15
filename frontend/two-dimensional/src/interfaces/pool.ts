@@ -31,10 +31,12 @@ export interface IBall extends IPoolComponent {
     velocity: IVector2,
     number: number,
     color: string, // Yellow or Red if numbers are not displayed
+    
 }
 export interface ICue extends IPoolComponent {
 
     //  angle: number,
+
     force: IVector2,
 }
 export interface IPointerLine {
