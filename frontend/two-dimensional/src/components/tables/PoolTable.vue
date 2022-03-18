@@ -25,7 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {IGameMode,IGameToken,ITable} from "../../interfaces";
-import {IPoolTable, ICue,IBall,IPointerLine, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions, IPoolTableBoundries} from "../../interfaces/pool";
+import {IPoolTable, ICue,IBall,IPockets,IPocket, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions, IPoolTableBoundries} from "../../interfaces/pool";
 import { loginMixin, } from "../../mixins/mixins";
 import { tablesMixin, } from "../../mixins/tablesMixin";
 import { useRoute } from "vue-router";
@@ -185,7 +185,8 @@ export default defineComponent({
 												canvasRotationAngle: { x:0, y:0 },
 												visible: true										
 			}
-			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, boundries:<IPoolTableBoundries>{top: 80, right: 1122, bottom: 600, left:78}, mouseEnabled: true}
+			const poolTablePockets = <IPockets> {topLeft:{middle:{x:80, y:80}}}
+			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, boundries:<IPoolTableBoundries>{top: 80, right: 1120, bottom: 600, left:80}, mouseEnabled: true,pockets:poolTablePockets}
 			let dimsCueBall: IVector2 = {x: BALL_DIAMETER, y: BALL_DIAMETER}
 			let cueBallImage = <IGameImage> {
 												image: <HTMLImageElement>document.getElementById("0"),
@@ -385,16 +386,17 @@ export default defineComponent({
 						// Table collisions 
 						if(component.position.y <= this.poolTable.boundries.top + this.cueBall.radius){
 							//Check if goes into pocket
-							if(component.position.x > this.poolTable.boundries.left && component.position.x < this.poolTable.boundries.right){
+							if(this.isInPocket(component, this.poolTable.pockets.topLeft)){								
+								this.handleBallInPocket(component, this.poolTable.pockets.topLeft)								
+							}
+							else if(component.position.x > this.poolTable.boundries.left && component.position.x < this.poolTable.boundries.right){
 								component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
-							}else{
-								console.log("Goes into pocket")
 							}
 						}
 						if(component.position.x >= this.poolTable.boundries.right - this.cueBall.radius){
 							
 							//Check if goes into pocket
-							if(component.position.y >= this.poolTable.boundries.top+ this.cueBall.radius && component.position.y <= this.poolTable.boundries.bottom-this.cueBall.radius){
+							if(component.position.y >= this.poolTable.boundries.top+ this.cueBall.radius && component.position.y <= this.poolTable.boundries.bottom -this.cueBall.radius){
 								component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
 							}else{
 								console.log("Goes into pocket2")
@@ -412,13 +414,29 @@ export default defineComponent({
 						component.velocity.y *= FRICTION
 						window.requestAnimationFrame(this.repaintAll)
 						if(!this.calculateVelocityLength(component).moving){
-							clearTimeout(stop)							
+							clearInterval(stop)							
 							resolve("movement done")
 						}
 					}, 25)
 			});
 		},
-	
+		isInPocket(component:IPoolComponent, pocket:IPocket){
+			const ballPercentage = this.cueBall.diameter * 0.65
+			const inPocket = component.position.x - ballPercentage <= pocket.middle.x && component.position.y < pocket.middle.y+ ballPercentage
+			console.log("InPocket:"+inPocket +" "+ JSON.stringify(component.position)+ " MIDDLE:"+pocket.middle.x+" y:"+pocket.middle.y)
+			return inPocket
+		},
+		handleBallInPocket (component:IPoolComponent, pocket:IPocket){
+			component.position = <IVector2> pocket.middle								
+			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.5
+			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.5
+			setTimeout(()=>{
+							component.velocity.x = 0
+							component.velocity.y = 0
+							component.image.canvasDimension.x *= 2
+							component.image.canvasDimension.y *= 2
+			}, 300)
+		},
 		calculateVelocityLength(component:IPoolComponent) :IPoolComponent {
 			const length = Math.sqrt(Math.pow(component.velocity.x, 2) + Math.pow(component.velocity.y, 2))			
 			if(length < 5){

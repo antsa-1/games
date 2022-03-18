@@ -26,7 +26,8 @@ export interface IPoolTable extends IPoolComponent {
     pointerLine: IPointerLine,
     mousePoint: IVector2,
     boundries: IPoolTableBoundries
-    mouseEnabled: boolean
+    mouseEnabled: boolean,
+    pockets: IPockets
 }
 
 export interface IPoolTableBoundries {
@@ -35,19 +36,27 @@ export interface IPoolTableBoundries {
     bottom: number,
     left: number,
 }
+
+export interface IPockets {
+    topLeft: IPocket,
+    topMiddle: IPocket,
+    topRight: IPocket,
+    bottomRight: IPocket,
+    bottomMiddle: IPocket,
+    bottomLeft: IPocket
+}
+export interface IPocket {
+    middle: IVector2,
+    direction?:number
+}
 export interface IBall extends IPoolComponent {
     diameter: number,
     radius: number,
     number: number,
     color: string, // Yellow or Red if numbers are not displayed
-    
     collided: boolean
-
 }
 export interface ICue extends IPoolComponent {
-
-    //  angle: number,
-
     force: number,
 }
 export interface IPointerLine {
