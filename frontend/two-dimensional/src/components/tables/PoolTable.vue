@@ -25,7 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {IGameMode,IGameToken,ITable} from "../../interfaces";
-import {IPoolTable, ICue,IBall,IPointerLine, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions} from "../../interfaces/pool";
+import {IPoolTable, ICue,IBall,IPointerLine, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions, IPoolTableBoundries} from "../../interfaces/pool";
 import { loginMixin, } from "../../mixins/mixins";
 import { tablesMixin, } from "../../mixins/tablesMixin";
 import { useRoute } from "vue-router";
@@ -37,8 +37,9 @@ const CUE_MAX_WIDTH = 900
 const CUE_MAX_HEIGHT = 12
 const BALL_DIAMETER = 34
 const SECOND_IN_MILLIS = 1000
-let interval = undefined
-const DELTA = 1/1000
+const FRICTION = 0.98
+let cueForceInterval = undefined
+const DELTA = 1/2
 
 export default defineComponent({
 	components: { Chat },
@@ -84,7 +85,9 @@ export default defineComponent({
     	})
 	},
 	computed: {
-
+			ballsMoving(){
+				return this.ballsRemaining.filte
+			}
 	},
 	mounted() {	
 		this.initTable()
@@ -143,8 +146,7 @@ export default defineComponent({
 			const t = this.poolTable.image
 			this.repaintComponent(this.poolTable)
 			this.repaintComponent(this.cueBall)
-			this.cue.position.x = this.cueBall.position.x
-			this.cue.position.y = this.cueBall.position.y
+			
 			this.repaintComponent(this.cue)
 			for( let i = 0; i < this.ballsRemaining.length; i++){
 				this.repaintComponent(this.ballsRemaining[i])
@@ -183,7 +185,7 @@ export default defineComponent({
 												canvasRotationAngle: { x:0, y:0 },
 												visible: true										
 			}
-			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}}
+			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, boundries:<IPoolTableBoundries>{top: 80, right: 1122, bottom: 600, left:78}, mouseEnabled: true}
 			let dimsCueBall: IVector2 = {x: BALL_DIAMETER, y: BALL_DIAMETER}
 			let cueBallImage = <IGameImage> {
 												image: <HTMLImageElement>document.getElementById("0"),
@@ -200,6 +202,8 @@ export default defineComponent({
 												position: <IVector2> {x: 311, y: Math.floor(this.canvas.height / 2)}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
+												velocity:<IVector2>{ x:0, y:0},
+												moving: false,
 			}
 			let dimsCue: IVector2 ={x: CUE_MAX_WIDTH, y: CUE_MAX_HEIGHT}
 			let cueImage = <IGameImage> {
@@ -211,7 +215,7 @@ export default defineComponent({
 												visible: true
 			}
 			let cuePosition = <IVector2> { x: this.cueBall.position.x, y: this.cueBall.position.y }	//5	
-			let cueForce = <IVector2>{x: 0,y: 0}
+			let cueForce = 0
 			this.cue = <ICue> {position: cuePosition, image: cueImage, force: cueForce}
 			for (let i = 0; i < 16; i++){
 				if(i !== 0){
@@ -252,7 +256,7 @@ export default defineComponent({
 							canvasDestination:{x:- ballDiameter/2, y: -ballDiameter/2},
 							visible: true
 			}
-			return	<IBall>{
+			return <IBall>{
 							image: ballImage,
 							diameter: ballDiameter,
 							radius: ballDiameter /2,
@@ -293,107 +297,138 @@ export default defineComponent({
 			return -4
 		},
 		calculateRackColumn(i){			
-			if(i===1){				
+			if(i===1){
 				return 1
 			}
-			else if(i===10 || i===3){				
+			else if(i===10 || i===3){
 				return 2
-			}else if(i===4 ||  i===8 || i===14 ){				
+			}else if(i===4 ||  i===8 || i===14 ){	
 				return 3
-			}else if(  i===7 ||i===9||i===2 ||i===15){				
+			}else if(  i===7 ||i===9||i===2 ||i===15){
 				return 4
-			}			
+			}
 			return 5
 		},
-		
-	
 		addMouseListeners(){
-			
-			this.canvas.addEventListener("mousemove", this.handleMouseMove) 
-			this.canvas.addEventListener("mousedown", this.handleMouseDown) 
-			this.canvas.addEventListener("mouseup", this.handleMouseUp) 
-		
-		},
-	
+			this.canvas.addEventListener("mousemove", this.handleMouseMove)
+			this.canvas.addEventListener("mousedown", this.handleMouseDown)
+			this.canvas.addEventListener("mouseup", this.handleMouseUp)
+		},	
 		handleMouseDown(event:MouseEvent){
-			console.log("Mouse down"+event.offsetX +" " +event.offsetY)			
-			interval = setInterval(this.increaseCueForce, 50)	
+			if(this.poolTable.mouseEnabled){
+				cueForceInterval = setInterval(this.updateCueForce, 50)
+			}
 		},	
 	
 		handleMouseUp(event:MouseEvent){
-			clearInterval(interval)
-			this.shootBall()
-		},
-		handleMouseMove(event:MouseEvent){
-			
-			this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
-			if(this.cue.image.visible){
-				this.updateCueAngle(event)
-			}
-			//	this.updatePointerLine(event)
-			if (this.cue.image.visible.requestAnimationFrame){
-				window.requestAnimationFrame(this.repaintAll)
-			}
-			
-		},
-		increaseCueForce(){	
-			console.log("Force:"+this.cue.force.x)
-			this.cue.force.x += 100
-			this.cue.image.canvasDestination.x  -= 5
-			requestAnimationFrame(this.repaintAll)
-			
-			if(this.cue.force >= 1000){
-				clearInterval(interval)
+			if(this.poolTable.mouseEnabled){
+				clearInterval(cueForceInterval)
 				this.shootBall()
 			}
 		},
-		shootBall(){
-			console.log("Shoot:"+this.cue.force.x +" angle:"+this.cue.image.canvasRotationAngle)
-			if(this.cue.force.x < 10 ){
-				this.cue.force.x = 10
-			}
-			let dimsCue: IVector2 ={x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
-			this.cue.image.canvasDestination=dimsCue
-			const force = this.cue.force.x
-			this.cueBall.velocity = <IVector2>{x : force * Math.cos(this.cue.image.canvasRotationAngle),y: force * Math.sin(this.cue.image.canvasRotationAngle)}
-			console.log("Velocity:"+JSON.stringify(this.cueBall.velocity))
-			this.animateComponentMovement(this.cue, 10, 50, this.cueBall.velocity).then(()=>{
-				
-				//this.cue.image.visible = false
-				this.animateComponentMovement(this.cueBall, 10, 50, this.cueBall.velocity)
-			})
-			
-			//const angle = this.cue.angle
-			
-			
-		//	const obj = { title: "MOVE", force: this.cue.force, angle: this.cue.angle,curve: 0 }; // Canvas size?
-      		//this.user.webSocket.send(JSON.stringify(obj));
-		//	this.cue.visible = false
-	
+		handleCollision(component:IPoolComponent){
+
 		},
-		animateComponentMovement(component:IPoolComponent, iterationCount:number, refreshRatePerSecond:number, velocity:IVector2){
-			return new Promise((resolve, reject) => {
+		handleMouseMove(event:MouseEvent){
+			
+			if(!this.cueBall.moving){
 				
-  				const stop = setInterval(() => {
-					console.log("Update componentPosition:"+JSON.stringify(component))
-					component.position.x += velocity.x * 0.5
-					component.position.y += velocity.y * 0.5
-					window.requestAnimationFrame(this.repaintAll)	// Not guaranteed to get all requestedFrames
-					iterationCount--
-					if(iterationCount <= 0){
-						console.log("animation stoppage time")
-						clearInterval(stop)
-						resolve("movement done")				
-					}
-					
-			}, SECOND_IN_MILLIS / refreshRatePerSecond)
+				this.cue.position.x = this.cueBall.position.x
+			
+				this.cue.position.y = this.cueBall.position.y
+				
+				this.cue.image.visible = true
+				this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
+				if(this.cue.image.visible){
+					this.updateCueAngle(event)
+					window.requestAnimationFrame(this.repaintAll)
+				}
+				//	this.updatePointerLine(event)				
+			}			
+		},
+		
+		shootBall(){
+			console.log("Shoot:"+this.cue.force +" angle:"+this.cue.image.canvasRotationAngle)
+			this.poolTable.mouseEnabled = false
+			if(this.cue.force < 10 ){
+				this.cue.force = 10
+			}
+			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
+			this.cue.image.canvasDestination = dimensions
+			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
+		
+			
+			this.collideCueWithCueBall().then(() => {				
+				this.cue.image.visible = false
+				this.cue.force = 0			
+				this.cueBall.moving = true	
+				this.handleCollisions().then(() => {
+					console.log("Animations should be done now")
+					this.cueBall.moving = false
+					this.poolTable.mouseEnabled = true
+				})
+			})
+		},
+		collideCueWithCueBall(){
+			return new Promise((resolve) => {
+					this.cue.position = this.cueBall.position
+					setTimeout(() => {
+						window.requestAnimationFrame(this.repaintAll)
+						resolve("movement done")
+					}, 145)
+			});
+		},
+		handleCollisions(){
+				let component= <IPoolComponent>this.cueBall
+				return new Promise((resolve) => {
+					const stop = setInterval(() => {
+						// Table collisions 
+						if(component.position.y <= this.poolTable.boundries.top + this.cueBall.radius){
+							//Check if goes into pocket
+							if(component.position.x > this.poolTable.boundries.left && component.position.x < this.poolTable.boundries.right){
+								component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
+							}else{
+								console.log("Goes into pocket")
+							}
+						}
+						if(component.position.x >= this.poolTable.boundries.right - this.cueBall.radius){
+							
+							//Check if goes into pocket
+							if(component.position.y >= this.poolTable.boundries.top+ this.cueBall.radius && component.position.y <= this.poolTable.boundries.bottom-this.cueBall.radius){
+								component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
+							}else{
+								console.log("Goes into pocket2")
+							}
+						}
+						if(component.position.y >= this.poolTable.boundries.bottom - this.cueBall.radius){
+							component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
+						}
+						if(component.position.x <= this.poolTable.boundries.left + this.cueBall.radius){
+							component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
+						}
+						component.position.x += component.velocity.x * DELTA
+						component.position.y += component.velocity.y * DELTA
+						component.velocity.x *= FRICTION // Friction
+						component.velocity.y *= FRICTION
+						window.requestAnimationFrame(this.repaintAll)
+						if(!this.calculateVelocityLength(component).moving){
+							clearTimeout(stop)							
+							resolve("movement done")
+						}
+					}, 25)
 			});
 		},
 	
-	
-	
+		calculateVelocityLength(component:IPoolComponent) :IPoolComponent {
+			const length = Math.sqrt(Math.pow(component.velocity.x, 2) + Math.pow(component.velocity.y, 2))			
+			if(length < 5){
+				component.moving = false
+				component.velocity = <IVector2> {x: 0, y: 0}
+			}
+			return component
+		},
 		updateCueAngle(event:MouseEvent){
-			console.log("Update cue")
+			
 			let opposite = this.mousePoint.y - this.cueBall.position.y
 			let adjacent = this.mousePoint.x - this.cueBall.position.x
 		
@@ -401,7 +436,16 @@ export default defineComponent({
 			this.cue.image.canvasRotationAngle = tempAngle	
 			window.requestAnimationFrame(this.repaintAll)	
 		},
-	
+		updateCueForce(){			
+			this.cue.force += 5
+			this.cue.image.canvasDestination.x  -= 5
+			requestAnimationFrame(this.repaintAll)
+			
+			if(this.cue.force >= 100){
+				clearInterval(cueForceInterval)
+				this.shootBall()
+			}
+		},
 		updatePointerLine(event:MouseEvent){
 			if(!event){
 				console.log("No event:")

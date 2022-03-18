@@ -1,6 +1,8 @@
 export interface IPoolComponent {
     position: IVector2,
     image: IGameImage,
+    moving: boolean,
+    velocity: IVector2,
 }
 export interface IEightBallGame {
     canvas: HTMLCanvasElement,
@@ -23,21 +25,30 @@ export interface IGameImage {
 export interface IPoolTable extends IPoolComponent {
     pointerLine: IPointerLine,
     mousePoint: IVector2,
+    boundries: IPoolTableBoundries
+    mouseEnabled: boolean
+}
+
+export interface IPoolTableBoundries {
+    top: number,
+    right: number,
+    bottom: number,
+    left: number,
 }
 export interface IBall extends IPoolComponent {
-
     diameter: number,
-    radius: number;
-    velocity: IVector2,
+    radius: number,
     number: number,
     color: string, // Yellow or Red if numbers are not displayed
     
+    collided: boolean
+
 }
 export interface ICue extends IPoolComponent {
 
     //  angle: number,
 
-    force: IVector2,
+    force: number,
 }
 export interface IPointerLine {
     startPosition: IVector2,
