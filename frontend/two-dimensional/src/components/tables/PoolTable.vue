@@ -192,12 +192,12 @@ export default defineComponent({
 
 
 			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, mouseEnabled: true,pockets:poolTablePockets}
-			const topLeftPart :IBoundry = <IBoundry>{a:80, b:118, c:570}
-			const topRightPart :IBoundry = <IBoundry>{a:80, b:600, c:1090}
-			const rightPart :IBoundry = <IBoundry>{a:1122, b:117, c:560}
-			const bottomRightPart :IBoundry = <IBoundry>{a:600, b:600, c:1090}
-			const bottomLeftPart :IBoundry = <IBoundry>{a:600, b:118, c:570}
-			const leftPart :IBoundry = <IBoundry>{a:80, b:120, c:560}
+			const topLeftPart :IBoundry = <IBoundry>{a:80, b:118, c:572}
+			const topRightPart :IBoundry = <IBoundry>{a:80, b:644, c:1090}
+			const rightPart :IBoundry = <IBoundry>{a:1122, b:118, c:560}
+			const bottomRightPart :IBoundry = <IBoundry>{a:600, b:644, c:1090}
+			const bottomLeftPart :IBoundry = <IBoundry>{a:600, b:118, c:572}
+			const leftPart :IBoundry = <IBoundry>{a:80, b:118, c:560}
 			
 			this.poolTable.topLeftPart = topLeftPart
 			this.poolTable.topRightPart = topRightPart
@@ -305,6 +305,7 @@ export default defineComponent({
 			this.canvas.addEventListener("mouseup", this.handleMouseUp)
 		},	
 		handleMouseDown(event:MouseEvent){
+			console.log(event.offsetX+":"+event.offsetY)
 			if(this.poolTable.mouseEnabled){
 				cueForceInterval = setInterval(this.updateCueForce, 50)
 			}
@@ -318,7 +319,7 @@ export default defineComponent({
 		},
 		handleMouseMove(event:MouseEvent){
 			
-			if(this.poolTable.mouseEnabled){				
+			if(this.poolTable.mouseEnabled){
 				this.cue.position.x = this.cueBall.position.x
 				this.cue.position.y = this.cueBall.position.y
 				this.cue.image.visible = true
@@ -328,7 +329,7 @@ export default defineComponent({
 					window.requestAnimationFrame(this.repaintAll)
 				}
 				//	this.updatePointerLine(event)				
-			}			
+			}
 		},
 		
 		shootBall(){
@@ -400,8 +401,7 @@ export default defineComponent({
 		},
 		handleBallCollisions(){			
 			for (let i = 0; i < this.ballsRemaining.length; i++){
-				const ball:IBall = this.ballsRemaining[i]
-					console.log("Ball "+ball)
+				const ball:IBall = this.ballsRemaining[i]					
 				if(this.isMoving(ball)){
 					this.handleTableCollision(ball)
 				}
@@ -474,25 +474,22 @@ export default defineComponent({
 						}
 					
 						else if(this.isTableTopBoundry(component) ){
-							
+							console.log("Top boundry"+JSON.stringify(component.position))	
 							if(this.isInPocket(component, this.poolTable.pockets.topLeft)){								
 								this.handleBallInPocket(component, this.poolTable.pockets.topLeft)								
 							}
 							component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
 						}
 						else if(this.isTableBottomBoundry(component)){
-							console.log("Lower boundry")
-							
+							console.log("Lower boundry"+JSON.stringify(component.position))							
 							component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
 						}
-						else if(this.isTableLeftBoundry(component) ){
-							
-							
+						else if(this.isTableLeftBoundry(component) ){						
+							console.log("Left boundry"+JSON.stringify(component.position))
 							component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
 						}
 						else if(this.isTableRightBoundry(component) ){
-							
-							
+							console.log("Right boundry"+JSON.stringify(component.position))							
 							component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
 						}
 						component.position.x += component.velocity.x * DELTA
