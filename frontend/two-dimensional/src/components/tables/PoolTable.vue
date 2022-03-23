@@ -147,10 +147,7 @@ export default defineComponent({
 			this.repaintComponent(this.cueBall)
 			
 			
-			for( let i = 0; i < this.ballsRemaining.length; i++){
-				this.repaintComponent(this.ballsRemaining[i])
-			}
-			this.repaintComponent(this.cue)
+			
 			/*
 				void ctx.drawImage(image, dx, dy);
 				void ctx.drawImage(image, dx, dy, dWidth, dHeight);
@@ -190,6 +187,10 @@ export default defineComponent({
 			this.renderingContext.closePath();
 			this.renderingContext.fill()
 			this.renderingContext.beginPath();
+			for( let i = 0; i < this.ballsRemaining.length; i++){
+				this.repaintComponent(this.ballsRemaining[i])
+			}
+			this.repaintComponent(this.cue)
 		},
 		
 		initTable() {
@@ -263,7 +264,7 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x: 78, y: 199}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x: 129, y: 199}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
 												velocity:<IVector2>{ x:0, y:0},												
@@ -467,7 +468,7 @@ export default defineComponent({
 		handleBallInPocket (component:IBall, pocket:IPocket){									
 			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.8
 			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.8
-			component.position = pocket.center
+			component.position = <IVector2> {x:pocket.center.x, y:pocket.center.y}
 			component.velocity.x = 0
 			component.velocity.y = 0		
 		},
@@ -536,16 +537,13 @@ export default defineComponent({
 			if(this.isTableTopBoundry(ball) ){
 				console.log("Top boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
-			}
-			else if(this.isTableBottomBoundry(ball)){
+			}else if(this.isTableBottomBoundry(ball)){
 				console.log("Lower boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
-			}
-			else if(this.isTableLeftBoundry(ball) ){						
+			}else if(this.isTableLeftBoundry(ball) ){						
 				console.log("Left boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
-			}
-			else if(this.isTableRightBoundry(ball) ){
+			}else if(this.isTableRightBoundry(ball) ){
 				console.log("Right boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
 			}else{
