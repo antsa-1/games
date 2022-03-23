@@ -25,16 +25,21 @@ export interface IGameImage {
 export interface IPoolTable extends IPoolComponent {
     pointerLine: IPointerLine,
     mousePoint: IVector2,
-    boundries: IPoolTableBoundries
     mouseEnabled: boolean,
     pockets: IPockets
+    topLeftPart:IBoundry,
+    topRightPart:IBoundry,
+    rightPart:IBoundry,
+    bottomRightPart:IBoundry,
+    bottomLeftPart:IBoundry,
+    leftPart:IBoundry,
 }
 
-export interface IPoolTableBoundries {
-    top: number,
-    right: number,
-    bottom: number,
-    left: number,
+
+export interface IBoundry {
+    a: number,
+    b: number,
+    c: number
 }
 
 export interface IPockets {
@@ -47,14 +52,14 @@ export interface IPockets {
 }
 export interface IPocket {
     middle: IVector2,
-    direction?:number
+    direction?: number
 }
 export interface IBall extends IPoolComponent {
     diameter: number,
     radius: number,
     number: number,
     color: string, // Yellow or Red if numbers are not displayed
-    collided: boolean
+    inPocket: boolean
 }
 export interface ICue extends IPoolComponent {
     force: number,

@@ -25,7 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {IGameMode,IGameToken,ITable} from "../../interfaces";
-import {IPoolTable, ICue,IBall,IPockets,IPocket, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions, IPoolTableBoundries} from "../../interfaces/pool";
+import {IPoolTable, ICue,IBall,IPockets,IPocket, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions,  IBoundry} from "../../interfaces/pool";
 import { loginMixin, } from "../../mixins/mixins";
 import { tablesMixin, } from "../../mixins/tablesMixin";
 import { useRoute } from "vue-router";
@@ -37,7 +37,7 @@ const CUE_MAX_WIDTH = 900
 const CUE_MAX_HEIGHT = 12
 const BALL_DIAMETER = 34
 const SECOND_IN_MILLIS = 1000
-const FRICTION = 0.98
+const FRICTION = 0.985
 let cueForceInterval = undefined
 const DELTA = 1/2
 
@@ -85,9 +85,7 @@ export default defineComponent({
     	})
 	},
 	computed: {
-			ballsMoving(){
-				return this.ballsRemaining.filte
-			}
+			
 	},
 	mounted() {	
 		this.initTable()
@@ -103,7 +101,8 @@ export default defineComponent({
 	methods: {
 		resize(){ 
 			//TODO, not init all
-			this.initTable()
+			console.log("****RESIZE")
+			//this.initTable()
 			
 		},
 		repaintComponent(component: IPoolComponent){
@@ -147,11 +146,11 @@ export default defineComponent({
 			this.repaintComponent(this.poolTable)
 			this.repaintComponent(this.cueBall)
 			
-			this.repaintComponent(this.cue)
+			
 			for( let i = 0; i < this.ballsRemaining.length; i++){
 				this.repaintComponent(this.ballsRemaining[i])
 			}
-			
+			this.repaintComponent(this.cue)
 			/*
 				void ctx.drawImage(image, dx, dy);
 				void ctx.drawImage(image, dx, dy, dWidth, dHeight);
@@ -160,7 +159,9 @@ export default defineComponent({
 			//this.renderingContext.fillText("O", 0, 0)
 	
 		},
+		
 		initTable() {
+			console.log("****initTable")
 			setTimeout( () => {
 			
 			
@@ -186,8 +187,26 @@ export default defineComponent({
 												visible: true										
 			}
 			const poolTablePockets = <IPockets> {topLeft:{middle:{x:80, y:80}}}
-			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, boundries:<IPoolTableBoundries>{top: 80, right: 1120, bottom: 600, left:80}, mouseEnabled: true,pockets:poolTablePockets}
-			let dimsCueBall: IVector2 = {x: BALL_DIAMETER, y: BALL_DIAMETER}
+			//component.position.x >=118 && component.position.x <=570 && component.position.y -this.cueBall.radius <= 78
+		
+
+
+			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, mouseEnabled: true,pockets:poolTablePockets}
+			const topLeftPart :IBoundry = <IBoundry>{a:80, b:118, c:570}
+			const topRightPart :IBoundry = <IBoundry>{a:80, b:600, c:1090}
+			const rightPart :IBoundry = <IBoundry>{a:1122, b:117, c:560}
+			const bottomRightPart :IBoundry = <IBoundry>{a:600, b:600, c:1090}
+			const bottomLeftPart :IBoundry = <IBoundry>{a:600, b:118, c:570}
+			const leftPart :IBoundry = <IBoundry>{a:80, b:120, c:560}
+			
+			this.poolTable.topLeftPart = topLeftPart
+			this.poolTable.topRightPart = topRightPart
+			this.poolTable.rightPart = rightPart
+			this.poolTable.bottomRightPart = bottomRightPart
+			this.poolTable.bottomLeftPart = bottomLeftPart
+			this.poolTable.leftPart = leftPart
+
+			const dimsCueBall: IVector2 = {x: BALL_DIAMETER, y: BALL_DIAMETER}
 			let cueBallImage = <IGameImage> {
 												image: <HTMLImageElement>document.getElementById("0"),
 												canvasDimension: dimsCueBall,
@@ -200,11 +219,10 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x: 311, y: Math.floor(this.canvas.height / 2)}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x: 311, y: 514}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
-												velocity:<IVector2>{ x:0, y:0},
-												moving: false,
+												velocity:<IVector2>{ x:0, y:0},												
 			}
 			let dimsCue: IVector2 ={x: CUE_MAX_WIDTH, y: CUE_MAX_HEIGHT}
 			let cueImage = <IGameImage> {
@@ -218,18 +236,31 @@ export default defineComponent({
 			let cuePosition = <IVector2> { x: this.cueBall.position.x, y: this.cueBall.position.y }	//5	
 			let cueForce = 0
 			this.cue = <ICue> {position: cuePosition, image: cueImage, force: cueForce}
-			for (let i = 0; i < 16; i++){
-				if(i !== 0){
-					let ball = <IBall> (this.createBall(i, BALL_DIAMETER))
-					this.ballsRemaining.push(this.createBall(i, BALL_DIAMETER))					
-				}
+			for (let i = 1; i < 16; i++){
+				let ball =	this.createBall(i, this.cueBall.diameter)				
+				this.ballsRemaining.push(ball)			
 			}
+			this.ballsRemaining.push(this.cueBall)
 			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true}
 			this.addMouseListeners()
 			window.requestAnimationFrame(this.repaintAll)
 		}, 300)	
 		},
-
+		isTableTopBoundry(component:IPoolComponent){
+		
+			return component.position.x >= this.poolTable.topLeftPart.b &&  component.position.x <=this.poolTable.topLeftPart.c && component.position.y -this.cueBall.radius <=this.poolTable.topLeftPart.a
+				|| component.position.x >= this.poolTable.topRightPart.b &&  component.position.x <=this.poolTable.topRightPart.c && component.position.y -this.cueBall.radius <=this.poolTable.topRightPart.a
+		},
+		isTableLeftBoundry(component:IPoolComponent){
+			return component.position.x <= this.poolTable.leftPart.a+this.cueBall.radius &&  component.position.y >=this.poolTable.leftPart.b && component.position.y  <=this.poolTable.leftPart.c
+		},
+		isTableRightBoundry(component:IPoolComponent){
+			return component.position.x >= this.poolTable.rightPart.a - this.cueBall.radius &&  component.position.y >=this.poolTable.rightPart.b && component.position.y <= this.poolTable.rightPart.c
+		},
+		isTableBottomBoundry(component:IPoolComponent){
+			return component.position.x >= this.poolTable.bottomLeftPart.b && component.position.x <=this.poolTable.bottomLeftPart.c && component.position.y +this.cueBall.radius >=this.poolTable.bottomLeftPart.a
+				|| component.position.x >= this.poolTable.bottomRightPart.b && component.position.x <=this.poolTable.bottomRightPart.c && component.position.y +this.cueBall.radius >=this.poolTable.bottomRightPart.a
+		},
 		startReducer(){			
 			if( this.redurcerInterval ){
 				this.stopReducer()
@@ -264,10 +295,282 @@ export default defineComponent({
 							position: position,
 							number: ballNumber,
 							color: this.calculateBallColor(ballNumber),
+							velocity:<IVector2>{ x: 0, y: 0},
 			}
 		},	
-		calculateBallColor(ballNumber:number){
-			if(ballNumber===8){
+	
+		addMouseListeners(){
+			this.canvas.addEventListener("mousemove", this.handleMouseMove)
+			this.canvas.addEventListener("mousedown", this.handleMouseDown)
+			this.canvas.addEventListener("mouseup", this.handleMouseUp)
+		},	
+		handleMouseDown(event:MouseEvent){
+			if(this.poolTable.mouseEnabled){
+				cueForceInterval = setInterval(this.updateCueForce, 50)
+			}
+		},	
+	
+		handleMouseUp(event:MouseEvent){
+			if(this.poolTable.mouseEnabled){
+				clearInterval(cueForceInterval)
+				this.shootBall()
+			}
+		},
+		handleMouseMove(event:MouseEvent){
+			
+			if(this.poolTable.mouseEnabled){				
+				this.cue.position.x = this.cueBall.position.x
+				this.cue.position.y = this.cueBall.position.y
+				this.cue.image.visible = true
+				this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
+				if(this.cue.image.visible){
+					this.updateCueAngle(event)
+					window.requestAnimationFrame(this.repaintAll)
+				}
+				//	this.updatePointerLine(event)				
+			}			
+		},
+		
+		shootBall(){
+			
+			this.poolTable.mouseEnabled = false
+			if(this.cue.force < 10 ){
+				this.cue.force = 10
+			}
+			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
+			this.cue.image.canvasDestination = dimensions
+			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
+			this.collideCueWithCueBall().then(() => {				
+				this.cue.image.visible = false
+				this.cue.force = 0					
+				this.handleCollisions().then(() => {
+					console.log("Animations done")					
+					this.poolTable.mouseEnabled = true
+				})
+			})
+		},
+		collideCueWithCueBall(){
+			return new Promise((resolve) => {
+					this.cue.position = this.cueBall.position				
+					setTimeout(() => {
+						window.requestAnimationFrame(this.repaintAll)
+						console.log("CollideCueWithBall done" )
+						resolve("Cue movement done")
+					}, 145)
+			});
+		},
+		handleCollisions(){
+				let cueBall= <IPoolComponent> this.cueBall
+				return new Promise((resolve) => {
+					const stop = setInterval(() => {
+						this.updateBalls()
+						this.handleBallCollisions()
+						window.requestAnimationFrame(this.repaintAll)
+						if(!this.isAnyBallMoving()){	
+							clearInterval(stop)	
+							resolve("collisions checked")
+						}
+					}, 25)
+			});
+		},
+		updateBalls(){
+			this.ballsRemaining.forEach(ball => {				
+				this.calculateLength(ball.velocity)
+				ball.position.x += ball.velocity.x * DELTA
+				ball.position.y += ball.velocity.y * DELTA
+				ball.velocity.x *= FRICTION
+				ball.velocity.y *= FRICTION				
+			})			
+		},		
+		isInPocket(component:IPoolComponent){
+			//const ballPercentage = this.cueBall.diameter * 0.6
+			//const inPocket = component.position.x - ballPercentage <= pocket.middle.x && component.position.y < pocket.middle.y+ ballPercentage
+			return false
+		},
+		handleBallInPocket (component:IPoolComponent, pocket:IPocket){
+			component.position = <IVector2> pocket.middle								
+			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.5
+			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.5
+			setTimeout(() => {
+							component.velocity.x = 0
+							component.velocity.y = 0
+							component.image.canvasDimension.x *= 2
+							component.image.canvasDimension.y *= 2
+			}, 300)
+		},
+		handleBallCollisions(){			
+			for (let i = 0; i < this.ballsRemaining.length; i++){
+				const ball:IBall = this.ballsRemaining[i]
+					console.log("Ball "+ball)
+				if(this.isMoving(ball)){
+					this.handleTableCollision(ball)
+				}
+				for (let j = i+1; j<this.ballsRemaining.length; j++){
+					const firstBall:IBall = this.ballsRemaining[j]
+					const secondBall:IBall = this.ballsRemaining[i]
+					if(firstBall.inPocket || secondBall.inPocket){
+						console.log("breaking loop, in pocket "+firstBall.inPocket)
+						break
+					}					
+					if(this.isMoving(firstBall) || this.isMoving(secondBall) ){
+						this.collide(secondBall, firstBall)
+					}
+				}				
+			}
+		},
+	
+		collide(componentA:IBall, componentB:IBall){
+			// Mathematics from -> ' JavaScript + HTML5 GameDev Tutorial: 8-Ball Pool Game (part 2) '  from 15:42 ->
+			// https://www.youtube.com/watch?v=Am8rT9xICRs
+				
+			let normalVector = this.subtractVectors(componentA.position, componentB.position)
+			const normalVectorLength = this.calculateLength(normalVector)
+			if(normalVectorLength > this.cueBall.diameter ){				
+				return
+			}
+			
+			const scalar = 1/normalVectorLength
+			const unitNormalVector = this.multiplyVector(normalVector, scalar)
+			const unitTangentVector = <IVector2> { x: -unitNormalVector.y, y: unitNormalVector.x}
+			const v1n = this.dotProduct(unitNormalVector, componentA.velocity)
+			const v1t = this.dotProduct(unitTangentVector, componentA.velocity)
+			const v2n = this.dotProduct(unitNormalVector, componentB.velocity)
+			const v2t = this.dotProduct(unitTangentVector, componentB.velocity)
+			let v1nTag = v2n
+			let v2nTag = v1n
+			v1nTag = <IVector2> {x: unitNormalVector.x * v1nTag, y:unitNormalVector.y * v1nTag}
+			const v1tTag = <IVector2> {x: unitTangentVector.x * v1t, y:unitTangentVector.y * v1t}
+			v2nTag = <IVector2> {x: unitNormalVector.x * v2nTag, y:unitNormalVector.y * v2nTag}
+			const v2tTag = <IVector2> {x: unitTangentVector.x * v2t, y:unitTangentVector.y * v2t}
+			componentA.velocity = <IVector2> { x: (v1nTag.x + v1tTag.x) , y: (v1nTag.y + v1tTag.y) }
+			componentB.velocity = <IVector2> { x: (v2nTag.x + v2tTag.x) , y: (v2nTag.y + v2tTag.y) }
+			const someRandomTestNumberToAvoidOverlapping = 4			
+			//minimum translation distance, 
+			const mtd = this.multiplyVector(normalVector, (this.cueBall.diameter + someRandomTestNumberToAvoidOverlapping - normalVectorLength) / normalVectorLength)		
+			componentA.position.x += mtd.x * 0.5
+			componentA.position.y += mtd.y * 0.5
+			componentB.position.x -= mtd.x * 0.5
+			componentB.position.y -= mtd.y * 0.5
+		},
+		isMoving(component:IPoolComponent){
+			if(!component)
+			return false
+			return component.velocity.x !== 0 || component.velocity.y !==0
+		},
+		handleTableCollision(component:IPoolComponent){
+			//Hard coded values for now
+			const ballRadius = this.cueBall.radius
+						if(component.position.x < 118 && component.position.x> 107 && component.position.y - (1.5 * ballRadius) <= 78 && component.velocity.y < 0){
+								console.log("going up"+JSON.stringify(component.position)+" velo:"+JSON.stringify(component.velocity))
+								//component.velocity =<IVector2>{x : Math.cos(0.785398163),y: Math.sin(0.785398163)}
+								component.velocity = <IVector2> {x: - 3* component.velocity.x, y: component.velocity.y /5}								
+								
+						}
+						else if(component.position.x >95 && component.position.x <= 107 && component.position.y - (ballRadius) <= 78 && component.velocity.y < 0){
+								console.log("hits  top left triangle  "+JSON.stringify(component.position)+" velo:"+JSON.stringify(component.velocity))
+								//component.velocity =<IVector2>{x : Math.cos(0.785398163),y: Math.sin(0.785398163)}
+								component.velocity = <IVector2> {x: - 6* component.velocity.x, y: component.velocity.y / 5}								
+								
+						}
+					
+						else if(this.isTableTopBoundry(component) ){
+							
+							if(this.isInPocket(component, this.poolTable.pockets.topLeft)){								
+								this.handleBallInPocket(component, this.poolTable.pockets.topLeft)								
+							}
+							component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
+						}
+						else if(this.isTableBottomBoundry(component)){
+							console.log("Lower boundry")
+							
+							component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
+						}
+						else if(this.isTableLeftBoundry(component) ){
+							
+							
+							component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
+						}
+						else if(this.isTableRightBoundry(component) ){
+							
+							
+							component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
+						}
+						component.position.x += component.velocity.x * DELTA
+						component.position.y += component.velocity.y * DELTA
+						component.velocity.x *= FRICTION 
+						component.velocity.y *= FRICTION
+					
+		},
+	
+		calculateLength(vector:IVector2){			
+			const length = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2))			
+			return length
+		},
+		calculateVectorLength(component:IPoolComponent) :IPoolComponent {
+			//Magnitude
+			const length = Math.sqrt((Math.pow(component.velocity.x, 2) + Math.pow(component.velocity.y, 2)))			
+			if(length < 5){				
+				component.velocity = <IVector2> {x: 0, y: 0}
+			}
+			return component
+		},
+		multiplyVector(vector:IVector2, scalar:number ): IVector2{
+			return <IVector2>{ x: vector.x * scalar, y: vector.y * scalar}
+		},
+		addVectors(vectorA:IVector2, vectorB: IVector2 ): IVector2{
+			return <IVector2>{ x: vectorA.x + vectorB.x, y: vectorA.y + vectorB.y}
+		},
+		subtractVectors(vectorA:IVector2, vectorB: IVector2 ): IVector2{
+			return <IVector2>{ x: vectorA.x - vectorB.x, y: vectorA.y - vectorB.y}
+		},
+		dotProduct(vectorA:IVector2, vectorB: IVector2 ): number{
+			return vectorA.x * vectorB.x + vectorA.y * vectorB.y
+			
+		},	
+		isAnyBallMoving(){
+			for (let i = 0; i< this.ballsRemaining.length; i++){				
+				let comp:IPoolComponent = this.ballsRemaining[i]
+				this.calculateVectorLength(comp)
+				if( comp.velocity.x !== 0 || comp.velocity.y !== 0){
+					return true
+				}
+			}
+			return false
+		},
+		updateCueAngle(event:MouseEvent){
+			
+			let opposite = this.mousePoint.y - this.cueBall.position.y
+			let adjacent = this.mousePoint.x - this.cueBall.position.x
+		
+			const tempAngle = Math.atan2(opposite, adjacent)			
+			this.cue.image.canvasRotationAngle = tempAngle	
+			window.requestAnimationFrame(this.repaintAll)	
+		},
+		updateCueForce(){			
+			this.cue.force += 5
+			this.cue.image.canvasDestination.x  -= 5
+			requestAnimationFrame(this.repaintAll)
+			
+			if(this.cue.force >= 100){
+				clearInterval(cueForceInterval)
+				this.shootBall()
+			}
+		},
+		updatePointerLine(event:MouseEvent){
+			if(!event){
+				console.log("No event:")
+				return
+			}
+			const cueBall = this.cueBall
+			this.pointerLine= {
+								fromX:cueBall.position.x+cueBall.diameter/2,
+								fromY:cueBall.position.y+cueBall.diameter/2,
+								toX:event.offsetX,
+								toY:event.offsetY,
+							}
+		},
+			calculateBallColor(ballNumber:number){
+			if(ballNumber === 8){
 				return "black"
 			}
 			return ballNumber %2 ===0 ? "red":"yellow"
@@ -310,173 +613,6 @@ export default defineComponent({
 			}
 			return 5
 		},
-		addMouseListeners(){
-			this.canvas.addEventListener("mousemove", this.handleMouseMove)
-			this.canvas.addEventListener("mousedown", this.handleMouseDown)
-			this.canvas.addEventListener("mouseup", this.handleMouseUp)
-		},	
-		handleMouseDown(event:MouseEvent){
-			if(this.poolTable.mouseEnabled){
-				cueForceInterval = setInterval(this.updateCueForce, 50)
-			}
-		},	
-	
-		handleMouseUp(event:MouseEvent){
-			if(this.poolTable.mouseEnabled){
-				clearInterval(cueForceInterval)
-				this.shootBall()
-			}
-		},
-		handleCollision(component:IPoolComponent){
-
-		},
-		handleMouseMove(event:MouseEvent){
-			
-			if(!this.cueBall.moving){
-				
-				this.cue.position.x = this.cueBall.position.x
-			
-				this.cue.position.y = this.cueBall.position.y
-				
-				this.cue.image.visible = true
-				this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
-				if(this.cue.image.visible){
-					this.updateCueAngle(event)
-					window.requestAnimationFrame(this.repaintAll)
-				}
-				//	this.updatePointerLine(event)				
-			}			
-		},
-		
-		shootBall(){
-			console.log("Shoot:"+this.cue.force +" angle:"+this.cue.image.canvasRotationAngle)
-			this.poolTable.mouseEnabled = false
-			if(this.cue.force < 10 ){
-				this.cue.force = 10
-			}
-			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
-			this.cue.image.canvasDestination = dimensions
-			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
-		
-			
-			this.collideCueWithCueBall().then(() => {				
-				this.cue.image.visible = false
-				this.cue.force = 0			
-				this.cueBall.moving = true	
-				this.handleCollisions().then(() => {
-					console.log("Animations should be done now")
-					this.cueBall.moving = false
-					this.poolTable.mouseEnabled = true
-				})
-			})
-		},
-		collideCueWithCueBall(){
-			return new Promise((resolve) => {
-					this.cue.position = this.cueBall.position
-					setTimeout(() => {
-						window.requestAnimationFrame(this.repaintAll)
-						resolve("movement done")
-					}, 145)
-			});
-		},
-		handleCollisions(){
-				let component= <IPoolComponent>this.cueBall
-				return new Promise((resolve) => {
-					const stop = setInterval(() => {
-						// Table collisions 
-						if(component.position.y <= this.poolTable.boundries.top + this.cueBall.radius){
-							//Check if goes into pocket
-							if(this.isInPocket(component, this.poolTable.pockets.topLeft)){								
-								this.handleBallInPocket(component, this.poolTable.pockets.topLeft)								
-							}
-							else if(component.position.x > this.poolTable.boundries.left && component.position.x < this.poolTable.boundries.right){
-								component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
-							}
-						}
-						if(component.position.x >= this.poolTable.boundries.right - this.cueBall.radius){
-							
-							//Check if goes into pocket
-							if(component.position.y >= this.poolTable.boundries.top+ this.cueBall.radius && component.position.y <= this.poolTable.boundries.bottom -this.cueBall.radius){
-								component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
-							}else{
-								console.log("Goes into pocket2")
-							}
-						}
-						if(component.position.y >= this.poolTable.boundries.bottom - this.cueBall.radius){
-							component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
-						}
-						if(component.position.x <= this.poolTable.boundries.left + this.cueBall.radius){
-							component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
-						}
-						component.position.x += component.velocity.x * DELTA
-						component.position.y += component.velocity.y * DELTA
-						component.velocity.x *= FRICTION // Friction
-						component.velocity.y *= FRICTION
-						window.requestAnimationFrame(this.repaintAll)
-						if(!this.calculateVelocityLength(component).moving){
-							clearInterval(stop)							
-							resolve("movement done")
-						}
-					}, 25)
-			});
-		},
-		isInPocket(component:IPoolComponent, pocket:IPocket){
-			const ballPercentage = this.cueBall.diameter * 0.65
-			const inPocket = component.position.x - ballPercentage <= pocket.middle.x && component.position.y < pocket.middle.y+ ballPercentage
-			console.log("InPocket:"+inPocket +" "+ JSON.stringify(component.position)+ " MIDDLE:"+pocket.middle.x+" y:"+pocket.middle.y)
-			return inPocket
-		},
-		handleBallInPocket (component:IPoolComponent, pocket:IPocket){
-			component.position = <IVector2> pocket.middle								
-			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.5
-			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.5
-			setTimeout(()=>{
-							component.velocity.x = 0
-							component.velocity.y = 0
-							component.image.canvasDimension.x *= 2
-							component.image.canvasDimension.y *= 2
-			}, 300)
-		},
-		calculateVelocityLength(component:IPoolComponent) :IPoolComponent {
-			const length = Math.sqrt(Math.pow(component.velocity.x, 2) + Math.pow(component.velocity.y, 2))			
-			if(length < 5){
-				component.moving = false
-				component.velocity = <IVector2> {x: 0, y: 0}
-			}
-			return component
-		},
-		updateCueAngle(event:MouseEvent){
-			
-			let opposite = this.mousePoint.y - this.cueBall.position.y
-			let adjacent = this.mousePoint.x - this.cueBall.position.x
-		
-			const tempAngle = Math.atan2(opposite, adjacent)			
-			this.cue.image.canvasRotationAngle = tempAngle	
-			window.requestAnimationFrame(this.repaintAll)	
-		},
-		updateCueForce(){			
-			this.cue.force += 5
-			this.cue.image.canvasDestination.x  -= 5
-			requestAnimationFrame(this.repaintAll)
-			
-			if(this.cue.force >= 100){
-				clearInterval(cueForceInterval)
-				this.shootBall()
-			}
-		},
-		updatePointerLine(event:MouseEvent){
-			if(!event){
-				console.log("No event:")
-				return
-			}
-			const cueBall = this.cueBall
-			this.pointerLine= {
-								fromX:cueBall.position.x+cueBall.diameter/2,
-								fromY:cueBall.position.y+cueBall.diameter/2,
-								toX:event.offsetX,
-								toY:event.offsetY,
-							}
-		},
 	
 	},
 	
@@ -491,5 +627,8 @@ export default defineComponent({
 
 
 <!--
- * @author antsa-1 from GitHub 
+ * 	@author antsa-1 from GitHub 
+  	  Guidance from
+  	// Youtube -> ' JavaScript + HTML5 GameDev Tutorial: 8-Ball Pool Game (parts 1 and 2) '->
+ 	// https://www.youtube.com/watch?v=Am8rT9xICRs
  -->
