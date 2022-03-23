@@ -235,14 +235,14 @@ export default defineComponent({
 			this.poolTable.topRightPart = topRightPart
 			this.poolTable.rightPart = rightPart
 			this.poolTable.bottomRightPart = bottomRightPart
-			this.poolTable.bottomLeftPart = bottomLeftPart   
+			this.poolTable.bottomLeftPart = bottomLeftPart
 			this.poolTable.leftPart = leftPart
-			const topLeftPocket:IPocket = <IPocket> {center: {x: 67, y:60}, radius:22}
-			const topMiddlePocket:IPocket = <IPocket> {center: {x: 606, y:45}, radius:20}
-			const topRightPocket:IPocket = <IPocket> {center: {x: 1144, y:60}, radius:22}
-			const bottomRightPocket:IPocket = <IPocket> {center: {x: 1144, y:617}, radius:22}
-			const bottomMiddlePocket:IPocket = <IPocket> {center: {x: 606, y:624}, radius:20}
-			const bottomLeftPocket:IPocket = <IPocket> {center: {x: 67, y:620}, radius:22}
+			const topLeftPocket:IPocket = <IPocket> {center: {x: 65, y:61}, radius:32}
+			const topMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:49}, radius:28}
+			const topRightPocket:IPocket = <IPocket> {center: {x: 1144, y:61}, radius:32}
+			const bottomRightPocket:IPocket = <IPocket> {center: {x: 1144, y:614}, radius:32}
+			const bottomMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:630}, radius:28} //left  little lower than in image. Symmetric position to oppsite?
+			const bottomLeftPocket:IPocket = <IPocket> {center: {x: 65, y:614}, radius:32}
 			this.poolTable.topLeftPocket = topLeftPocket
 			this.poolTable.topMiddlePocket = topMiddlePocket
 			this.poolTable.topRightPocket = topRightPocket
@@ -263,7 +263,7 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x: 78, y: 85}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x: 78, y: 199}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
 												velocity:<IVector2>{ x:0, y:0},												
