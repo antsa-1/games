@@ -157,7 +157,39 @@ export default defineComponent({
 				void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 			*/			
 			//this.renderingContext.fillText("O", 0, 0)
-	
+			this.renderingContext.fillStyle = 'red';
+			this.renderingContext.lineWidth = 1;
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.topLeftPocket.center.x, this.poolTable.topLeftPocket.center.y, this.poolTable.topLeftPocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.topMiddlePocket.center.x, this.poolTable.topMiddlePocket.center.y, this.poolTable.topMiddlePocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath()
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.topRightPocket.center.x, this.poolTable.topRightPocket.center.y, this.poolTable.topRightPocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.bottomRightPocket.center.x, this.poolTable.bottomRightPocket.center.y, this.poolTable.bottomRightPocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.bottomMiddlePocket.center.x, this.poolTable.bottomMiddlePocket.center.y, this.poolTable.bottomMiddlePocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.bottomLeftPocket.center.x, this.poolTable.bottomLeftPocket.center.y, this.poolTable.bottomLeftPocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
 		},
 		
 		initTable() {
@@ -203,8 +235,20 @@ export default defineComponent({
 			this.poolTable.topRightPart = topRightPart
 			this.poolTable.rightPart = rightPart
 			this.poolTable.bottomRightPart = bottomRightPart
-			this.poolTable.bottomLeftPart = bottomLeftPart
+			this.poolTable.bottomLeftPart = bottomLeftPart   
 			this.poolTable.leftPart = leftPart
+			const topLeftPocket:IPocket = <IPocket> {center: {x: 67, y:60}, radius:22}
+			const topMiddlePocket:IPocket = <IPocket> {center: {x: 606, y:45}, radius:20}
+			const topRightPocket:IPocket = <IPocket> {center: {x: 1144, y:60}, radius:22}
+			const bottomRightPocket:IPocket = <IPocket> {center: {x: 1144, y:617}, radius:22}
+			const bottomMiddlePocket:IPocket = <IPocket> {center: {x: 606, y:624}, radius:20}
+			const bottomLeftPocket:IPocket = <IPocket> {center: {x: 67, y:620}, radius:22}
+			this.poolTable.topLeftPocket = topLeftPocket
+			this.poolTable.topMiddlePocket = topMiddlePocket
+			this.poolTable.topRightPocket = topRightPocket
+			this.poolTable.bottomRightPocket = bottomRightPocket
+			this.poolTable.bottomMiddlePocket = bottomMiddlePocket
+			this.poolTable.bottomLeftPocket = bottomLeftPocket
 
 			const dimsCueBall: IVector2 = {x: BALL_DIAMETER, y: BALL_DIAMETER}
 			let cueBallImage = <IGameImage> {
@@ -219,7 +263,7 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x: 311, y: 514}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x: 78, y: 85}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
 												velocity:<IVector2>{ x:0, y:0},												
@@ -244,7 +288,7 @@ export default defineComponent({
 			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true}
 			this.addMouseListeners()
 			window.requestAnimationFrame(this.repaintAll)
-		}, 300)	
+		}, 300)
 		},
 		isTableTopBoundry(component:IPoolComponent){
 		
@@ -343,14 +387,14 @@ export default defineComponent({
 				this.cue.image.visible = false
 				this.cue.force = 0					
 				this.handleCollisions().then(() => {
-					console.log("Animations done")					
+					console.log("Animations done")
 					this.poolTable.mouseEnabled = true
 				})
 			})
 		},
 		collideCueWithCueBall(){
 			return new Promise((resolve) => {
-				this.cue.position = this.cueBall.position				
+				this.cue.position = this.cueBall.position
 				setTimeout(() => {
 					window.requestAnimationFrame(this.repaintAll)
 					console.log("CollideCueWithBall done" )
@@ -380,25 +424,56 @@ export default defineComponent({
 				ball.velocity.y *= FRICTION				
 			})			
 		},		
-		isInPocket(component:IPoolComponent){
-			//const ballPercentage = this.cueBall.diameter * 0.6
-			//const inPocket = component.position.x - ballPercentage <= pocket.middle.x && component.position.y < pocket.middle.y+ ballPercentage
-			return false
+		isInPocket(component:IBall){
+			// https://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
+			// (x - center_x)² + (y - center_y)² < radius²   			
+			let pocket:IPocket = this.poolTable.topLeftPocket
+			let inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
+			if(inPocket){
+				console.log("topLeftPocket:"+inPocket +JSON.stringify(component.position))
+				return pocket
+			}
+			pocket = this.poolTable.topMiddlePocket
+			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
+			if(inPocket){
+				console.log("topMiddlePocket:"+inPocket +JSON.stringify(component.position))
+				return pocket
+			}
+			pocket = this.poolTable.topRightPocket
+			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
+			if(inPocket){
+				console.log("topRightPocket:"+inPocket +JSON.stringify(component.position))
+				return pocket
+			}
+			pocket = this.poolTable.bottomRightPocket
+			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
+			if(inPocket){
+				console.log("bottomRightPocket:"+inPocket +JSON.stringify(component.position))
+				return pocket
+			}
+			pocket = this.poolTable.bottomMiddlePocket
+			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
+			if(inPocket){
+				console.log("bottomRMiddlePocket:"+inPocket +JSON.stringify(component.position))
+				return pocket
+			}
+			pocket = this.poolTable.bottomLeftPocket
+			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
+			if(inPocket){
+				console.log("bottomLeftPocket:"+inPocket +JSON.stringify(component.position))
+				return pocket
+			}		
 		},
-		handleBallInPocket (component:IPoolComponent, pocket:IPocket){
-		//	component.position = <IVector2> pocket.middle								
-			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.5
-			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.5
-			setTimeout(() => {
-							component.velocity.x = 0
-							component.velocity.y = 0
-							component.image.canvasDimension.x *= 2
-							component.image.canvasDimension.y *= 2
-			}, 300)
+		handleBallInPocket (component:IBall, pocket:IPocket){									
+			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.8
+			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.8
+			component.position = pocket.center
+			component.velocity.x = 0
+			component.velocity.y = 0		
 		},
 		handleBallCollisions(){			
 			for (let i = 0; i < this.ballsRemaining.length; i++){
-				const ball:IBall = this.ballsRemaining[i]					
+				const ball:IBall = this.ballsRemaining[i]
 				if(this.isMoving(ball)){
 					this.handleTableCollision(ball)
 				}
@@ -443,7 +518,8 @@ export default defineComponent({
 			componentB.velocity = <IVector2> { x: (v2nTag.x + v2tTag.x) , y: (v2nTag.y + v2tTag.y) }
 			const someRandomTestNumberToAvoidOverlapping = 4			
 			//minimum translation distance, 
-			const mtd = this.multiplyVector(normalVector, (this.cueBall.diameter + someRandomTestNumberToAvoidOverlapping - normalVectorLength) / normalVectorLength)		
+			const mtd = this.multiplyVector(normalVector, (this.cueBall.diameter + someRandomTestNumberToAvoidOverlapping - normalVectorLength) / normalVectorLength)
+			// TODO check boundries	?	
 			componentA.position.x += mtd.x * 0.5
 			componentA.position.y += mtd.y * 0.5
 			componentB.position.x -= mtd.x * 0.5
@@ -454,29 +530,35 @@ export default defineComponent({
 			return false
 			return component.velocity.x !== 0 || component.velocity.y !==0
 		},
-		handleTableCollision(component:IPoolComponent){
+		handleTableCollision(ball:IBall){
 			//Hard coded values for now
 			const ballRadius = this.cueBall.radius
-			if(this.isTableTopBoundry(component) ){
-				console.log("Top boundry"+JSON.stringify(component.position))
-				component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
+			if(this.isTableTopBoundry(ball) ){
+				console.log("Top boundry"+JSON.stringify(ball.position))
+				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
 			}
-			else if(this.isTableBottomBoundry(component)){
-				console.log("Lower boundry"+JSON.stringify(component.position))
-				component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
+			else if(this.isTableBottomBoundry(ball)){
+				console.log("Lower boundry"+JSON.stringify(ball.position))
+				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
 			}
-			else if(this.isTableLeftBoundry(component) ){						
-				console.log("Left boundry"+JSON.stringify(component.position))
-				component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
+			else if(this.isTableLeftBoundry(ball) ){						
+				console.log("Left boundry"+JSON.stringify(ball.position))
+				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
 			}
-			else if(this.isTableRightBoundry(component) ){
-				console.log("Right boundry"+JSON.stringify(component.position))
-				component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
+			else if(this.isTableRightBoundry(ball) ){
+				console.log("Right boundry"+JSON.stringify(ball.position))
+				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
+			}else{
+				const pocket:IPocket = this.isInPocket(ball)
+				if(pocket){
+					this.handleBallInPocket(ball, pocket)
+				}
 			}
-			component.position.x += component.velocity.x * DELTA
-			component.position.y += component.velocity.y * DELTA
-			component.velocity.x *= FRICTION 
-			component.velocity.y *= FRICTION
+
+			ball.position.x += ball.velocity.x * DELTA
+			ball.position.y += ball.velocity.y * DELTA
+			ball.velocity.x *= FRICTION 
+			ball.velocity.y *= FRICTION
 		},
 	
 		calculateLength(vector:IVector2){			

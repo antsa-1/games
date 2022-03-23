@@ -32,7 +32,12 @@ export interface IPoolTable extends IPoolComponent {
     bottomRightPart: IBoundry,
     bottomLeftPart: IBoundry,
     leftPart: IBoundry,
- 
+    topLeftPocket: IPocket,
+    topMiddlePocket: IPocket,
+    topRightPocket: IPocket,
+    bottomRightPocket: IPocket,
+    bottomMiddlePocket: IPocket,
+    bottomLeftPocket: IPocket
 }
 
 export interface IBoundry {
@@ -42,11 +47,8 @@ export interface IBoundry {
 }
 
 export interface IPocket {
-    middlePoint: IVector2,
-    radius: number,
-    leftIn: IVector2
-    rightIn: IVector2
-    isUpper: boolean
+    center: IVector2,
+    radius: number
 }
 export interface IBall extends IPoolComponent {
     diameter: number,
