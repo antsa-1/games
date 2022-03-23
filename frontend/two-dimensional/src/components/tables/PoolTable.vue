@@ -25,7 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {IGameMode,IGameToken,ITable} from "../../interfaces";
-import {IPoolTable, ICue,IBall,IPockets,IPocket, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions,  IBoundry} from "../../interfaces/pool";
+import {IPoolTable, ICue,IBall,IPocket, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions,  IBoundry} from "../../interfaces/pool";
 import { loginMixin, } from "../../mixins/mixins";
 import { tablesMixin, } from "../../mixins/tablesMixin";
 import { useRoute } from "vue-router";
@@ -186,12 +186,12 @@ export default defineComponent({
 												canvasRotationAngle: { x:0, y:0 },
 												visible: true										
 			}
-			const poolTablePockets = <IPockets> {topLeft:{middle:{x:80, y:80}}}
+			
 			//component.position.x >=118 && component.position.x <=570 && component.position.y -this.cueBall.radius <= 78
 		
 
 
-			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, mouseEnabled: true,pockets:poolTablePockets}
+			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, mouseEnabled: true}
 			const topLeftPart :IBoundry = <IBoundry>{a:80, b:118, c:572}
 			const topRightPart :IBoundry = <IBoundry>{a:80, b:644, c:1090}
 			const rightPart :IBoundry = <IBoundry>{a:1122, b:118, c:560}
@@ -318,7 +318,6 @@ export default defineComponent({
 			}
 		},
 		handleMouseMove(event:MouseEvent){
-			
 			if(this.poolTable.mouseEnabled){
 				this.cue.position.x = this.cueBall.position.x
 				this.cue.position.y = this.cueBall.position.y
@@ -332,8 +331,7 @@ export default defineComponent({
 			}
 		},
 		
-		shootBall(){
-			
+		shootBall(){			
 			this.poolTable.mouseEnabled = false
 			if(this.cue.force < 10 ){
 				this.cue.force = 10
@@ -352,27 +350,26 @@ export default defineComponent({
 		},
 		collideCueWithCueBall(){
 			return new Promise((resolve) => {
-					this.cue.position = this.cueBall.position				
-					setTimeout(() => {
-						window.requestAnimationFrame(this.repaintAll)
-						console.log("CollideCueWithBall done" )
-						resolve("Cue movement done")
-					}, 145)
-			});
+				this.cue.position = this.cueBall.position				
+				setTimeout(() => {
+					window.requestAnimationFrame(this.repaintAll)
+					console.log("CollideCueWithBall done" )
+					resolve("Cue movement done")
+				}, 145)
+			})
 		},
-		handleCollisions(){
-				let cueBall= <IPoolComponent> this.cueBall
-				return new Promise((resolve) => {
-					const stop = setInterval(() => {
-						this.updateBalls()
-						this.handleBallCollisions()
-						window.requestAnimationFrame(this.repaintAll)
-						if(!this.isAnyBallMoving()){	
-							clearInterval(stop)	
-							resolve("collisions checked")
-						}
-					}, 25)
-			});
+		handleCollisions(){			
+			return new Promise((resolve) => {
+				const collisionCheckInterval = setInterval(() => {
+					this.updateBalls()
+					this.handleBallCollisions()
+					window.requestAnimationFrame(this.repaintAll)
+					if(!this.isAnyBallMoving()){	
+						clearInterval(collisionCheckInterval)	
+						resolve("collisions checked")
+					}
+			}, 25)
+			})
 		},
 		updateBalls(){
 			this.ballsRemaining.forEach(ball => {				
@@ -389,7 +386,7 @@ export default defineComponent({
 			return false
 		},
 		handleBallInPocket (component:IPoolComponent, pocket:IPocket){
-			component.position = <IVector2> pocket.middle								
+		//	component.position = <IVector2> pocket.middle								
 			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.5
 			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.5
 			setTimeout(() => {
@@ -460,43 +457,26 @@ export default defineComponent({
 		handleTableCollision(component:IPoolComponent){
 			//Hard coded values for now
 			const ballRadius = this.cueBall.radius
-						if(component.position.x < 118 && component.position.x> 107 && component.position.y - (1.5 * ballRadius) <= 78 && component.velocity.y < 0){
-								console.log("going up"+JSON.stringify(component.position)+" velo:"+JSON.stringify(component.velocity))
-								//component.velocity =<IVector2>{x : Math.cos(0.785398163),y: Math.sin(0.785398163)}
-								component.velocity = <IVector2> {x: - 3* component.velocity.x, y: component.velocity.y /5}								
-								
-						}
-						else if(component.position.x >95 && component.position.x <= 107 && component.position.y - (ballRadius) <= 78 && component.velocity.y < 0){
-								console.log("hits  top left triangle  "+JSON.stringify(component.position)+" velo:"+JSON.stringify(component.velocity))
-								//component.velocity =<IVector2>{x : Math.cos(0.785398163),y: Math.sin(0.785398163)}
-								component.velocity = <IVector2> {x: - 6* component.velocity.x, y: component.velocity.y / 5}								
-								
-						}
-					
-						else if(this.isTableTopBoundry(component) ){
-							console.log("Top boundry"+JSON.stringify(component.position))	
-							if(this.isInPocket(component, this.poolTable.pockets.topLeft)){								
-								this.handleBallInPocket(component, this.poolTable.pockets.topLeft)								
-							}
-							component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
-						}
-						else if(this.isTableBottomBoundry(component)){
-							console.log("Lower boundry"+JSON.stringify(component.position))							
-							component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
-						}
-						else if(this.isTableLeftBoundry(component) ){						
-							console.log("Left boundry"+JSON.stringify(component.position))
-							component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
-						}
-						else if(this.isTableRightBoundry(component) ){
-							console.log("Right boundry"+JSON.stringify(component.position))							
-							component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
-						}
-						component.position.x += component.velocity.x * DELTA
-						component.position.y += component.velocity.y * DELTA
-						component.velocity.x *= FRICTION 
-						component.velocity.y *= FRICTION
-					
+			if(this.isTableTopBoundry(component) ){
+				console.log("Top boundry"+JSON.stringify(component.position))
+				component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
+			}
+			else if(this.isTableBottomBoundry(component)){
+				console.log("Lower boundry"+JSON.stringify(component.position))
+				component.velocity = <IVector2> {x:component.velocity.x, y: -component.velocity.y}
+			}
+			else if(this.isTableLeftBoundry(component) ){						
+				console.log("Left boundry"+JSON.stringify(component.position))
+				component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
+			}
+			else if(this.isTableRightBoundry(component) ){
+				console.log("Right boundry"+JSON.stringify(component.position))
+				component.velocity = <IVector2> {x:-component.velocity.x, y: component.velocity.y}
+			}
+			component.position.x += component.velocity.x * DELTA
+			component.position.y += component.velocity.y * DELTA
+			component.velocity.x *= FRICTION 
+			component.velocity.y *= FRICTION
 		},
 	
 		calculateLength(vector:IVector2){			

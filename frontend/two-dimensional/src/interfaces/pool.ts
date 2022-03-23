@@ -26,15 +26,14 @@ export interface IPoolTable extends IPoolComponent {
     pointerLine: IPointerLine,
     mousePoint: IVector2,
     mouseEnabled: boolean,
-    pockets: IPockets
-    topLeftPart:IBoundry,
-    topRightPart:IBoundry,
-    rightPart:IBoundry,
-    bottomRightPart:IBoundry,
-    bottomLeftPart:IBoundry,
-    leftPart:IBoundry,
+    topLeftPart: IBoundry,
+    topRightPart: IBoundry,
+    rightPart: IBoundry,
+    bottomRightPart: IBoundry,
+    bottomLeftPart: IBoundry,
+    leftPart: IBoundry,
+ 
 }
-
 
 export interface IBoundry {
     a: number,
@@ -42,17 +41,12 @@ export interface IBoundry {
     c: number
 }
 
-export interface IPockets {
-    topLeft: IPocket,
-    topMiddle: IPocket,
-    topRight: IPocket,
-    bottomRight: IPocket,
-    bottomMiddle: IPocket,
-    bottomLeft: IPocket
-}
 export interface IPocket {
-    middle: IVector2,
-    direction?: number
+    middlePoint: IVector2,
+    radius: number,
+    leftIn: IVector2
+    rightIn: IVector2
+    isUpper: boolean
 }
 export interface IBall extends IPoolComponent {
     diameter: number,
