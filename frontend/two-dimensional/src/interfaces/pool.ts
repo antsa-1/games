@@ -10,7 +10,8 @@ export interface IEightBallGame {
     cueBall: IBall,
     cue: ICue,
     poolTable: IPoolTable,
-    gameOptions: IEightBallGameOptions
+    gameOptions: IEightBallGameOptions,
+    mouseCoordsTemp: IVector2,
 }
 
 export interface IGameImage {
@@ -32,12 +33,7 @@ export interface IPoolTable extends IPoolComponent {
     bottomRightPart: IBoundry,
     bottomLeftPart: IBoundry,
     leftPart: IBoundry,
-    topLeftPocket: IPocket,
-    topMiddlePocket: IPocket,
-    topRightPocket: IPocket,
-    bottomRightPocket: IPocket,
-    bottomMiddlePocket: IPocket,
-    bottomLeftPocket: IPocket
+    pockets: Array<IPocket>[],    
 }
 
 export interface IBoundry {
@@ -48,7 +44,13 @@ export interface IBoundry {
 
 export interface IPocket {
     center: IVector2,
-    radius: number
+    radius: number,
+    pathwayRight: IPathWayBorder,
+    pathwayLeft: IPathWayBorder
+}
+export interface IPathWayBorder {
+    top: IVector2,
+    bottom: IVector2
 }
 export interface IBall extends IPoolComponent {
     diameter: number,
@@ -66,7 +68,7 @@ export interface IPointerLine {
 }
 export interface IVector2 {
     x: number,
-    y: number,
+    y: number, 
 }
 
 export interface IEightBallGameOptions {

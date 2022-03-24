@@ -25,7 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import {IGameMode,IGameToken,ITable} from "../../interfaces";
-import {IPoolTable, ICue,IBall,IPocket, IEightBallGame,IVector2, IGameImage,IPoolComponent, IEightBallGameOptions,  IBoundry} from "../../interfaces/pool";
+import {IPoolTable, ICue, IBall, IPocket, IEightBallGame, IVector2, IGameImage, IPoolComponent, IEightBallGameOptions, IBoundry, IPathWayBorder} from "../../interfaces/pool";
 import { loginMixin, } from "../../mixins/mixins";
 import { tablesMixin, } from "../../mixins/tablesMixin";
 import { useRoute } from "vue-router";
@@ -37,9 +37,9 @@ const CUE_MAX_WIDTH = 900
 const CUE_MAX_HEIGHT = 12
 const BALL_DIAMETER = 34
 const SECOND_IN_MILLIS = 1000
-const FRICTION = 0.985
+const FRICTION = 0.991
 let cueForceInterval = undefined
-const DELTA = 1/2
+const DELTA = 1/20
 
 export default defineComponent({
 	components: { Chat },
@@ -53,7 +53,8 @@ export default defineComponent({
 				cueBall: undefined,
 				cue: undefined,
 				poolTable: undefined,
-				gameOptions: undefined
+				gameOptions: undefined,
+				mouseCoordsTemp: undefined
 			}
 	},
 	beforeCreated(){
@@ -73,7 +74,7 @@ export default defineComponent({
 					this.removeMouseListeners()
 					this.stopReducer()
 				}
-			}else if (mutation.type === "rematch" ){			
+			}else if (mutation.type === "rematch" ){
 				this.initTable()			
 			}
 			else if (mutation.type === "updateWinner" ){			
@@ -113,7 +114,7 @@ export default defineComponent({
 				return
 			}
 			this.renderingContext.translate(component.position.x, component.position.y)
-			if(image.canvasRotationAngle){				
+			if(image.canvasRotationAngle){
 				this.renderingContext.rotate(image.canvasRotationAngle)
 			}
 		
@@ -136,7 +137,7 @@ export default defineComponent({
 			}
 			this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
 			this.renderingContext.resetTransform()
-			this.renderingContext.fillText("O", 0, 0)
+		
 		},
 		repaintAll(){
 			
@@ -152,45 +153,34 @@ export default defineComponent({
 				void ctx.drawImage(image, dx, dy);
 				void ctx.drawImage(image, dx, dy, dWidth, dHeight);
 				void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-			*/			
-			//this.renderingContext.fillText("O", 0, 0)
-			this.renderingContext.fillStyle = 'red';
-			this.renderingContext.lineWidth = 1;
-			this.renderingContext.beginPath();
-			this.renderingContext.arc(this.poolTable.topLeftPocket.center.x, this.poolTable.topLeftPocket.center.y, this.poolTable.topLeftPocket.radius, 0, 2 * Math.PI);
-			this.renderingContext.stroke();
-			this.renderingContext.closePath();
-			this.renderingContext.fill()
-			this.renderingContext.beginPath();
-			this.renderingContext.arc(this.poolTable.topMiddlePocket.center.x, this.poolTable.topMiddlePocket.center.y, this.poolTable.topMiddlePocket.radius, 0, 2 * Math.PI);
-			this.renderingContext.stroke();
-			this.renderingContext.closePath()
-			this.renderingContext.fill()
-			this.renderingContext.beginPath();
-			this.renderingContext.arc(this.poolTable.topRightPocket.center.x, this.poolTable.topRightPocket.center.y, this.poolTable.topRightPocket.radius, 0, 2 * Math.PI);
-			this.renderingContext.stroke();
-			this.renderingContext.closePath();
-			this.renderingContext.fill()
-			this.renderingContext.beginPath();
-			this.renderingContext.arc(this.poolTable.bottomRightPocket.center.x, this.poolTable.bottomRightPocket.center.y, this.poolTable.bottomRightPocket.radius, 0, 2 * Math.PI);
-			this.renderingContext.stroke();
-			this.renderingContext.closePath();
-			this.renderingContext.fill()
-			this.renderingContext.beginPath();
-			this.renderingContext.arc(this.poolTable.bottomMiddlePocket.center.x, this.poolTable.bottomMiddlePocket.center.y, this.poolTable.bottomMiddlePocket.radius, 0, 2 * Math.PI);
-			this.renderingContext.stroke();
-			this.renderingContext.closePath();
-			this.renderingContext.fill()
-			this.renderingContext.beginPath();
-			this.renderingContext.arc(this.poolTable.bottomLeftPocket.center.x, this.poolTable.bottomLeftPocket.center.y, this.poolTable.bottomLeftPocket.radius, 0, 2 * Math.PI);
-			this.renderingContext.stroke();
-			this.renderingContext.closePath();
-			this.renderingContext.fill()
-			this.renderingContext.beginPath();
+					
+			*/
+			for( let i = 0; i < 2; i++){
+				let pathway = this.poolTable.pockets[i].pathwayRight
+				if(!pathway)
+				break // testcode
+				this.renderingContext.moveTo(pathway.top.x, pathway.top.y)
+				this.renderingContext.lineTo(pathway.bottom.x, pathway.bottom.y)			
+				this.renderingContext.stroke()
+				this.renderingContext.closePath()
+				pathway = this.poolTable.pockets[i].pathwayLeft
+				this.renderingContext.moveTo(pathway.top.x, pathway.top.y)
+				this.renderingContext.lineTo(pathway.bottom.x, pathway.bottom.y)			
+				this.renderingContext.stroke()
+				this.renderingContext.closePath()
+			}
+			
 			for( let i = 0; i < this.ballsRemaining.length; i++){
 				this.repaintComponent(this.ballsRemaining[i])
 			}
 			this.repaintComponent(this.cue)
+			this.repaintPathways()
+			this.repaintPockets()
+			if(this.mouseCoordsTemp){
+				this.renderingContext.fillStyle = 'black';
+				this.renderingContext.fillText("Mouse: x:"+this.mouseCoordsTemp.x +"  y:"+this.mouseCoordsTemp.y, 150, 50)
+				this.renderingContext.fillText("Ball:  x:"+this.cueBall.position.x +"  y:"+this.cueBall.position.y, 150, 40)
+			}
 		},
 		
 		initTable() {
@@ -219,32 +209,33 @@ export default defineComponent({
 												canvasRotationAngle: { x:0, y:0 },
 												visible: true										
 			}
-			
-			//component.position.x >=118 && component.position.x <=570 && component.position.y -this.cueBall.radius <= 78
-		
-
-
 			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, mouseEnabled: true}
-			const topLeftPart :IBoundry = <IBoundry>{a:80, b:118, c:572}
-			const topRightPart :IBoundry = <IBoundry>{a:80, b:644, c:1090}
+			
+			const topLeftPart :IBoundry = <IBoundry>{a:79, b:118, c:572}
+			const topRightPart :IBoundry = <IBoundry>{a:79, b:644, c:1090}
 			const rightPart :IBoundry = <IBoundry>{a:1122, b:118, c:560}
 			const bottomRightPart :IBoundry = <IBoundry>{a:600, b:644, c:1090}
 			const bottomLeftPart :IBoundry = <IBoundry>{a:600, b:118, c:572}
 			const leftPart :IBoundry = <IBoundry>{a:80, b:118, c:560}
-			
+			this.poolTable.pockets =[]
 			this.poolTable.topLeftPart = topLeftPart
 			this.poolTable.topRightPart = topRightPart
 			this.poolTable.rightPart = rightPart
 			this.poolTable.bottomRightPart = bottomRightPart
 			this.poolTable.bottomLeftPart = bottomLeftPart
-			this.poolTable.leftPart = leftPart
-			const topLeftPocket:IPocket = <IPocket> {center: {x: 65, y:61}, radius:32}
-			const topMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:49}, radius:28}
+			this.poolTable.leftPart = leftPart 
+			const topLeftPocket:IPocket = <IPocket> {center: {x: 65, y:61}, radius:32, pathwayLeft:{top:{x:54,y:93}, bottom:{x:80, y:120}}, pathwayRight:{top:{x:96,y:56}, bottom:{x:117, y:77}}}
+			const topMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:49}, radius:28, pathwayLeft:{top:{x:580,y:56}, bottom:{x:571, y:79}}, pathwayRight:{top:{x:635,y:56}, bottom:{x:644, y:79}}}
 			const topRightPocket:IPocket = <IPocket> {center: {x: 1144, y:61}, radius:32}
 			const bottomRightPocket:IPocket = <IPocket> {center: {x: 1144, y:614}, radius:32}
 			const bottomMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:630}, radius:28} //left  little lower than in image. Symmetric position to oppsite?
 			const bottomLeftPocket:IPocket = <IPocket> {center: {x: 65, y:614}, radius:32}
-			this.poolTable.topLeftPocket = topLeftPocket
+			this.poolTable.pockets.push(topLeftPocket)
+			this.poolTable.pockets.push(topMiddlePocket)
+			this.poolTable.pockets.push(topRightPocket)
+			this.poolTable.pockets.push(bottomRightPocket)
+			this.poolTable.pockets.push(bottomMiddlePocket)
+			this.poolTable.pockets.push(bottomLeftPocket)
 			this.poolTable.topMiddlePocket = topMiddlePocket
 			this.poolTable.topRightPocket = topRightPocket
 			this.poolTable.bottomRightPocket = bottomRightPocket
@@ -264,7 +255,7 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x: 129, y: 199}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x: 625, y: 150}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
 												velocity:<IVector2>{ x:0, y:0},												
@@ -348,21 +339,34 @@ export default defineComponent({
 			this.canvas.addEventListener("mousemove", this.handleMouseMove)
 			this.canvas.addEventListener("mousedown", this.handleMouseDown)
 			this.canvas.addEventListener("mouseup", this.handleMouseUp)
+			this.canvas.addEventListener("contextmenu",(e)=> e.preventDefault()) 
 		},	
 		handleMouseDown(event:MouseEvent){
-			console.log(event.offsetX+":"+event.offsetY)
+			if(event.button ===2){				
+				return
+			}
 			if(this.poolTable.mouseEnabled){
 				cueForceInterval = setInterval(this.updateCueForce, 50)
 			}
 		},	
 	
 		handleMouseUp(event:MouseEvent){
+			if(event.button ===2){
+				this.cueBall.position.x = event.offsetX
+				this.cueBall.position.y = event.offsetY
+				requestAnimationFrame(this.repaintAll)
+				return
+			}
+			if(event.button ===1){ // wheel or middle button
+			
+			}
 			if(this.poolTable.mouseEnabled){
 				clearInterval(cueForceInterval)
 				this.shootBall()
 			}
 		},
 		handleMouseMove(event:MouseEvent){
+			this.mouseCoordsTemp = <IVector2> {x:event.offsetX, y: event.offsetY}
 			if(this.poolTable.mouseEnabled){
 				this.cue.position.x = this.cueBall.position.x
 				this.cue.position.y = this.cueBall.position.y
@@ -388,7 +392,7 @@ export default defineComponent({
 				this.cue.image.visible = false
 				this.cue.force = 0					
 				this.handleCollisions().then(() => {
-					console.log("Animations done")
+					console.log("Animations done ball center position "+JSON.stringify(this.cueBall.position))
 					this.poolTable.mouseEnabled = true
 				})
 			})
@@ -428,10 +432,10 @@ export default defineComponent({
 		isInPocket(component:IBall){
 			// https://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
 			// (x - center_x)² + (y - center_y)² < radius²   			
-			let pocket:IPocket = this.poolTable.topLeftPocket
+			let pocket:IPocket = this.poolTable.pockets[0]
 			let inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
 			if(inPocket){
-				console.log("topLeftPocket:"+inPocket +JSON.stringify(component.position))
+				console.log("pockets[0]:"+inPocket +JSON.stringify(component.position))
 				return pocket
 			}
 			pocket = this.poolTable.topMiddlePocket
@@ -476,7 +480,7 @@ export default defineComponent({
 			for (let i = 0; i < this.ballsRemaining.length; i++){
 				const ball:IBall = this.ballsRemaining[i]
 				if(this.isMoving(ball)){
-					this.handleTableCollision(ball)
+					this.checkAndHandleTableCollision(ball)
 				}
 				for (let j = i+1; j<this.ballsRemaining.length; j++){
 					const firstBall:IBall = this.ballsRemaining[j]
@@ -520,7 +524,7 @@ export default defineComponent({
 			const someRandomTestNumberToAvoidOverlapping = 4			
 			//minimum translation distance, 
 			const mtd = this.multiplyVector(normalVector, (this.cueBall.diameter + someRandomTestNumberToAvoidOverlapping - normalVectorLength) / normalVectorLength)
-			// TODO check boundries	?	
+			// TODO check boundries	?	It will be interesting to see how the other browser with different poolTable size handles these in order to be sync. Might need some re-work
 			componentA.position.x += mtd.x * 0.5
 			componentA.position.y += mtd.y * 0.5
 			componentB.position.x -= mtd.x * 0.5
@@ -531,8 +535,7 @@ export default defineComponent({
 			return false
 			return component.velocity.x !== 0 || component.velocity.y !==0
 		},
-		handleTableCollision(ball:IBall){
-			//Hard coded values for now
+		checkAndHandleTableCollision(ball:IBall){			
 			const ballRadius = this.cueBall.radius
 			if(this.isTableTopBoundry(ball) ){
 				console.log("Top boundry"+JSON.stringify(ball.position))
@@ -540,26 +543,93 @@ export default defineComponent({
 			}else if(this.isTableBottomBoundry(ball)){
 				console.log("Lower boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
-			}else if(this.isTableLeftBoundry(ball) ){						
+			}else if(this.isTableLeftBoundry(ball) ){
 				console.log("Left boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
 			}else if(this.isTableRightBoundry(ball) ){
 				console.log("Right boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
+			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){
+				console.log("collided with pathway, that's all we know")
 			}else{
 				const pocket:IPocket = this.isInPocket(ball)
 				if(pocket){
 					this.handleBallInPocket(ball, pocket)
 				}
 			}
-
 			ball.position.x += ball.velocity.x * DELTA
 			ball.position.y += ball.velocity.y * DELTA
 			ball.velocity.x *= FRICTION 
 			ball.velocity.y *= FRICTION
 		},
-	
-		calculateLength(vector:IVector2){			
+		checkAndHandlePocketPathwayCollisions(ball:IBall){
+			for(let i = 0; i < 2; i++){
+				const pocket:IPocket = this.poolTable.pockets[i]				
+				if(this.isPathwayBorderCollision(pocket.pathwayRight, ball, i)){					
+					const reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayRight, ball)
+					console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+					ball.velocity = reflectionVector
+					return true
+				}else if(this.isPathwayBorderCollision(pocket.pathwayLeft, ball, i)){
+					const reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayLeft, ball)
+					ball.velocity = reflectionVector
+					return true
+				}
+			}
+			return false
+		},
+		//Pathway to pocket means a separate area in front of the pocket which has two sides thus different angles if ball hits them
+		calculateBallVelocityOnPathwayBorderCollision(pathway:IPathWayBorder, ball:IBall){
+			// calculations ??
+			let normalVector:IVector2 = this.subtractVectors(pathway.bottom, pathway.top)
+			const normalVectorLength = this.calculateLength(normalVector)
+			const scalar = 1/normalVectorLength
+			const unitNormalVector = this.multiplyVector(normalVector, scalar)
+			let magnitude = 2 * this.dotProduct(unitNormalVector, ball.velocity)
+			let multipliedVector:IVector2 = this.multiplyVector(unitNormalVector, magnitude)
+			let reflectionVector:IVector2 = this.subtractVectors(multipliedVector, ball.velocity)
+			return reflectionVector
+		},
+		isPathwayBorderCollision(p:IPathWayBorder, ball:IBall, test = 0){
+			const ballRadius = this.cueBall.radius
+			//Horizontal comparison including edge cases
+			//console.log("isPathwayBorderCollision:"+JSON.stringify(p), " ba:ll"+JSON.stringify(ball.position) +" upper:"+test +" radius:"+ballRadius)
+			if(test == 0 && this.isBallBetweenXCoordinates(ball, p.top, p.bottom )){
+				// Vertical comparison including edge cases
+				console.log("match1"+JSON.stringify(p)+ " ball"+JSON.stringify(ball.position))
+				return this.isBallBetweenYCoordinates(ball, p.bottom, p.top )
+			}
+			else if(test == 1 && this.isBallBetweenXCoordinates (ball, p.top, p.bottom)){
+				// Vertical comparison including edge cases
+				console.log("Match2"+ JSON.stringify(ball.position)+ " top:"+JSON.stringify(p.top)+ " bottom:"+JSON.stringify(p.bottom))
+				if(this.isBallBetweenYCoordinates(ball, p.top, p.bottom )){
+					console.log("MATCH3"+JSON.stringify(p)+ " ba:ll"+JSON.stringify(ball.position))
+					return true
+				}
+			}
+			return false
+		},
+		isBallBetweenXCoordinates(ball:IBall, lower:IVector2, higher:IVector2){
+			if(ball.velocity.x > 0){
+			//	console.log("velo>0:"+ "ball:"+(ball.position.x + ball.radius/2 )+ ">="+ lower.x +" && <="+higher.x+(ball.position.x + ball.radius >= lower.x && ball.position.x + ball.radius <= higher.x)+ " ball:"+JSON.stringify(ball.position))
+				return ball.position.x + ball.radius/2 >= lower.x && ball.position.x + ball.radius <= higher.x
+			}else if(ball.velocity.x < 0){
+				console.log("velo<0:"+ (ball.position.x - ball.radius >= lower.x && ball.position.x - ball.radius <= higher.x))
+				return ball.position.x - ball.radius >= lower.x && ball.position.x - ball.radius/2 <= higher.x
+			} 
+			return ball.position.x >= lower.x && ball.position.x <= higher.x
+		},
+		isBallBetweenYCoordinates(ball:IBall, lower:IVector2, higher:IVector2){
+			if(ball.velocity.y > 0){ // going down
+				return ball.position.y + ball.radius >= lower.y && ball.position.y + ball.radius <= higher.y
+			}
+			else if(ball.velocity.y < 0){ // going up
+			console.log("up:"+ (ball.position.y - ball.radius)+ " >="+lower.y+" <="+ (ball.position.y - ball.radius <= higher.y ))
+				return ball.position.y - ball.radius >= lower.y && ball.position.y - ball.radius <= higher.y
+			}
+			return ball.position.y >= lower.y && ball.position.y <= higher.y
+		},
+		calculateLength(vector:IVector2){
 			const length = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2))			
 			return length
 		},
@@ -595,20 +665,18 @@ export default defineComponent({
 			return false
 		},
 		updateCueAngle(event:MouseEvent){
-			
 			let opposite = this.mousePoint.y - this.cueBall.position.y
 			let adjacent = this.mousePoint.x - this.cueBall.position.x
-		
-			const tempAngle = Math.atan2(opposite, adjacent)			
-			this.cue.image.canvasRotationAngle = tempAngle	
-			window.requestAnimationFrame(this.repaintAll)	
+			const tempAngle = Math.atan2(opposite, adjacent)
+			this.cue.image.canvasRotationAngle = tempAngle
+			window.requestAnimationFrame(this.repaintAll)
 		},
-		updateCueForce(){			
-			this.cue.force += 5
+		updateCueForce(){
+			this.cue.force += 10
 			this.cue.image.canvasDestination.x  -= 5
 			requestAnimationFrame(this.repaintAll)
 			
-			if(this.cue.force >= 100){
+			if(this.cue.force >= 250){
 				clearInterval(cueForceInterval)
 				this.shootBall()
 			}
@@ -670,8 +738,70 @@ export default defineComponent({
 			}
 			return 5
 		},
+		repaintPathways(poolTable:IPoolTable){
+		
+			this.renderingContext.moveTo(this.poolTable.leftPart.a, this.poolTable.leftPart.b)
+				this.renderingContext.lineTo(this.poolTable.leftPart.a, this.poolTable.leftPart.c)			
+				this.renderingContext.stroke()
+				this.renderingContext.closePath()
+				this.renderingContext.moveTo(this.poolTable.topLeftPart.b, this.poolTable.topLeftPart.a)
+				this.renderingContext.lineTo(this.poolTable.topLeftPart.c, this.poolTable.topLeftPart.a)			
+				this.renderingContext.stroke()
+				this.renderingContext.closePath()
+				this.renderingContext.moveTo(this.poolTable.topRightPart.b, this.poolTable.topRightPart.a)
+				this.renderingContext.lineTo(this.poolTable.topRightPart.c, this.poolTable.topRightPart.a)			
+				this.renderingContext.stroke()
+				this.renderingContext.closePath()
+				this.renderingContext.moveTo(this.poolTable.rightPart.a, this.poolTable.rightPart.b)
+				this.renderingContext.lineTo(this.poolTable.rightPart.a, this.poolTable.rightPart.c)			
+				this.renderingContext.stroke()
+				this.renderingContext.closePath()
+				this.renderingContext.moveTo(this.poolTable.bottomRightPart.b, this.poolTable.bottomRightPart.a)
+				this.renderingContext.lineTo(this.poolTable.bottomRightPart.c, this.poolTable.bottomRightPart.a)			
+				this.renderingContext.stroke()
+				this.renderingContext.closePath()
+				this.renderingContext.moveTo(this.poolTable.bottomLeftPart.b, this.poolTable.bottomLeftPart.a)
+				this.renderingContext.lineTo(this.poolTable.bottomLeftPart.c, this.poolTable.bottomLeftPart.a)			
+				this.renderingContext.stroke()
+				this.renderingContext.closePath()
+		},
+		repaintPockets(){
+			this.renderingContext.fillStyle = 'red';
+			this.renderingContext.lineWidth = 1;
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.pockets[0].center.x, this.poolTable.pockets[0].center.y, this.poolTable.pockets[0].radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.topMiddlePocket.center.x, this.poolTable.topMiddlePocket.center.y, this.poolTable.topMiddlePocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath()
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.topRightPocket.center.x, this.poolTable.topRightPocket.center.y, this.poolTable.topRightPocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.bottomRightPocket.center.x, this.poolTable.bottomRightPocket.center.y, this.poolTable.bottomRightPocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.bottomMiddlePocket.center.x, this.poolTable.bottomMiddlePocket.center.y, this.poolTable.bottomMiddlePocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+			this.renderingContext.beginPath();
+			this.renderingContext.arc(this.poolTable.bottomLeftPocket.center.x, this.poolTable.bottomLeftPocket.center.y, this.poolTable.bottomLeftPocket.radius, 0, 2 * Math.PI);
+			this.renderingContext.stroke();
+			this.renderingContext.closePath();
+			this.renderingContext.fill()
+		}
 	
 	},
+	
 	
 });
 </script>
