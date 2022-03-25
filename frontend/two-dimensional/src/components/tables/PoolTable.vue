@@ -39,8 +39,10 @@ const BALL_DIAMETER = 34
 const SECOND_IN_MILLIS = 1000
 const FRICTION = 0.991
 let cueForceInterval = undefined
-const DELTA = 1/20
 
+const DELTA = 1/8 // TODO if any lower the ball goes over to pocket in full speed
+let middleAreaTopLeft =<IVector2> {x: 125, y:130}
+let middleAreaBottomRight =<IVector2> {x: 1072, y:550}
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
@@ -62,7 +64,7 @@ export default defineComponent({
 	},
 	created() {		
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
-			if (mutation.type === "move") {					
+			if (mutation.type === "move") {
 				this.animate(this.theTable.board[this.theTable.board.length -1])
 				this.playMoveNotification()
 				this.highlightLastSquareIfSelected()
@@ -75,7 +77,7 @@ export default defineComponent({
 					this.stopReducer()
 				}
 			}else if (mutation.type === "rematch" ){
-				this.initTable()			
+				this.initTable()
 			}
 			else if (mutation.type === "updateWinner" ){			
 				console.log("update winner")
@@ -90,7 +92,6 @@ export default defineComponent({
 	},
 	mounted() {	
 		this.initTable()
-		
 		if(this.watch === "1"){
 			this.drawBoard()
 		}
@@ -122,7 +123,7 @@ export default defineComponent({
 			if(!image.canvasDestination){
 				image.canvasDestination = <IVector2> {x:0, y:0}
 			}
-			if(this.gameOptions && this.gameOptions.helperOrigo && component.hasOwnProperty('force')){
+			if(false && this.gameOptions && this.gameOptions.helperOrigo && component.hasOwnProperty('force')){
 
 				this.renderingContext.beginPath()
 				this.renderingContext.moveTo(-200, 0)
@@ -137,6 +138,7 @@ export default defineComponent({
 			}
 			this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
 			this.renderingContext.resetTransform()
+		
 		
 		},
 		repaintAll(){
@@ -155,32 +157,15 @@ export default defineComponent({
 				void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 					
 			*/
-			for( let i = 0; i < 2; i++){
-				let pathway = this.poolTable.pockets[i].pathwayRight
-				if(!pathway)
-				break // testcode
-				this.renderingContext.moveTo(pathway.top.x, pathway.top.y)
-				this.renderingContext.lineTo(pathway.bottom.x, pathway.bottom.y)			
-				this.renderingContext.stroke()
-				this.renderingContext.closePath()
-				pathway = this.poolTable.pockets[i].pathwayLeft
-				this.renderingContext.moveTo(pathway.top.x, pathway.top.y)
-				this.renderingContext.lineTo(pathway.bottom.x, pathway.bottom.y)			
-				this.renderingContext.stroke()
-				this.renderingContext.closePath()
-			}
+		
 			
 			for( let i = 0; i < this.ballsRemaining.length; i++){
 				this.repaintComponent(this.ballsRemaining[i])
 			}
 			this.repaintComponent(this.cue)
-			this.repaintPathways()
-			this.repaintPockets()
-			if(this.mouseCoordsTemp){
-				this.renderingContext.fillStyle = 'black';
-				this.renderingContext.fillText("Mouse: x:"+this.mouseCoordsTemp.x +"  y:"+this.mouseCoordsTemp.y, 150, 50)
-				this.renderingContext.fillText("Ball:  x:"+this.cueBall.position.x +"  y:"+this.cueBall.position.y, 150, 40)
-			}
+			//this.repaintTableParts()
+			//this.repaintPockets()
+			//this.repaintPathways()
 		},
 		
 		initTable() {
@@ -224,12 +209,12 @@ export default defineComponent({
 			this.poolTable.bottomRightPart = bottomRightPart
 			this.poolTable.bottomLeftPart = bottomLeftPart
 			this.poolTable.leftPart = leftPart 
-			const topLeftPocket:IPocket = <IPocket> {center: {x: 65, y:61}, radius:32, pathwayLeft:{top:{x:54,y:93}, bottom:{x:80, y:120}}, pathwayRight:{top:{x:96,y:56}, bottom:{x:117, y:77}}}
+			const topLeftPocket:IPocket = <IPocket> {center: {x: 65, y:61}, radius:32, pathwayLeft:{top:{x:54,y:93}, bottom:{x:80, y:118}}, pathwayRight:{top:{x:96,y:56}, bottom:{x:117, y:77}}}
 			const topMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:49}, radius:28, pathwayLeft:{top:{x:580,y:56}, bottom:{x:571, y:79}}, pathwayRight:{top:{x:635,y:56}, bottom:{x:644, y:79}}}
-			const topRightPocket:IPocket = <IPocket> {center: {x: 1144, y:61}, radius:32}
-			const bottomRightPocket:IPocket = <IPocket> {center: {x: 1144, y:614}, radius:32}
-			const bottomMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:630}, radius:28} //left  little lower than in image. Symmetric position to oppsite?
-			const bottomLeftPocket:IPocket = <IPocket> {center: {x: 65, y:614}, radius:32}
+			const topRightPocket:IPocket = <IPocket> {center: {x: 1144, y:61}, radius:32, pathwayLeft:{top:{x:1112,y:56}, bottom:{x:1089, y:79}}, pathwayRight:{top:{x:1144,y:93}, bottom:{x:1122, y:118}}}
+			const bottomRightPocket:IPocket = <IPocket> {center: {x: 1144, y:614}, radius:32, pathwayLeft:{top:{x:1091, y:600}, bottom:{x:1112, y:620}}, pathwayRight:{top:{x:1122,y:562}, bottom:{x:1142, y:580}}}
+			const bottomMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:630}, radius:28, pathwayLeft:{top:{x:571, y:600}, bottom:{x:580, y:620}}, pathwayRight:{top:{x:644,y:600}, bottom:{x:635, y:620}}}
+			const bottomLeftPocket:IPocket = <IPocket> {center: {x: 65, y:614}, radius:32, pathwayLeft:{top:{x:80,y:558}, bottom:{x:54, y:584}}, pathwayRight:{top:{x:118,y:600}, bottom:{x:98, y:620}}}
 			this.poolTable.pockets.push(topLeftPocket)
 			this.poolTable.pockets.push(topMiddlePocket)
 			this.poolTable.pockets.push(topRightPocket)
@@ -535,9 +520,11 @@ export default defineComponent({
 			return false
 			return component.velocity.x !== 0 || component.velocity.y !==0
 		},
-		checkAndHandleTableCollision(ball:IBall){			
-			const ballRadius = this.cueBall.radius
-			if(this.isTableTopBoundry(ball) ){
+		checkAndHandleTableCollision(ball:IBall){
+		
+			if(this.isBallInMiddleArea(ball)){
+				//console.log("in middle area"+JSON.stringify(ball))
+			}else if(this.isTableTopBoundry(ball) ){
 				console.log("Top boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
 			}else if(this.isTableBottomBoundry(ball)){
@@ -551,30 +538,35 @@ export default defineComponent({
 				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
 			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){
 				console.log("collided with pathway, that's all we know")
+			
 			}else{
 				const pocket:IPocket = this.isInPocket(ball)
 				if(pocket){
 					this.handleBallInPocket(ball, pocket)
 				}
 			}
+			this.updatePositionAndVelocity(ball)
+		},
+		updatePositionAndVelocity(ball:IBall){
 			ball.position.x += ball.velocity.x * DELTA
 			ball.position.y += ball.velocity.y * DELTA
 			ball.velocity.x *= FRICTION 
 			ball.velocity.y *= FRICTION
 		},
 		checkAndHandlePocketPathwayCollisions(ball:IBall){
-			for(let i = 0; i < 2; i++){
+			for(let i = 0; i < this.poolTable.pockets.length; i++){
 				const pocket:IPocket = this.poolTable.pockets[i]				
 				if(this.isPathwayBorderCollision(pocket.pathwayRight, ball, i)){					
-					const reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayRight, ball)
+					let reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayRight, ball)
 					console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
 					ball.velocity = reflectionVector
 					return true
-				}else if(this.isPathwayBorderCollision(pocket.pathwayLeft, ball, i)){
-					const reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayLeft, ball)
+				} else if(this.isPathwayBorderCollision(pocket.pathwayLeft, ball, i)){
+					let reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayLeft, ball)
 					ball.velocity = reflectionVector
+					console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
 					return true
-				}
+				}				
 			}
 			return false
 		},
@@ -590,46 +582,52 @@ export default defineComponent({
 			let reflectionVector:IVector2 = this.subtractVectors(multipliedVector, ball.velocity)
 			return reflectionVector
 		},
-		isPathwayBorderCollision(p:IPathWayBorder, ball:IBall, test = 0){
-			const ballRadius = this.cueBall.radius
-			//Horizontal comparison including edge cases
-			//console.log("isPathwayBorderCollision:"+JSON.stringify(p), " ba:ll"+JSON.stringify(ball.position) +" upper:"+test +" radius:"+ballRadius)
-			if(test == 0 && this.isBallBetweenXCoordinates(ball, p.top, p.bottom )){
-				// Vertical comparison including edge cases
-				console.log("match1"+JSON.stringify(p)+ " ball"+JSON.stringify(ball.position))
-				return this.isBallBetweenYCoordinates(ball, p.bottom, p.top )
+		isPathwayBorderCollision(p:IPathWayBorder, ball:IBall){
+			// https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm  -> answer starting  "No one seems to consider projection ..."			
+			if(this.isBallInMiddleArea(ball)){
+				console.log("Ball in middle area")
+				return false
 			}
-			else if(test == 1 && this.isBallBetweenXCoordinates (ball, p.top, p.bottom)){
-				// Vertical comparison including edge cases
-				console.log("Match2"+ JSON.stringify(ball.position)+ " top:"+JSON.stringify(p.top)+ " bottom:"+JSON.stringify(p.bottom))
-				if(this.isBallBetweenYCoordinates(ball, p.top, p.bottom )){
-					console.log("MATCH3"+JSON.stringify(p)+ " ba:ll"+JSON.stringify(ball.position))
-					return true
-				}
+			//console.log("Ball not in middle area")
+			const a:IVector2 = p.top
+			const b:IVector2 = p.bottom
+			const c:IVector2 = ball.position
+			const ac:IVector2 = this.subtractVectors(c,a)
+			const ab:IVector2 = this.subtractVectors(b,a)
+			const d:IVector2 = this.addVectors(this.projectVectorOnVector(ac, ab), a)
+			const ad:IVector2 = this.subtractVectors(d,a)
+			const k = Math.abs(ab.x) > Math.abs(ab.y) ? ad.x / ab.x : ad.y / ab.y
+			let distance = undefined
+			if (k <= 0.0) {
+				distance = Math.sqrt(this.hypot2(c, a))
+			}else if (k >= 1.0) {
+				distance = Math.sqrt(this.hypot2(c, b))
 			}
-			return false
+			if(!distance){
+				distance = Math.sqrt(this.hypot2(c, d))
+			}
+			//console.log("Distance to pathWay"+distance)
+			return distance <= ball.radius			
 		},
-		isBallBetweenXCoordinates(ball:IBall, lower:IVector2, higher:IVector2){
-			if(ball.velocity.x > 0){
-			//	console.log("velo>0:"+ "ball:"+(ball.position.x + ball.radius/2 )+ ">="+ lower.x +" && <="+higher.x+(ball.position.x + ball.radius >= lower.x && ball.position.x + ball.radius <= higher.x)+ " ball:"+JSON.stringify(ball.position))
-				return ball.position.x + ball.radius/2 >= lower.x && ball.position.x + ball.radius <= higher.x
-			}else if(ball.velocity.x < 0){
-				console.log("velo<0:"+ (ball.position.x - ball.radius >= lower.x && ball.position.x - ball.radius <= higher.x))
-				return ball.position.x - ball.radius >= lower.x && ball.position.x - ball.radius/2 <= higher.x
-			} 
-			return ball.position.x >= lower.x && ball.position.x <= higher.x
-		},
-		isBallBetweenYCoordinates(ball:IBall, lower:IVector2, higher:IVector2){
-			if(ball.velocity.y > 0){ // going down
-				return ball.position.y + ball.radius >= lower.y && ball.position.y + ball.radius <= higher.y
+		isBallInMiddleArea(ball:IBall){
+			const middleAreaTopLeft =<IVector2> {x: 125, y:130}
+			const middleAreaBottomRight =<IVector2> {x: 1072, y:550}
+			const top:IVector2 = this.subtractVectors(ball.position, middleAreaTopLeft)
+			const bottom:IVector2 = this.subtractVectors(middleAreaBottomRight, ball.position)
+			if(top.x > 0 && top.y > 0){
+				return bottom.x > 0 && bottom.y > 0
 			}
-			else if(ball.velocity.y < 0){ // going up
-			console.log("up:"+ (ball.position.y - ball.radius)+ " >="+lower.y+" <="+ (ball.position.y - ball.radius <= higher.y ))
-				return ball.position.y - ball.radius >= lower.y && ball.position.y - ball.radius <= higher.y
-			}
-			return ball.position.y >= lower.y && ball.position.y <= higher.y
 		},
+		hypot2(vectorA:IVector2, vectorB:IVector2){
+			return this.dotProduct(this.subtractVectors(vectorA, vectorB), this.subtractVectors(vectorA, vectorB))
+		},
+		
+		projectVectorOnVector(vectorA:IVector2, vectorB:IVector2){
+			const scalar = this.dotProduct(vectorA, vectorB) / this.dotProduct(vectorB, vectorB)
+			return <IVector2>{x: scalar * vectorB.x, y: scalar * vectorB.y}
+		},			
 		calculateLength(vector:IVector2){
+			// = same as magnitude of Vector
 			const length = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2))			
 			return length
 		},
@@ -652,8 +650,8 @@ export default defineComponent({
 		},
 		dotProduct(vectorA:IVector2, vectorB: IVector2 ): number{
 			return vectorA.x * vectorB.x + vectorA.y * vectorB.y
-			
-		},	
+		},
+	
 		isAnyBallMoving(){
 			for (let i = 0; i< this.ballsRemaining.length; i++){				
 				let comp:IPoolComponent = this.ballsRemaining[i]
@@ -738,7 +736,7 @@ export default defineComponent({
 			}
 			return 5
 		},
-		repaintPathways(poolTable:IPoolTable){
+		repaintTableParts(poolTable:IPoolTable){
 		
 			this.renderingContext.moveTo(this.poolTable.leftPart.a, this.poolTable.leftPart.b)
 				this.renderingContext.lineTo(this.poolTable.leftPart.a, this.poolTable.leftPart.c)			
@@ -798,8 +796,28 @@ export default defineComponent({
 			this.renderingContext.stroke();
 			this.renderingContext.closePath();
 			this.renderingContext.fill()
+		},
+		repaintPathways(){
+			if(this.mouseCoordsTemp){
+					this.renderingContext.fillStyle = 'black';
+					this.renderingContext.fillText("Mouse: x:"+this.mouseCoordsTemp.x +"  y:"+this.mouseCoordsTemp.y, 150, 50)
+					this.renderingContext.fillText("Ball:  x:"+this.cueBall.position.x +"  y:"+this.cueBall.position.y, 150, 40)
+				}
+						for( let i = 0; i < 6; i++){
+					let pathway = this.poolTable.pockets[i].pathwayLeft 
+					if(!pathway)
+					break // testcode
+					this.renderingContext.moveTo(pathway.top.x, pathway.top.y)
+					this.renderingContext.lineTo(pathway.bottom.x, pathway.bottom.y)			
+					this.renderingContext.stroke()
+					this.renderingContext.closePath()
+					pathway = this.poolTable.pockets[i].pathwayRight
+					this.renderingContext.moveTo(pathway.top.x, pathway.top.y)
+					this.renderingContext.lineTo(pathway.bottom.x, pathway.bottom.y)			
+					this.renderingContext.stroke()
+					this.renderingContext.closePath()			
+				}
 		}
-	
 	},
 	
 	
