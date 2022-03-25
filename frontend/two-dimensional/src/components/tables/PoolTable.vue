@@ -27,7 +27,8 @@ import { defineComponent } from "vue";
 import {IGameMode,IGameToken,ITable} from "../../interfaces";
 import {IPoolTable, ICue, IBall, IPocket, IEightBallGame, IVector2, IGameImage, IPoolComponent, IEightBallGameOptions, IBoundry, IPathWayBorder} from "../../interfaces/pool";
 import { loginMixin, } from "../../mixins/mixins";
-import { tablesMixin, } from "../../mixins/tablesMixin";
+import { tablesMixin} from "../../mixins/tablesMixin";
+import { poolMixin} from "../../mixins/poolMixin";
 import { useRoute } from "vue-router";
 import Chat from "../Chat.vue";
 
@@ -46,7 +47,7 @@ let middleAreaBottomRight =<IVector2> {x: 1072, y:550}
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
-	mixins: [loginMixin,tablesMixin],
+	mixins: [loginMixin, tablesMixin, poolMixin],
 	props:["watch"],
 	data():IEightBallGame{
 		return{
@@ -373,6 +374,7 @@ export default defineComponent({
 			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
 			this.cue.image.canvasDestination = dimensions
 			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
+			this.sendPoolMove(this.cueBall,)
 			this.collideCueWithCueBall().then(() => {				
 				this.cue.image.visible = false
 				this.cue.force = 0					
@@ -454,12 +456,12 @@ export default defineComponent({
 				return pocket
 			}		
 		},
-		handleBallInPocket (component:IBall, pocket:IPocket){									
+		handleBallInPocket (component:IBall, pocket:IPocket){
 			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.8
 			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.8
 			component.position = <IVector2> {x:pocket.center.x, y:pocket.center.y}
 			component.velocity.x = 0
-			component.velocity.y = 0		
+			component.velocity.y = 0
 		},
 		handleBallCollisions(){			
 			for (let i = 0; i < this.ballsRemaining.length; i++){
@@ -668,6 +670,7 @@ export default defineComponent({
 			const tempAngle = Math.atan2(opposite, adjacent)
 			this.cue.image.canvasRotationAngle = tempAngle
 			window.requestAnimationFrame(this.repaintAll)
+			this.sendPoolCueUpdate(tempAngle, this.cue.position)
 		},
 		updateCueForce(){
 			this.cue.force += 10
