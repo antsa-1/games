@@ -50,7 +50,7 @@ export const tablesMixin = {
 	created() {
 		if(this.theTable?.playerInTurn?.name === this.userName){
 			this.startTime=120
-			this.startReducer()
+			//this.startReducer()
 		}
 	},
 	methods: {
