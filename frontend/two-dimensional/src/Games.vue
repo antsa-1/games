@@ -18,7 +18,7 @@ import Lobby from "./components/Lobby.vue";
 import {IUser} from "./interfaces/interfaces";
 import { loginMixin } from "./mixins/mixins";
 export default defineComponent({
-	name: "TicTacToe",
+	name: "Games",
 	components: {
 		NavbarTop
 	},

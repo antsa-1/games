@@ -2,7 +2,7 @@
  * @author antsa-1 from GitHub
  */
 import { createApp } from 'vue'
-import TicTacToe from './TicTacToe.vue'
+import TicTacToe from './Games.vue'
 import Login from './components/Login.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
