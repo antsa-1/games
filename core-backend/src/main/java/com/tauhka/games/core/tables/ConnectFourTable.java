@@ -1,14 +1,13 @@
-package com.tauhka.games.connectfour;
+package com.tauhka.games.core.tables;
 
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.Move;
-import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
 
-public class ConnectFourTable extends Table {
+public class ConnectFourTable extends TicTacToeTable {
 	private static final Logger LOGGER = Logger.getLogger(ConnectFourTable.class.getName());
 
 	public ConnectFourTable(User playerA, GameMode gameMode, boolean randomizeStarter) {
@@ -16,7 +15,7 @@ public class ConnectFourTable extends Table {
 	}
 
 	@Override
-	public synchronized Move addGameToken(User user, Integer x, Integer y) {
+	public synchronized Move playTurn(User user, Integer x, Integer y) {
 		if (!user.equals(super.getPlayerInTurn())) {
 			throw new IllegalArgumentException("Player is not in turn in board:" + this);
 

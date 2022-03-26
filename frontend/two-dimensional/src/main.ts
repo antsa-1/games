@@ -114,10 +114,12 @@ const routes: RouteRecordRaw[] = [
         props: true,
       
         beforeEnter: (to, from, next) => {
-            let playerA:IPlayer={name:"playerA", gameToken:IGameToken.X}
+            
+           /* let playerA:IPlayer={name:"playerA", gameToken:IGameToken.X}
             let playerB:IPlayer={name:"playerB", gameToken:IGameToken.O}
             let table:ITable= {playerA:playerA,playerB:playerB,playerInTurn:playerA,gameMode:undefined,board:undefined,chat:null,tableId:"a",x:0,y:0}
             store.state.theTable=table
+            */
             if (!store.state.user || !store.state.theTable) {
                 next('/');
             } else {

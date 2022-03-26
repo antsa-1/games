@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.tauhka</groupId>
 	<artifactId>games-web</artifactId>
-	<version>1.0.14</version>
+	<version>1.1.0</version>
 	<packaging>war</packaging>
 	<name>GamesWeb</name>
 	<description>GamesWeb</description>
@@ -11,6 +11,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>12</maven.compiler.source>
 		<maven.compiler.target>12</maven.compiler.target>
+		
 	</properties>
 
 	<dependencyManagement>
@@ -29,7 +30,7 @@
 		<dependency>
 			<groupId>com.tauhka</groupId>
 			<artifactId>games-core</artifactId>
-			<version>1.0.14</version>
+			<version>1.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -125,7 +126,7 @@
 						<execution>
 							<id>copy-resources</id>
 
-							<phase>validate</phase>
+							<phase>process-resources</phase>
 							<goals>
 								<goal>copy-resources</goal>
 							</goals>

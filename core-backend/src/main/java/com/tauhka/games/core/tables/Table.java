@@ -1,101 +1,69 @@
-package com.tauhka.games.core;
+package com.tauhka.games.core.tables;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
-import com.tauhka.games.core.twodimen.ArtificialUser;
+import com.tauhka.games.core.GameMode;
+import com.tauhka.games.core.GameResultType;
+import com.tauhka.games.core.Move;
+import com.tauhka.games.core.User;
+import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
-import com.tauhka.games.core.twodimen.GameResultType;
-import com.tauhka.games.core.twodimen.util.TwoDimensionalBoardAdapter;
-import com.tauhka.games.core.twodimen.util.WinnerChecker;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
-import jakarta.json.bind.annotation.JsonbTypeAdapter;
 
-// Contains two players, board and spectators. Plus some logic.
+// Base class for extending tables
 
-public class Table {
+public abstract class Table {
 	private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
 
 	@JsonbProperty("tableId")
 	private UUID tableId;
 	@JsonbProperty("playerA")
-	private User playerA;
+	protected User playerA;
 	@JsonbProperty("playerB")
-	private User playerB;
+	protected User playerB;
 	@JsonbProperty("playerInTurn")
-	private User playerInTurn;
+	protected User playerInTurn;
 	@JsonbTransient
-	private User rematchPlayer;
+	protected User rematchPlayer;
 	@JsonbTransient()
-	private User startingPlayer;
+	protected User startingPlayer;
 	@JsonbProperty("timer")
-	private int timer = 180;
+	protected int timer = 180;
 	@JsonbProperty("watchers")
-	private List<User> watchers = new ArrayList<User>();
-	@JsonbTypeAdapter(TwoDimensionalBoardAdapter.class)
-	private GameToken board[][];
-	@JsonbProperty("x")
-	private int x = 0;
-	@JsonbProperty("y")
-	private int y = 0;
+	protected List<User> watchers = new ArrayList<User>();
+
 	@JsonbProperty("draws")
-	private int draws = 0;
+	protected int draws = 0;
 	@JsonbTransient
-	private boolean randomizeStarter;
+	protected boolean randomizeStarter;
 	@JsonbProperty("gameMode")
-	private GameMode gameMode;
+	protected GameMode gameMode;
 	@JsonbProperty("gameStartedInstant")
-	private Instant gameStartedInstant;
-	@JsonbTransient
-	private int addedTokens;
+	protected Instant gameStartedInstant;
 
 	public Table(User playerA, GameMode gameMode, boolean randomizeStarter) {
-		super();
 		this.tableId = UUID.randomUUID();
 		this.playerA = playerA;
-		this.startingPlayer = playerA;
-
-		playerA.setGameToken(GameToken.X);
-		this.randomizeStarter = randomizeStarter;
-		this.playerInTurn = this.playerA;
-		board = new GameToken[gameMode.getX()][gameMode.getY()];
 		this.gameMode = gameMode;
-		this.x = this.gameMode.getX();
-		this.y = this.gameMode.getY();
-		this.addedTokens = 0;
-
 	}
+
+	public abstract GameResult checkWinAndDraw();
+
+	protected abstract Table startRematch();
+
+	public abstract Move playTurn(User user, Integer i1, Integer i2);
 
 	@JsonbTransient
 	public boolean isArtificialPlayerInTurn() {
 		return this.playerInTurn != null && this.playerInTurn instanceof ArtificialUser;
-	}
-
-	private Table startRematch() {
-		board = new GameToken[gameMode.getX()][gameMode.getY()];
-		this.rematchPlayer = null;
-		if (startingPlayer.equals(playerA)) {
-			startingPlayer = playerB;
-		} else {
-			startingPlayer = playerA;
-		}
-		if (startingPlayer.equals(playerA)) {
-			playerA.setGameToken(GameToken.X);
-			playerB.setGameToken(GameToken.O);
-		} else {
-			playerA.setGameToken(GameToken.O);
-			playerB.setGameToken(GameToken.X);
-		}
-		this.playerInTurn = startingPlayer;
-		this.addedTokens = 0;
-		this.gameStartedInstant = Instant.now();
-		return this;
 	}
 
 	public boolean isWaitingOpponent() {
@@ -154,10 +122,6 @@ public class Table {
 		return this.watchers.contains(user);
 	}
 
-	public int getX() {
-		return this.gameMode.getX();
-	}
-
 	public boolean addWatcher(User watcher) {
 		if (this.playerA == null || this.playerB == null) {
 			return false;
@@ -170,69 +134,10 @@ public class Table {
 		return false;
 	}
 
-	public int getY() {
-		return this.gameMode.getY();
-	}
-
-	// Tuplaklikit jne. -> synchronized plus
-
-	public synchronized Move addGameToken(User user, Integer x, Integer y) {
-		if (!user.equals(this.playerInTurn)) {
-			throw new IllegalArgumentException("Player is not in turn in board:" + this);
-			// throw new CloseWebSocketExcepetion("Player is not in turn in board:" + this);
-		}
-		GameToken token = this.board[x][y];
-		if (token != null) {
-			throw new IllegalArgumentException("Board already has token x:" + x + "+ y:" + y + " _" + this);
-		}
-		token = this.playerInTurn.getGameToken();
-		this.board[x][y] = token;
-		this.changePlayerInTurn();
-		this.addedTokens++;
-		Move move = new Move(x, y);
-		move.setToken(token);
-		return move;
-	}
-
-	public GameResult checkWinAndDraw() {
-		int requiredTokenConnects = this.gameMode.getRequiredConnections();
-		GameResult result = WinnerChecker.checkWinner(this.board, requiredTokenConnects);
-		if (result == null) {
-			// No winner, is it a draw?
-			if (isDraw()) {
-				result = new GameResult();
-				result.setResultType(GameResultType.DRAW);
-				result.setStartInstant(this.gameStartedInstant);
-				result.setGameMode(this.gameMode);
-
-				// this.playerInTurn = null;
-				initRematchForArtificialPlayer();
-				addPlayersToResult(result);
-			}
-			return result;
-		}
-		initRematchForArtificialPlayer();
-		addPlayersToResult(result);
-		result.setResultType(GameResultType.WIN_BY_PLAY);
-		result.setGameMode(this.gameMode);
-		result.setStartInstant(this.gameStartedInstant);
-
-		if (playerA.getGameToken() == result.getToken()) {
-			result.setWinner(playerA);
-			return result;
-		}
-		result.setWinner(playerB);
-		return result;
-	}
-
-	private void addPlayersToResult(GameResult result) {
+	protected void addPlayersToResult(GameResult result) {
 		// Order does not actually matter
 		result.setPlayerA(this.playerA);
 		result.setPlayerB(this.playerB);
-	}
-
-	private boolean isDraw() {
-		return addedTokens == gameMode.getX() * gameMode.getY();
 	}
 
 	public void initRematchForArtificialPlayer() {
@@ -249,10 +154,6 @@ public class Table {
 
 	public void setTimer(int timer) {
 		this.timer = timer;
-	}
-
-	protected void addTokenCount() {
-		this.addedTokens++;
 	}
 
 	@JsonbTransient
@@ -280,6 +181,10 @@ public class Table {
 			return true;
 		}
 		return false;
+	}
+
+	public void setPlayerInTurn(User player) {
+		playerInTurn = player;
 	}
 
 	@Override
@@ -335,11 +240,22 @@ public class Table {
 		this.playerInTurn = playerA;
 	}
 
-	public void setPlayerB(User playerB) {
+	public void joinTableAsPlayer(User playerB) {
 		this.playerB = playerB;
-		playerB.setGameToken(GameToken.O);
-
 		this.gameStartedInstant = Instant.now();
+		if (this.randomizeStarter) {
+			int i = ThreadLocalRandom.current().nextInt(1, 51);
+			if (i % 2 == 0) {
+				this.startingPlayer = playerA;
+				playerInTurn = playerA;
+			} else {
+				this.startingPlayer = playerB;
+				playerInTurn = playerB;
+			}
+		} else {
+			this.startingPlayer = playerA;
+			playerInTurn = playerA;
+		}
 	}
 
 	public List<User> getWatchers() {
@@ -348,15 +264,11 @@ public class Table {
 
 	@Override
 	public String toString() {
-		return "TicTacToeTable [id=" + tableId + ", playerA=" + playerA + ", playerB=" + playerB + "]";
+		return "Table [tableId=" + tableId + ", playerA=" + playerA + ", playerB=" + playerB + ", gameMode=" + gameMode + "]";
 	}
 
-	public GameToken[][] getBoard() {
-		return board;
-	}
-
-	public void setBoard(GameToken[][] board) {
-		this.board = board;
+	protected void resetRematchPlayer() {
+		rematchPlayer = null;
 	}
 
 	public synchronized boolean suggestRematch(User user) {
@@ -367,7 +279,7 @@ public class Table {
 		if (this.rematchPlayer.equals(user)) {
 			return false;
 		}
-		this.startRematch();
+		startRematch();
 		return true;
 	}
 

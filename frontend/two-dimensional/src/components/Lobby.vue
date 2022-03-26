@@ -56,14 +56,20 @@
 								<td v-if="table.gameMode.id<20" scope="row">
 									X.O 
 								</td>								
-								<td v-else-if="table.gameMode.id>=20" scope="row">
+								<td v-else-if="table.gameMode.id>=20 &&table.gameMode.id<30" scope="row">
 								 4x
+								</td>
+								<td v-else scope="row">
+									{{table.gameMode.name}} 
 								</td>
 								<td>
 									{{table.playerA.name}} - {{table.playerB?.name}}
 								</td>
-								<td>
+								<td v-if ="table.gameMode.gameNumber !== 3">
 									{{table.gameMode.x}} x {{table.gameMode.y}}
+								</td>
+								<td v-else>
+									-
 								</td>
 								<td>
 									<section v-if="!hasCreatedTable">
@@ -98,26 +104,34 @@
 				<div class="modal-body">
 						<form>
 							<div class="btn-group" role="group" aria-label="Select game" id="select-game">
-								<input type="radio" v-model="selectedGame" value="1" @change="changeSelectedGame"  id="tictactoe" name="tictactoe" class="btn">
-								<label class="form-label ms-1" for="tictactoe">TicTacToe</label>
-								<input type="radio" v-model="selectedGame" value="2" @change="changeSelectedGame" id="connect4" name="connect4" class="btn ms-2 pt-1 ">	
-								<label class="form-label ms-1 " for="connect4">Connect 4</label>						
+								<select v-model="selectedGame">
+									<option :value="0" :key="0" >
+										Select game
+									</option>
+									<option v-for="game in games" :value="game.gameId" :key="game.id">
+										{{game.name}}
+									</option>
+								</select>							
+								
 							</div>
 							<div class="mb-3" id="v-model-select-dynamic">						
 							<select v-model="selectedGameMode">
 								<option :value="0" :key="0" >
-									Select board size
+									Select mode
 								</option>
 								<option v-for="gameMode in gameModes" :value="gameMode.id" :key="gameMode.id">
-									{{gameMode.name}} connect {{gameMode.requiredConnections}}
+									{{gameMode.name}}
 								</option>
 							</select>			
 						</div>
 						<div class="mb-3" id="computer_selection">
 							<input class="form-check-input mr-2" type="checkbox" id="computerSelection" @change="computerSelectionOnChanged" v-model="playAgainstComputerChecked">
-							<label class="form-check-label" for="computerSelection">Play against computer</label>
-							
-						</div>						
+							<label class="form-check-label" for="computerSelection">Play against computer</label>							
+						</div>
+						<div class="mb-3" id="random_starter">
+							<input class="form-check-input mr-2" type="checkbox" id="randomStarter" @change="randomStarterOnChanged" v-model="randomStarterChecked">
+							<label class="form-check-label" for="randomStarter">Random starter</label>
+						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
@@ -135,7 +149,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IGameMode, IGameToken, ITable, IUser,ISquare, IChatMessage, IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces";
+import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare, IChatMessage, IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces";
 import { loginMixin } from "../mixins/mixins";
 import { utilsMixin } from "../mixins/utilsmixin";
 import { useRoute } from "vue-router";
@@ -143,20 +157,21 @@ import { Tooltip } from 'bootstrap/dist/js/bootstrap.esm.min.js'
 //import * as bootstrap from 'bootstrap';
 
 import Chat from "./Chat.vue";
+import { tablesMixin } from "@/mixins/tablesMixin";
+import { poolMixin } from "@/mixins/poolMixin";
 export default defineComponent({
 	
 	name: "Lobby",
-
-	mixins: [loginMixin,utilsMixin],
-
+	mixins: [loginMixin, utilsMixin, tablesMixin, poolMixin],
 	data() {
 		return {		
 			createTableButtonVisible:true,
 			watchTableButtonDisabled:false,
 			removeTableButtonVisible:false,
-			selectedGame:"1",
+			selectedGame:"0",
 			selectedGameMode:"0",
 			playAgainstComputerChecked:false,
+			randomStarterChecked:false,
 			computerLevel:"0",
 		}
 	},
@@ -168,23 +183,28 @@ export default defineComponent({
 		tables(){
 			return this.$store.getters.tables
 		},
+		games(){
+			return this.$store.getters.games
+		},
 		gameModes(){
-			if(this.selectedGame==="1"){
-				return this.$store.getters.gameModes.filter(gameMode => gameMode.gameNumber===1)
+			if(this.selectedGame === 1){
+				return this.$store.getters.games.filter(game => game.gameId === 1)[0].gameModes	
+			}else if(this.selectedGame === 2){
+				return this.$store.getters.games.filter(game => game.gameId === 2)[0].gameModes
+			}else if(this.selectedGame === 3){
+				return this.$store.getters.games.filter(game => game.gameId === 3)[0].gameModes
 			}
-			return this.$store.getters.gameModes.filter(gameMode => gameMode.gameNumber===2)
 		},
 		modalCreateTableDisabled(){
-			return this.selectedGameMode === "0"
-			
+			return this.selectedGameMode === "0"			
 		},
-		tablesExist(){			
+		tablesExist(){
 			return this.$store.getters.tables.length > 0
 		},
 		hasCreatedTable(){
 			const firstTable:ITable = this.$store.getters.tables[0]
 			if(firstTable && firstTable.playerA){
-				return firstTable.playerA.name===this.userName
+				return firstTable.playerA.name === this.userName
 			}
 			return false
 		},
@@ -229,7 +249,7 @@ export default defineComponent({
 						};
 					 	this.$store.dispatch("setUser", user).then(() => {
 							this.$store.dispatch("setUsers", data.players)
-							this.$store.dispatch("setGameModes", data.gameModes)
+							this.$store.dispatch("setGames", data.games)
 							this.$store.dispatch("setTables", data.tables)
 						})	
 						break;
@@ -267,42 +287,32 @@ export default defineComponent({
 					case "START_GAME":						
 						this.$store.dispatch("startGame", data.table)
 						const tableC:ITable=data.table
-						if (tableC.playerA.name===this.userName || tableC.playerB.name===this.userName ){
-							tableC.playerA.wins=0
-							tableC.playerB.wins=0
+						if (tableC.playerA.name === this.userName || tableC.playerB.name === this.userName ){
+							tableC.playerA.wins = 0
+							tableC.playerB.wins = 0
 							this.createTableButtonVisible = false
 							this.removeTableButtonVisible = false
 							this.watchTableButtonVisible = false
 							this.$store.dispatch("selectTable", data.table).then(() => {
-								if(tableC.gameMode.gameNumber===2){					
-									this.$router.push({ name: 'TableConnectFour', id:data.table.id})
-									return
-								}
-								this.$router.push({ name: 'TableTicTacToe', id:data.table.id})
+								this.openTable(data.table)
 							})
-						}						
-						break;
+						}			
+						break
 					case "MOVE":
-						const square :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
-						
+						const square :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}					
 						this.$store.dispatch("move", square)
 						this.$store.dispatch("changeTurn", data.table.playerInTurn)
-						break;
+						break
 					case "WATCH":
-							
 						this.$store.dispatch("selectTable", data.table).then(() => {
-							if(data.table.gameMode.gameNumber===2){									
-								this.$router.push({ name: 'TableConnectFour', id:data.table.id,params: { watch: "1" }})
-									return
-							}
-								this.$router.push({ name: 'TableTicTacToe', id:data.table.id,params: { watch: "1" }})
-						})		
-						break;
+							this.watchTable(data.table)							
+						})
+						break
 					case "ADD_WATCHER":						
 						this.$store.dispatch("addWatcher", data.who).then(() => {
 							
 						})		
-						break;				
+						break		
 					case "CHAT":
 						const message:IChatMessage={text: data.message,from:data.from}
 						if(data.to==="COMMON"){
@@ -310,15 +320,19 @@ export default defineComponent({
 							return
 						}
 						this.$store.dispatch("chat", message)
-						break;
+						break
 					case "REMATCH":
 						this.$store.dispatch("rematch", data.table).then(() => {
 							//this.$router.push({ name: 'Table', id:data.table.id})
 						})
-						break;
-					case "LEAVE_TABLE":		 				
+						break
+					case "POOL_CUE_UPDATE":
+						console.log("update opponent cue"+ JSON.stringify(data, null, 2))
+						this.updateOpponentCue(data.pool.cueAngle)				
+						break
+					case "LEAVE_TABLE":	
 						this.$store.dispatch("leaveTable", data.who.name)
-						break;
+						break
 					case "GAME_END":
 							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}							
 							this.$store.dispatch("move", lastSquare)
@@ -382,17 +396,18 @@ export default defineComponent({
 		},
 		createTable(){
 		 	
-			const obj = { title: "CREATE_TABLE", message: this.selectedGameMode,"computer":this.playAgainstComputerChecked};			
-			this.user.webSocket.send(JSON.stringify(obj));
-			this.computerLevel=null;
-			this.playAgainstComputerChecked=false;
+			const obj = { title: "CREATE_TABLE", message: this.selectedGameMode,"computer":this.playAgainstComputerChecked, randomStarter:this.randomStarterChecked}		
+			this.user.webSocket.send(JSON.stringify(obj))
+			this.computerLevel = null
+			this.playAgainstComputerChecked = false
+			this.randomStarterChecked = false
 		},
 		computerSelectionOnChanged(){
 			if(!this.playAgainstComputerChecked){
 				
 				this.computerLevel="0";
 			}
-		},
+		},				
 		changeSelectedGame(event){			
 			this.selectedGameMode="0"
 		},

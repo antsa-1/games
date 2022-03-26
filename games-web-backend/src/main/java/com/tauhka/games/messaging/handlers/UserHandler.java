@@ -12,12 +12,12 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.tauhka.games.core.GameMode;
-import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.ejb.UserEJBC;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.messaging.util.GamesUtils;
 import com.tauhka.games.web.websocket.CloseWebSocketException;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
@@ -29,6 +29,7 @@ import jakarta.websocket.Session;
 @Dependent
 public class UserHandler {
 	private static final Logger LOGGER = Logger.getLogger(UserHandler.class.getName());
+
 	private static int anonymCount = 0;
 	@Inject
 	private UserEJBC userEJB;
@@ -39,7 +40,7 @@ public class UserHandler {
 		User user = null;
 		Message loginMessage = new Message();
 		try {
-			if (message.getMessage() == null || message.getMessage().equals(NULL) || message.getMessage().trim().length() < 1 || message.getMessage().startsWith(ANONYM_LOGIN_TOKEN_START)) {
+			if (isAnonymLogin(message)) {
 				name = ANONYM_LOGIN_NAME_START + updateAnonymCount();
 				user = new User(name);
 				loginMessage.setToken(ANONYM_LOGIN_TOKEN_START + UUID.randomUUID().toString());
@@ -64,7 +65,7 @@ public class UserHandler {
 			tables = CommonEndpoint.TABLES.values().stream().collect(Collectors.toList());
 			loginMessage.setTables(tables);
 			loginMessage.setMessage(name);
-			loginMessage.setGameModes(GameMode.getGameModes());
+			loginMessage.setGames(GamesUtils.games);
 			loginMessage.setWho(user);
 			loginMessage.setTitle(MessageTitle.LOGIN);
 			return loginMessage;
@@ -72,6 +73,10 @@ public class UserHandler {
 			LOGGER.log(Level.SEVERE, "LoginHandler common excpetion", e);
 			throw new CloseWebSocketException("LoginHandler exception");
 		}
+	}
+
+	private boolean isAnonymLogin(Message message) {
+		return message.getMessage() == null || message.getMessage().equals(NULL) || message.getMessage().trim().length() < 1 || message.getMessage().startsWith(ANONYM_LOGIN_TOKEN_START);
 	}
 
 	private void cleanUpGhostTables() {

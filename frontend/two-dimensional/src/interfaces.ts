@@ -1,10 +1,13 @@
+import { IPoolTable } from "./interfaces/pool";
+
 export interface IStoreState {
 	user: IUser,
-	gameModes: IGameMode[],
+	games: IGame[],
 	tables: ITable[],
 	users: IUser[],
 	commonChat: IChat,
 	theTable: ITable,
+	poolTable: IPoolTable,
 	loadingStatus?: boolean
 }
 
@@ -46,6 +49,11 @@ export interface ISquare {
 export interface IWinSquares {
 	square: ISquare[]
 }
+export interface IGame{
+	gameId: number,
+	name: string
+	gameModes: IGameMode[]
+}
 export interface IGameMode {
 	gameId: number,
 	id: number,
@@ -75,16 +83,17 @@ export interface Lobby {
 }
 
 export interface ITable {
-	playerA: IPlayer;
-	playerB: IPlayer;
-	playerInTurn: IPlayer;
-	gameMode: IGameMode;
-	board: ISquare[];
-	win?: IWin;
-	tableId: string;
-	chat: IChat;
-	x: number;
-	y: number;
+	playerA: IPlayer,
+	playerB: IPlayer,
+	playerInTurn: IPlayer,
+	gameMode: IGameMode,
+	board: ISquare[],
+	win?: IWin,
+	tableId: string,
+	chat: IChat,
+	x: number,
+	y: number,
+	id:string
 }
 
 export interface IPlayer {

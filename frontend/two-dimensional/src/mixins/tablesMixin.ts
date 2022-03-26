@@ -8,7 +8,7 @@ export const tablesMixin = {
 	},
 	computed: {
 		resignButtonDisabled(){
-			const table=this.$store.getters.theTable;
+			const table = this.$store.getters.theTable;
 			if(this.watch){
 			
 				return true
@@ -35,8 +35,7 @@ export const tablesMixin = {
 		},
 		theTable(): ITable {
 			return this.$store.getters.theTable;
-		  },  
-
+		  }, 
 	},
 	timeLeft(){
 		return this.secondsLeft
@@ -49,7 +48,7 @@ export const tablesMixin = {
 		return this.$store.getters.theTable.watchers
 	},
 	created() {
-		if(this.theTable.playerInTurn?.name===this.userName){
+		if(this.theTable?.playerInTurn?.name === this.userName){
 			this.startTime=120
 			this.startReducer()
 		}
@@ -97,6 +96,22 @@ export const tablesMixin = {
 		leaveTable(){
 			const obj ={title:"LEAVE_TABLE", message:this.theTable.tableId}
 			this?.user?.webSocket?.send(JSON.stringify(obj));
-		}		
+		},
+		openTable(table:ITable){
+			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.id})
+		},
+		watchTable(table:ITable){
+			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.id, params: { watch: "1" }})			
+		},
+		getTableName(gameNumber:number):string{
+			if(gameNumber === 1){
+				return "TableTicTacToe"
+			}else if(gameNumber === 2){
+				return "TableConnectFour"
+			}
+			else if(gameNumber === 3){
+				return "PoolTable"
+			}
+		}
 	},
 };

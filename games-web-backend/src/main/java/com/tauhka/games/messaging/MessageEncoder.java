@@ -2,7 +2,7 @@ package com.tauhka.games.messaging;
 
 import java.util.logging.Logger;
 
-import com.tauhka.games.core.twodimen.util.TwoDimensionalBoardAdapter;
+import com.tauhka.games.core.twodimen.ai.TwoDimensionalBoardAdapter;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;

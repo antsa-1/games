@@ -1,16 +1,17 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { ITable, IUser, IPlayer, IStoreState, ISquare, IChatMessage, IChat, IGameResult, IWinMessage, IWin, } from "./interfaces";
-import { IGameMode } from "./interfaces";
+import { IGame } from "./interfaces";
 import { createStore } from 'vuex';
 
 export const store = createStore<IStoreState>({
     state: {
         user: null,
-        gameModes: [],
+        games: [],
         tables: [],
         users: [],
         theTable: null,
+        poolTable: null,
         commonChat: {
             messages: [],
             message: null
@@ -47,11 +48,14 @@ export const store = createStore<IStoreState>({
         tables(state) {
             return state.tables
         },
-        gameModes(state) {
-            return state.gameModes
+        games(state) {
+            return state.games
         },
         theTable(state) {
             return state.theTable
+        },
+        poolTable(state) {
+            return state.poolTable
         },
         chatMessages(state) {
             if (state.theTable && state.theTable.chat) {
@@ -71,6 +75,9 @@ export const store = createStore<IStoreState>({
     },
 
     mutations: {
+        updateCue(state, user: number){
+            
+        },
         setUser(state, user: IUser) {
             if (user) {
                 
@@ -85,8 +92,8 @@ export const store = createStore<IStoreState>({
                 state.user = user
             }
         },
-        setGameModes(state, gameModes: IGameMode[]) {
-            state.gameModes = gameModes
+        setGames(state, games: IGame[]) {
+            state.games = games
         },
         setTables(state, tables: ITable[]) {
 
@@ -223,13 +230,16 @@ export const store = createStore<IStoreState>({
 
     },
     actions: {
+        updateCue(context, angle: number) {
+            context.commit('updateCue', angle)            
+        },
         setUser(context, user: IUser) {
             context.commit('setUser', user)
             
         },
-        setGameModes(context, gamemodes: string[]) {
+        setGames(context, games: string[]) {
 
-            context.commit('setGameModes', gamemodes)
+            context.commit('setGames', games)
         },
         setTables(context, tables: ITable[]) {
 

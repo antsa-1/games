@@ -10,13 +10,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import com.tauhka.games.connectfour.ConnectFourTable;
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.Move;
-import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
-import com.tauhka.games.core.twodimen.ArtificialUser;
+import com.tauhka.games.core.tables.ConnectFourTable;
+import com.tauhka.games.core.tables.PoolTable;
+import com.tauhka.games.core.tables.Table;
+import com.tauhka.games.core.tables.TicTacToeTable;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
@@ -42,12 +44,17 @@ public class TableHandler {
 		if (tableOptional.isPresent()) {
 			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser() + " table:" + tableOptional.get());
 		}
+
 		Table table = null;
+
 		GameMode gameMode = GameMode.getGameMode(Integer.parseInt(message.getMessage()));
+
 		if (GameMode.CONNECT4 == gameMode.getGameNumber()) {
 			table = new ConnectFourTable(endpoint.getUser(), gameMode, false);
+		} else if (GameMode.POOL == gameMode.getGameNumber()) {
+			table = new PoolTable(endpoint.getUser(), gameMode, message.getRandomStarter());
 		} else {
-			table = new Table(endpoint.getUser(), gameMode, false);
+			table = new TicTacToeTable(endpoint.getUser(), gameMode, false);
 		}
 		CommonEndpoint.TABLES.put(table.getTableId(), table);
 		if (message.getComputer()) {
@@ -56,7 +63,7 @@ public class TableHandler {
 			user.setRankingTictactoe(OLAV_COMPUTER_TICTACTOE_RANKING);
 			user.setRankingConnectFour(OLAV_COMPUTER_CONNECT_FOUR_RANKING);
 			user.setId(UUID.fromString(OLAV_COMPUTER_ID));
-			table.setPlayerB(user);
+			table.joinTableAsPlayer(user);
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.START_GAME);
 			message_.setTable(table);
@@ -113,7 +120,7 @@ public class TableHandler {
 			int x = message.getX();
 			int y = message.getY();
 			Table table = tableOptional.get();
-			Move move = table.addGameToken(user, x, y);
+			Move move = table.playTurn(user, x, y);
 			GameResult result = tableOptional.get().checkWinAndDraw();
 			if (result != null) {
 				tokenMessage.setTitle(MessageTitle.GAME_END);
@@ -157,12 +164,12 @@ public class TableHandler {
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
 		if (!table.isWaitingOpponent()) {
-			throw new ConcurrentAccessException("Table is not waiting player " + table + " trying user:" + endpoint.getUser());
+			throw new ConcurrentAccessException("Table is not waiting player " + table + " trying user:" + endpoint.getUser()); // something else than concurrentaccess since synchronized, todo
 		}
 		if (table.getPlayerA().equals(endpoint.getUser())) {
 			throw new IllegalArgumentException("Same players to table not possible..");
 		}
-		table.setPlayerB(endpoint.getUser());
+		table.joinTableAsPlayer(endpoint.getUser());
 		Message message_ = new Message();
 		message_.setTitle(MessageTitle.START_GAME);
 		message_.setTable(table);
@@ -192,7 +199,7 @@ public class TableHandler {
 	}
 
 	public Message resign(CommonEndpoint endpoint) {
-		// Using params would be faster...
+
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
 		stream = stream.filter(table -> table.isPlayer(endpoint.getUser()));
 		Optional<Table> tableOptional = stream.findFirst();
@@ -244,7 +251,7 @@ public class TableHandler {
 
 	public Message makeComputerMove(Table table) {
 		ArtificialUser artificialUser = (ArtificialUser) table.getPlayerInTurn();
-		Move move = artificialUser.calculateBestMove(table);
+		Move move = artificialUser.calculateBestMove((TicTacToeTable) table);
 		Message message = new Message();
 		message.setTable(table);
 		message.setTitle(MessageTitle.MOVE);

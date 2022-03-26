@@ -74,7 +74,7 @@ export default defineComponent({
 		
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
 			if (mutation.type === "move") {
-				const board : ISquare[]= state.theTable.board
+				const f : ISquare[]= state.theTable.board
 				this.removeLastSquareHighLightning()
 				this.drawToken(this.theTable.board[this.theTable.board.length -1])
 				this.playMoveNotification()
@@ -332,7 +332,7 @@ export default defineComponent({
 				coordinates: x.toString().concat(y.toString())
 			};
 			
-			const elementExist =this.theTable.board.find(square => square.coordinates===clickedSquare.coordinates)
+			const elementExist = this.theTable.board.find(square => square.coordinates === clickedSquare.coordinates)
 			if(!elementExist){
 				
 				this.removeMouseListener()

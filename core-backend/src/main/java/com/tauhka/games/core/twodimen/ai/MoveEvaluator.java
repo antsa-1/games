@@ -1,11 +1,11 @@
-package com.tauhka.games.core.twodimen.util;
+package com.tauhka.games.core.twodimen.ai;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.Move;
-import com.tauhka.games.core.Table;
+import com.tauhka.games.core.tables.TicTacToeTable;
 
 //Just some testing for calculating computer best move.
 public class MoveEvaluator {
@@ -16,7 +16,7 @@ public class MoveEvaluator {
 	private static final BigDecimal TOKEN_IN_MIDDLE_WEIGHT = new BigDecimal("0.5");
 	private static final BigDecimal DEAD_END = new BigDecimal("-1000");
 
-	public static Move calculateMove(Table table, List<Move> availableMoves) {
+	public static Move calculateMove(TicTacToeTable table, List<Move> availableMoves) {
 		GameToken board[][] = table.getBoard();
 		int requiredConnections = table.getGameMode().getRequiredConnections();
 		GameToken tokenToBePlayed = table.getPlayerInTurn().getGameToken();

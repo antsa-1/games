@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tauhka.games.core.GameMode;
-import com.tauhka.games.core.Table;
+import com.tauhka.games.core.Game;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.twodimen.GameResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -37,12 +37,16 @@ public class Message implements Serializable {
 	private Table table;
 	@JsonbProperty("tables")
 	private List<Table> tables = new ArrayList<Table>();
-	@JsonbProperty("gameModes")
-	private List<GameMode> gameModes;
+	@JsonbProperty("games")
+	private List<Game> games;
 	@JsonbProperty("win")
 	private GameResult win;
 	@JsonbProperty("computer")
 	private Boolean computer;
+	@JsonbProperty("randomStarter")
+	private Boolean randomStarter;
+	@JsonbProperty("pool")
+	private PoolMessage poolMessage;
 
 	public MessageTitle getTitle() {
 		return title;
@@ -92,16 +96,32 @@ public class Message implements Serializable {
 		return win;
 	}
 
+	public PoolMessage getPoolMessage() {
+		return poolMessage;
+	}
+
+	public void setPoolMessage(PoolMessage poolMessage) {
+		this.poolMessage = poolMessage;
+	}
+
 	public void setWin(GameResult win) {
 		this.win = win;
 	}
 
-	public List<GameMode> getGameModes() {
-		return gameModes;
+	public Boolean getRandomStarter() {
+		return randomStarter;
 	}
 
-	public void setGameModes(List<GameMode> gameModes) {
-		this.gameModes = gameModes;
+	public void setRandomStarter(Boolean randomStarter) {
+		this.randomStarter = randomStarter;
+	}
+
+	public List<Game> getGames() {
+		return games;
+	}
+
+	public void setGames(List<Game> games) {
+		this.games = games;
 	}
 
 	public String getMessage() {

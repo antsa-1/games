@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.tauhka.games.core.GameMode;
+import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.User;
 

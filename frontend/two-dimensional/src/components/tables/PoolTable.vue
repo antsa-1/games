@@ -13,7 +13,9 @@
 
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
-			Text
+			<span v-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn. </span>
+			<span v-else-if="theTable?.playerInTurn === null" class="text-success"> Game ended </span>	
+			<div v-else class="text-danger"> In turn: {{theTable.playerInTurn?.name}}</div>			
 		</div>
 	</div>
 	<div class="col-xs-12 col-sm-8">
@@ -44,6 +46,7 @@ let cueForceInterval = undefined
 const DELTA = 1/8 // TODO if any lower the ball goes over to pocket in full speed
 let middleAreaTopLeft =<IVector2> {x: 125, y:130}
 let middleAreaBottomRight =<IVector2> {x: 1072, y:550}
+
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
@@ -104,7 +107,7 @@ export default defineComponent({
 	methods: {
 		resize(){ 
 			//TODO, not init all
-			console.log("****RESIZE")
+			console.log("****RESIZE all components todo")
 			//this.initTable()
 			
 		},
@@ -171,6 +174,7 @@ export default defineComponent({
 		
 		initTable() {
 			console.log("****initTable")
+			
 			setTimeout( () => {
 			
 			
@@ -264,9 +268,12 @@ export default defineComponent({
 			}
 			this.ballsRemaining.push(this.cueBall)
 			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true}
-			this.addMouseListeners()
+			 if (this.theTable.playerInTurn?.name === this.userName) {
+				this.addMouseListeners()
+			}
 			window.requestAnimationFrame(this.repaintAll)
-		}, 300)
+		}, 250)
+		
 		},
 		isTableTopBoundry(component:IPoolComponent){
 		
@@ -320,13 +327,17 @@ export default defineComponent({
 							velocity:<IVector2>{ x: 0, y: 0},
 			}
 		},	
-	
 		addMouseListeners(){
 			this.canvas.addEventListener("mousemove", this.handleMouseMove)
 			this.canvas.addEventListener("mousedown", this.handleMouseDown)
 			this.canvas.addEventListener("mouseup", this.handleMouseUp)
-			this.canvas.addEventListener("contextmenu",(e)=> e.preventDefault()) 
-		},	
+			this.canvas.addEventListener("contextmenu",(e)=> e.preventDefault())
+		},
+		removeMouseListeners(){
+			this.canvas.removeEventListener("mousemove", this.handleMouseMove)
+			this.canvas.removeEventListener("mousedown", this.handleMouseDown)
+			this.canvas.removeEventListener("mouseup", this.handleMouseUp)			
+		},
 		handleMouseDown(event:MouseEvent){
 			if(event.button ===2){				
 				return
@@ -337,7 +348,7 @@ export default defineComponent({
 		},	
 	
 		handleMouseUp(event:MouseEvent){
-			if(event.button ===2){
+			if(event.button === 2){
 				this.cueBall.position.x = event.offsetX
 				this.cueBall.position.y = event.offsetY
 				requestAnimationFrame(this.repaintAll)
@@ -374,7 +385,7 @@ export default defineComponent({
 			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
 			this.cue.image.canvasDestination = dimensions
 			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
-			this.sendPoolMove(this.cueBall,)
+			this.playTurn(this.cueBall, this.canvas)
 			this.collideCueWithCueBall().then(() => {				
 				this.cue.image.visible = false
 				this.cue.force = 0					
@@ -670,7 +681,7 @@ export default defineComponent({
 			const tempAngle = Math.atan2(opposite, adjacent)
 			this.cue.image.canvasRotationAngle = tempAngle
 			window.requestAnimationFrame(this.repaintAll)
-			this.sendPoolCueUpdate(tempAngle, this.cue.position)
+			this.sendPoolCueUpdate(tempAngle, this.cue.position, this.canvas)
 		},
 		updateCueForce(){
 			this.cue.force += 10

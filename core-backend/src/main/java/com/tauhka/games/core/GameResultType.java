@@ -1,4 +1,4 @@
-package com.tauhka.games.core.twodimen;
+package com.tauhka.games.core;
 
 public enum GameResultType {
 

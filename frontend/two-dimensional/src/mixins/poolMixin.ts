@@ -20,15 +20,16 @@ export const poolMixin = {
 
 	},
 	methods: {
-		sendPoolMove(cueBall:IBall, canvas:HTMLCanvasElement){
+		playTurn(cueBall:IBall, canvas:HTMLCanvasElement){
             const obj ={ title:"POOL_MOVE", message: this.theTable.tableId, velocity:cueBall.velocity, cueBall:cueBall.position, canvasWidth:canvas.width, canvasHeight: canvas.height}
             console.log("poolMixin sending pool move"+ JSON.stringify(obj, null , 2))
 			//this.user.webSocket.send(JSON.stringify(obj))
         },
-        sendPoolCueUpdate(rotationAngle: IVector2, position:IVector2){
-            const obj ={ title:"POOL_CUE_UPDATE", message: this.theTable.tableId, position:position, angle:rotationAngle }
-            console.log("poolMixin sending cueUpdate"+ JSON.stringify(obj, null , 2))
-			//this.user.webSocket.send(JSON.stringify(obj))
-        }
+        sendPoolCueUpdate(rotationAngle: IVector2, cueBall:IBall, canvas:HTMLCanvasElement){ // percentage??
+            const obj ={ title:"POOL_CUE_UPDATE", message: this.theTable.tableId, pool:{ cueBallPosition:cueBall.position, cueAngle:rotationAngle, canvas:{x:canvas.width, y:canvas.height} }}
+          //  console.log("poolMixin sending cueUpdate"+ JSON.stringify(obj, null , 2))
+		//	this.user.webSocket.send(JSON.stringify(obj))
+        },
+     
 	},
 }

@@ -1,17 +1,17 @@
-package com.tauhka.games.core.twodimen;
+package com.tauhka.games.core.twodimen.ai;
 
 import java.util.List;
 
 import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.Move;
-import com.tauhka.games.core.Table;
-import com.tauhka.games.core.twodimen.util.MoveEvaluator;
+import com.tauhka.games.core.tables.TicTacToeTable;
+import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.twodimen.util.MoveHelper;
 import com.tauhka.games.core.twodimen.util.WinnerChecker;
 
 public interface CommonAI {
 
-	public default Move calculateBestMove(Table table) {
+	public default Move calculateBestMove(TicTacToeTable table) {
 		Move move = null;
 		List<Move> availableMoves = MoveHelper.getAvailableMoves(table);
 		move = checkOwnWinningCondition(table, availableMoves);
@@ -26,7 +26,7 @@ public interface CommonAI {
 		return MoveEvaluator.calculateMove(table, availableMoves);
 	}
 
-	private Move checkOpponentWinningCondition(Table table, List<Move> availableMoves) {
+	private Move checkOpponentWinningCondition(TicTacToeTable table, List<Move> availableMoves) {
 		GameToken tokenToBePlayed = table.getPlayerInTurn().getGameToken();
 		// Check opponent token, since opponent is not in turn
 		if (tokenToBePlayed == GameToken.O) {
@@ -45,7 +45,7 @@ public interface CommonAI {
 		return null;
 	}
 
-	private Move checkOwnWinningCondition(Table table, List<Move> availableMoves) {
+	private Move checkOwnWinningCondition(TicTacToeTable table, List<Move> availableMoves) {
 		GameToken tokenToBePlayed = table.getPlayerInTurn().getGameToken();
 		for (Move move : availableMoves) {
 			GameToken[][] deepCloned = deepCopy(table.getBoard());

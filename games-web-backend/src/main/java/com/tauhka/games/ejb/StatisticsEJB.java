@@ -13,9 +13,9 @@ import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.stats.RankingCalculator;
-import com.tauhka.games.core.twodimen.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
 
 import jakarta.annotation.Resource;

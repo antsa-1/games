@@ -6,12 +6,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageDecoder;
 import com.tauhka.games.messaging.MessageEncoder;
 import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.messaging.handlers.PoolTableHandler;
 import com.tauhka.games.messaging.handlers.TableHandler;
 import com.tauhka.games.messaging.handlers.UserHandler;
 
@@ -26,6 +27,8 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
+/** @author antsa-1 from GitHub **/
+
 @ServerEndpoint(value = "/ws", decoders = { MessageDecoder.class }, encoders = { MessageEncoder.class }, configurator = CommonEndpointConfiguration.class)
 public class CommonEndpoint {
 	private static final Logger LOGGER = Logger.getLogger(CommonEndpoint.class.getName());
@@ -37,6 +40,8 @@ public class CommonEndpoint {
 
 	@Inject
 	private TableHandler tableHandler;
+	@Inject
+	private PoolTableHandler pooltableHandler;
 
 	private Session session;
 	private User user;
@@ -103,6 +108,9 @@ public class CommonEndpoint {
 						sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 					}
 				}
+			} else if (message.getTitle() == MessageTitle.POOL_CUE_UPDATE) {
+				gameMessage = pooltableHandler.updateCue(this, message);
+				sendMessageToAllInTableExcept(gameMessage, user);
 			} else {
 				throw new CloseWebSocketException("unknown command:" + message);
 			}
@@ -164,6 +172,27 @@ public class CommonEndpoint {
 			return;
 		}
 		for (User user : table.getUsers()) {
+			CommonEndpoint endpoint = ENDPOINTS.get(user);
+			if (endpoint != null && endpoint.getSession() != null && endpoint.getSession().isOpen()) {
+				try {
+					endpoint.getSession().getBasicRemote().sendObject(message);
+				} catch (IOException e) {
+					LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
+				} catch (EncodeException e) {
+					LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table encoding error", e);
+				}
+			}
+		}
+	}
+
+	public void sendMessageToAllInTableExcept(Message message, User exceptUser) {
+		if (message == null) {
+			return;
+		}
+		for (User user : message.getTable().getUsers()) {
+			if (user.equals(exceptUser)) {
+				continue;
+			}
 			CommonEndpoint endpoint = ENDPOINTS.get(user);
 			if (endpoint != null && endpoint.getSession() != null && endpoint.getSession().isOpen()) {
 				try {

@@ -1,3 +1,5 @@
+import { ITable } from "@/interfaces"
+
 export interface IPoolComponent {
     position: IVector2,
     image: IGameImage,
@@ -23,7 +25,7 @@ export interface IGameImage {
     visible: boolean
 }
 
-export interface IPoolTable extends IPoolComponent {
+export interface IPoolTable extends IPoolComponent, ITable {
     pointerLine: IPointerLine,
     mousePoint: IVector2,
     mouseEnabled: boolean,

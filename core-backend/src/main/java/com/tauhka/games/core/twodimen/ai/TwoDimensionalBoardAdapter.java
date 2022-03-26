@@ -1,4 +1,4 @@
-package com.tauhka.games.core.twodimen.util;
+package com.tauhka.games.core.twodimen.ai;
 
 import com.tauhka.games.core.GameToken;
 

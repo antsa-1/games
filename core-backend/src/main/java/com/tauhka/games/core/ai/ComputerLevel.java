@@ -1,4 +1,4 @@
-package com.tauhka.games.core.twodimen.util;
+package com.tauhka.games.core.ai;
 
 import java.util.ArrayList;
 import java.util.List;

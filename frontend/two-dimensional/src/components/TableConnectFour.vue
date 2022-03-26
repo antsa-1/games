@@ -145,53 +145,53 @@ export default defineComponent({
       this.$router.push("/error");
       return;
     }
-    this.initBoard();
+    this.initBoard()
 
     if (this.watch === "1") {
 		
-      this.drawBoard();
+      this.drawBoard()
     }
   },
   beforeUnmount() {
-    this.unsubscribe();
-    this.leaveTable();
+    this.unsubscribe()
+    this.leaveTable()
   },
   methods: {
     startReducer() {
       if (this.redurcerInterval) {
-        this.stopReducer();
+        this.stopReducer()
       }
-      this.secondsLeft = 120;
+      this.secondsLeft = 120
       this.redurcerInterval = setInterval(() => {
-        this.secondsLeft = this.secondsLeft - 1;
+        this.secondsLeft = this.secondsLeft - 1
         if (this.secondsLeft <= 0) {
-          this.stopReducer();
-          this.resign();
+          this.stopReducer()
+          this.resign()
         }
       }, 1000);
     },
 
     stopReducer() {
-      clearInterval(this.redurcerInterval);
-      this.secondsLeft = null;
+      clearInterval(this.redurcerInterval)
+      this.secondsLeft = null
     },
     highlightLastSquareIfSelected() {
       if (this.showLastVal && this.theTable.board.length > 1) {
-        const board = this.theTable.board;
+        const board = this.theTable.board
         const lastSquare: ISquare = board[board.length - 1];
         this.drawToken(lastSquare, "#FF0000");
       }
     },
     playMoveNotification() {
       if (this.soundOn) {
-        const audioCtx = new window.AudioContext();
-        const oscillator = audioCtx.createOscillator();
+        const audioCtx = new window.AudioContext()
+        const oscillator = audioCtx.createOscillator()
         oscillator.type = "sine";
         oscillator.frequency.setValueAtTime(446, audioCtx.currentTime); // value in hertz
-        oscillator.connect(audioCtx.destination);
-        oscillator.start();
+        oscillator.connect(audioCtx.destination)
+        oscillator.start()
         setTimeout(() => {
-          oscillator.stop();
+            oscillator.stop()
         }, 250);
       }
     },
