@@ -16,7 +16,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { loginMixin } from "../mixins/mixins";
-import { IChat } from "../interfaces";
+import { IChat } from "../interfaces/interfaces";
 export default defineComponent({
 	name: "Chat",
 	mixins: [loginMixin],

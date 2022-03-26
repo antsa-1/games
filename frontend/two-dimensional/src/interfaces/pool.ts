@@ -1,4 +1,4 @@
-import { ITable } from "@/interfaces"
+import { ITable } from "@/interfaces/interfaces"
 
 export interface IPoolComponent {
     position: IVector2,

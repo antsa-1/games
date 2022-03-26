@@ -1,4 +1,4 @@
-import { IUser } from "@/interfaces";
+import { IUser } from "@/interfaces/interfaces";
 import { IVector2,IBall } from "@/interfaces/pool";
 
 import { loginMixin, ANONYM } from "./mixins";

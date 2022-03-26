@@ -34,7 +34,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IUser,ITopLists } from "../interfaces";
+import { IUser,ITopLists } from "../interfaces/interfaces";
 export default defineComponent({
 	name: "TopLists",
 

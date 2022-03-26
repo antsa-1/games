@@ -1,4 +1,4 @@
-import { IUser, GameResult } from "@/interfaces";
+import { IUser, GameResult } from "@/interfaces/interfaces";
 
 
 export const utilsMixin = {

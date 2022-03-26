@@ -38,7 +38,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { loginMixin } from "../mixins/mixins";
-import { IUser } from "../interfaces";
+import { IUser } from "../interfaces/interfaces";
 export default defineComponent({
 	name: "Login",
 	mixins: [loginMixin],

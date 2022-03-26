@@ -1,4 +1,4 @@
-import { IUser } from "@/interfaces";
+import { IUser } from "@/interfaces/interfaces";
 
 export const ANONYM = "Anom:"
 export const loginMixin = {

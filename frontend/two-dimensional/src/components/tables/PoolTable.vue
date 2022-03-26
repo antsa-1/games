@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {IGameMode,IGameToken,ITable} from "../../interfaces";
+import {IGameMode,IGameToken,ITable} from "../../interfaces/interfaces";
 import {IPoolTable, ICue, IBall, IPocket, IEightBallGame, IVector2, IGameImage, IPoolComponent, IEightBallGameOptions, IBoundry, IPathWayBorder} from "../../interfaces/pool";
 import { loginMixin, } from "../../mixins/mixins";
 import { tablesMixin} from "../../mixins/tablesMixin";

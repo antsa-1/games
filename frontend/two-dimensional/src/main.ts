@@ -7,7 +7,7 @@ import Login from './components/Login.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
 import TableTicTacToe from './components/TableTicTacToe.vue'
-import { IGameToken, IPlayer, ITable } from "./interfaces";
+import { IGameToken, IPlayer, ITable } from "./interfaces/interfaces";
 
 import Profile from './components/Profile.vue'
 import TopLists from './components/TopLists.vue'
@@ -19,7 +19,7 @@ import Registration from './components/Registration.vue'
 import Error from './components/Error.vue'
 import VueRouter, { RouteRecordRaw } from 'vue-router'
 import { store } from './store'
-import { IUser } from "./interfaces";
+import { IUser } from "./interfaces/interfaces";
 import { createWebHistory, createRouter } from "vue-router";
 
 const routes: RouteRecordRaw[] = [

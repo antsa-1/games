@@ -1,4 +1,4 @@
-import { IPoolTable } from "./interfaces/pool";
+import { IPoolTable } from "./pool";
 
 export interface IStoreState {
 	user: IUser,

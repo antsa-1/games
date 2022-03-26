@@ -27,7 +27,7 @@
 import { defineComponent } from "vue";
 import { loginMixin } from "../mixins/mixins";
 import GameHistory from "./GameHistory.vue";
-import { IProfile, IUser,GameResult } from "../interfaces";
+import { IProfile, IUser,GameResult } from "../interfaces/interfaces";
 export default defineComponent({
 	name: "Profile",
 	mixins: [loginMixin],

@@ -46,7 +46,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IUser } from "../interfaces";
+import { IUser } from "../interfaces/interfaces";
 export default defineComponent({
 	name: "Registration",
 	data() {

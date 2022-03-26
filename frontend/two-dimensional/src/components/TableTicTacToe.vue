@@ -48,7 +48,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import {IGameMode,IGameToken,	ITable,	IUser,ISquare, IWin} from "../interfaces";
+import {IGameMode,IGameToken,	ITable,	IUser,ISquare, IWin} from "../interfaces/interfaces";
 import { loginMixin } from "../mixins/mixins";
 import { useRoute } from "vue-router";
 import Chat from "./Chat.vue";

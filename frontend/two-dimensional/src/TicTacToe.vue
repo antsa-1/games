@@ -15,7 +15,7 @@ import { defineComponent } from "vue";
 
 import NavbarTop from "./components/NavbarTop.vue";
 import Lobby from "./components/Lobby.vue";
-import {IUser} from "./interfaces";
+import {IUser} from "./interfaces/interfaces";
 import { loginMixin } from "./mixins/mixins";
 export default defineComponent({
 	name: "TicTacToe",

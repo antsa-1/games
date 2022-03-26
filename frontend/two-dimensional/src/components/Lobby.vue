@@ -149,7 +149,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare, IChatMessage, IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces";
+import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare, IChatMessage, IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces/interfaces";
 import { loginMixin } from "../mixins/mixins";
 import { utilsMixin } from "../mixins/utilsmixin";
 import { useRoute } from "vue-router";

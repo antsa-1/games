@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { ITable, IUser, IPlayer, IStoreState, ISquare, IChatMessage, IChat, IGameResult, IWinMessage, IWin, } from "./interfaces";
-import { IGame } from "./interfaces";
+import { ITable, IUser, IPlayer, IStoreState, ISquare, IChatMessage, IChat, IGameResult, IWinMessage, IWin, } from "./interfaces/interfaces";
+import { IGame } from "./interfaces/interfaces";
 import { createStore } from 'vuex';
 
 export const store = createStore<IStoreState>({
