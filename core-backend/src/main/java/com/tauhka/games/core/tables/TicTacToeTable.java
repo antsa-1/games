@@ -18,7 +18,7 @@ import jakarta.json.bind.annotation.JsonbTypeAdapter;
 /**
  * @author antsa-1 from GitHub 26 Mar 2022
  * 
- *         Table for TicTacToe and basis for ConnectFour game
+ * Table for TicTacToe and basis for ConnectFour game
  **/
 
 public class TicTacToeTable extends Table {
@@ -71,21 +71,23 @@ public class TicTacToeTable extends Table {
 	public int getY() {
 		return this.gameMode.getY();
 	}
+
 	@Override
-	public synchronized Move playTurn(User user, Integer x, Integer y) {
+	public synchronized Move playTurn(User user, Object moveInObject) {
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in board:" + this);
 			// throw new CloseWebSocketExcepetion("Player is not in turn in board:" + this);
 		}
-		GameToken token = this.board[x][y];
+		Move moveIn = (Move) moveInObject;
+		GameToken token = this.board[moveIn.getX()][moveIn.getY()];
 		if (token != null) {
 			throw new IllegalArgumentException("Board already has token x:" + x + "+ y:" + y + " _" + this);
 		}
 		token = this.playerInTurn.getGameToken();
-		this.board[x][y] = token;
+		this.board[moveIn.getX()][moveIn.getY()] = token;
 		this.changePlayerInTurn();
 		this.addedTokens++;
-		Move move = new Move(x, y);
+		Move move = new Move(moveIn.getX(), moveIn.getY());
 		move.setToken(token);
 		return move;
 	}

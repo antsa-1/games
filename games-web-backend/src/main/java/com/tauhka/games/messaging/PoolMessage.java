@@ -3,6 +3,8 @@ package com.tauhka.games.messaging;
 import java.io.Serializable;
 
 import com.tauhka.games.core.Vector2d;
+import com.tauhka.games.pool.Cue;
+import com.tauhka.games.pool.CueBall;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 
@@ -11,20 +13,27 @@ import jakarta.json.bind.annotation.JsonbProperty;
 public class PoolMessage implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
-	@JsonbProperty("cueAngle")
-	private Double cueAngle;
-	@JsonbProperty("cueBallPosition")
-	private Vector2d cueBallPosition;
+	@JsonbProperty("cue")
+	private Cue cue;
+	@JsonbProperty("cueBall")
+	private CueBall cueBall;
 	@JsonbProperty("canvas")
 	private Vector2d canvas;
 
-	public Vector2d getCueBallPosition() {
-		return cueBallPosition;
+	public Cue getCue() {
+		return cue;
 	}
 
-	public void setCueBallPosition(Vector2d cueBallPosition) {
-		this.cueBallPosition = cueBallPosition;
+	public void setCue(Cue cue) {
+		this.cue = cue;
+	}
+
+	public CueBall getCueBall() {
+		return cueBall;
+	}
+
+	public void setCueBall(CueBall cueBall) {
+		this.cueBall = cueBall;
 	}
 
 	public Vector2d getCanvas() {
@@ -35,11 +44,4 @@ public class PoolMessage implements Serializable {
 		this.canvas = canvas;
 	}
 
-	public Double getCueAngle() {
-		return cueAngle;
-	}
-
-	public void setCueAngle(Double cueAngle) {
-		this.cueAngle = cueAngle;
-	}
 }

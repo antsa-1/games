@@ -3,8 +3,8 @@ package com.tauhka.games.messaging;
 public enum MessageTitle {
 
 	LOGIN("LOGIN"), JOIN_TABLE("JOIN_TABLE"), CHAT("CHAT"), LOGOUT("LOGOUT"), START_GAME("START_GAME"), REMOVE_PLAYER("REMOVE_PLAYER"), WATCH("WATCH"), ADD_WATCHER("ADD_WATCHER"), WATCHER_LEFT("WATCHER_LEFT"), LEAVE_TABLE("LEAVE_TABLE"),
-	NEW_PLAYER("NEW_PLAYER"), CREATE_TABLE("CREATE_TABLE"), REMOVE_TABLE("REMOVE_TABLE"), CHALLENGE("CHALLENGE"), MOVE("MOVE"), GAME_END("GAME_END"), RESIGN("RESIGN"), WINNER("WINNER"), REMATCH("REMATCH"),
-	POOL_CUE_UPDATE("POOL_CUE_UPDATE"), POOL_PLAY_TURN("POOL_PLAY_TURN");
+	NEW_PLAYER("NEW_PLAYER"), CREATE_TABLE("CREATE_TABLE"), REMOVE_TABLE("REMOVE_TABLE"), CHALLENGE("CHALLENGE"), MOVE("MOVE"), GAME_END("GAME_END"), RESIGN("RESIGN"), WINNER("WINNER"), REMATCH("REMATCH"), POOL_UPDATE("POOL_UPDATE"),
+	POOL_PLAY_TURN("POOL_PLAY_TURN");
 
 	private String text;
 
@@ -17,7 +17,7 @@ public enum MessageTitle {
 	}
 
 	public static boolean isPoolMessage(MessageTitle title) {
-		return title == POOL_CUE_UPDATE || title == POOL_PLAY_TURN;
+		return title == POOL_UPDATE || title == POOL_PLAY_TURN;
 	}
 
 	public static MessageTitle get(String text) {
@@ -52,8 +52,10 @@ public enum MessageTitle {
 			return MOVE;
 		} else if (text.equals(ADD_WATCHER.getAsText())) {
 			return ADD_WATCHER;
-		} else if (text.equals(POOL_CUE_UPDATE.getAsText())) {
-			return POOL_CUE_UPDATE;
+		} else if (text.equals(POOL_UPDATE.getAsText())) {
+			return POOL_UPDATE;
+		} else if (text.equals(POOL_PLAY_TURN.getAsText())) {
+			return POOL_PLAY_TURN;
 		}
 		throw new IllegalArgumentException("Not enumText" + text);
 	}

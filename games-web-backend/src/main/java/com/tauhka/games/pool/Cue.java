@@ -5,18 +5,18 @@ import com.tauhka.games.core.Vector2d;
 import jakarta.json.bind.annotation.JsonbProperty;
 
 /**
- * @author antsa-1 from GitHub 6 Mar 2022
+ * @author antsa-1 from GitHub 27 Mar 2022
  **/
 
-public class CueBall {
+public class Cue {
 	@JsonbProperty("velocity")
 	private Vector2d velocity;
+	@JsonbProperty("force")
+	private Double force;
 	@JsonbProperty("position")
 	private Vector2d position;
 	@JsonbProperty("angle")
 	private Double angle;
-	@JsonbProperty("force")
-	private Double force;
 
 	public Vector2d getVelocity() {
 		return velocity;
@@ -26,12 +26,12 @@ public class CueBall {
 		this.velocity = velocity;
 	}
 
-	public Double getAngle() {
-		return angle;
+	public Double getForce() {
+		return force;
 	}
 
-	public void setAngle(Double angle) {
-		this.angle = angle;
+	public void setForce(Double force) {
+		this.force = force;
 	}
 
 	public Vector2d getPosition() {
@@ -42,12 +42,12 @@ public class CueBall {
 		this.position = position;
 	}
 
-	public Double getForce() {
-		return force;
+	public Double getAngle() {
+		return angle;
 	}
 
-	public void setForce(Double force) {
-		this.force = force;
+	public void setAngle(Double angle) {
+		this.angle = angle;
 	}
 
 }

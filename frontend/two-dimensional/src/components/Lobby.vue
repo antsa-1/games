@@ -326,9 +326,13 @@ export default defineComponent({
 							//this.$router.push({ name: 'Table', id:data.table.id})
 						})
 						break
-					case "POOL_CUE_UPDATE":
-						console.log("update opponent cue"+ JSON.stringify(data, null, 2))
-						this.updateOpponentCue(data.pool.cueAngle)				
+					case "POOL_UPDATE":						
+						this.$store.dispatch("poolUpdate", data.pool)
+						break
+					case "POOL_PLAY_TURN":						
+						this.$store.dispatch("poolPlayTurn", data.pool).then(() => {
+							this.$store.dispatch("changeTurn", data.table.playerInTurn)
+						})						
 						break
 					case "LEAVE_TABLE":	
 						this.$store.dispatch("leaveTable", data.who.name)

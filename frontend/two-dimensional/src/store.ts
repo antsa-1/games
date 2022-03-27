@@ -1,7 +1,4 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import { ITable, IUser, IPlayer, IStoreState, ISquare, IChatMessage, IChat, IGameResult, IWinMessage, IWin, } from "./interfaces/interfaces";
-import { IGame } from "./interfaces/interfaces";
+import { ITable, IGame, IUser, IPlayer, IStoreState, ISquare, IChatMessage, IChat, IGameResult, IWinMessage, IWin, } from "./interfaces/interfaces";
 import { createStore } from 'vuex';
 
 export const store = createStore<IStoreState>({
@@ -11,7 +8,6 @@ export const store = createStore<IStoreState>({
         tables: [],
         users: [],
         theTable: null,
-        poolTable: null,
         commonChat: {
             messages: [],
             message: null
@@ -54,9 +50,6 @@ export const store = createStore<IStoreState>({
         theTable(state) {
             return state.theTable
         },
-        poolTable(state) {
-            return state.poolTable
-        },
         chatMessages(state) {
             if (state.theTable && state.theTable.chat) {
                 return state.theTable.chat.messages
@@ -75,18 +68,15 @@ export const store = createStore<IStoreState>({
     },
 
     mutations: {
-        updateCue(state, user: number){
-            
-        },
         setUser(state, user: IUser) {
             if (user) {
-                
+
                 sessionStorage.setItem("userName", user.name)
                 sessionStorage.setItem("token", user.token)
                 state.user = user
 
             } else {
-                
+
                 sessionStorage.removeItem("userName")
                 sessionStorage.removeItem("token")
                 state.user = user
@@ -150,7 +140,7 @@ export const store = createStore<IStoreState>({
             state.theTable.board.push(square)
         },
         changeTurn(state, playerInTurn: IPlayer) {
-           
+
             state.theTable = { ...state.theTable, playerInTurn: playerInTurn }
 
         },
@@ -160,7 +150,7 @@ export const store = createStore<IStoreState>({
             }
         },
         updateCommonChat(state, message: IChatMessage) {
-            
+
             state.commonChat.messages.unshift(message);
         },
         updateScore(state, winMessage: IWinMessage) {
@@ -200,7 +190,7 @@ export const store = createStore<IStoreState>({
             state.theTable = table
         },
         updateWinner(state, win: IWin) {
-            
+
             if (this.state.theTable) {
                 state.theTable.playerInTurn = null
                 const chatMessage: IChatMessage = { text: win.winner.name.concat(" won"), from: "System" }
@@ -209,7 +199,7 @@ export const store = createStore<IStoreState>({
             }
         },
         setDraw(state, gameResult: IGameResult) {
-            
+
             if (this.state.theTable) {
                 if (state.theTable.playerA) {
                     state.theTable.playerA.draws = gameResult.table.playerA.draws
@@ -230,12 +220,15 @@ export const store = createStore<IStoreState>({
 
     },
     actions: {
-        updateCue(context, angle: number) {
-            context.commit('updateCue', angle)            
+        poolUpdate(context, object) {
+            // PoolTable has subscribed to this action     
+        },
+        poolPlayTurn(context, object) {
+            // PoolTable has subscribed to this action     
         },
         setUser(context, user: IUser) {
             context.commit('setUser', user)
-            
+
         },
         setGames(context, games: string[]) {
 
@@ -303,17 +296,17 @@ export const store = createStore<IStoreState>({
             context.commit("updateWinner", win)
         },
         setDraw(context, gameResult: IGameResult) {
-            
+
             context.commit("setDraw", gameResult)
         },
         logout(context, user: IUser) {
-            
+
             context.commit("setTables", [])
             context.commit("setUsers", [])
-            if(user && user.webSocket){
-                
+            if (user && user.webSocket) {
+
                 user.webSocket.close();
-                user.webSocket= null
+                user.webSocket = null
             }
             const requestOptions = {
                 method: "POST",
@@ -325,9 +318,9 @@ export const store = createStore<IStoreState>({
                     token: user?.token
                 })
             }
-            const apiURL=process.env.VUE_APP_API_BASE_URL+"/portal/api/user/logout"
+            const apiURL = process.env.VUE_APP_API_BASE_URL + "/portal/api/user/logout"
             context.commit('setUser', null)
-            fetch(apiURL, requestOptions).then(response => {             
+            fetch(apiURL, requestOptions).then(response => {
             })
         },
         setLoadingStatus(context, loading: boolean) {
@@ -335,3 +328,7 @@ export const store = createStore<IStoreState>({
         }
     }
 })
+
+/*
+ * 	@author antsa-1 from GitHub 
+*/

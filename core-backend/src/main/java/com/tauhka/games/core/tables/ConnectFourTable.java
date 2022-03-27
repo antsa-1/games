@@ -15,25 +15,26 @@ public class ConnectFourTable extends TicTacToeTable {
 	}
 
 	@Override
-	public synchronized Move playTurn(User user, Integer x, Integer y) {
+	public synchronized Move playTurn(User user, Object moveInObject) {
 		if (!user.equals(super.getPlayerInTurn())) {
 			throw new IllegalArgumentException("Player is not in turn in board:" + this);
 
 		}
+		Move moveIn = (Move) moveInObject;
 		GameToken[][] board = super.getBoard();
 		GameMode gameMode = super.getGameMode();
 		int rows = gameMode.getY() - 1;
 		GameToken token = null;
 		while (rows >= 0) {
-			token = board[rows][y];
+			token = board[rows][moveIn.getY()];
 			if (token == null) {
-				board[rows][y] = user.getGameToken();
+				board[rows][moveIn.getY()] = user.getGameToken();
 
 				this.changePlayerInTurn();
 				super.addTokenCount();
-				Move move = new Move(rows, y);
+				Move move = new Move(rows, moveIn.getY());
 				move.setToken(user.getGameToken());
-				LOGGER.fine("ConnectFour: added" + rows + " -" + y);
+				LOGGER.fine("ConnectFour: added" + rows + " -" + moveIn.getY());
 				return move;
 			}
 			rows--;

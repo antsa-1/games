@@ -1,9 +1,8 @@
-import { ITable } from "@/interfaces/interfaces"
+import { IBaseTable, ITable } from "@/interfaces/interfaces"
 
 export interface IPoolComponent {
     position: IVector2,
     image: IGameImage,
-    moving: boolean,
     velocity: IVector2,
 }
 export interface IEightBallGame {
@@ -24,8 +23,8 @@ export interface IGameImage {
     realDimension: IVector2,
     visible: boolean
 }
-
-export interface IPoolTable extends IPoolComponent, ITable {
+// extending ITable is dubious -> inherits properties which are not related to this pooltable. But helps to keep only one table and avoiding type checks
+export interface IPoolTable extends IPoolComponent, ITable { 
     pointerLine: IPointerLine,
     mousePoint: IVector2,
     mouseEnabled: boolean,
@@ -63,6 +62,7 @@ export interface IBall extends IPoolComponent {
 }
 export interface ICue extends IPoolComponent {
     force: number,
+    angle: number
 }
 export interface IPointerLine {
     startPosition: IVector2,

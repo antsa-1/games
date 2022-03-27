@@ -66,7 +66,8 @@ export default defineComponent({
 	beforeCreated(){
 		
 	},
-	created() {		
+	created() {
+	
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
 			if (mutation.type === "move") {
 				this.animate(this.theTable.board[this.theTable.board.length -1])
@@ -77,7 +78,7 @@ export default defineComponent({
 					this.addMouseListeners()
 					this.startReducer()
 				}else{
-					this.removeMouseListeners()
+					//this.removeMouseListeners()
 					this.stopReducer()
 				}
 			}else if (mutation.type === "rematch" ){
@@ -88,7 +89,7 @@ export default defineComponent({
 			}else if(mutation.type === "setDraw"){
 				this.stopReducer()
 				this.removeMouseListener()
-			}
+			}			
     	})
 	},
 	computed: {
@@ -99,14 +100,30 @@ export default defineComponent({
 		if(this.watch === "1"){
 			this.drawBoard()
 		}
+		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
+			//console.log("Action:"+action.type+ " payload:"+ JSON.stringify(action.payload))
+			if(action.type === "poolUpdate"){
+				this.cue.image.canvasRotationAngle = action.payload.cue.angle		
+				this.cue.image.visible = true
+			}else if(action.type === "poolPlayTurn"){				
+				Object.assign(this.cue, action.payload.cue)
+				if(state.theTable.playerInTurn.name === this.userName){
+					this.cue.image.visible = true
+				}
+				window.requestAnimationFrame(this.repaintAll)
+				this.shootBall()
+			}
+			window.requestAnimationFrame(this.repaintAll)
+		})
 	},
 	beforeUnmount() {
     	this.unsubscribe()
+		this.unsubscribeAction()
 		this.leaveTable()
   	},
 	methods: {
 		resize(){ 
-			//TODO, not init all
+		
 			console.log("****RESIZE all components todo")
 			//this.initTable()
 			
@@ -358,18 +375,23 @@ export default defineComponent({
 			
 			}
 			if(this.poolTable.mouseEnabled){
+				this.removeMouseListeners()
 				clearInterval(cueForceInterval)
-				this.shootBall()
+				this.st(this.cue, this.cueBall, this.canvas)
 			}
+		},
+		isPlayerInTurn(){	
+			return this.theTable.playerInTurn.name === this.userName
 		},
 		handleMouseMove(event:MouseEvent){
 			this.mouseCoordsTemp = <IVector2> {x:event.offsetX, y: event.offsetY}
 			if(this.poolTable.mouseEnabled){
+
 				this.cue.position.x = this.cueBall.position.x
 				this.cue.position.y = this.cueBall.position.y
 				this.cue.image.visible = true
 				this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
-				if(this.cue.image.visible){
+				if(this.isPlayerInTurn()){
 					this.updateCueAngle(event)
 					window.requestAnimationFrame(this.repaintAll)
 				}
@@ -385,10 +407,10 @@ export default defineComponent({
 			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
 			this.cue.image.canvasDestination = dimensions
 			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
-			this.playTurn(this.cueBall, this.canvas)
-			this.collideCueWithCueBall().then(() => {				
+			
+			this.collideCueWithCueBall().then(() => {
 				this.cue.image.visible = false
-				this.cue.force = 0					
+				this.cue.force = 0
 				this.handleCollisions().then(() => {
 					console.log("Animations done ball center position "+JSON.stringify(this.cueBall.position))
 					this.poolTable.mouseEnabled = true
@@ -679,9 +701,10 @@ export default defineComponent({
 			let opposite = this.mousePoint.y - this.cueBall.position.y
 			let adjacent = this.mousePoint.x - this.cueBall.position.x
 			const tempAngle = Math.atan2(opposite, adjacent)
+			this.cue.angle = tempAngle
 			this.cue.image.canvasRotationAngle = tempAngle
 			window.requestAnimationFrame(this.repaintAll)
-			this.sendPoolCueUpdate(tempAngle, this.cue.position, this.canvas)
+			this.t(this.sp, 1000, this.cue, this.cueBall, this.canvas)
 		},
 		updateCueForce(){
 			this.cue.force += 10
@@ -690,7 +713,7 @@ export default defineComponent({
 			
 			if(this.cue.force >= 250){
 				clearInterval(cueForceInterval)
-				this.shootBall()
+				this.st(this.cue, this.cueBall, this.canvas)
 			}
 		},
 		updatePointerLine(event:MouseEvent){

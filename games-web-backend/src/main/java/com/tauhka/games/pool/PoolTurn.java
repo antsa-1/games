@@ -10,32 +10,34 @@ import jakarta.json.bind.annotation.JsonbProperty;
 
 public class PoolTurn {
 	@JsonbProperty("cueBall")
-	private Vector2d velocity;
-	private Vector2d position;
-	private Double angle;
+	private CueBall cueBall;
+	@JsonbProperty("cue")
+	private Cue cue;
+	@JsonbProperty("canvas")
+	private Vector2d canvas;
 
-	public Vector2d getVelocity() {
-		return velocity;
+	public CueBall getCueBall() {
+		return cueBall;
 	}
 
-	public void setVelocity(Vector2d velocity) {
-		this.velocity = velocity;
+	public void setCueBall(CueBall cueBall) {
+		this.cueBall = cueBall;
 	}
 
-	public Vector2d getPosition() {
-		return position;
+	public Cue getCue() {
+		return cue;
 	}
 
-	public void setPosition(Vector2d position) {
-		this.position = position;
+	public void setCue(Cue cue) {
+		this.cue = cue;
 	}
 
-	public Double getAngle() {
-		return angle;
+	public Vector2d getCanvas() {
+		return canvas;
 	}
 
-	public void setAngle(Double angle) {
-		this.angle = angle;
+	public void setCanvas(Vector2d canvas) {
+		this.canvas = canvas;
 	}
 
 }

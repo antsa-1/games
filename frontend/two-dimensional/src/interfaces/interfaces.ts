@@ -3,11 +3,10 @@ import { IPoolTable } from "./pool";
 export interface IStoreState {
 	user: IUser,
 	games: IGame[],
-	tables: ITable[],
+	tables: ITable[], 
 	users: IUser[],
 	commonChat: IChat,
-	theTable: ITable,
-	poolTable: IPoolTable,
+	theTable: ITable, // this !!
 	loadingStatus?: boolean
 }
 
@@ -49,7 +48,7 @@ export interface ISquare {
 export interface IWinSquares {
 	square: ISquare[]
 }
-export interface IGame{
+export interface IGame {
 	gameId: number,
 	name: string
 	gameModes: IGameMode[]
@@ -82,18 +81,19 @@ export interface Lobby {
 	lobbyists: string[];
 }
 
-export interface ITable {
+export interface ITable extends IBaseTable {
+	board: ISquare[],
+	win?: IWin,
+	x: number,
+	y: number,
+}
+export interface IBaseTable {
 	playerA: IPlayer,
 	playerB: IPlayer,
 	playerInTurn: IPlayer,
 	gameMode: IGameMode,
-	board: ISquare[],
-	win?: IWin,
-	tableId: string,
 	chat: IChat,
-	x: number,
-	y: number,
-	id:string
+	tableId: string,
 }
 
 export interface IPlayer {

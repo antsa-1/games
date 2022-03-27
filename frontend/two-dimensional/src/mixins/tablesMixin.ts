@@ -98,10 +98,10 @@ export const tablesMixin = {
 			this?.user?.webSocket?.send(JSON.stringify(obj));
 		},
 		openTable(table:ITable){
-			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.id})
+			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.tableId})
 		},
 		watchTable(table:ITable){
-			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.id, params: { watch: "1" }})			
+			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.tableId, params: { watch: "1" }})			
 		},
 		getTableName(gameNumber:number):string{
 			if(gameNumber === 1){
@@ -112,6 +112,9 @@ export const tablesMixin = {
 			else if(gameNumber === 3){
 				return "PoolTable"
 			}
+		},
+		isPlayerInTurn(userName:string){
+			return this.playerInTurn.name === userName
 		}
 	},
 };

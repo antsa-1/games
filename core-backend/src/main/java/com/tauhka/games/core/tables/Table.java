@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.GameResultType;
-import com.tauhka.games.core.Move;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
@@ -59,7 +58,7 @@ public abstract class Table {
 
 	protected abstract Table startRematch();
 
-	public abstract Move playTurn(User user, Integer i1, Integer i2);
+	public abstract Object playTurn(User user, Object o);
 
 	@JsonbTransient
 	public boolean isArtificialPlayerInTurn() {

@@ -120,7 +120,8 @@ public class TableHandler {
 			int x = message.getX();
 			int y = message.getY();
 			Table table = tableOptional.get();
-			Move move = table.playTurn(user, x, y);
+			Move moveIn = new Move(x, y);
+			Move move = (Move) table.playTurn(user, moveIn);
 			GameResult result = tableOptional.get().checkWinAndDraw();
 			if (result != null) {
 				tokenMessage.setTitle(MessageTitle.GAME_END);

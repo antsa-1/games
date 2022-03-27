@@ -108,9 +108,12 @@ public class CommonEndpoint {
 						sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 					}
 				}
-			} else if (message.getTitle() == MessageTitle.POOL_CUE_UPDATE) {
-				gameMessage = pooltableHandler.updateCue(this, message);
+			} else if (message.getTitle() == MessageTitle.POOL_UPDATE) {
+				gameMessage = pooltableHandler.update(this, message);
 				sendMessageToAllInTableExcept(gameMessage, user);
+			} else if (message.getTitle() == MessageTitle.POOL_PLAY_TURN) {
+				gameMessage = pooltableHandler.playTurn(this, message);
+				sendMessageToTable(gameMessage.getTable(), gameMessage);
 			} else {
 				throw new CloseWebSocketException("unknown command:" + message);
 			}
