@@ -381,7 +381,7 @@ export default defineComponent({
 			}
 		},
 		isPlayerInTurn(){	
-			return this.theTable.playerInTurn.name === this.userName
+			return this.theTable?.playerInTurn?.name === this.userName
 		},
 		handleMouseMove(event:MouseEvent){
 			this.mouseCoordsTemp = <IVector2> {x:event.offsetX, y: event.offsetY}

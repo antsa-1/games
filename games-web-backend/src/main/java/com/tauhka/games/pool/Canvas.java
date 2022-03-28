@@ -11,4 +11,17 @@ import jakarta.json.bind.annotation.JsonbProperty;
 public class Canvas {
 	@JsonbProperty("size")
 	private Vector2d size;
+
+	public Canvas(Vector2d size) {
+		this.size = size;
+	}
+
+	public Vector2d getSize() {
+		return size;
+	}
+
+	public void setSize(Vector2d size) {
+		this.size = size;
+	}
+
 }

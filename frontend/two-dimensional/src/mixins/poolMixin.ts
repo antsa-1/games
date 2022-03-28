@@ -1,5 +1,5 @@
 import { IUser } from "@/interfaces/interfaces";
-import { IVector2,IBall, ICue } from "@/interfaces/pool";
+import { IVector2,IBall, ICue, IPoolComponent } from "@/interfaces/pool";
 
 import { loginMixin, ANONYM } from "./mixins";
 import { tablesMixin } from "./tablesMixin";
@@ -21,13 +21,17 @@ export const poolMixin = {
 	},
 	methods: {
 		st(cue, cueBall, canvas){			
-            const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:cue, cueBall:cueBall, canvas:{x:canvas.width, y:canvas.height}}}            
+            const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
 			this.user.webSocket.send(JSON.stringify(obj))
         },
-        sp(cue, cueBall, canvas){			
-            const obj ={ title:"POOL_UPDATE", message: this.theTable.tableId, pool:{ cue:cue, cueBall:cueBall, canvas:{x:canvas.width, y:canvas.height}}}
+        sp(cue, cueBall, canvas){
+            const obj ={ title:"POOL_UPDATE", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}
 			this.user.webSocket.send(JSON.stringify(obj))
         },
+		prepareTransfer(object){
+			const {image, color, ...object2} = object
+			return object2
+		},
 		t(p, m, cue, cueBall, canvas, i = false){			
 			if(this.p){				
 				return

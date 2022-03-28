@@ -16,12 +16,14 @@ import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.tables.ConnectFourTable;
-import com.tauhka.games.core.tables.PoolTable;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TicTacToeTable;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.pool.PoolTable;
+import com.tauhka.games.pool.debug.Runner;
+import com.tauhka.games.pool.debug.ServerGUI;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.ejb.ConcurrentAccessException;
@@ -52,7 +54,9 @@ public class TableHandler {
 		if (GameMode.CONNECT4 == gameMode.getGameNumber()) {
 			table = new ConnectFourTable(endpoint.getUser(), gameMode, false);
 		} else if (GameMode.POOL == gameMode.getGameNumber()) {
-			table = new PoolTable(endpoint.getUser(), gameMode, message.getRandomStarter());
+			PoolTable p = new PoolTable(endpoint.getUser(), gameMode, message.getRandomStarter());
+			table = p;
+		
 		} else {
 			table = new TicTacToeTable(endpoint.getUser(), gameMode, false);
 		}

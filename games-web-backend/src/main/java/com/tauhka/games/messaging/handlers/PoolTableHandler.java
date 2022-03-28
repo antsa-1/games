@@ -5,11 +5,11 @@ import static com.tauhka.games.core.util.Constants.SYSTEM;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.tauhka.games.core.tables.PoolTable;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.PoolMessage;
+import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.pool.PoolTurn;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
@@ -36,7 +36,7 @@ public class PoolTableHandler {
 		PoolMessage updateCueMessage = new PoolMessage();
 		updateCueMessage.setCue(message.getPoolMessage().getCue());
 		updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
-		updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
+		updateCueMessage.setCanvas(message.getPoolMessage().getCanvas()); 
 		updateMessage.setPoolMessage(updateCueMessage);
 		return updateMessage;
 	}

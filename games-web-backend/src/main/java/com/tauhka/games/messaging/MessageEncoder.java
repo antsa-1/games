@@ -27,7 +27,7 @@ public class MessageEncoder implements Encoder.Text<Message> {
 			String retVal = jsonb.toJson(message, Message.class);
 			return retVal;
 		} catch (Exception e) {
-			LOGGER.severe("Encode error in MessageEncoder:" + e.getMessage());
+			LOGGER.severe("Encode error in MessageEncoder:" + e.getMessage()); 
 		}
 		return null;
 	}

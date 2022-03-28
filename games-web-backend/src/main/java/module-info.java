@@ -19,5 +19,6 @@ module tauhka.games {
 	requires jakarta.websocket;
 	requires java.logging;
 	requires java.sql;
+	requires transitive java.desktop;
 	requires transitive tauhka.core;
 }

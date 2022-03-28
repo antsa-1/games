@@ -8,22 +8,23 @@ import jakarta.json.bind.annotation.JsonbProperty;
  * @author antsa-1 from GitHub 6 Mar 2022
  **/
 
-public class CueBall {
-	@JsonbProperty("velocity")
-	private Vector2d velocity;
-	@JsonbProperty("position")
-	private Vector2d position;
+public class CueBall extends Ball {
+
 	@JsonbProperty("angle")
 	private Double angle;
 	@JsonbProperty("force")
 	private Double force;
 
-	public Vector2d getVelocity() {
-		return velocity;
+	public CueBall() {
+		// For deserialization
 	}
 
-	public void setVelocity(Vector2d velocity) {
-		this.velocity = velocity;
+	public CueBall(int number, Color color, Vector2d position, Double diameter) {
+		super(number, color, position, diameter);
+	}
+
+	public CueBall(int number, Color color, Vector2d position, Double diameter, String imageName) {
+		this(number, color, position, diameter);
 	}
 
 	public Double getAngle() {
@@ -32,14 +33,6 @@ public class CueBall {
 
 	public void setAngle(Double angle) {
 		this.angle = angle;
-	}
-
-	public Vector2d getPosition() {
-		return position;
-	}
-
-	public void setPosition(Vector2d position) {
-		this.position = position;
 	}
 
 	public Double getForce() {
