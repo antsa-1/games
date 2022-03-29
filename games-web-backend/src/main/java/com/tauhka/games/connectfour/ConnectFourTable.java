@@ -22,6 +22,9 @@ public class ConnectFourTable extends Table {
 
 		}
 		GameToken[][] board = super.getBoard();
+		if (y < 0 || y > board.length - 1) {
+			throw new IllegalArgumentException("Board length fail:" + y);
+		}
 		GameMode gameMode = super.getGameMode();
 		int rows = gameMode.getY() - 1;
 		GameToken token = null;
