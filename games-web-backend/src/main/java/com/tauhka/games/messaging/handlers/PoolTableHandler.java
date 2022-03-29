@@ -24,10 +24,10 @@ public class PoolTableHandler {
 
 	public Message update(CommonEndpoint endpoint, Message message) {
 		Table table = findUserTable(endpoint);
-		/* not recycling the given message directly, although creating new objects increases used memory/heap size. Reason is that message could contain some unwanted data in the other fields and passing it directly to other user without
-		 * sanitizing, and that is not wanted effect */
+
 		if (!table.isPlayerInTurn(endpoint.getUser())) {
-			throw new IllegalArgumentException("pool, not updating cue, player is not in turn");
+			// throw new IllegalArgumentException("pool, not updating cue, player is not in turn");
+			return null; // after turn ui not working properly, it still send updates..
 		}
 		Message updateMessage = new Message();
 		updateMessage.setFrom(SYSTEM);
@@ -36,7 +36,7 @@ public class PoolTableHandler {
 		PoolMessage updateCueMessage = new PoolMessage();
 		updateCueMessage.setCue(message.getPoolMessage().getCue());
 		updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
-		updateCueMessage.setCanvas(message.getPoolMessage().getCanvas()); 
+		updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
 		updateMessage.setPoolMessage(updateCueMessage);
 		return updateMessage;
 	}

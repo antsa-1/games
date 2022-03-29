@@ -239,7 +239,7 @@ public abstract class Table {
 		this.playerInTurn = playerA;
 	}
 
-	public void joinTableAsPlayer(User playerB) {
+	public synchronized void joinTableAsPlayer(User playerB) {
 		this.playerB = playerB;
 		this.gameStartedInstant = Instant.now();
 		if (this.randomizeStarter) {

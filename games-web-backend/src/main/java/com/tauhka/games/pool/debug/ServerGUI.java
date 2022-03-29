@@ -6,7 +6,6 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.pool.Ball;
 import com.tauhka.games.pool.PoolTable;
 
@@ -25,12 +24,12 @@ public class ServerGUI extends Thread {
 		this.poolTable = poolTable;
 		JPanel canvasPanel = new JPanel(true);
 		canvasPanel.setLayout(null);
-		JComponent tableComponent = new PoolGUIComponent("table.png", poolTable, 1200, 677);
+		JComponent tableComponent = new ServerGUIComponent("table.png", poolTable, 1200, 677);
 		tableComponent.setBounds(0, 0, 1200, 677);
 		canvasPanel.setBounds(new Rectangle(0, 0, 1200, 677));
 		for (Ball ball : poolTable.getRemainingBalls()) {
-			PoolGUIComponent l = new PoolGUIComponent(ball.getNumber() + ".png", ball, 34, 34);
-			l.setBounds(ball.getPosition().getX().intValue(), ball.getPosition().getY().intValue(), 141, 141);
+			ServerGUIComponent l = new ServerGUIComponent(ball.getNumber() + ".png", ball, 34, 34);
+			l.setBounds((int) ball.getPosition().x, (int) ball.getPosition().y, 141, 141);
 			canvasPanel.add(l);
 		}
 		canvasPanel.add(tableComponent);
@@ -43,13 +42,16 @@ public class ServerGUI extends Thread {
 		canvasPanel.setVisible(true);
 		frame.setVisible(true);
 		this.frame = frame;
+
 	}
 
-	public void updateBallPositions() {
+	public void updateSwingComponentPositions() {
 		int componentCount = this.canvasPanel.getComponentCount();
 		for (int i = 0; i < componentCount - 1; i++) {
-			PoolGUIComponent p = (PoolGUIComponent) canvasPanel.getComponent(i);
-			p.setBounds(p.getPoolComponent().getPosition().getX().intValue(), p.getPoolComponent().getPosition().getY().intValue(), 141, 141);
+			ServerGUIComponent ballPanel = (ServerGUIComponent) canvasPanel.getComponent(i);
+			System.out.println("ServerGUI -> " + ballPanel.getPoolComponent().getNumber() + " panel old position x:" + ballPanel.getX() + " y:" + ballPanel.getY());
+			ballPanel.setBounds((int) ballPanel.getPoolComponent().getPosition().x, (int) ballPanel.getPoolComponent().getPosition().y, 141, 141);
+			System.out.println("ServerGUI -> panel new position x:" + ballPanel.getX() + " y:" + ballPanel.getY());
 		}
 	}
 
@@ -57,18 +59,21 @@ public class ServerGUI extends Thread {
 	@Override
 	public void run() {
 		try {
-			while (true) {
-				System.out.println("REPAINT");
-				Thread.sleep(2000);
-				canvasPanel.repaint();
-				Ball b = poolTable.getRemainingBalls().get(0);
-				b.getPosition().add(new Vector2d(10d, 10d));
-				updateBallPositions();
+			synchronized (poolTable) {
+				while (true) {
+					System.out.println("ServerGui starts to wait");
+					poolTable.wait();
+					System.out.println("ServerGui continues after waiting");
+					updateSwingComponentPositions();
+					System.out.println("ServerGui updated component positions, now notifies");
+					canvasPanel.revalidate();
+					canvasPanel.repaint();
+					poolTable.notify();
+				}
 			}
 
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("ServerGui interrupted");
 		}
 	}
 

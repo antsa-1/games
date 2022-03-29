@@ -16,13 +16,13 @@ import com.tauhka.games.pool.PoolComponent;
  * @author antsa-1 from GitHub 28 Mar 2022
  **/
 
-public class PoolGUIComponent extends JComponent {
+public class ServerGUIComponent extends JComponent {
 
 	private static final long serialVersionUID = 1L;
 	private PoolComponent poolComponent;
 	private Image scaledImage;
 
-	public PoolGUIComponent(String imageName, PoolComponent p, int width, int height) {
+	public ServerGUIComponent(String imageName, PoolComponent p, int width, int height) {
 		try {
 			// The path where images are found should be replaced here
 			BufferedImage image = ImageIO.read(new File("C:\\Users\\test\\workspaces\\games\\games-web-backend\\target\\games\\pool\\" + imageName));

@@ -262,7 +262,7 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x: 625, y: 150}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x: 250, y: 311}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
 												velocity:<IVector2>{ x:0, y:0},												
@@ -407,7 +407,7 @@ export default defineComponent({
 			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
 			this.cue.image.canvasDestination = dimensions
 			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
-			
+			console.log("CueB velo"+JSON.stringify(this.cueBall.velocity))
 			this.collideCueWithCueBall().then(() => {
 				this.cue.image.visible = false
 				this.cue.force = 0
@@ -442,11 +442,17 @@ export default defineComponent({
 		},
 		updateBalls(){
 			this.ballsRemaining.forEach(ball => {				
-				this.calculateLength(ball.velocity)
+				//this.calculateLength(ball.velocity)
+				if(ball.number === 0){
+					console.log("cueBall moves:"+JSON.stringify(ball))
+				}
 				ball.position.x += ball.velocity.x * DELTA
 				ball.position.y += ball.velocity.y * DELTA
 				ball.velocity.x *= FRICTION
-				ball.velocity.y *= FRICTION				
+				ball.velocity.y *= FRICTION
+				if(ball.number === 0){
+					console.log("cueBall moves2:"+JSON.stringify(ball))
+				}		
 			})			
 		},		
 		isInPocket(component:IBall){

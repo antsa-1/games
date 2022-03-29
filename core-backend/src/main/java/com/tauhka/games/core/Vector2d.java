@@ -8,9 +8,9 @@ import jakarta.json.bind.annotation.JsonbProperty;
 
 public class Vector2d {
 	@JsonbProperty("x")
-	private Double x;
+	public double x;
 	@JsonbProperty("y")
-	private Double y;
+	public double y;
 
 	public Vector2d() {
 		// For messagedecoding empty required
@@ -20,7 +20,7 @@ public class Vector2d {
 		this.x = x;
 		this.y = y;
 	}
-
+/*
 	public Double getX() {
 		return x;
 	}
@@ -46,7 +46,7 @@ public class Vector2d {
 	public int hashCode() {
 		return Objects.hash(x, y);
 	}
-
+*/
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -59,9 +59,13 @@ public class Vector2d {
 		return Objects.equals(x, other.x) && Objects.equals(y, other.y);
 	}
 
+	public boolean isZero() {
+		return this.x == 0.0d && this.y == 0.0d;
+	}
+
 	@Override
 	public String toString() {
-		return "Vector2d [x=" + x + ", y=" + y + "]";
+		return "[x=" + x + ", y=" + y + "]";
 	}
 
 }

@@ -169,7 +169,7 @@ export default defineComponent({
 			watchTableButtonDisabled:false,
 			removeTableButtonVisible:false,
 			selectedGame:"0",
-			selectedGameMode:"0",
+			selectedGameMode:"",
 			playAgainstComputerChecked:false,
 			randomStarterChecked:false,
 			computerLevel:"0",

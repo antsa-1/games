@@ -1,9 +1,8 @@
 package com.tauhka.games.pool;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
@@ -17,9 +16,10 @@ import com.tauhka.games.pool.debug.ServerGUI;
  * @author antsa-1 from GitHub 25 Mar 2022
  **/
 
-public class PoolTable extends Table implements PoolComponent, PropertyChangeListener {
+public class PoolTable extends Table implements PoolComponent {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = Logger.getLogger(PoolTable.class.getName());
 	private Canvas canvas;
 	private List<Ball> remainingBalls;
 	// LinkedList<Ball> linked = new LinkedList<Ball>();
@@ -37,22 +37,31 @@ public class PoolTable extends Table implements PoolComponent, PropertyChangeLis
 			}
 			Ball ball = null;
 			if (i == 8) {
-				Vector2d position = new Vector2d(canvas.getSize().getX() * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().getY() / 2 + (ballDiameter * 0.5 * this.calculateRackRow(i)));
+				Vector2d position = new Vector2d(canvas.getSize().x * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().y / 2 + (ballDiameter * 0.5 * this.calculateRackRow(i)));
 				ball = new Ball(i, Color.BLACK, position, ballDiameter);
 			} else {
-				Vector2d position = new Vector2d(canvas.getSize().getX() * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().getY() / 2 + (ballDiameter * 0.5 * this.calculateRackRow(i)));
+				Vector2d position = new Vector2d(canvas.getSize().x * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().y / 2 + (ballDiameter * 0.5 * this.calculateRackRow(i)));
 				ball = new Ball(i, i % 2 == 0 ? Color.RED : Color.BLACK, position, ballDiameter);
 			}
+			ball.setVelocity(new Vector2d(0d, 0d));
 			this.remainingBalls.add(ball);
 		}
 		cueBall = new CueBall(0, Color.WHITE, new Vector2d(250d, 311d), ballDiameter);
+		cueBall.setVelocity(new Vector2d(0d, 0d));
 		this.remainingBalls.add(cueBall);
-		if (isDebugMode()) {
+
+	}
+
+	@Override
+	public synchronized void joinTableAsPlayer(User playerB) {
+		super.joinTableAsPlayer(playerB);
+		if (isServerGUIWanted()) {
 			new ServerGUI(this).start();
+			;
 		}
 	}
 
-	private boolean isDebugMode() {
+	private boolean isServerGUIWanted() {
 		// System.getProperty("debugMode");
 		return true;
 	}
@@ -65,13 +74,39 @@ public class PoolTable extends Table implements PoolComponent, PropertyChangeLis
 		this.canvas = canvas;
 	}
 
+	public CueBall getCueBall() {
+		return cueBall;
+	}
+
+	public void setCueBall(CueBall cueBall) {
+		this.cueBall = cueBall;
+	}
+
 	@Override
 	public Object playTurn(User user, Object o) {
-		System.out.println("TURN");
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
 		PoolTurn turn = (PoolTurn) o;
+		if (isServerGUIWanted()) {
+			LOGGER.info("Pooltable instance, server in testing mode");
+			synchronized (this) {
+				new EightBallRuleBase().handleMovements(this, turn);
+				LOGGER.info("PoolTable instance made movements now notifying, threadId:" + Thread.currentThread().getId());
+				this.notify();
+				try {
+					LOGGER.info("Pooltable instance waits for Swing components to update");
+					this.wait();
+					LOGGER.info("pooltable waiting done, continues");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					LOGGER.info("Pooltable instance, thread interrupted" + Thread.currentThread().getId());
+				}
+			}
+		} else {
+			new EightBallRuleBase().handleMovements(this, turn);
+		}
+		LOGGER.info("pooltable instance, turn played, changing turn");
 		changePlayerInTurn();
 		return null;
 	}
@@ -137,9 +172,9 @@ public class PoolTable extends Table implements PoolComponent, PropertyChangeLis
 	}
 
 	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
+	public int getNumber() {
 		// TODO Auto-generated method stub
-
+		return -1;
 	}
 
 }

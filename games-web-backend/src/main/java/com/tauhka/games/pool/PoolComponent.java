@@ -10,4 +10,6 @@ public interface PoolComponent {
 
 	public Vector2d getPosition();
 
+	public int getNumber();
+
 }
