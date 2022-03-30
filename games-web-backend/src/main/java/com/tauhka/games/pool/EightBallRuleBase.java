@@ -42,11 +42,10 @@ public class EightBallRuleBase {
 			if (ball.getNumber() == 0) {
 				System.out.println("0");
 			}
-			// checkAndHandleTableCollisions(table);
+			checkAndHandleTableCollisions(table, ball);
 			checkAndHandleBallOnBallCollisions(table, i);
 		}
 		return false;
-
 	}
 
 	private void checkAndHandleBallOnBallCollisions(PoolTable table, int i) {
@@ -95,9 +94,64 @@ public class EightBallRuleBase {
 		secondBall.setVelocity(secondBallVelocity);
 	}
 
-	private void checkAndHandleTableCollisions(PoolTable table) {
-		// TODO Auto-generated method stub
+	private void checkAndHandleTableCollisions(PoolTable table, Ball ball) {
+		if (isInMiddleArea(table, ball)) {
+			System.out.println("InMiddle");
+			return;
+		}
+		Boundry topLeft = table.getBoundries().get(0);
+		Boundry topRight = table.getBoundries().get(1);
+		Boundry right = table.getBoundries().get(2);
+		Boundry bottomRight = table.getBoundries().get(3);
+		Boundry bottomLeft = table.getBoundries().get(4);
+		Boundry left = table.getBoundries().get(5);
 
+		double radius = ball.getDiameter() / 2;
+		if (isTableTopBondry(topLeft, topRight, ball.getPosition(), radius)) {
+			System.out.println("isTableTopBondry");
+			ball.getVelocity().y = -ball.getVelocity().y;
+		}
+
+		if (isTableLeftBoundry(left, ball.getPosition(), radius)) {
+			System.out.println("left");
+			ball.getVelocity().x = -ball.getVelocity().x;
+		}
+
+		if (isTableBottomBoundry(bottomLeft, bottomRight, ball.getPosition(), radius)) {
+			System.out.println("bottom");
+			ball.getVelocity().y = -ball.getVelocity().y;
+		}
+		if (isTableRightBoundry(right, ball.getPosition(), radius)) {
+			System.out.println("right");
+			ball.getVelocity().x = -ball.getVelocity().x;
+		}
+
+	}
+
+	private boolean isTableTopBondry(Boundry topLeft, Boundry topRight, Vector2d ballPosition, double radius) {
+		return ballPosition.x >= topLeft.b && ballPosition.x <= topLeft.c && ballPosition.y - radius <= topLeft.a || ballPosition.x >= topRight.b && ballPosition.x <= topRight.c && ballPosition.y - radius <= topRight.a;
+	}
+
+	public boolean isTableLeftBoundry(Boundry left, Vector2d ballPosition, double radius) {
+		return ballPosition.x <= left.a + radius && ballPosition.y >= left.b && ballPosition.y <= left.c;
+	}
+
+	public boolean isTableRightBoundry(Boundry right, Vector2d ballPosition, double radius) {
+		return ballPosition.x >= right.a - radius && ballPosition.y >= right.b && ballPosition.y <= right.c;
+	}
+
+	public boolean isTableBottomBoundry(Boundry bottomLeft, Boundry bottomRight, Vector2d ballPosition, double radius) {
+		return ballPosition.x >= bottomLeft.b && ballPosition.x <= bottomLeft.c && ballPosition.y + radius >= bottomLeft.a || ballPosition.x >= bottomRight.b && ballPosition.x <= bottomRight.c && ballPosition.y + radius >= bottomRight.a;
+	}
+
+	public boolean isInMiddleArea(PoolTable table, Ball b) {
+
+		Vector2d top = VectorUtil.subtractVectors(b.getPosition(), table.getMiddleAreaStart());
+		Vector2d bottom = VectorUtil.subtractVectors(table.getMiddleAreaEnd(), b.getPosition());
+		if (top.x > 0 && top.y > 0) {
+			return bottom.x > 0 && bottom.y > 0;
+		}
+		return false;
 	}
 
 	private boolean updatePositions(PoolTable table) {

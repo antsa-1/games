@@ -22,7 +22,9 @@ public class PoolTable extends Table implements PoolComponent {
 	private static final Logger LOGGER = Logger.getLogger(PoolTable.class.getName());
 	private Canvas canvas;
 	private List<Ball> remainingBalls;
-	// LinkedList<Ball> linked = new LinkedList<Ball>();
+	private List<Boundry> boundries;
+	private Vector2d middleAreaStart;
+	private Vector2d middleAreaEnd;
 	private CueBall cueBall;
 	private PoolTurn lastTurn;
 
@@ -54,6 +56,26 @@ public class PoolTable extends Table implements PoolComponent {
 		cueBall = new CueBall(0, Color.WHITE, new Vector2d(250d, 311d), ballDiameter);
 		cueBall.setVelocity(new Vector2d(0d, 0d));
 		this.remainingBalls.add(cueBall);
+		this.boundries = initBoundries();
+		this.middleAreaStart = new Vector2d(125d, 130d);
+		this.middleAreaEnd = new Vector2d(1072d, 550d);
+	}
+
+	private List<Boundry> initBoundries() {
+		Boundry topLeft = new Boundry(79, 118, 572);
+		Boundry topRight = new Boundry(79, 644, 1090);
+		Boundry right = new Boundry(1122, 118, 560);
+		Boundry bottomRight = new Boundry(600, 644, 1090);
+		Boundry bottomLeft = new Boundry(600, 118, 572);
+		Boundry left = new Boundry(80, 118, 560);
+		List<Boundry> boundries = new ArrayList<Boundry>(6);
+		boundries.add(topLeft);
+		boundries.add(topRight);
+		boundries.add(right);
+		boundries.add(bottomRight);
+		boundries.add(bottomLeft);
+		boundries.add(left);
+		return boundries;
 	}
 
 	@Override
@@ -87,6 +109,14 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public void setCueBall(CueBall cueBall) {
 		this.cueBall = cueBall;
+	}
+
+	public List<Boundry> getBoundries() {
+		return boundries;
+	}
+
+	public void setBoundries(List<Boundry> boundries) {
+		this.boundries = boundries;
 	}
 
 	@Override
@@ -191,6 +221,22 @@ public class PoolTable extends Table implements PoolComponent {
 	public int getNumber() {
 		// TODO Auto-generated method stub
 		return -1;
+	}
+
+	public Vector2d getMiddleAreaStart() {
+		return middleAreaStart;
+	}
+
+	public void setMiddleAreaStart(Vector2d middleAreaStart) {
+		this.middleAreaStart = middleAreaStart;
+	}
+
+	public Vector2d getMiddleAreaEnd() {
+		return middleAreaEnd;
+	}
+
+	public void setMiddleAreaEnd(Vector2d middleAreaEnd) {
+		this.middleAreaEnd = middleAreaEnd;
 	}
 
 }
