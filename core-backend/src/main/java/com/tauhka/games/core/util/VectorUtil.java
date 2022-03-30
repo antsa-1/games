@@ -8,7 +8,7 @@ import com.tauhka.games.core.Vector2d;
 
 public class VectorUtil {
 
-	public static Double dotProduct(Vector2d vectorA, Vector2d vectorB) {
+	public static double dotProduct(Vector2d vectorA, Vector2d vectorB) {
 
 		return vectorA.x * vectorB.x + vectorA.y * vectorB.y;
 	}
@@ -23,9 +23,14 @@ public class VectorUtil {
 		return new Vector2d(vectorA.x + vectorB.x, vectorA.y + vectorB.y);
 	}
 
-	public static void multiplyVector(Vector2d vector, Double scalar) {
+	public static Vector2d copy(Vector2d v) {
+		return new Vector2d(v.x, v.y);
+	}
+
+	public static Vector2d multiply(Vector2d vector, Double scalar) {
 		vector.x = vector.x * scalar;
 		vector.y = vector.y * scalar;
+		return vector;
 	}
 
 	public static double calculateVectorLength(Vector2d vector) {

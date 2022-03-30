@@ -29,6 +29,10 @@ public class Ball implements PoolComponent {
 		this.diameter = diameter;
 	}
 
+	public boolean isMoving() {
+		return !this.velocity.isZero();
+	}
+
 	public int getNumber() {
 		return number;
 	}
@@ -67,6 +71,11 @@ public class Ball implements PoolComponent {
 
 	public void setVelocity(Vector2d velocity) {
 		this.velocity = velocity;
+	}
+
+	@Override
+	public String toString() {
+		return "Ball [number=" + number + ", position=" + position + ", velocity=" + velocity + "]";
 	}
 
 }

@@ -5,7 +5,7 @@
 			<button v-if="resignButtonVisible" :disabled ="resignButtonDisabled" @click="resign" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
 				Resign 
 			</button>			
-			<button v-if="rematchButtonEnabled" @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
+			<button @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
 				Rematch
 			</button>
 		</div>
@@ -191,7 +191,7 @@ export default defineComponent({
 		
 		initTable() {
 			console.log("****initTable")
-			
+			this.ballsRemaining=[]
 			setTimeout( () => {
 			
 			
@@ -514,15 +514,15 @@ export default defineComponent({
 					if(firstBall.inPocket || secondBall.inPocket){
 						console.log("breaking loop, in pocket "+firstBall.inPocket)
 						break
-					}					
-					if(this.isMoving(firstBall) || this.isMoving(secondBall) ){
-						this.collide(secondBall, firstBall)
 					}
-				}				
+					if(this.isMoving(firstBall) || this.isMoving(secondBall) ){
+						this.checkAndHandleCollision(secondBall, firstBall)
+					}
+				}
 			}
 		},
 	
-		collide(componentA:IBall, componentB:IBall){
+		checkAndHandleCollision(componentA:IBall, componentB:IBall){
 			// Mathematics from -> ' JavaScript + HTML5 GameDev Tutorial: 8-Ball Pool Game (part 2) '  from 15:42 ->
 			// https://www.youtube.com/watch?v=Am8rT9xICRs
 				
@@ -531,7 +531,12 @@ export default defineComponent({
 			if(normalVectorLength > this.cueBall.diameter ){				
 				return
 			}
-			
+			const someRandomTestNumberToAvoidOverlapping = 4			
+			const mtd = this.multiplyVector(normalVector, (this.cueBall.diameter - normalVectorLength) / normalVectorLength)
+			componentA.position.x += mtd.x * 0.5
+			componentA.position.y += mtd.y * 0.5
+			componentB.position.x -= mtd.x * 0.5
+			componentB.position.y -= mtd.y * 0.5
 			const scalar = 1/normalVectorLength
 			const unitNormalVector = this.multiplyVector(normalVector, scalar)
 			const unitTangentVector = <IVector2> { x: -unitNormalVector.y, y: unitNormalVector.x}
@@ -547,14 +552,9 @@ export default defineComponent({
 			const v2tTag = <IVector2> {x: unitTangentVector.x * v2t, y:unitTangentVector.y * v2t}
 			componentA.velocity = <IVector2> { x: (v1nTag.x + v1tTag.x) , y: (v1nTag.y + v1tTag.y) }
 			componentB.velocity = <IVector2> { x: (v2nTag.x + v2tTag.x) , y: (v2nTag.y + v2tTag.y) }
-			const someRandomTestNumberToAvoidOverlapping = 4			
 			//minimum translation distance, 
-			const mtd = this.multiplyVector(normalVector, (this.cueBall.diameter + someRandomTestNumberToAvoidOverlapping - normalVectorLength) / normalVectorLength)
 			// TODO check boundries	?	It will be interesting to see how the other browser with different poolTable size handles these in order to be sync. Might need some re-work
-			componentA.position.x += mtd.x * 0.5
-			componentA.position.y += mtd.y * 0.5
-			componentB.position.x -= mtd.x * 0.5
-			componentB.position.y -= mtd.y * 0.5
+			
 		},
 		isMoving(component:IPoolComponent){
 			if(!component)

@@ -28,6 +28,11 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public PoolTable(User playerA, GameMode gameMode, boolean randomizeStarter) {
 		super(playerA, gameMode, randomizeStarter);
+		initPoolTable();
+
+	}
+
+	private void initPoolTable() {
 		this.canvas = new Canvas(new Vector2d(1200d, 677d));
 		remainingBalls = new ArrayList<Ball>(16);
 		Double ballDiameter = 34d;
@@ -49,7 +54,6 @@ public class PoolTable extends Table implements PoolComponent {
 		cueBall = new CueBall(0, Color.WHITE, new Vector2d(250d, 311d), ballDiameter);
 		cueBall.setVelocity(new Vector2d(0d, 0d));
 		this.remainingBalls.add(cueBall);
-
 	}
 
 	@Override
@@ -57,8 +61,11 @@ public class PoolTable extends Table implements PoolComponent {
 		super.joinTableAsPlayer(playerB);
 		if (isServerGUIWanted()) {
 			new ServerGUI(this).start();
-			;
 		}
+	}
+
+	public boolean isInPocket(Ball ball) {
+		return false;
 	}
 
 	private boolean isServerGUIWanted() {
@@ -163,8 +170,17 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	protected Table startRematch() {
-		// TODO Auto-generated method stub
-		return null;
+		this.initPoolTable();
+		return this;
+	}
+
+	@Override
+	public synchronized boolean suggestRematch(User user) {
+
+		super.suggestRematch(this.playerA);
+		super.suggestRematch(this.playerB);
+		this.notify();
+		return true;
 	}
 
 	public Vector2d getPosition() {
