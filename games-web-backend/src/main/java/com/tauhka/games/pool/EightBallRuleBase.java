@@ -1,5 +1,6 @@
 package com.tauhka.games.pool;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.Vector2d;
@@ -27,22 +28,55 @@ public class EightBallRuleBase {
 
 	private boolean handleBallsMovements(PoolTable table) {
 		boolean ballsMoving = false;
-		while (ballsMoving = updatePositions(table)) {
-			detectCollisions(table);
+		while (isAnyBallMoving(table.getRemainingBalls())) {
+			updatePositionsAndApplyFriction(table);
+			table.notify();
+			try {
+				System.out.println("rulebase wait");
+				table.wait();
+				System.out.println("rulebase continue");
+				detectCollisions(table);
+				table.notify();
+				System.out.println("rulebase2 wait");
+				table.wait();
+				System.out.println("rulebase2 continue");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		// ballsMoving = detectCollisions(table);
 		LOGGER.info("RuleBase handleBallsMovements done" + ballsMoving);
 		return ballsMoving;
 	}
 
+	private boolean isAnyBallMoving(List<Ball> balls) {
+		for (Ball b : balls) {
+			if (b.isMoving()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void applyFriction(Ball ball) {
+		VectorUtil.multiply(ball.getVelocity(), FRICTION);
+		double length = VectorUtil.calculateVectorLength(ball.getVelocity());
+		LOGGER.info("RuleBase after -> Ball: " + ball.getNumber() + ball.getVelocity() + " position: " + ball.getPosition());
+		if (length < 5d) {
+			ball.getVelocity().x = 0d;
+			ball.getVelocity().y = 0d;
+		}
+	}
+
 	private boolean detectCollisions(PoolTable table) {
 		// TODO Auto-generated method stub
 		for (int i = 0; i < table.getRemainingBalls().size(); i++) {
 			Ball ball = table.getRemainingBalls().get(i);
-			if (ball.getNumber() == 0) {
-				System.out.println("0");
+			if(ball.isMoving()) {
+				checkAndHandleTableCollisions(table, ball);
+				table.notify();
 			}
-			checkAndHandleTableCollisions(table, ball);
 			checkAndHandleBallOnBallCollisions(table, i);
 		}
 		return false;
@@ -55,9 +89,6 @@ public class EightBallRuleBase {
 			if (table.isInPocket(firstBall) || table.isInPocket(secondBall)) {
 				break;
 			}
-			if (firstBall.getNumber() == 0) {
-				System.out.println("00000");
-			}
 			if (firstBall.isMoving() || secondBall.isMoving()) {
 				collide(firstBall, secondBall);
 			}
@@ -69,7 +100,7 @@ public class EightBallRuleBase {
 		Vector2d normalVector = VectorUtil.subtractVectors(firstBall.getPosition(), secondBall.getPosition());
 		double normalVectorLength = VectorUtil.calculateVectorLength(normalVector);
 		if (normalVectorLength > firstBall.getDiameter()) {
-			LOGGER.info("No collision between:" + firstBall + " and " + secondBall);
+		//	LOGGER.info("No collision between:" + firstBall + " and " + secondBall);
 			return;
 		}
 		Vector2d mtd = VectorUtil.multiply(VectorUtil.copy(normalVector), (firstBall.getDiameter() - normalVectorLength) / normalVectorLength);
@@ -92,6 +123,7 @@ public class EightBallRuleBase {
 		firstBall.setVelocity(firstBallVelocity);
 		Vector2d secondBallVelocity = new Vector2d(v2nTag.x + v2tTag.x, v2nTag.y + v2tTag.y);
 		secondBall.setVelocity(secondBallVelocity);
+		System.out.println("After collision A:"+firstBall + " B:"+secondBall);
 	}
 
 	private void checkAndHandleTableCollisions(PoolTable table, Ball ball) {
@@ -99,6 +131,10 @@ public class EightBallRuleBase {
 			System.out.println("InMiddle");
 			return;
 		}
+		checkAndHandleBoundriesCollisions(table, ball);
+	}
+
+	private void checkAndHandleBoundriesCollisions(PoolTable table, Ball ball) {
 		Boundry topLeft = table.getBoundries().get(0);
 		Boundry topRight = table.getBoundries().get(1);
 		Boundry right = table.getBoundries().get(2);
@@ -110,22 +146,25 @@ public class EightBallRuleBase {
 		if (isTableTopBondry(topLeft, topRight, ball.getPosition(), radius)) {
 			System.out.println("isTableTopBondry");
 			ball.getVelocity().y = -ball.getVelocity().y;
+			return;
 		}
 
 		if (isTableLeftBoundry(left, ball.getPosition(), radius)) {
 			System.out.println("left");
 			ball.getVelocity().x = -ball.getVelocity().x;
+			return;
 		}
 
 		if (isTableBottomBoundry(bottomLeft, bottomRight, ball.getPosition(), radius)) {
 			System.out.println("bottom");
 			ball.getVelocity().y = -ball.getVelocity().y;
+			return;
 		}
 		if (isTableRightBoundry(right, ball.getPosition(), radius)) {
 			System.out.println("right");
 			ball.getVelocity().x = -ball.getVelocity().x;
+			return;
 		}
-
 	}
 
 	private boolean isTableTopBondry(Boundry topLeft, Boundry topRight, Vector2d ballPosition, double radius) {
@@ -154,8 +193,7 @@ public class EightBallRuleBase {
 		return false;
 	}
 
-	private boolean updatePositions(PoolTable table) {
-		boolean ballsStillMoving = false;
+	private void updatePositionsAndApplyFriction(PoolTable table) {
 		for (Ball ball : table.getRemainingBalls()) {
 			LOGGER.info("RuleBase -> Ball: " + ball.getNumber() + " velocity:" + ball.getVelocity() + " position: " + ball.getPosition());
 			if (ball.getVelocity().isZero()) {
@@ -166,16 +204,7 @@ public class EightBallRuleBase {
 			VectorUtil.multiply(tempVector, DELTA);
 			Vector2d v = VectorUtil.addVectors(ball.getPosition(), tempVector);
 			ball.setPosition(v);
-			VectorUtil.multiply(ball.getVelocity(), FRICTION);
-			double length = VectorUtil.calculateVectorLength(ball.getVelocity());
-			LOGGER.info("RuleBase after -> Ball: " + ball.getNumber() + ball.getVelocity() + " position: " + ball.getPosition());
-			if (length == 0.0d) {
-				ball.getVelocity().x = 0d;
-				ball.getVelocity().y = 0d;
-			} else {
-				ballsStillMoving = true;
-			}
+			applyFriction(ball);
 		}
-		return ballsStillMoving;
 	}
 }

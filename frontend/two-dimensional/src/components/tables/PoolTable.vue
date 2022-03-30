@@ -430,31 +430,30 @@ export default defineComponent({
 		handleCollisions(){			
 			return new Promise((resolve) => {
 				const collisionCheckInterval = setInterval(() => {
-					this.updateBalls()
+					this.updateBallProperties()
 					this.handleBallCollisions()
 					window.requestAnimationFrame(this.repaintAll)
 					if(!this.isAnyBallMoving()){	
-						clearInterval(collisionCheckInterval)	
+						clearInterval(collisionCheckInterval)
+						this.printBallPositions()
 						resolve("collisions checked")
 					}
 			}, 25)
 			})
 		},
-		updateBalls(){
-			this.ballsRemaining.forEach(ball => {				
-				//this.calculateLength(ball.velocity)
-				if(ball.number === 0){
-					console.log("cueBall moves:"+JSON.stringify(ball))
-				}
+		updateBallProperties(){
+			this.ballsRemaining.forEach(ball => {
 				ball.position.x += ball.velocity.x * DELTA
 				ball.position.y += ball.velocity.y * DELTA
 				ball.velocity.x *= FRICTION
-				ball.velocity.y *= FRICTION
-				if(ball.number === 0){
-					console.log("cueBall moves2:"+JSON.stringify(ball))
-				}		
+				ball.velocity.y *= FRICTION						
 			})			
-		},		
+		},
+		printBallPositions(){
+			this.ballsRemaining.forEach(ball => {
+				console.log("Ball final pos "+ball.number +" -> "+JSON.stringify(ball.position))					
+			})
+		},
 		isInPocket(component:IBall){
 			// https://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
 			// (x - center_x)² + (y - center_y)² < radius²   			
@@ -552,8 +551,7 @@ export default defineComponent({
 			const v2tTag = <IVector2> {x: unitTangentVector.x * v2t, y:unitTangentVector.y * v2t}
 			componentA.velocity = <IVector2> { x: (v1nTag.x + v1tTag.x) , y: (v1nTag.y + v1tTag.y) }
 			componentB.velocity = <IVector2> { x: (v2nTag.x + v2tTag.x) , y: (v2nTag.y + v2tTag.y) }
-			//minimum translation distance, 
-			// TODO check boundries	?	It will be interesting to see how the other browser with different poolTable size handles these in order to be sync. Might need some re-work
+			console.log("After collsion: A"+JSON.stringify(componentA)+ " ***** B:"+JSON.stringify(componentB))		
 			
 		},
 		isMoving(component:IPoolComponent){
@@ -565,6 +563,7 @@ export default defineComponent({
 		
 			if(this.isBallInMiddleArea(ball)){
 				//console.log("in middle area"+JSON.stringify(ball))
+				return
 			}else if(this.isTableTopBoundry(ball) ){
 				console.log("Top boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
@@ -584,9 +583,10 @@ export default defineComponent({
 				const pocket:IPocket = this.isInPocket(ball)
 				if(pocket){
 					this.handleBallInPocket(ball, pocket)
+					return 
 				}
 			}
-			this.updatePositionAndVelocity(ball)
+			//this.updatePositionAndVelocity(ball)
 		},
 		updatePositionAndVelocity(ball:IBall){
 			ball.position.x += ball.velocity.x * DELTA

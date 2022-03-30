@@ -16,6 +16,7 @@ public class Ball implements PoolComponent {
 	private Color color;
 	private Vector2d position;
 	private Double diameter;
+	private Double radius;
 	private Vector2d velocity;
 
 	public Ball() {
@@ -27,6 +28,7 @@ public class Ball implements PoolComponent {
 		this.color = color;
 		this.position = position;
 		this.diameter = diameter;
+		this.radius = diameter / 2;
 	}
 
 	public boolean isMoving() {
@@ -73,9 +75,17 @@ public class Ball implements PoolComponent {
 		this.velocity = velocity;
 	}
 
+	public Double getRadius() {
+		return radius;
+	}
+
+	public void setRadius(Double radius) {
+		this.radius = radius;
+	}
+
 	@Override
 	public String toString() {
-		return "Ball [number=" + number + ", position=" + position + ", velocity=" + velocity + "]";
+		return "Ball [" + number + ", position=" + position + ", velocity=" + velocity + "]";
 	}
 
 }

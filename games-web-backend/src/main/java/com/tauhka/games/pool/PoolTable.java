@@ -82,7 +82,7 @@ public class PoolTable extends Table implements PoolComponent {
 	public synchronized void joinTableAsPlayer(User playerB) {
 		super.joinTableAsPlayer(playerB);
 		if (isServerGUIWanted()) {
-			new ServerGUI(this).start();
+			new Thread(new ServerGUI(this)).start();
 		}
 	}
 

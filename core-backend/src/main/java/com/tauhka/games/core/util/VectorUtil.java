@@ -37,9 +37,7 @@ public class VectorUtil {
 		double dx = (Math.pow(vector.x, 2));
 		double dy = (Math.pow(vector.y, 2));
 		double res = Math.sqrt(dx + dy);
-		if (res < 5) {
-			return 0;
-		}
+		
 		return res;
 	}
 

@@ -1,5 +1,7 @@
 package com.tauhka.games.pool.debug;
 
+import javax.swing.SwingUtilities;
+
 import com.tauhka.games.core.User;
 import com.tauhka.games.pool.Cue;
 import com.tauhka.games.pool.PoolTable;
@@ -11,9 +13,10 @@ import com.tauhka.games.pool.PoolTurn;
 
 public class Runner {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		User u = new User("test");
 		PoolTable p = new PoolTable(u, null, false);
+
 		User u2 = new User("best");
 		p.joinTableAsPlayer(u2);
 		PoolTurn turn = new PoolTurn();
@@ -24,6 +27,12 @@ public class Runner {
 		cue.setForce(95d);
 		turn.setCue(cue);
 		p.playTurn(u, turn);
+		Thread.sleep(2000);
+		cue.setAngle(-0.01425565337077744d);
+		cue.setForce(95d);
+		turn.setCue(cue);
+		p.playTurn(u2, turn);
+
 	}
 
 }
