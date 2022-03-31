@@ -1,7 +1,5 @@
 package com.tauhka.games.pool.debug;
 
-import javax.swing.SwingUtilities;
-
 import com.tauhka.games.core.User;
 import com.tauhka.games.pool.Cue;
 import com.tauhka.games.pool.PoolTable;
