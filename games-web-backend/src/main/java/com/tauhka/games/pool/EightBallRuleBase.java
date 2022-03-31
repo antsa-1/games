@@ -131,7 +131,7 @@ public class EightBallRuleBase {
 		firstBall.setVelocity(firstBallVelocity);
 		Vector2d secondBallVelocity = new Vector2d(v2nTag.x + v2tTag.x, v2nTag.y + v2tTag.y);
 		secondBall.setVelocity(secondBallVelocity);
-		//System.out.println("After collision A:" + firstBall + " B:" + secondBall);
+		// System.out.println("After collision A:" + firstBall + " B:" + secondBall);
 	}
 
 	private void checkAndHandleTableCollisions(PoolTable table, Ball ball) {
@@ -172,6 +172,34 @@ public class EightBallRuleBase {
 			ball.getVelocity().x = -1 * ball.getVelocity().x;
 			return;
 		}
+		checkAndHandlePocketPathwayCollisions(table, ball);
+
+	}
+
+	private void checkAndHandlePocketPathwayCollisions(PoolTable table, Ball ball) {
+		// TODO Auto-generated method stub
+		for (Pocket pocket : table.getPockets()) {
+			if (this.isPathwayBorderCollision(table, pocket.getPathWayRight(), ball)) {
+				Vector2d reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathWayRight(), ball);
+				// console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+				ball.setVelocity(reflectionVector);
+			} else if (this.isPathwayBorderCollision(table, pocket.getPathWayRight(), ball)) {
+				// console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+			}
+		}
+	}
+
+	// TODO if using instance then passing the table to every method gets unnecessary..
+	private boolean isPathwayBorderCollision(PoolTable table, PathWay pathway, Ball ball) {
+		if (isInMiddleArea(table, ball)) {
+			return false;
+		}
+		return false;
+	}
+
+	private Vector2d calculateBallVelocityOnPathwayBorderCollision(PoolTable table, PathWay pathWayRight, Ball ball) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private boolean isTableTopBondry(Boundry topLeft, Boundry topRight, Vector2d ballPosition, double radius) {
