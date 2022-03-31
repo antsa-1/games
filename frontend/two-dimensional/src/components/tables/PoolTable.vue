@@ -435,7 +435,7 @@ export default defineComponent({
 					window.requestAnimationFrame(this.repaintAll)
 					if(!this.isAnyBallMoving()){	
 						clearInterval(collisionCheckInterval)
-						this.printBallPositions()
+						//this.printBallPositions()
 						resolve("collisions checked")
 					}
 			}, 25)
@@ -551,8 +551,7 @@ export default defineComponent({
 			const v2tTag = <IVector2> {x: unitTangentVector.x * v2t, y:unitTangentVector.y * v2t}
 			componentA.velocity = <IVector2> { x: (v1nTag.x + v1tTag.x) , y: (v1nTag.y + v1tTag.y) }
 			componentB.velocity = <IVector2> { x: (v2nTag.x + v2tTag.x) , y: (v2nTag.y + v2tTag.y) }
-			console.log("After collsion: A"+JSON.stringify(componentA)+ " ***** B:"+JSON.stringify(componentB))		
-			
+		//	console.log("After collsion: A:"+componentA.number+" pos:"+JSON.stringify(componentA.position)+" velo:"+JSON.stringify(componentA.velocity)+ " ***** B:"+componentB.number +" pos:"+JSON.stringify(componentB.position)+" velo:"+JSON.stringify(componentB.velocity))
 		},
 		isMoving(component:IPoolComponent){
 			if(!component)
@@ -599,13 +598,13 @@ export default defineComponent({
 				const pocket:IPocket = this.poolTable.pockets[i]				
 				if(this.isPathwayBorderCollision(pocket.pathwayRight, ball, i)){					
 					let reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayRight, ball)
-					console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+					//console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
 					ball.velocity = reflectionVector
 					return true
 				} else if(this.isPathwayBorderCollision(pocket.pathwayLeft, ball, i)){
 					let reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayLeft, ball)
 					ball.velocity = reflectionVector
-					console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+				//	console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
 					return true
 				}				
 			}

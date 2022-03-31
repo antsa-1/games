@@ -23,15 +23,11 @@ public class Runner {
 		Cue cue = new Cue();
 		// -0.01425565337077744 -> osuu force 70
 		// -0.18982631837040745d) -> yli force 65
-		cue.setAngle(-0.01425565337077744d);
-		cue.setForce(95d);
+		cue.setAngle(0.07277142770340442d);
+		cue.setForce(130d);
 		turn.setCue(cue);
 		p.playTurn(u, turn);
-		Thread.sleep(2000);
-		cue.setAngle(-0.01425565337077744d);
-		cue.setForce(95d);
-		turn.setCue(cue);
-		p.playTurn(u2, turn);
+		
 
 	}
 

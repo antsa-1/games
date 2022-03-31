@@ -30,6 +30,8 @@ export const poolMixin = {
         },
 		prepareTransfer(object){
 			const {image, color, ...object2} = object
+		//	object2.angle= 0.07277142770340442;
+		//	object2.force =130
 			return object2
 		},
 		t(p, m, cue, cueBall, canvas, i = false){			

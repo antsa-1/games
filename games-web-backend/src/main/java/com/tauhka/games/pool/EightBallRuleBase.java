@@ -20,63 +20,71 @@ public class EightBallRuleBase {
 		Vector2d v = VectorUtil.calculateCueBallInitialVelocity(cue.getForce(), cue.getAngle());
 		LOGGER.info("CueBall initial velocity:" + v);
 		table.getCueBall().setVelocity(v);
-		boolean ballsMoving = true;
-		while (ballsMoving) {
-			ballsMoving = handleBallsMovements(table);
-		}
+		handleBallsMovements(table);
+		table.notify();
 	}
 
-	private boolean handleBallsMovements(PoolTable table) {
-		boolean ballsMoving = false;
-		while (isAnyBallMoving(table.getRemainingBalls())) {
+	private void handleBallsMovements(PoolTable table) {
+		while (true) {
 			updatePositionsAndApplyFriction(table);
+			detectCollisions(table);
+			if (!isAnyBallMoving(table.getRemainingBalls())) {
+				break;
+			}
 			table.notify();
 			try {
-				System.out.println("rulebase wait");
 				table.wait();
-				System.out.println("rulebase continue");
-				detectCollisions(table);
-				table.notify();
-				System.out.println("rulebase2 wait");
-				table.wait();
-				System.out.println("rulebase2 continue");
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		// ballsMoving = detectCollisions(table);
-		LOGGER.info("RuleBase handleBallsMovements done" + ballsMoving);
-		return ballsMoving;
 	}
 
-	private boolean isAnyBallMoving(List<Ball> balls) {
-		for (Ball b : balls) {
-			if (b.isMoving()) {
-				return true;
-			}
+	private void updatePositionsAndApplyFriction(PoolTable table) {
+		for (Ball ball : table.getRemainingBalls()) {
+			Vector2d changeInPosition = VectorUtil.multiply(ball.getVelocity(), DELTA);
+			Vector2d currentPosition = ball.getPosition();
+			ball.setPosition(VectorUtil.addVectors(changeInPosition, currentPosition));
+			Vector2d newVelocity = VectorUtil.multiply(ball.getVelocity(), FRICTION);
+			ball.setVelocity(newVelocity);
 		}
-		return false;
 	}
 
 	public void applyFriction(Ball ball) {
-		VectorUtil.multiply(ball.getVelocity(), FRICTION);
-		double length = VectorUtil.calculateVectorLength(ball.getVelocity());
-		LOGGER.info("RuleBase after -> Ball: " + ball.getNumber() + ball.getVelocity() + " position: " + ball.getPosition());
+		Vector2d v = VectorUtil.multiply(ball.getVelocity(), FRICTION);
+		ball.setVelocity(v);
+		double length = VectorUtil.calculateVectorLength(v);
 		if (length < 5d) {
 			ball.getVelocity().x = 0d;
 			ball.getVelocity().y = 0d;
 		}
 	}
 
+	private boolean isAnyBallMoving(List<Ball> balls) {
+		boolean retVal = false;
+		for (Ball b : balls) {
+			if (b.isMoving()) {
+				retVal = true;
+			}
+			// Changes state but method name does not indicate it..
+			VectorUtil.calculateVectorLength(b.getVelocity());
+			// and this return immediately if match is found -> not all balls velocity is calculated/changed.. potential issue but UI-works the same atm.
+			if (!b.getVelocity().isZero()) {
+				return true;
+			}
+
+		}
+		return retVal;
+	}
+
 	private boolean detectCollisions(PoolTable table) {
 		// TODO Auto-generated method stub
 		for (int i = 0; i < table.getRemainingBalls().size(); i++) {
 			Ball ball = table.getRemainingBalls().get(i);
-			if(ball.isMoving()) {
-				checkAndHandleTableCollisions(table, ball);
-				table.notify();
-			}
+			// if (ball.isMoving()) {
+			checkAndHandleTableCollisions(table, ball);
+			// }
 			checkAndHandleBallOnBallCollisions(table, i);
 		}
 		return false;
@@ -100,35 +108,34 @@ public class EightBallRuleBase {
 		Vector2d normalVector = VectorUtil.subtractVectors(firstBall.getPosition(), secondBall.getPosition());
 		double normalVectorLength = VectorUtil.calculateVectorLength(normalVector);
 		if (normalVectorLength > firstBall.getDiameter()) {
-		//	LOGGER.info("No collision between:" + firstBall + " and " + secondBall);
+			// LOGGER.info("No collision between:" + firstBall + " and " + secondBall);
 			return;
 		}
-		Vector2d mtd = VectorUtil.multiply(VectorUtil.copy(normalVector), (firstBall.getDiameter() - normalVectorLength) / normalVectorLength);
+		Vector2d mtd = VectorUtil.multiply(normalVector, (firstBall.getDiameter() - normalVectorLength) / normalVectorLength);
 		firstBall.getPosition().x += mtd.x * 0.5;
 		firstBall.getPosition().y += mtd.y * 0.5;
 		secondBall.getPosition().x -= mtd.x * 0.5;
 		secondBall.getPosition().y -= mtd.y * 0.5;
 		double scalar = 1 / normalVectorLength;
 		Vector2d unitNormalVector = VectorUtil.multiply(normalVector, scalar);
-		Vector2d unitTangentVector = new Vector2d(-normalVector.y, normalVector.x);
+		Vector2d unitTangentVector = new Vector2d(-unitNormalVector.y, unitNormalVector.x);
 		double v1n = VectorUtil.dotProduct(unitNormalVector, firstBall.getVelocity());
 		double v1t = VectorUtil.dotProduct(unitTangentVector, firstBall.getVelocity());
 		double v2n = VectorUtil.dotProduct(unitNormalVector, secondBall.getVelocity());
 		double v2t = VectorUtil.dotProduct(unitTangentVector, secondBall.getVelocity());
-		Vector2d v1nTag = VectorUtil.multiply(VectorUtil.copy(unitNormalVector), v2n);
-		Vector2d v1tTag = VectorUtil.multiply(VectorUtil.copy(unitTangentVector), v1t);
-		Vector2d v2nTag = VectorUtil.multiply(VectorUtil.copy(unitNormalVector), v1n);
-		Vector2d v2tTag = VectorUtil.multiply(VectorUtil.copy(unitTangentVector), v2t);
+		Vector2d v1nTag = VectorUtil.multiply(unitNormalVector, v2n);
+		Vector2d v1tTag = VectorUtil.multiply(unitTangentVector, v1t);
+		Vector2d v2nTag = VectorUtil.multiply(unitNormalVector, v1n);
+		Vector2d v2tTag = VectorUtil.multiply(unitTangentVector, v2t);
 		Vector2d firstBallVelocity = new Vector2d(v1nTag.x + v1tTag.x, v1nTag.y + v1tTag.y);
 		firstBall.setVelocity(firstBallVelocity);
 		Vector2d secondBallVelocity = new Vector2d(v2nTag.x + v2tTag.x, v2nTag.y + v2tTag.y);
 		secondBall.setVelocity(secondBallVelocity);
-		System.out.println("After collision A:"+firstBall + " B:"+secondBall);
+		//System.out.println("After collision A:" + firstBall + " B:" + secondBall);
 	}
 
 	private void checkAndHandleTableCollisions(PoolTable table, Ball ball) {
 		if (isInMiddleArea(table, ball)) {
-			System.out.println("InMiddle");
 			return;
 		}
 		checkAndHandleBoundriesCollisions(table, ball);
@@ -145,24 +152,24 @@ public class EightBallRuleBase {
 		double radius = ball.getDiameter() / 2;
 		if (isTableTopBondry(topLeft, topRight, ball.getPosition(), radius)) {
 			System.out.println("isTableTopBondry");
-			ball.getVelocity().y = -ball.getVelocity().y;
+			ball.getVelocity().y = -1 * ball.getVelocity().y;
 			return;
 		}
 
 		if (isTableLeftBoundry(left, ball.getPosition(), radius)) {
 			System.out.println("left");
-			ball.getVelocity().x = -ball.getVelocity().x;
+			ball.getVelocity().x = -1 * ball.getVelocity().x;
 			return;
 		}
 
 		if (isTableBottomBoundry(bottomLeft, bottomRight, ball.getPosition(), radius)) {
 			System.out.println("bottom");
-			ball.getVelocity().y = -ball.getVelocity().y;
+			ball.getVelocity().y = -1 * ball.getVelocity().y;
 			return;
 		}
 		if (isTableRightBoundry(right, ball.getPosition(), radius)) {
 			System.out.println("right");
-			ball.getVelocity().x = -ball.getVelocity().x;
+			ball.getVelocity().x = -1 * ball.getVelocity().x;
 			return;
 		}
 	}
@@ -193,18 +200,4 @@ public class EightBallRuleBase {
 		return false;
 	}
 
-	private void updatePositionsAndApplyFriction(PoolTable table) {
-		for (Ball ball : table.getRemainingBalls()) {
-			LOGGER.info("RuleBase -> Ball: " + ball.getNumber() + " velocity:" + ball.getVelocity() + " position: " + ball.getPosition());
-			if (ball.getVelocity().isZero()) {
-				LOGGER.fine("RuleBase -> Ball: " + ball.getNumber() + " had no velocity");
-				continue; // Ball is not on the move
-			}
-			Vector2d tempVector = new Vector2d(ball.getVelocity().x, ball.getVelocity().y);
-			VectorUtil.multiply(tempVector, DELTA);
-			Vector2d v = VectorUtil.addVectors(ball.getPosition(), tempVector);
-			ball.setPosition(v);
-			applyFriction(ball);
-		}
-	}
 }

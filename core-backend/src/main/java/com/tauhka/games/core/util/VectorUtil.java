@@ -28,16 +28,17 @@ public class VectorUtil {
 	}
 
 	public static Vector2d multiply(Vector2d vector, Double scalar) {
-		vector.x = vector.x * scalar;
-		vector.y = vector.y * scalar;
-		return vector;
+		return new Vector2d(vector.x * scalar, vector.y * scalar);
 	}
 
 	public static double calculateVectorLength(Vector2d vector) {
-		double dx = (Math.pow(vector.x, 2));
-		double dy = (Math.pow(vector.y, 2));
+		double dx = Math.pow(vector.x, 2);
+		double dy = Math.pow(vector.y, 2);
 		double res = Math.sqrt(dx + dy);
-		
+		if (res < 5) {
+			vector.x = 0;
+			vector.y = 0;
+		}
 		return res;
 	}
 
@@ -48,6 +49,6 @@ public class VectorUtil {
 	}
 
 	public static boolean isZero(Vector2d v) {
-		return v.x == 0 && v.y == 0;
+		return v.x == 0d && v.y == 0d;
 	}
 }

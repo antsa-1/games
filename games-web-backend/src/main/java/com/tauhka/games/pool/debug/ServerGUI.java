@@ -48,7 +48,6 @@ public class ServerGUI implements Runnable {
 
 	public void updateSwingComponentPositions() {
 		JPanel canvasPanel = this.canvasPanel;
-		System.out.println("ServerGui updateSwingComponentPositions");
 		try {
 			EventQueue.invokeAndWait(new Runnable() {
 				@Override
@@ -57,9 +56,9 @@ public class ServerGUI implements Runnable {
 					for (int i = 0; i < componentCount - 1; i++) {
 						ServerGUIComponent ballPanel = (ServerGUIComponent) canvasPanel.getComponent(i);
 						Ball ball = (Ball) ballPanel.getPoolComponent();
-						System.out.println("ServerGUI -> " + ballPanel.getPoolComponent().getNumber() + " panel old position x:" + ballPanel.getX() + " y:" + ballPanel.getY());
+						//System.out.println("ServerGUI -> " + ballPanel.getPoolComponent().getNumber() + " panel old position x:" + ballPanel.getX() + " y:" + ballPanel.getY());
 						ballPanel.setBounds((int) ballPanel.getPoolComponent().getPosition().x - ball.getRadius().intValue(), (int) ballPanel.getPoolComponent().getPosition().y - ball.getRadius().intValue(), 141, 141);
-						System.out.println("ServerGUI -> ball real position:" + ball.getPosition() + "  Panel positionx:" + ballPanel.getX() + " y:" + ballPanel.getY());
+						//System.out.println("ServerGUI -> ball real position:" + ball.getPosition() + "  Panel positionx:" + ballPanel.getX() + " y:" + ballPanel.getY());
 					}
 				}
 			});
@@ -79,13 +78,14 @@ public class ServerGUI implements Runnable {
 		try {
 			synchronized (poolTable) {
 				while (true) {
-					System.out.println("ServerGui starts to wait");
+					//System.out.println("ServerGui starts to wait");
 					poolTable.wait();
-					System.out.println("ServerGui continues after waiting");
+					//System.out.println("ServerGui continues after waiting");
 					updateSwingComponentPositions();
-					System.out.println("ServerGui updated component positions, now notifies");
+					//System.out.println("ServerGui updated component positions, now notifies");
 					canvasPanel.revalidate();
 					canvasPanel.repaint();
+					Thread.sleep(20);
 					poolTable.notify();
 				}
 			}
