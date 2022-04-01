@@ -172,11 +172,8 @@ public class EightBallRuleBase {
 
 	private void checkAndHandlePocketPathwayCollisions(PoolTable table, Ball ball) {
 		for (Pocket pocket : table.getPockets()) {
-			if (isInMiddleArea(table, ball)) {
-				continue;
-			}
 			if (this.isPathwayBorderCollision(table, pocket.getPathWayRight(), ball)) {
-				System.out.println("IS PATHWAY COL1");
+				System.out.println("IS PATHWAY COL1"+ball);
 				Vector2d reflectionVector = calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathWayRight(), ball);
 				ball.setVelocity(reflectionVector);
 				return;
@@ -209,13 +206,13 @@ public class EightBallRuleBase {
 		Vector2d ab = VectorUtil.subtractVectors(b, a);
 		Vector2d projectedVector = this.projectVectorOnVector(ac, ab);
 		Vector2d d = VectorUtil.addVectors(projectedVector, a);
-		Vector2d ad = VectorUtil.subtractVectors(projectedVector, a);
+		Vector2d ad = VectorUtil.subtractVectors(d, a);
 
 		double k = Math.abs(ab.x) > Math.abs(ab.y) ? ad.x / ab.x : ad.y / ab.y;
 		Double distance = null;
 		if (k <= 0.0) {
 			distance = Math.sqrt(this.hypot2(c, a));
-		} else if (k > 1.0) {
+		} else if (k >= 1.0) {
 			distance = Math.sqrt(this.hypot2(c, b));
 		}
 		if (distance == null) {
