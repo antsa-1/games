@@ -73,6 +73,7 @@ public class PoolTable extends Table implements PoolComponent {
 		if (SERVER_GUI) {
 			LOGGER.info("Pooltable instance, server in testing mode");
 			synchronized (this) {
+				//When second pool turn comes from browser this blocks and does not proceed .. TODO 
 				turnResult = this.eightBallRuleBase.playTurn(this, turn);
 				LOGGER.info("PoolTable instance made movements now notifying, threadId:" + Thread.currentThread().getId());
 				this.notify();
