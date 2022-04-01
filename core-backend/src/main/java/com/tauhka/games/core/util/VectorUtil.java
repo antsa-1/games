@@ -31,15 +31,19 @@ public class VectorUtil {
 		return new Vector2d(vector.x * scalar, vector.y * scalar);
 	}
 
-	public static double calculateVectorLength(Vector2d vector) {
-		double dx = Math.pow(vector.x, 2);
-		double dy = Math.pow(vector.y, 2);
-		double res = Math.sqrt(dx + dy);
+	public static double calculateAndHandleVectorLength(Vector2d vector) {
+		double res = VectorUtil.calculateVectorLength(vector);
 		if (res < 5) {
 			vector.x = 0;
 			vector.y = 0;
 		}
 		return res;
+	}
+
+	public static double calculateVectorLength(Vector2d vector) {
+		double dx = Math.pow(vector.x, 2);
+		double dy = Math.pow(vector.y, 2);
+		return Math.sqrt(dx + dy);
 	}
 
 	public static Vector2d calculateCueBallInitialVelocity(double initialForce, double angle) {

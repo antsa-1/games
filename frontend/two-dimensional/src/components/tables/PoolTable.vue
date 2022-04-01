@@ -612,7 +612,7 @@ export default defineComponent({
 		},
 		//Pathway to pocket means a separate area in front of the pocket which has two sides thus different angles if ball hits them
 		calculateBallVelocityOnPathwayBorderCollision(pathway:IPathWayBorder, ball:IBall){
-			// calculations ??
+			// https://stackoverflow.com/questions/61272597/calculate-the-bouncing-angle-for-a-ball-point
 			let normalVector:IVector2 = this.subtractVectors(pathway.bottom, pathway.top)
 			const normalVectorLength = this.calculateLength(normalVector)
 			const scalar = 1/normalVectorLength

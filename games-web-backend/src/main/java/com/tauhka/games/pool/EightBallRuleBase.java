@@ -10,6 +10,7 @@ import com.tauhka.games.core.util.VectorUtil;
  * @author antsa-1 from GitHub 28 Mar 2022
  **/
 
+/* https://openjdk.java.net/jeps/417 JEP 417: Vector API (Third Incubator) any help here with jdk 18? */
 public class EightBallRuleBase {
 	private final double DELTA = 0.125d;
 	private final double FRICTION = 0.991d;
@@ -51,16 +52,6 @@ public class EightBallRuleBase {
 		}
 	}
 
-	public void applyFriction(Ball ball) {
-		Vector2d v = VectorUtil.multiply(ball.getVelocity(), FRICTION);
-		ball.setVelocity(v);
-		double length = VectorUtil.calculateVectorLength(v);
-		if (length < 5d) {
-			ball.getVelocity().x = 0d;
-			ball.getVelocity().y = 0d;
-		}
-	}
-
 	private boolean isAnyBallMoving(List<Ball> balls) {
 		boolean retVal = false;
 		for (Ball b : balls) {
@@ -68,7 +59,7 @@ public class EightBallRuleBase {
 				retVal = true;
 			}
 			// Changes state but method name does not indicate it..
-			VectorUtil.calculateVectorLength(b.getVelocity());
+			VectorUtil.calculateAndHandleVectorLength(b.getVelocity());
 			// and this return immediately if match is found -> not all balls velocity is calculated/changed.. potential issue but UI-works the same atm.
 			if (!b.getVelocity().isZero()) {
 				return true;
@@ -138,10 +129,13 @@ public class EightBallRuleBase {
 		if (isInMiddleArea(table, ball)) {
 			return;
 		}
-		checkAndHandleBoundriesCollisions(table, ball);
+		if (checkAndHandleTableBoundriesCollisions(table, ball)) {
+			return;
+		}
+		checkAndHandlePocketPathwayCollisions(table, ball);
 	}
 
-	private void checkAndHandleBoundriesCollisions(PoolTable table, Ball ball) {
+	private boolean checkAndHandleTableBoundriesCollisions(PoolTable table, Ball ball) {
 		Boundry topLeft = table.getBoundries().get(0);
 		Boundry topRight = table.getBoundries().get(1);
 		Boundry right = table.getBoundries().get(2);
@@ -153,53 +147,94 @@ public class EightBallRuleBase {
 		if (isTableTopBondry(topLeft, topRight, ball.getPosition(), radius)) {
 			System.out.println("isTableTopBondry");
 			ball.getVelocity().y = -1 * ball.getVelocity().y;
-			return;
+			return true;
 		}
 
 		if (isTableLeftBoundry(left, ball.getPosition(), radius)) {
 			System.out.println("left");
 			ball.getVelocity().x = -1 * ball.getVelocity().x;
-			return;
+			return true;
 		}
 
 		if (isTableBottomBoundry(bottomLeft, bottomRight, ball.getPosition(), radius)) {
 			System.out.println("bottom");
 			ball.getVelocity().y = -1 * ball.getVelocity().y;
-			return;
+			return true;
 		}
 		if (isTableRightBoundry(right, ball.getPosition(), radius)) {
 			System.out.println("right");
 			ball.getVelocity().x = -1 * ball.getVelocity().x;
-			return;
+			return true;
 		}
-		checkAndHandlePocketPathwayCollisions(table, ball);
 
+		return false;
 	}
 
 	private void checkAndHandlePocketPathwayCollisions(PoolTable table, Ball ball) {
-		// TODO Auto-generated method stub
 		for (Pocket pocket : table.getPockets()) {
+			if (isInMiddleArea(table, ball)) {
+				continue;
+			}
 			if (this.isPathwayBorderCollision(table, pocket.getPathWayRight(), ball)) {
-				Vector2d reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathWayRight(), ball);
-				// console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+				System.out.println("IS PATHWAY COL1");
+				Vector2d reflectionVector = calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathWayRight(), ball);
 				ball.setVelocity(reflectionVector);
-			} else if (this.isPathwayBorderCollision(table, pocket.getPathWayRight(), ball)) {
-				// console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+				return;
+			} else if (this.isPathwayBorderCollision(table, pocket.getPathwayLeft(), ball)) {
+				System.out.println("IS PATHWAY COL2");
+				Vector2d reflectionVector = calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathwayLeft(), ball);
+				ball.setVelocity(reflectionVector);
+				return;
 			}
 		}
 	}
 
-	// TODO if using instance then passing the table to every method gets unnecessary..
-	private boolean isPathwayBorderCollision(PoolTable table, PathWay pathway, Ball ball) {
-		if (isInMiddleArea(table, ball)) {
-			return false;
-		}
-		return false;
+	private Vector2d projectVectorOnVector(Vector2d a, Vector2d b) {
+		double scalar = VectorUtil.dotProduct(a, b) / VectorUtil.dotProduct(b, b);
+		return new Vector2d(scalar * b.x, scalar * b.y);
 	}
 
-	private Vector2d calculateBallVelocityOnPathwayBorderCollision(PoolTable table, PathWay pathWayRight, Ball ball) {
-		// TODO Auto-generated method stub
-		return null;
+	private Double hypot2(Vector2d a, Vector2d b) {
+		Vector2d subtracted1 = VectorUtil.subtractVectors(a, b);
+		Vector2d subtracted2 = VectorUtil.subtractVectors(a, b);
+		return VectorUtil.dotProduct(subtracted1, subtracted2);
+	}
+
+	private boolean isPathwayBorderCollision(PoolTable table, PathWay pathway, Ball ball) {
+		// https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm -> answer starting "No one seems to consider projection ..."
+		Vector2d a = pathway.getTop();
+		Vector2d b = pathway.getBottom();
+		Vector2d c = ball.getPosition();
+		Vector2d ac = VectorUtil.subtractVectors(c, a);
+		Vector2d ab = VectorUtil.subtractVectors(b, a);
+		Vector2d projectedVector = this.projectVectorOnVector(ac, ab);
+		Vector2d d = VectorUtil.addVectors(projectedVector, a);
+		Vector2d ad = VectorUtil.subtractVectors(projectedVector, a);
+
+		double k = Math.abs(ab.x) > Math.abs(ab.y) ? ad.x / ab.x : ad.y / ab.y;
+		Double distance = null;
+		if (k <= 0.0) {
+			distance = Math.sqrt(this.hypot2(c, a));
+		} else if (k > 1.0) {
+			distance = Math.sqrt(this.hypot2(c, b));
+		}
+		if (distance == null) {
+			distance = Math.sqrt(this.hypot2(c, d));
+		}
+		return distance <= ball.getRadius();
+
+	}
+
+	private Vector2d calculateBallVelocityOnPathwayBorderCollision(PoolTable table, PathWay pathWay, Ball ball) {
+		// https://stackoverflow.com/questions/61272597/calculate-the-bouncing-angle-for-a-ball-point
+		Vector2d normalVector = VectorUtil.subtractVectors(pathWay.getBottom(), pathWay.getTop());
+		double normalVectorLength = VectorUtil.calculateVectorLength(normalVector);
+		double scalar = 1 / normalVectorLength;
+		Vector2d unitNormalVector = VectorUtil.multiply(normalVector, scalar);
+		double magnitude = 2 * VectorUtil.dotProduct(unitNormalVector, ball.getVelocity());
+		Vector2d multiplied = VectorUtil.multiply(unitNormalVector, magnitude);
+		Vector2d reflectionVector = VectorUtil.subtractVectors(multiplied, ball.getVelocity());
+		return reflectionVector;
 	}
 
 	private boolean isTableTopBondry(Boundry topLeft, Boundry topRight, Vector2d ballPosition, double radius) {
