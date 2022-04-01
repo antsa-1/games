@@ -1,10 +1,12 @@
 package com.tauhka.games.pool;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.util.VectorUtil;
+import com.tauhka.games.pool.PoolTable.TurnResult;
 
 /**
  * @author antsa-1 from GitHub 28 Mar 2022
@@ -12,17 +14,71 @@ import com.tauhka.games.core.util.VectorUtil;
 
 /* https://openjdk.java.net/jeps/417 JEP 417: Vector API (Third Incubator) any help here with jdk 18? */
 public class EightBallRuleBase {
+	private static final Logger LOGGER = Logger.getLogger(EightBallRuleBase.class.getName());
 	private final double DELTA = 0.125d;
 	private final double FRICTION = 0.991d;
-	private static final Logger LOGGER = Logger.getLogger(EightBallRuleBase.class.getName());
+	private TurnResult turnResult;
+	private int iterationCount = 0;
+	private List<Ball> nextTurnBalls = new ArrayList<Ball>();
 
-	public void handleMovements(PoolTable table, PoolTurn turn) {
+	public TurnResult playTurn(PoolTable table, PoolTurn turn) {
+		this.reset();
 		Cue cue = turn.getCue();
 		Vector2d v = VectorUtil.calculateCueBallInitialVelocity(cue.getForce(), cue.getAngle());
 		LOGGER.info("CueBall initial velocity:" + v);
 		table.getCueBall().setVelocity(v);
 		handleBallsMovements(table);
-		table.notify();
+		table.setRemainingBalls(nextTurnBalls);
+		return turnResult != null ? turnResult : TurnResult.CONTINUE;
+	}
+
+	private void reset() {
+		this.turnResult = null;
+		this.iterationCount = 0;
+		this.nextTurnBalls = new ArrayList<Ball>();
+
+	}
+
+	public boolean isCueBallNewPositionAllowed(PoolTable table, Vector2d newPosition) {
+		Boundry left = table.getBoundries().get(5);
+		double radius = table.getCueBall().getRadius();
+		double x = newPosition.x;
+		double y = newPosition.y;
+
+		if (!(left.a + radius > x)) {
+			System.out.println("CueBall fail1");
+			return false;
+		}
+		if (!(left.b + radius > y)) {
+			System.out.println("CueBall fail2");
+			return false;
+		}
+
+		Boundry right = table.getBoundries().get(2);
+		if (!(right.a - radius < x)) {
+			System.out.println("CueBall fail3");
+			return false;
+		}
+		if (!(right.b - radius < y)) {
+			System.out.println("CueBall fail4");
+			return false;
+		}
+
+		for (Ball b : table.getRemainingBalls()) {
+			if (areBallsIntersecting(b, table.getCueBall())) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean areBallsIntersecting(Ball ball, Ball cueBall) {
+		double x = Math.abs(ball.getPosition().x - cueBall.getPosition().x);
+		if (x <= ball.getRadius()) {
+			return false;
+		}
+		double y = Math.abs(ball.getPosition().y - cueBall.getPosition().y);
+		return y <= ball.getRadius();
 	}
 
 	private void handleBallsMovements(PoolTable table) {
@@ -69,38 +125,52 @@ public class EightBallRuleBase {
 		return retVal;
 	}
 
-	private boolean detectCollisions(PoolTable table) {
-		// TODO Auto-generated method stub
+	private void detectCollisions(PoolTable table) {
 		for (int i = 0; i < table.getRemainingBalls().size(); i++) {
 			Ball ball = table.getRemainingBalls().get(i);
-			// if (ball.isMoving()) {
 			checkAndHandleTableCollisions(table, ball);
-			// }
 			checkAndHandleBallOnBallCollisions(table, i);
 		}
-		return false;
 	}
 
 	private void checkAndHandleBallOnBallCollisions(PoolTable table, int i) {
 		for (int j = i + 1; j < table.getRemainingBalls().size(); j++) {
 			Ball firstBall = table.getRemainingBalls().get(i);
 			Ball secondBall = table.getRemainingBalls().get(j);
-			if (table.isInPocket(firstBall) || table.isInPocket(secondBall)) {
-				break;
-			}
 			if (firstBall.isMoving() || secondBall.isMoving()) {
-				collide(firstBall, secondBall);
+				collide(table, firstBall, secondBall);
 			}
 		}
 	}
 
+	private boolean isAllowedToHit(PoolTable table, Ball ball) {
+		Ball playerABall = table.getPlayerABalls().isEmpty() ? null : table.getPlayerABalls().get(0);
+		Ball playerBBall = table.getPlayerBBalls().isEmpty() ? null : table.getPlayerBBalls().get(0);
+		if (ball.isSimilar(playerABall)) {
+			return true;
+		}
+		if (ball.isSimilar(playerBBall)) {
+			return true;
+		}
+		if (playerABall == null && playerBBall == null) {
+			return true;
+		}
+		return false;
+	}
+
 	/* Mathematics from -> ' JavaScript + HTML5 GameDev Tutorial: 8-Ball Pool Game (part 2) ' from 15:42 -> // https://www.youtube.com/watch?v=Am8rT9xICRs */
-	private void collide(Ball firstBall, Ball secondBall) {
+	private void collide(PoolTable table, Ball firstBall, Ball secondBall) {
 		Vector2d normalVector = VectorUtil.subtractVectors(firstBall.getPosition(), secondBall.getPosition());
 		double normalVectorLength = VectorUtil.calculateVectorLength(normalVector);
 		if (normalVectorLength > firstBall.getDiameter()) {
 			// LOGGER.info("No collision between:" + firstBall + " and " + secondBall);
 			return;
+		}
+		if (iterationCount == 0) { // Cue ball should be secondBall in the first round
+			if (!isAllowedToHit(table, firstBall)) {// This should be
+				this.turnResult = TurnResult.HANDBALL;
+			}
+			iterationCount++;
 		}
 		Vector2d mtd = VectorUtil.multiply(normalVector, (firstBall.getDiameter() - normalVectorLength) / normalVectorLength);
 		firstBall.getPosition().x += mtd.x * 0.5;
@@ -129,10 +199,63 @@ public class EightBallRuleBase {
 		if (isInMiddleArea(table, ball)) {
 			return;
 		}
+		if (checkAndHandlePockets(table, ball) != null) {
+			return;
+		}
 		if (checkAndHandleTableBoundriesCollisions(table, ball)) {
 			return;
 		}
 		checkAndHandlePocketPathwayCollisions(table, ball);
+	}
+
+	private TurnResult checkAndHandlePockets(PoolTable table, Ball balla) {
+
+		for (Pocket pocket : table.getPockets()) {
+			if (!isBallInPocket(table, balla, pocket)) {
+				nextTurnBalls.add(balla);
+				continue;
+			}
+			System.out.println("Ball:" + balla + " goes In Pocket:" + pocket);
+			if (balla.getNumber() == 8) {
+				// This should check the order of balls going in pocket if several balls at the same time goes
+				if (table.getPlayerInTurnBalls().size() != 8) {
+					this.turnResult = TurnResult.EIGHT_BALL_FAIL;
+				} else {
+					System.out.println("We have a winner ");
+					this.turnResult = TurnResult.EIGHT_BALL_SUCCESS;
+				}
+				nextTurnBalls.add(balla);
+			} else if (balla.getNumber() == 0) {
+				nextTurnBalls.add(balla);
+				if (this.turnResult == null) {
+					this.turnResult = TurnResult.HANDBALL;
+				}
+			} else {
+				balla.getVelocity().x = 0d;
+				balla.getVelocity().y = 0d;
+				balla.setPosition(pocket.getCenter());
+				table.putBallInPocket(balla, pocket);
+				break;
+			}
+		}
+		return this.turnResult;
+
+	}
+
+	private boolean isBallInPocket(PoolTable table, Ball ball, Pocket pocket) {
+		// // https://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
+		double dx = Math.abs(ball.getPosition().x - pocket.getCenter().x);
+		if (dx > pocket.getRadius()) {
+			return false;
+		}
+		double dy = ball.getPosition().y - pocket.getCenter().y;
+		if (dy > pocket.getRadius()) {
+			return false;
+		}
+		if (Math.pow(dx, 2) + Math.pow(dy, 2) <= Math.pow(pocket.getRadius(), 2)) {
+			return true;
+		}
+		return false;
 	}
 
 	private boolean checkAndHandleTableBoundriesCollisions(PoolTable table, Ball ball) {

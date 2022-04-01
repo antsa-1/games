@@ -13,7 +13,8 @@ import jakarta.websocket.Encoder;
 public class MessageEncoder implements Encoder.Text<Message> {
 
 	private static final Logger LOGGER = Logger.getLogger(MessageEncoder.class.getName());
-	private final JsonbConfig ticTacToeConfig = new JsonbConfig().withAdapters(new TwoDimensionalBoardAdapter());
+	private final JsonbConfig gamesConfig = new JsonbConfig().withAdapters(new TwoDimensionalBoardAdapter());
+	private Jsonb jsonb = JsonbBuilder.create(gamesConfig);
 
 	@Override
 	public void destroy() {
@@ -23,11 +24,10 @@ public class MessageEncoder implements Encoder.Text<Message> {
 	@Override
 	public String encode(Message message) throws EncodeException {
 		try {
-			Jsonb jsonb = JsonbBuilder.create(ticTacToeConfig);
 			String retVal = jsonb.toJson(message, Message.class);
 			return retVal;
 		} catch (Exception e) {
-			LOGGER.severe("Encode error in MessageEncoder:" + e.getMessage()); 
+			LOGGER.severe("Encode error in MessageEncoder:" + e.getMessage());
 		}
 		return null;
 	}

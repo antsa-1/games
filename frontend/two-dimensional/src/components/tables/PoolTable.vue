@@ -76,6 +76,7 @@ export default defineComponent({
 			}else if (mutation.type === "changeTurn") {
 				if(state.theTable.playerInTurn.name === this.userName){
 					this.addMouseListeners()
+					
 					this.startReducer()
 				}else{
 					//this.removeMouseListeners()
@@ -349,6 +350,7 @@ export default defineComponent({
 			this.canvas.addEventListener("mousedown", this.handleMouseDown)
 			this.canvas.addEventListener("mouseup", this.handleMouseUp)
 			this.canvas.addEventListener("contextmenu",(e)=> e.preventDefault())
+			this.poolTable.mouseEnabled = true
 		},
 		removeMouseListeners(){
 			this.canvas.removeEventListener("mousemove", this.handleMouseMove)

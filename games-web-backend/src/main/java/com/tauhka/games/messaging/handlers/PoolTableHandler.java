@@ -10,6 +10,7 @@ import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.PoolMessage;
 import com.tauhka.games.pool.PoolTable;
+import com.tauhka.games.pool.PoolTable.TurnResult;
 import com.tauhka.games.pool.PoolTurn;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
@@ -48,18 +49,24 @@ public class PoolTableHandler {
 		turn.setCue(message.getPoolMessage().getCue());
 		turn.setCueBall(message.getPoolMessage().getCueBall());
 		PoolTable table = (PoolTable) findUserTable(endpoint);
-		Object notUsedAtm = table.playTurn(endpoint.getUser(), turn);
-		Message updateMessage = new Message();
-		updateMessage.setFrom(SYSTEM);
-		updateMessage.setTable(table);
-		updateMessage.setTitle(MessageTitle.POOL_PLAY_TURN);
+		PoolTurn playedTurn = (PoolTurn) table.playTurn(endpoint.getUser(), turn);
+		Message playTurnMessage = new Message();
+		playTurnMessage.setFrom(SYSTEM);
+		playTurnMessage.setTable(table);
+		if (playedTurn.getTurnResult() == TurnResult.EIGHT_BALL_SUCCESS || playedTurn.getTurnResult() == TurnResult.EIGHT_BALL_SUCCESS) {
+			playTurnMessage.setTitle(MessageTitle.GAME_END);
+		} else if (playedTurn.getTurnResult() == TurnResult.HANDBALL) {
+			playTurnMessage.setTitle(MessageTitle.POOL_SET_CUEBALL);
+		} else {
+			playTurnMessage.setTitle(MessageTitle.POOL_PLAY_TURN);
+		}
 		PoolMessage updateCueMessage = new PoolMessage();
 		updateCueMessage.setCue(message.getPoolMessage().getCue());
 		updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
-
+		playTurnMessage.setTable(table);
 		updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
-		updateMessage.setPoolMessage(updateCueMessage);
-		return updateMessage;
+		playTurnMessage.setPoolMessage(updateCueMessage);
+		return playTurnMessage;
 	}
 
 	public Table findUserTable(CommonEndpoint endpoint) {

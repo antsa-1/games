@@ -10,6 +10,9 @@ import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.pool.debug.ServerGUI;
 
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
+
 /**
  * @author antsa-1 from GitHub 25 Mar 2022
  **/
@@ -18,36 +21,132 @@ public class PoolTable extends Table implements PoolComponent {
 
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(PoolTable.class.getName());
+
+	public enum TurnResult {
+		HANDBALL, EIGHT_BALL_SUCCESS, EIGHT_BALL_FAIL, CONTINUE
+	};
+
+	@JsonbProperty("turn")
+	private PoolTurn turn;
+	@JsonbTransient
 	private Canvas canvas;
+	@JsonbTransient
 	private List<Ball> remainingBalls;
+	@JsonbTransient
+	private List<Ball> playerABalls; // Player properties
+	@JsonbTransient
+	private List<Ball> playerBBalls; // Player properties
+	@JsonbTransient
 	private List<Pocket> pockets;
+	@JsonbTransient
 	private List<Boundry> boundries;
+	@JsonbTransient
 	private Vector2d middleAreaStart;
+	@JsonbTransient
 	private Vector2d middleAreaEnd;
+	@JsonbTransient
 	private CueBall cueBall;
-	private PoolTurn lastTurn;
+	@JsonbTransient
+	private EightBallRuleBase eightBallRuleBase;
+	@JsonbTransient
+	private static final boolean SERVER_GUI;
+	static {
+		String env = System.getProperty("Server_Environment");
+		String ui = System.getProperty("Server_ShowUI");
+		SERVER_GUI = true;
+		/* else if (env.equalsIgnoreCase(Constants.ENVIRONMENT_DEVELOPMENT) && gui.equalsIgnoreCase("Server_ActivateGUI")) { SERVER_GUI = true; } else { SERVER_GUI = true; } */
+	}
 
 	public PoolTable(User playerA, GameMode gameMode, boolean randomizeStarter) {
+		// PoolPlayer p = new PoolPlayer() super(p,gameMode,randomizeStarte)
 		super(playerA, gameMode, randomizeStarter);
 		PoolTableInitializer.init(this);
-		System.out.println("sds");
+	}
+
+	@Override
+	public Object playTurn(User user, Object o) {
+		if (!user.equals(this.playerInTurn)) {
+			throw new IllegalArgumentException("Player is not in turn in table:" + this);
+		}
+		PoolTurn turn = (PoolTurn) o;
+		TurnResult turnResult = null;
+		if (SERVER_GUI) {
+			LOGGER.info("Pooltable instance, server in testing mode");
+			synchronized (this) {
+				turnResult = this.eightBallRuleBase.playTurn(this, turn);
+				LOGGER.info("PoolTable instance made movements now notifying, threadId:" + Thread.currentThread().getId());
+				this.notify();
+				try {
+					LOGGER.info("Pooltable instance waits for Swing components to update");
+					this.wait();
+					LOGGER.info("pooltable waiting done, continues");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					LOGGER.info("Pooltable instance, thread interrupted" + Thread.currentThread().getId());
+				}
+			}
+		} else {
+			turnResult = this.eightBallRuleBase.playTurn(this, turn);
+		}
+		if (turnResult != TurnResult.EIGHT_BALL_SUCCESS && turnResult != TurnResult.EIGHT_BALL_FAIL) {
+			changePlayerInTurn();
+		}
+		PoolTurn playedTurn = new PoolTurn();
+		playedTurn.setTurnResult(turnResult);
+		turn.setCue(turn.getCue());
+		return playedTurn;
+
 	}
 
 	@Override
 	public synchronized void joinTableAsPlayer(User playerB) {
 		super.joinTableAsPlayer(playerB);
-		if (isServerGUIWanted()) {
+		if (SERVER_GUI) {
 			new Thread(new ServerGUI(this)).start();
 		}
 	}
 
-	public boolean isInPocket(Ball ball) {
-		return false;
+	public List<Ball> getPlayerInTurnBalls() {
+		if (playerInTurn.equals(playerA)) {
+			return this.playerABalls;
+		}
+		return this.playerBBalls;
 	}
 
-	private boolean isServerGUIWanted() {
-		// System.getProperty("debugMode");
-		return true;
+	public void handleHandBall(CueBall cueBall, Vector2d newPosition) {
+		if (eightBallRuleBase.isCueBallNewPositionAllowed(this, newPosition)) {
+			this.cueBall.setPosition(newPosition);
+		}
+		throw new IllegalArgumentException("CueBall new position is not allowed:" + newPosition);
+	}
+
+	public void putBallInPocket(Ball ballToPocket, Pocket pocket) {
+		if (ballToPocket.getNumber() == 0) {
+			return;
+		}
+		Ball ballInPocket = this.playerABalls.isEmpty() ? null : this.playerABalls.get(0);
+		if (ballInPocket != null) {
+			if (ballInPocket.isLower() && ballToPocket.isLower()) {
+				this.playerABalls.add(ballToPocket);
+				return;
+			}
+			this.playerBBalls.add(ballToPocket);
+			return;
+		}
+		ballInPocket = this.playerBBalls.isEmpty() ? null : this.playerBBalls.get(0);
+		if (ballInPocket != null) {
+			if (ballInPocket.isLower() && ballToPocket.isLower()) {
+				this.playerBBalls.add(ballToPocket);
+				return;
+			}
+			this.playerABalls.add(ballToPocket);
+			return;
+		}
+		if (playerA.equals(playerInTurn)) {
+			this.playerABalls.add(ballToPocket);
+			return;
+		}
+		this.playerBBalls.add(ballToPocket);
 	}
 
 	public Canvas getCanvas() {
@@ -82,35 +181,6 @@ public class PoolTable extends Table implements PoolComponent {
 		this.pockets = pockets;
 	}
 
-	@Override
-	public Object playTurn(User user, Object o) {
-		if (!user.equals(this.playerInTurn)) {
-			throw new IllegalArgumentException("Player is not in turn in table:" + this);
-		}
-		PoolTurn turn = (PoolTurn) o;
-		if (isServerGUIWanted()) {
-			LOGGER.info("Pooltable instance, server in testing mode");
-			synchronized (this) {
-				new EightBallRuleBase().handleMovements(this, turn);
-				LOGGER.info("PoolTable instance made movements now notifying, threadId:" + Thread.currentThread().getId());
-				this.notify();
-				try {
-					LOGGER.info("Pooltable instance waits for Swing components to update");
-					this.wait();
-					LOGGER.info("pooltable waiting done, continues");
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					LOGGER.info("Pooltable instance, thread interrupted" + Thread.currentThread().getId());
-				}
-			}
-		} else {
-			new EightBallRuleBase().handleMovements(this, turn);
-		}
-		LOGGER.info("pooltable instance, turn played, changing turn");
-		changePlayerInTurn();
-		return null;
-	}
-
 	public List<Ball> getRemainingBalls() {
 		return remainingBalls;
 	}
@@ -128,6 +198,22 @@ public class PoolTable extends Table implements PoolComponent {
 	@Override
 	protected Table startRematch() {
 		return this;
+	}
+
+	public List<Ball> getPlayerABalls() {
+		return playerABalls;
+	}
+
+	public void setPlayerABalls(List<Ball> playerABalls) {
+		this.playerABalls = playerABalls;
+	}
+
+	public List<Ball> getPlayerBBalls() {
+		return playerBBalls;
+	}
+
+	public void setPlayerBBalls(List<Ball> playerBBalls) {
+		this.playerBBalls = playerBBalls;
 	}
 
 	@Override
@@ -163,6 +249,14 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public void setMiddleAreaEnd(Vector2d middleAreaEnd) {
 		this.middleAreaEnd = middleAreaEnd;
+	}
+
+	public EightBallRuleBase getEightBallRuleBase() {
+		return eightBallRuleBase;
+	}
+
+	public void setEightBallRuleBase(EightBallRuleBase eightBallRuleBase) {
+		this.eightBallRuleBase = eightBallRuleBase;
 	}
 
 }

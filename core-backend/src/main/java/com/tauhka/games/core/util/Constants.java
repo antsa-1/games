@@ -17,6 +17,7 @@ public final class Constants {
 	public static final double OLAV_COMPUTER_CONNECT_FOUR_RANKING = 1205;
 	public static final String OLAV_COMPUTER_ID = "123e4567-e89b-12d3-a456-426652340000";
 	public static final String ENVIRONMENT_PRODUCTION = "PRODUCTION";
+	public static final String ENVIRONMENT_DEVELOPMENT = "DEVELOPMENT";
 	public static final String WEBSOCKET_PRODUCTION_ORIGIN = "http://35.217.7.146"; // TODO replace with real prod. URL
 	public static final String WEBSOCKET_LOCALHOST_ORIGIN = "http://localhost:8080"; //
 	public static final String SYSTEM = "System";

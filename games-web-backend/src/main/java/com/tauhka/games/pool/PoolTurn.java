@@ -1,6 +1,7 @@
 package com.tauhka.games.pool;
 
 import com.tauhka.games.core.Vector2d;
+import com.tauhka.games.pool.PoolTable.TurnResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 
@@ -15,6 +16,12 @@ public class PoolTurn {
 	private Cue cue;
 	@JsonbProperty("canvas")
 	private Vector2d canvas;
+
+	@JsonbProperty("handBall")
+	private Vector2d handBall;
+
+	@JsonbProperty("turnResult")
+	private TurnResult turnResult;
 
 	public CueBall getCueBall() {
 		return cueBall;
@@ -38,6 +45,22 @@ public class PoolTurn {
 
 	public void setCanvas(Vector2d canvas) {
 		this.canvas = canvas;
+	}
+
+	public Vector2d getHandBall() {
+		return handBall;
+	}
+
+	public void setHandBall(Vector2d handBall) {
+		this.handBall = handBall;
+	}
+
+	public TurnResult getTurnResult() {
+		return turnResult;
+	}
+
+	public void setTurnResult(TurnResult turnResult) {
+		this.turnResult = turnResult;
 	}
 
 }

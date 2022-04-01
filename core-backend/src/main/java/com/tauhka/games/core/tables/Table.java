@@ -1,5 +1,6 @@
 package com.tauhka.games.core.tables;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,9 @@ import jakarta.json.bind.annotation.JsonbTransient;
 
 // Base class for extending tables
 
-public abstract class Table {
+public abstract class Table implements Serializable {
+	private static final long serialVersionUID = 2422118498940197289L;
+
 	private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
 
 	@JsonbProperty("tableId")
@@ -52,6 +55,9 @@ public abstract class Table {
 		this.tableId = UUID.randomUUID();
 		this.playerA = playerA;
 		this.gameMode = gameMode;
+		if (!randomizeStarter) {
+			this.playerInTurn = playerA;
+		}
 	}
 
 	public abstract GameResult checkWinAndDraw();
@@ -280,6 +286,10 @@ public abstract class Table {
 		}
 		startRematch();
 		return true;
+	}
+
+	public void setPlayerA(User playerA) {
+		this.playerA = playerA;
 	}
 
 	public Instant getGameStartedInstant() {

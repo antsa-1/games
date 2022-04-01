@@ -22,8 +22,6 @@ import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.pool.PoolTable;
-import com.tauhka.games.pool.debug.Runner;
-import com.tauhka.games.pool.debug.ServerGUI;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.ejb.ConcurrentAccessException;

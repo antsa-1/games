@@ -15,9 +15,10 @@ public class Ball implements PoolComponent {
 	private int number;
 	private Color color;
 	private Vector2d position;
-	private Double diameter;
-	private Double radius;
+	private double diameter;
+	private double radius;
 	private Vector2d velocity;
+	private boolean inPocket;
 
 	public Ball() {
 		// For deserialization
@@ -43,8 +44,19 @@ public class Ball implements PoolComponent {
 		this.number = number;
 	}
 
+	public boolean isLower() {
+		return this.number < 8;
+	}
+
 	public Color getColor() {
 		return color;
+	}
+
+	public boolean isSimilar(Ball ball) {
+		if (ball == null) {
+			return false;
+		}
+		return ball.getColor() == this.getColor();
 	}
 
 	public void setColor(Color color) {
@@ -69,6 +81,14 @@ public class Ball implements PoolComponent {
 
 	public Vector2d getVelocity() {
 		return velocity;
+	}
+
+	public boolean isInPocket() {
+		return inPocket;
+	}
+
+	public void setInPocket(boolean inPocket) {
+		this.inPocket = inPocket;
 	}
 
 	public void setVelocity(Vector2d velocity) {

@@ -42,6 +42,9 @@ public class PoolTableInitializer {
 		table.setBoundries(boundries);
 		table.setCanvas(canvas);
 		table.setPockets(PoolTableInitializer.initPockets());
+		table.setPlayerABalls(new ArrayList<Ball>(8));
+		table.setPlayerBBalls(new ArrayList<Ball>(8));
+		table.setEightBallRuleBase(new EightBallRuleBase());
 	}
 
 	private static List<Pocket> initPockets() {
