@@ -32,7 +32,7 @@ public abstract class Table {
 	protected User playerInTurn;
 	@JsonbTransient
 	protected User rematchPlayer;
-	@JsonbTransient()
+	@JsonbTransient
 	protected User startingPlayer;
 	@JsonbProperty("timer")
 	protected int timer = 180;
@@ -56,9 +56,9 @@ public abstract class Table {
 
 	public abstract GameResult checkWinAndDraw();
 
-	protected abstract Table startRematch();
-
 	public abstract Object playTurn(User user, Object o);
+
+	protected abstract Table startRematch();
 
 	@JsonbTransient
 	public boolean isArtificialPlayerInTurn() {
@@ -86,7 +86,7 @@ public abstract class Table {
 			gameResult.setPlayerA(this.playerA);
 			gameResult.setPlayerB(this.playerB);
 			gameResult.setResultType(GameResultType.WIN_BY_RESIGNATION);
-
+			return gameResult;
 		}
 		return null;
 	}
