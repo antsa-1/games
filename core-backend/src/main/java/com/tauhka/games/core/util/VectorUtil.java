@@ -55,4 +55,15 @@ public class VectorUtil {
 	public static boolean isZero(Vector2d v) {
 		return v.x == 0d && v.y == 0d;
 	}
+
+	public static Vector2d projectVectorOnVector(Vector2d a, Vector2d b) {
+		double scalar = VectorUtil.dotProduct(a, b) / VectorUtil.dotProduct(b, b);
+		return new Vector2d(scalar * b.x, scalar * b.y);
+	}
+
+	public static Double hypot2(Vector2d a, Vector2d b) {
+		Vector2d subtracted1 = VectorUtil.subtractVectors(a, b);
+		Vector2d subtracted2 = VectorUtil.subtractVectors(a, b);
+		return VectorUtil.dotProduct(subtracted1, subtracted2);
+	}
 }

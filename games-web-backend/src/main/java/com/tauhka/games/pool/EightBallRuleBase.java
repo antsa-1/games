@@ -173,7 +173,7 @@ public class EightBallRuleBase {
 	private void checkAndHandlePocketPathwayCollisions(PoolTable table, Ball ball) {
 		for (Pocket pocket : table.getPockets()) {
 			if (this.isPathwayBorderCollision(table, pocket.getPathWayRight(), ball)) {
-				System.out.println("IS PATHWAY COL1"+ball);
+				System.out.println("IS PATHWAY COL1" + ball);
 				Vector2d reflectionVector = calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathWayRight(), ball);
 				ball.setVelocity(reflectionVector);
 				return;
@@ -186,17 +186,6 @@ public class EightBallRuleBase {
 		}
 	}
 
-	private Vector2d projectVectorOnVector(Vector2d a, Vector2d b) {
-		double scalar = VectorUtil.dotProduct(a, b) / VectorUtil.dotProduct(b, b);
-		return new Vector2d(scalar * b.x, scalar * b.y);
-	}
-
-	private Double hypot2(Vector2d a, Vector2d b) {
-		Vector2d subtracted1 = VectorUtil.subtractVectors(a, b);
-		Vector2d subtracted2 = VectorUtil.subtractVectors(a, b);
-		return VectorUtil.dotProduct(subtracted1, subtracted2);
-	}
-
 	private boolean isPathwayBorderCollision(PoolTable table, PathWay pathway, Ball ball) {
 		// https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm -> answer starting "No one seems to consider projection ..."
 		Vector2d a = pathway.getTop();
@@ -204,19 +193,19 @@ public class EightBallRuleBase {
 		Vector2d c = ball.getPosition();
 		Vector2d ac = VectorUtil.subtractVectors(c, a);
 		Vector2d ab = VectorUtil.subtractVectors(b, a);
-		Vector2d projectedVector = this.projectVectorOnVector(ac, ab);
+		Vector2d projectedVector = VectorUtil.projectVectorOnVector(ac, ab);
 		Vector2d d = VectorUtil.addVectors(projectedVector, a);
 		Vector2d ad = VectorUtil.subtractVectors(d, a);
 
 		double k = Math.abs(ab.x) > Math.abs(ab.y) ? ad.x / ab.x : ad.y / ab.y;
 		Double distance = null;
 		if (k <= 0.0) {
-			distance = Math.sqrt(this.hypot2(c, a));
+			distance = Math.sqrt(VectorUtil.hypot2(c, a));
 		} else if (k >= 1.0) {
-			distance = Math.sqrt(this.hypot2(c, b));
+			distance = Math.sqrt(VectorUtil.hypot2(c, b));
 		}
 		if (distance == null) {
-			distance = Math.sqrt(this.hypot2(c, d));
+			distance = Math.sqrt(VectorUtil.hypot2(c, d));
 		}
 		return distance <= ball.getRadius();
 
