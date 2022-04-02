@@ -76,7 +76,6 @@ export default defineComponent({
 			}else if (mutation.type === "changeTurn") {
 				if(state.theTable.playerInTurn.name === this.userName){
 					this.addMouseListeners()
-					
 					this.startReducer()
 				}else{
 					//this.removeMouseListeners()
@@ -104,13 +103,14 @@ export default defineComponent({
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
 			//console.log("Action:"+action.type+ " payload:"+ JSON.stringify(action.payload))
 			if(action.type === "poolUpdate"){
-				this.cue.image.canvasRotationAngle = action.payload.cue.angle		
+				this.cue.image.canvasRotationAngle = action.payload.cue.angle
 				this.cue.image.visible = true
-			}else if(action.type === "poolPlayTurn"){				
+			}else if(action.type === "poolPlayTurn"){
 				Object.assign(this.cue, action.payload.cue)
-				if(state.theTable.playerInTurn.name === this.userName){
-					this.cue.image.visible = true
-				}
+				console.log("JSON for cue "+JSON.stringify(action.payload.cue))
+				this.cue.image.canvasRotationAngle = action.payload.cue.angle
+				this.cue.image.visible = true
+				
 				window.requestAnimationFrame(this.repaintAll)
 				this.shootBall()
 			}
@@ -350,7 +350,6 @@ export default defineComponent({
 			this.canvas.addEventListener("mousedown", this.handleMouseDown)
 			this.canvas.addEventListener("mouseup", this.handleMouseUp)
 			this.canvas.addEventListener("contextmenu",(e)=> e.preventDefault())
-			this.poolTable.mouseEnabled = true
 		},
 		removeMouseListeners(){
 			this.canvas.removeEventListener("mousemove", this.handleMouseMove)
@@ -401,11 +400,12 @@ export default defineComponent({
 			}
 		},
 		
-		shootBall(){			
+		shootBall(showOnly:boolean){			
 			this.poolTable.mouseEnabled = false
 			if(this.cue.force < 10 ){
 				this.cue.force = 10
 			}
+			console.log("shoot ball with cue "+JSON.stringify(this.cue))
 			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
 			this.cue.image.canvasDestination = dimensions
 			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
@@ -566,19 +566,19 @@ export default defineComponent({
 				//console.log("in middle area"+JSON.stringify(ball))
 				return
 			}else if(this.isTableTopBoundry(ball) ){
-				console.log("Top boundry"+JSON.stringify(ball.position))
+				//console.log("Top boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
 			}else if(this.isTableBottomBoundry(ball)){
-				console.log("Lower boundry"+JSON.stringify(ball.position))
+				//console.log("Lower boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
 			}else if(this.isTableLeftBoundry(ball) ){
-				console.log("Left boundry"+JSON.stringify(ball.position))
+				//console.log("Left boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
 			}else if(this.isTableRightBoundry(ball) ){
-				console.log("Right boundry"+JSON.stringify(ball.position))
+			//	console.log("Right boundry"+JSON.stringify(ball.position))
 				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
 			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){
-				console.log("collided with pathway, that's all we know")
+				//console.log("collided with pathway, that's all we know")
 			
 			}else{
 				const pocket:IPocket = this.isInPocket(ball)

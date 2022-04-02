@@ -63,7 +63,7 @@ public class PoolTableHandler {
 		PoolMessage updateCueMessage = new PoolMessage();
 		updateCueMessage.setCue(message.getPoolMessage().getCue());
 		updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
-		playTurnMessage.setTable(table);
+		//playTurnMessage.setTable(table);
 		updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
 		playTurnMessage.setPoolMessage(updateCueMessage);
 		return playTurnMessage;

@@ -21,7 +21,8 @@ export const poolMixin = {
 	},
 	methods: {
 		st(cue, cueBall, canvas){			
-            const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
+			const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
+			console.log("Play turn"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
         sp(cue, cueBall, canvas){

@@ -8,6 +8,7 @@ import com.tauhka.games.core.User;
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.twodimen.GameResult;
+import com.tauhka.games.core.util.VectorUtil;
 import com.tauhka.games.pool.debug.ServerGUI;
 
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -69,11 +70,13 @@ public class PoolTable extends Table implements PoolComponent {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
 		PoolTurn turn = (PoolTurn) o;
+
+		// VectorUtil.copy(middleAreaEnd);
 		TurnResult turnResult = null;
 		if (SERVER_GUI) {
 			LOGGER.info("Pooltable instance, server in testing mode");
 			synchronized (this) {
-				//When second pool turn comes from browser this blocks and does not proceed .. TODO 
+				// When second pool turn comes from browser this blocks and does not proceed .. TODO
 				turnResult = this.eightBallRuleBase.playTurn(this, turn);
 				LOGGER.info("PoolTable instance made movements now notifying, threadId:" + Thread.currentThread().getId());
 				this.notify();
@@ -94,7 +97,7 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 		PoolTurn playedTurn = new PoolTurn();
 		playedTurn.setTurnResult(turnResult);
-		turn.setCue(turn.getCue());
+		playedTurn.setCue(turn.getCue());
 		return playedTurn;
 
 	}
@@ -125,6 +128,7 @@ public class PoolTable extends Table implements PoolComponent {
 		if (ballToPocket.getNumber() == 0) {
 			return;
 		}
+		ballToPocket.setInPocket(true);
 		Ball ballInPocket = this.playerABalls.isEmpty() ? null : this.playerABalls.get(0);
 		if (ballInPocket != null) {
 			if (ballInPocket.isLower() && ballToPocket.isLower()) {

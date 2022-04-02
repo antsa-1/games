@@ -329,7 +329,8 @@ export default defineComponent({
 					case "POOL_UPDATE":						
 						this.$store.dispatch("poolUpdate", data.pool)
 						break
-					case "POOL_PLAY_TURN":						
+					case "POOL_PLAY_TURN":
+						console.log("__"+JSON.stringify(data))				
 						this.$store.dispatch("poolPlayTurn", data.pool).then(() => {
 							this.$store.dispatch("changeTurn", data.table.playerInTurn)
 						})						

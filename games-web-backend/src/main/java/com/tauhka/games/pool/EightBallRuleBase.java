@@ -19,7 +19,7 @@ public class EightBallRuleBase {
 	private final double FRICTION = 0.991d;
 	private TurnResult turnResult;
 	private int iterationCount = 0;
-	private List<Ball> nextTurnBalls = new ArrayList<Ball>();
+	private List<Ball> removalBalls = new ArrayList<Ball>();
 
 	public TurnResult playTurn(PoolTable table, PoolTurn turn) {
 		this.reset();
@@ -28,14 +28,18 @@ public class EightBallRuleBase {
 		LOGGER.info("CueBall initial velocity:" + v);
 		table.getCueBall().setVelocity(v);
 		handleBallsMovements(table);
-		table.setRemainingBalls(nextTurnBalls);
+		for (Ball ball : removalBalls) {
+			table.getRemainingBalls().remove(ball);
+
+		}
+		table.setRemainingBalls(removalBalls);
 		return turnResult != null ? turnResult : TurnResult.CONTINUE;
 	}
 
 	private void reset() {
 		this.turnResult = null;
 		this.iterationCount = 0;
-		this.nextTurnBalls = new ArrayList<Ball>();
+		this.removalBalls = new ArrayList<Ball>();
 
 	}
 
@@ -88,10 +92,10 @@ public class EightBallRuleBase {
 			if (!isAnyBallMoving(table.getRemainingBalls())) {
 				break;
 			}
-			table.notify();
 			try {
+				table.notify();
 				table.wait();
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -128,8 +132,10 @@ public class EightBallRuleBase {
 	private void detectCollisions(PoolTable table) {
 		for (int i = 0; i < table.getRemainingBalls().size(); i++) {
 			Ball ball = table.getRemainingBalls().get(i);
-			checkAndHandleTableCollisions(table, ball);
-			checkAndHandleBallOnBallCollisions(table, i);
+			if (!ball.isInPocket()) {
+				checkAndHandleTableCollisions(table, ball);
+				checkAndHandleBallOnBallCollisions(table, i);
+			}
 		}
 	}
 
@@ -161,6 +167,9 @@ public class EightBallRuleBase {
 	/* Mathematics from -> ' JavaScript + HTML5 GameDev Tutorial: 8-Ball Pool Game (part 2) ' from 15:42 -> // https://www.youtube.com/watch?v=Am8rT9xICRs */
 	private void collide(PoolTable table, Ball firstBall, Ball secondBall) {
 		Vector2d normalVector = VectorUtil.subtractVectors(firstBall.getPosition(), secondBall.getPosition());
+		if (Double.isNaN(firstBall.getPosition().x)) {
+			System.out.println("Changed to Nan");
+		}
 		double normalVectorLength = VectorUtil.calculateVectorLength(normalVector);
 		if (normalVectorLength > firstBall.getDiameter()) {
 			// LOGGER.info("No collision between:" + firstBall + " and " + secondBall);
@@ -208,11 +217,17 @@ public class EightBallRuleBase {
 		checkAndHandlePocketPathwayCollisions(table, ball);
 	}
 
+	private void removeFromNextTurn(Ball ball) {
+		// vs. compare what is in the pockets after turn.. this is run many time
+		if (!removalBalls.contains(ball)) {
+			removalBalls.add(ball);
+		}
+	}
+
 	private TurnResult checkAndHandlePockets(PoolTable table, Ball balla) {
 
 		for (Pocket pocket : table.getPockets()) {
 			if (!isBallInPocket(table, balla, pocket)) {
-				nextTurnBalls.add(balla);
 				continue;
 			}
 			System.out.println("Ball:" + balla + " goes In Pocket:" + pocket);
@@ -224,19 +239,17 @@ public class EightBallRuleBase {
 					System.out.println("We have a winner ");
 					this.turnResult = TurnResult.EIGHT_BALL_SUCCESS;
 				}
-				nextTurnBalls.add(balla);
 			} else if (balla.getNumber() == 0) {
-				nextTurnBalls.add(balla);
 				if (this.turnResult == null) {
 					this.turnResult = TurnResult.HANDBALL;
 				}
-			} else {
-				balla.getVelocity().x = 0d;
-				balla.getVelocity().y = 0d;
-				balla.setPosition(pocket.getCenter());
-				table.putBallInPocket(balla, pocket);
-				break;
 			}
+			removeFromNextTurn(balla);
+			balla.getVelocity().x = 0d;
+			balla.getVelocity().y = 0d;
+			balla.setPosition(pocket.getCenter());
+			table.putBallInPocket(balla, pocket);
+			break;
 		}
 		return this.turnResult;
 
@@ -290,7 +303,7 @@ public class EightBallRuleBase {
 			return true;
 		}
 
-		return false;
+		return true;
 	}
 
 	private void checkAndHandlePocketPathwayCollisions(PoolTable table, Ball ball) {
