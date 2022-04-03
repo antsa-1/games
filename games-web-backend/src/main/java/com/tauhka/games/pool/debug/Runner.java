@@ -22,12 +22,13 @@ public class Runner {
 		// -0.01425565337077744 -> osuu force 70
 		// -0.18982631837040745d) -> yli force 65
 		// 0.04085316949817506  force 200 two bottom pocket pathway collisions
-		cue.setAngle(0.04085316949817506d);
-		cue.setForce(200d);
+		//0.0522503382826774d / 220d -> top left collision to table
+		cue.setAngle(0.0522503382826774d);
+		cue.setForce(220d);
 		turn.setCue(cue);
 		p.playTurn(u, turn);
 		
-
+//JSON for cue {"angle":0.0522503382826774,"force":220,"position":{"x":250,"y":311,"zero":false}}
 	}
 
 }

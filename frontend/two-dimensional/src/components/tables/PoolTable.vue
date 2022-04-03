@@ -114,6 +114,13 @@ export default defineComponent({
 				window.requestAnimationFrame(this.repaintAll)
 				this.shootBall()
 			}
+			else if(action.type === "poolHandBall"){
+				if(this.isPlayerInTurn()){
+					console.log("should set handball")
+				}else{
+					console.log("opponent handball")
+				}
+			}
 			window.requestAnimationFrame(this.repaintAll)
 		})
 	},

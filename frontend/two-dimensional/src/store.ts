@@ -221,11 +221,14 @@ export const store = createStore<IStoreState>({
     },
     actions: {
         poolUpdate(context, object) {
-            // PoolTable has subscribed to this action     
+            // PoolTable has subscribed to this action
         },
         poolPlayTurn(context, object) {
-            // PoolTable has subscribed to this action     
+            // PoolTable has subscribed to this action
         },
+        poolHandBall(context,object){
+            // PoolTable has subscribed to this action
+        },        
         setUser(context, user: IUser) {
             context.commit('setUser', user)
 

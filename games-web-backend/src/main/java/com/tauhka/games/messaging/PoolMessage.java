@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.pool.Cue;
 import com.tauhka.games.pool.CueBall;
+import com.tauhka.games.pool.PoolTable.TurnResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 
@@ -19,6 +20,8 @@ public class PoolMessage implements Serializable {
 	private CueBall cueBall;
 	@JsonbProperty("canvas")
 	private Vector2d canvas;
+	@JsonbProperty("turnResult")
+	private TurnResult turnResult;
 
 	public Cue getCue() {
 		return cue;
@@ -42,6 +45,14 @@ public class PoolMessage implements Serializable {
 
 	public void setCanvas(Vector2d canvas) {
 		this.canvas = canvas;
+	}
+
+	public TurnResult getTurnResult() {
+		return turnResult;
+	}
+
+	public void setTurnResult(TurnResult turnResult) {
+		this.turnResult = turnResult;
 	}
 
 }

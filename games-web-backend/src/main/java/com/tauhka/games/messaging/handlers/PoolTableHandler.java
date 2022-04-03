@@ -53,19 +53,17 @@ public class PoolTableHandler {
 		Message playTurnMessage = new Message();
 		playTurnMessage.setFrom(SYSTEM);
 		playTurnMessage.setTable(table);
-		if (playedTurn.getTurnResult() == TurnResult.EIGHT_BALL_SUCCESS || playedTurn.getTurnResult() == TurnResult.EIGHT_BALL_SUCCESS) {
+		if (playedTurn.getTurnResult() == TurnResult.EIGHT_BALL_IN_POCKET_OK || playedTurn.getTurnResult() == TurnResult.EIGHT_BALL_IN_POCKET_FAIL) {
 			playTurnMessage.setTitle(MessageTitle.GAME_END);
-		} else if (playedTurn.getTurnResult() == TurnResult.HANDBALL) {
-			playTurnMessage.setTitle(MessageTitle.POOL_SET_CUEBALL);
 		} else {
 			playTurnMessage.setTitle(MessageTitle.POOL_PLAY_TURN);
 		}
-		PoolMessage updateCueMessage = new PoolMessage();
-		updateCueMessage.setCue(message.getPoolMessage().getCue());
-		updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
-		//playTurnMessage.setTable(table);
-		updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
-		playTurnMessage.setPoolMessage(updateCueMessage);
+		PoolMessage playTurn = new PoolMessage();
+		playTurn.setCue(message.getPoolMessage().getCue());
+		playTurn.setCueBall(message.getPoolMessage().getCueBall());
+		playTurn.setCanvas(message.getPoolMessage().getCanvas());
+		playTurn.setTurnResult(playedTurn.getTurnResult());
+		playTurnMessage.setPoolMessage(playTurn);
 		return playTurnMessage;
 	}
 

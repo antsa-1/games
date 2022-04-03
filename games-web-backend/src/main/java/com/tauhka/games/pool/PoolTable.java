@@ -8,7 +8,6 @@ import com.tauhka.games.core.User;
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.twodimen.GameResult;
-import com.tauhka.games.core.util.VectorUtil;
 import com.tauhka.games.pool.debug.ServerGUI;
 
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -24,8 +23,8 @@ public class PoolTable extends Table implements PoolComponent {
 	private static final Logger LOGGER = Logger.getLogger(PoolTable.class.getName());
 
 	public enum TurnResult {
-		HANDBALL, EIGHT_BALL_SUCCESS, EIGHT_BALL_FAIL, CONTINUE
-	};
+		HANDBALL, EIGHT_BALL_IN_POCKET_OK, EIGHT_BALL_IN_POCKET_FAIL, CONTINUE_TURN, CHANGE_TURN
+	}
 
 	@JsonbProperty("turn")
 	private PoolTurn turn;
@@ -92,7 +91,7 @@ public class PoolTable extends Table implements PoolComponent {
 		} else {
 			turnResult = this.eightBallRuleBase.playTurn(this, turn);
 		}
-		if (turnResult != TurnResult.EIGHT_BALL_SUCCESS && turnResult != TurnResult.EIGHT_BALL_FAIL) {
+		if (turnResult == TurnResult.CHANGE_TURN) {
 			changePlayerInTurn();
 		}
 		PoolTurn playedTurn = new PoolTurn();
@@ -110,11 +109,22 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 	}
 
+	public boolean isOpen() {
+		return this.getRemainingBalls().size() == 16;
+	}
+
 	public List<Ball> getPlayerInTurnBalls() {
 		if (playerInTurn.equals(playerA)) {
 			return this.playerABalls;
 		}
 		return this.playerBBalls;
+	}
+
+	public List<Ball> getPlayerNotInTurnBalls() {
+		if (!playerInTurn.equals(playerA)) {
+			return this.playerBBalls;
+		}
+		return this.playerABalls;
 	}
 
 	public void handleHandBall(CueBall cueBall, Vector2d newPosition) {

@@ -52,6 +52,10 @@ public class Ball implements PoolComponent {
 		return color;
 	}
 
+	public boolean isEightBall() {
+		return number == 8;
+	}
+
 	public boolean isSimilar(Ball ball) {
 		if (ball == null) {
 			return false;
