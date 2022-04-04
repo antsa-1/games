@@ -64,6 +64,9 @@ export const store = createStore<IStoreState>({
         },
         loadingStatus(state) {
             return state.loadingStatus
+        },
+        playerInTurn(state){  
+            return state.theTable.playerInTurn
         }
     },
 

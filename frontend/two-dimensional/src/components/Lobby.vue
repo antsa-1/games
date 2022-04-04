@@ -315,7 +315,7 @@ export default defineComponent({
 						break		
 					case "CHAT":
 						const message:IChatMessage={text: data.message,from:data.from}
-						if(data.to==="COMMON"){
+						if(data.to === "COMMON"){
 							this.$store.dispatch("updateCommonChat", message)
 							return
 						}
@@ -326,17 +326,24 @@ export default defineComponent({
 							//this.$router.push({ name: 'Table', id:data.table.id})
 						})
 						break
-					case "POOL_UPDATE":						
+					case "POOL_UPDATE":
 						this.$store.dispatch("poolUpdate", data.pool)
 						break
+					case "POOL_HANDBALL":
+						this.$store.dispatch("poolHandBall", data.pool)
+						break
 					case "POOL_PLAY_TURN":
-						console.log("__"+JSON.stringify(data))
-						this.$store.dispatch("poolPlayTurn", data.pool).then(() => {
-							if(data.pool.turnResult === "CHANGE_TURN"){
-								console.log("change turn")
+						console.log("POOL_PLAY_TURN json"+JSON.stringify(data)+ " playerInTurn table:"+data.table.playerInTurn.name +" playerInTurnStore:"+this.$store.getters.playerInTurn+ " I am:"+this.userName)
+						this.$store.dispatch("poolPlayTurn", data.pool).then(() => {							
+							if(this.isTurnChangeToMe(data.table)){
+								console.log("Turn changed to me")
+								this.$store.dispatch("changeTurn", data.table.playerInTurn).then(this.checkHandBall(data))
+							}else if(this.isTurnChangeFromMe(data.table)){
+									console.log("Turn from me")
 								this.$store.dispatch("changeTurn", data.table.playerInTurn)
-							}else if(data.pool.turnResult === "HANDBALL"){
-								this.$store.dispatch("poolHandBall", data.pool)
+							}else{
+								console.log("My turn stayed")
+								this.checkHandBall(data)
 							}
 						})
 						break
@@ -404,6 +411,7 @@ export default defineComponent({
 			//	this.logout();
 			};
 		},
+	
 		createTable(){
 		 	
 			const obj = { title: "CREATE_TABLE", message: this.selectedGameMode,"computer":this.playAgainstComputerChecked, randomStarter:this.randomStarterChecked}		

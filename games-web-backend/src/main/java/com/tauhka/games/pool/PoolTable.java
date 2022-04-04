@@ -50,6 +50,8 @@ public class PoolTable extends Table implements PoolComponent {
 	private EightBallRuleBase eightBallRuleBase;
 	@JsonbTransient
 	private static final boolean SERVER_GUI;
+	@JsonbTransient
+	private boolean expectingHandBallUpdate;
 	static {
 		String env = System.getProperty("Server_Environment");
 		String ui = System.getProperty("Server_ShowUI");
@@ -67,6 +69,9 @@ public class PoolTable extends Table implements PoolComponent {
 	public Object playTurn(User user, Object o) {
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
+		}
+		if (expectingHandBallUpdate) {
+			throw new IllegalArgumentException("Expecting handball update:" + this);
 		}
 		PoolTurn turn = (PoolTurn) o;
 
@@ -94,6 +99,9 @@ public class PoolTable extends Table implements PoolComponent {
 		if (turnResult == TurnResult.CHANGE_TURN) {
 			changePlayerInTurn();
 		}
+		if (turnResult == TurnResult.HANDBALL) {
+			expectingHandBallUpdate = true;
+		}
 		PoolTurn playedTurn = new PoolTurn();
 		playedTurn.setTurnResult(turnResult);
 		playedTurn.setCue(turn.getCue());
@@ -109,10 +117,34 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 	}
 
+	public boolean updateHandBall(User user, CueBall cueBall2) {
+		if (!user.equals(this.playerInTurn)) {
+			throw new IllegalArgumentException("Player is not in turn in table:" + this);
+		}
+		if (!expectingHandBallUpdate) {
+			throw new IllegalArgumentException("HandBall update is not expected:" + this);
+		}
+		if (handBallPositionAllowed(cueBall2)) {
+			// Different canvas sizes .. TODO
+			Vector2d position = cueBall2.getPosition();
+			cueBall2.setPosition(position);
+		}
+	
+		expectingHandBallUpdate = false;
+		return true;
+	}
+
+	private boolean handBallPositionAllowed(CueBall cueBall2) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 	public boolean isOpen() {
+		// Open table -> no balls inside pocket yet
 		return this.getRemainingBalls().size() == 16;
 	}
 
+	@JsonbTransient
 	public List<Ball> getPlayerInTurnBalls() {
 		if (playerInTurn.equals(playerA)) {
 			return this.playerABalls;
@@ -120,6 +152,7 @@ public class PoolTable extends Table implements PoolComponent {
 		return this.playerBBalls;
 	}
 
+	@JsonbTransient
 	public List<Ball> getPlayerNotInTurnBalls() {
 		if (!playerInTurn.equals(playerA)) {
 			return this.playerBBalls;

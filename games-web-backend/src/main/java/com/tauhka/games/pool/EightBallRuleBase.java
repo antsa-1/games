@@ -237,7 +237,6 @@ public class EightBallRuleBase {
 		checkAndHandlePocketPathwayCollisions(table, ball);
 		checkAndHandleTableBoundriesCollisions(table, ball);
 
-
 	}
 
 	private void removeFromNextTurn(Ball ball) {
@@ -271,9 +270,14 @@ public class EightBallRuleBase {
 			balla.getVelocity().y = 0d;
 			balla.setPosition(pocket.getCenter());
 			int ownBalls = table.getPlayerInTurnBalls().size();
+			int opponentBalls = table.getPlayerNotInTurnBalls().size();
 			table.putBallInPocket(balla, pocket);
 			if (table.getPlayerInTurnBalls().size() > ownBalls) {
 				this.gotOwnBallInPocket = true;
+			}
+			if (table.getPlayerNotInTurnBalls().size() > opponentBalls && this.turnResult == null) {
+				//fails, most likely bug in table.putBallInPocket method
+				this.turnResult = TurnResult.HANDBALL;
 			}
 			removeFromNextTurn(balla);
 			break;

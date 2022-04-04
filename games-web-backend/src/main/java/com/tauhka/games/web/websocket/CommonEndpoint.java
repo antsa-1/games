@@ -114,6 +114,9 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.POOL_PLAY_TURN) {
 				gameMessage = pooltableHandler.playTurn(this, message);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
+			} else if (message.getTitle() == MessageTitle.POOL_HANDBALL) {
+				gameMessage = pooltableHandler.updateHandBall(this, message);
+				sendMessageToTable(gameMessage.getTable(), gameMessage);
 			} else {
 				throw new CloseWebSocketException("unknown command:" + message);
 			}

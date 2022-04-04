@@ -43,4 +43,10 @@ public class CueBall extends Ball {
 		this.force = force;
 	}
 
+	public Vector2d getRelativePosition(Canvas canvas) {
+		double canvasWidth = canvas.getSize().x;
+		double canvasHeight = canvas.getSize().y;
+		Vector2d relative = new Vector2d(super.position.x / canvasWidth, super.position.y / canvasHeight);
+		return relative;
+	}
 }

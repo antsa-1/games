@@ -13,6 +13,7 @@ export interface IEightBallGame {
     poolTable: IPoolTable,
     gameOptions: IEightBallGameOptions,
     mouseCoordsTemp: IVector2,
+    handBall: boolean
 }
 
 export interface IGameImage {
@@ -24,7 +25,7 @@ export interface IGameImage {
     visible: boolean
 }
 // extending ITable is dubious -> inherits properties which are not related to this pooltable. But helps to keep only one table and avoiding type checks
-export interface IPoolTable extends IPoolComponent, ITable { 
+export interface IPoolTable extends IPoolComponent, ITable {
     pointerLine: IPointerLine,
     mousePoint: IVector2,
     mouseEnabled: boolean,
@@ -34,7 +35,7 @@ export interface IPoolTable extends IPoolComponent, ITable {
     bottomRightPart: IBoundry,
     bottomLeftPart: IBoundry,
     leftPart: IBoundry,
-    pockets: Array<IPocket>[],    
+    pockets: Array<IPocket>[], 
 }
 
 export interface IBoundry {
@@ -70,7 +71,7 @@ export interface IPointerLine {
 }
 export interface IVector2 {
     x: number,
-    y: number, 
+    y: number,
 }
 
 export interface IEightBallGameOptions {

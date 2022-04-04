@@ -14,7 +14,8 @@ public class Ball implements PoolComponent {
 
 	private int number;
 	private Color color;
-	private Vector2d position;
+	protected Vector2d position;
+	private Vector2d relativePosition;
 	private double diameter;
 	private double radius;
 	private Vector2d velocity;
@@ -38,6 +39,14 @@ public class Ball implements PoolComponent {
 
 	public int getNumber() {
 		return number;
+	}
+
+	public Vector2d getRelativePosition() {
+		return relativePosition;
+	}
+
+	public void setRelativePosition(Vector2d relativePosition) {
+		this.relativePosition = relativePosition;
 	}
 
 	public void setNumber(int number) {

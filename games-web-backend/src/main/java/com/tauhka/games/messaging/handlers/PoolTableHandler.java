@@ -42,6 +42,24 @@ public class PoolTableHandler {
 		return updateMessage;
 	}
 
+	public Message updateHandBall(CommonEndpoint endpoint, Message message) {
+		PoolTable table = (PoolTable) findUserTable(endpoint);
+
+		if (!table.isPlayerInTurn(endpoint.getUser())) {
+			return null; // after turn ui not working properly, it still send updates..
+		}
+		table.updateHandBall(endpoint.getUser(), message.getPoolMessage().getCueBall());
+		Message updateMessage = new Message();
+		updateMessage.setFrom(SYSTEM);
+		updateMessage.setTable(table);
+		updateMessage.setTitle(MessageTitle.POOL_HANDBALL);
+		PoolMessage updateCueBallPositionMessage = new PoolMessage();
+		updateCueBallPositionMessage.setCueBall(message.getPoolMessage().getCueBall());
+		updateCueBallPositionMessage.setCanvas(message.getPoolMessage().getCanvas());
+		updateMessage.setPoolMessage(updateCueBallPositionMessage);
+		return updateMessage;
+	}
+
 	public Message playTurn(CommonEndpoint endpoint, Message message) {
 		// ServerSide calcs?
 		PoolTurn turn = new PoolTurn();

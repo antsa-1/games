@@ -60,7 +60,8 @@ export default defineComponent({
 				cue: undefined,
 				poolTable: undefined,
 				gameOptions: undefined,
-				mouseCoordsTemp: undefined
+				mouseCoordsTemp: undefined,
+				handBall:false
 			}
 	},
 	beforeCreated(){
@@ -76,10 +77,10 @@ export default defineComponent({
 			}else if (mutation.type === "changeTurn") {
 				if(state.theTable.playerInTurn.name === this.userName){
 					this.addMouseListeners()
-					this.startReducer()
+				//	this.startReducer()
 				}else{
 					//this.removeMouseListeners()
-					this.stopReducer()
+				//	this.stopReducer()
 				}
 			}else if (mutation.type === "rematch" ){
 				this.initTable()
@@ -109,16 +110,20 @@ export default defineComponent({
 				Object.assign(this.cue, action.payload.cue)
 				console.log("JSON for cue "+JSON.stringify(action.payload.cue))
 				this.cue.image.canvasRotationAngle = action.payload.cue.angle
-				this.cue.image.visible = true
-				
+				if(action.payload.turnResult === "HANDBALL"){
+					this.handBall = true
+				}
 				window.requestAnimationFrame(this.repaintAll)
 				this.shootBall()
 			}
 			else if(action.type === "poolHandBall"){
+				console.log("Setting cueBall in handBall"+this.isPlayerInTurn())
+				this.cueBall.position = action.payload.cueBall.position
+				this.handBall = false
+				this.cueBall.image.visible = true		
 				if(this.isPlayerInTurn()){
-					console.log("should set handball")
-				}else{
-					console.log("opponent handball")
+					this.cue.image.visible = true
+					this.addMouseListeners()
 				}
 			}
 			window.requestAnimationFrame(this.repaintAll)
@@ -357,6 +362,11 @@ export default defineComponent({
 			this.canvas.addEventListener("mousedown", this.handleMouseDown)
 			this.canvas.addEventListener("mouseup", this.handleMouseUp)
 			this.canvas.addEventListener("contextmenu",(e)=> e.preventDefault())
+			this.poolTable.mouseEnabled = true
+			if(!this.handBall){
+				console.log("lisätään mouselistenerit ja cue visilbe")
+			//	this.cue.image.visible = true
+			}
 		},
 		removeMouseListeners(){
 			this.canvas.removeEventListener("mousemove", this.handleMouseMove)
@@ -367,7 +377,7 @@ export default defineComponent({
 			if(event.button ===2){				
 				return
 			}
-			if(this.poolTable.mouseEnabled){
+			if(this.poolTable.mouseEnabled && !this.handBall){
 				cueForceInterval = setInterval(this.updateCueForce, 50)
 			}
 		},	
@@ -382,31 +392,86 @@ export default defineComponent({
 			if(event.button ===1){ // wheel or middle button
 			
 			}
+			if(this.handBall && this.poolTable.mouseEnabled){
+				this.cueBall.position.x = event.offsetX
+				this.cueBall.position.y = event.offsetY
+				console.log("sending handBall:"+JSON.stringify(this.cueBall.position))
+				this.hb(this.cueBall, this.canvas)
+			}
 			if(this.poolTable.mouseEnabled){
 				this.removeMouseListeners()
 				clearInterval(cueForceInterval)
-				this.st(this.cue, this.cueBall, this.canvas)
+				if(!this.handBall){
+					this.st(this.cue, this.cueBall, this.canvas)
+				}
 			}
 		},
 		isPlayerInTurn(){	
 			return this.theTable?.playerInTurn?.name === this.userName
 		},
+		isHandBallPositionAllowed(){
+			//Table
+			if( this.mouseCoordsTemp.x > this.poolTable.leftPart.a + this.cueBall.radius &&  this.mouseCoordsTemp.x < this.poolTable.rightPart.a - this.cueBall.radius){
+				if(! (this.mouseCoordsTemp.y > this.poolTable.topLeftPart.a+ this.cueBall.radius && this.mouseCoordsTemp.y < this.poolTable.bottomRightPart.a -this.cueBall.radius) ){
+					return false
+				}
+			}else{
+				return false
+			}
+			//Balls
+			for (let i = 0; i < this.ballsRemaining.length; i++) {		
+				const ball:IBall = this.ballsRemaining[i]
+				if(ball.number === 0){
+					continue
+				}
+				let xVal = ball.position.x - this.cueBall.position.x		
+				let yVal = ball.position.y - this.cueBall.position.y				
+				if(!(Math.abs(xVal) > ball.diameter) && !(Math.abs(yVal) > ball.diameter)){					
+					return false					
+				}	
+			}
+			return true
+		},
+			
 		handleMouseMove(event:MouseEvent){
+			if(! this.poolTable.mouseEnabled){
+				return
+			}
 			this.mouseCoordsTemp = <IVector2> {x:event.offsetX, y: event.offsetY}
-			if(this.poolTable.mouseEnabled){
-
+			if(this.handBall){				
+				this.cueBall.position.x = event.offsetX
+				this.cueBall.position.y = event.offsetY
+				setTimeout(() => {
+					if(this.isHandBallPositionAllowed(event)){						
+						this.cueBall.image.visible = true
+					}else {						
+						this.cueBall.image.visible = false
+					}
+					window.requestAnimationFrame(this.repaintAll)
+				}, 10)
+			}else{
 				this.cue.position.x = this.cueBall.position.x
 				this.cue.position.y = this.cueBall.position.y
-				this.cue.image.visible = true
 				this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
 				if(this.isPlayerInTurn()){
 					this.updateCueAngle(event)
 					window.requestAnimationFrame(this.repaintAll)
 				}
-				//	this.updatePointerLine(event)				
 			}
 		},
-		
+		handleAfterAnimation(){
+			console.log("HandleAfterAnimation")			
+			if(this.isPlayerInTurn()){
+				console.log("HandleAfterAnimation my turn")
+				this.addMouseListeners()
+				this.poolTable.mouseEnabled = true
+				this.cue.image.visible = true
+			}
+			if(this.handBall){
+				this.cueBall.image.visible = false
+			}
+			requestAnimationFrame(this.repaintAll)
+		},
 		shootBall(showOnly:boolean){			
 			this.poolTable.mouseEnabled = false
 			if(this.cue.force < 10 ){
@@ -422,7 +487,7 @@ export default defineComponent({
 				this.cue.force = 0
 				this.handleCollisions().then(() => {
 					console.log("Animations done ball center position "+JSON.stringify(this.cueBall.position))
-					this.poolTable.mouseEnabled = true
+					this.handleAfterAnimation()				
 				})
 			})
 		},
@@ -504,8 +569,14 @@ export default defineComponent({
 			}		
 		},
 		handleBallInPocket (component:IBall, pocket:IPocket){
-			component.image.canvasDimension.x = component.image.canvasDimension.x * 0.8
-			component.image.canvasDimension.y = component.image.canvasDimension.y * 0.8
+			if(component.number !== 0){
+				component.image.canvasDimension.x = component.image.canvasDimension.x * 0.8
+				component.image.canvasDimension.y = component.image.canvasDimension.y * 0.8
+				setTimeout(()=>{
+					component.position.x = 50
+					component.position.y = 50
+				},1000)
+			}			
 			component.position = <IVector2> {x:pocket.center.x, y:pocket.center.y}
 			component.velocity.x = 0
 			component.velocity.y = 0
