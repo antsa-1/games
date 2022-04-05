@@ -20,6 +20,7 @@ public class EightBallRuleBase {
 	private int iterationCount = 0;
 	private List<Ball> removalBalls = new ArrayList<Ball>();
 	private boolean eightBallHitFirst = false;
+	private boolean anyBallHit = false;
 	private boolean gotOwnBallInPocket = false;
 
 	public TurnResult playTurn(PoolTable table, PoolTurn turn) {
@@ -41,6 +42,10 @@ public class EightBallRuleBase {
 		if (turnResult == null && gotOwnBallInPocket) {
 			turnResult = TurnResult.CONTINUE_TURN;
 		}
+		if (!anyBallHit && turnResult == null) {
+			// No ball was hit
+			turnResult = TurnResult.HANDBALL;
+		}
 		return turnResult != null ? turnResult : TurnResult.CHANGE_TURN;
 	}
 
@@ -50,6 +55,7 @@ public class EightBallRuleBase {
 		this.removalBalls = new ArrayList<Ball>();
 		this.eightBallHitFirst = false;
 		gotOwnBallInPocket = false;
+		anyBallHit = false;
 
 	}
 
@@ -203,6 +209,7 @@ public class EightBallRuleBase {
 			}
 			iterationCount++;
 		}
+		this.anyBallHit = true;
 		Vector2d mtd = VectorUtil.multiply(normalVector, (firstBall.getDiameter() - normalVectorLength) / normalVectorLength);
 		firstBall.getPosition().x += mtd.x * 0.5;
 		firstBall.getPosition().y += mtd.y * 0.5;

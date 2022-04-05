@@ -24,13 +24,12 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@JsonbProperty("turn")
 	private PoolTurn turn;
-	@JsonbTransient
-	private Canvas canvas;
-	@JsonbTransient
+
+	@JsonbProperty("remainingBalls")
 	private List<Ball> remainingBalls;
-	@JsonbTransient
+	@JsonbProperty("playerABalls")
 	private List<Ball> playerABalls; // Player properties
-	@JsonbTransient
+	@JsonbProperty("playerBBalls")
 	private List<Ball> playerBBalls; // Player properties
 	@JsonbTransient
 	private List<Pocket> pockets;
@@ -42,6 +41,8 @@ public class PoolTable extends Table implements PoolComponent {
 	private Vector2d middleAreaEnd;
 	@JsonbTransient
 	private CueBall cueBall;
+	@JsonbTransient
+	private Canvas canvas;
 	@JsonbTransient
 	private EightBallRuleBase eightBallRuleBase;
 	@JsonbTransient
@@ -100,7 +101,7 @@ public class PoolTable extends Table implements PoolComponent {
 			expectingHandBallUpdate = true;
 		}
 		PoolTurn playedTurn = new PoolTurn();
-		playedTurn.setTurnResult(turnResult);
+		playedTurn.setTurnResult(turnResult.toString());
 		playedTurn.setCue(turn.getCue());
 		return playedTurn;
 

@@ -20,7 +20,7 @@ public class PoolTurn {
 	private Vector2d handBall;
 
 	@JsonbProperty("turnResult")
-	private TurnResult turnResult;
+	private String turnResult;
 
 	public CueBall getCueBall() {
 		return cueBall;
@@ -54,11 +54,11 @@ public class PoolTurn {
 		this.handBall = handBall;
 	}
 
-	public TurnResult getTurnResult() {
+	public String getTurnResult() {
 		return turnResult;
 	}
 
-	public void setTurnResult(TurnResult turnResult) {
+	public void setTurnResult(String turnResult) {
 		this.turnResult = turnResult;
 	}
 

@@ -26,7 +26,7 @@ public class PoolTableInitializer {
 				ball = new Ball(i, Color.BLACK, position, ballDiameter);
 			} else {
 				Vector2d position = new Vector2d(canvas.getSize().x * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().y / 2 + (ballDiameter * 0.5 * PoolTableInitializer.calculateRackRow(i)));
-				ball = new Ball(i, i % 2 == 0 ? Color.RED : Color.BLACK, position, ballDiameter);
+				ball = new Ball(i, i < 8 ? Color.RED : Color.YELLOW, position, ballDiameter);
 			}
 			ball.setVelocity(new Vector2d(0d, 0d));
 			remainingBalls.add(ball);

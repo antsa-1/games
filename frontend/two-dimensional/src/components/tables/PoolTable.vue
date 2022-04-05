@@ -61,7 +61,9 @@ export default defineComponent({
 				poolTable: undefined,
 				gameOptions: undefined,
 				mouseCoordsTemp: undefined,
-				handBall:false
+				handBall:false,
+				playerABalls:[],
+				playerBBalls:[]
 			}
 	},
 	beforeCreated(){
@@ -94,7 +96,14 @@ export default defineComponent({
     	})
 	},
 	computed: {
-			
+			playerBPocketed(){
+				console.log("playerB pockets "+JSON.stringify(this.playerBBalls))
+				return this.playerBBalls
+			},
+			playerAPocketed(){
+				console.log("playerA pockets "+JSON.stringify(this.playerABalls))
+				return this.playerABalls
+			},
 	},
 	mounted() {	
 		this.initTable()
@@ -104,22 +113,24 @@ export default defineComponent({
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
 			//console.log("Action:"+action.type+ " payload:"+ JSON.stringify(action.payload))
 			if(action.type === "poolUpdate"){
-				this.cue.image.canvasRotationAngle = action.payload.cue.angle
+				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
 				this.cue.image.visible = true
 			}else if(action.type === "poolPlayTurn"){
-				Object.assign(this.cue, action.payload.cue)
-				console.log("JSON for cue "+JSON.stringify(action.payload.cue))
-				this.cue.image.canvasRotationAngle = action.payload.cue.angle
-				if(action.payload.turnResult === "HANDBALL"){
+				Object.assign(this.cue, action.payload.pool.cue)
+				console.log("JSON for cue "+JSON.stringify(action.payload.pool.cue))
+				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
+				if(action.payload.pool.turnResult === "HANDBALL"){
 					console.log("It will be handball after animations")
 					this.handBall = true
 				}
+				this.playerABalls = action.payload.table.playerABalls
+				this.playerBBalls = action.payload.table.playerBBalls
 				window.requestAnimationFrame(this.repaintAll)
 				this.shootBall()
 			}
 			else if(action.type === "poolHandBall"){
 				console.log("Setting cueBall in handBall"+this.isPlayerInTurn())
-				this.cueBall.position = action.payload.cueBall.position
+				this.cueBall.position = action.payload.pool.cueBall.position
 				this.handBall = false
 				this.cueBall.image.visible = true		
 				if(this.isPlayerInTurn()){
@@ -573,9 +584,19 @@ export default defineComponent({
 			if(component.number !== 0){
 				component.image.canvasDimension.x = component.image.canvasDimension.x * 0.8
 				component.image.canvasDimension.y = component.image.canvasDimension.y * 0.8
-				setTimeout(()=>{
-					component.position.x = 50
-					component.position.y = 50
+				setTimeout(() => {
+					const found = this.playerABalls.find(ball => ball.number === component.number)
+					const startY = this.canvas.height / 20
+					let startX = undefined
+					if(found){
+						 startX = this.canvas.width / 20						
+					}else{
+						 startX = this.canvas.width / 20 //relative.. todo
+					}
+					component.position.x = startX * component.number
+					component.position.y = startY
+					console.log("startX => "+startX +" JSON."+JSON.stringify(this.playerABalls))
+					
 				},1000)
 			}			
 			component.position = <IVector2> {x:pocket.center.x, y:pocket.center.y}

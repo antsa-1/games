@@ -327,11 +327,11 @@ export default defineComponent({
 						})
 						break
 					case "POOL_UPDATE":
-						this.$store.dispatch("poolUpdate", data.pool)
+						this.$store.dispatch("poolUpdate", data)
 						break
 					case "POOL_HANDBALL":
 						console.log("HANDBALL json"+JSON.stringify(data)+ " playerInTurn table:"+data.table.playerInTurn.name +" playerInTurnStore:"+this.$store.getters.playerInTurn+ " I am:"+this.userName)
-						this.$store.dispatch("poolHandBall", data.pool)
+						this.$store.dispatch("poolHandBall", data)
 						const handBallMessage:IChatMessage = {
 							from:data.from,
 							text:"Handball for "+data.table.playerInTurn.name
@@ -340,7 +340,7 @@ export default defineComponent({
 						break
 					case "POOL_PLAY_TURN":
 						console.log("POOL_PLAY_TURN json"+JSON.stringify(data)+ " playerInTurn table:"+data.table.playerInTurn.name +" playerInTurnStore:"+this.$store.getters.playerInTurn+ " I am:"+this.userName)
-						this.$store.dispatch("poolPlayTurn", data.pool).then(() => {							
+						this.$store.dispatch("poolPlayTurn", data).then(() => {							
 							if(this.isTurnChangeToMe(data.table)){
 								console.log("Turn changed to me")
 								this.$store.dispatch("changeTurn", data.table.playerInTurn)

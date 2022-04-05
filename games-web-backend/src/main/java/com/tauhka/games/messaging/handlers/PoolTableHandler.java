@@ -71,7 +71,7 @@ public class PoolTableHandler {
 		Message playTurnMessage = new Message();
 		playTurnMessage.setFrom(SYSTEM);
 		playTurnMessage.setTable(table);
-		if (playedTurn.getTurnResult() == TurnResult.EIGHT_BALL_IN_POCKET_OK || playedTurn.getTurnResult() == TurnResult.EIGHT_BALL_IN_POCKET_FAIL) {
+		if (playedTurn.getTurnResult().equals(TurnResult.EIGHT_BALL_IN_POCKET_OK.toString()) || playedTurn.getTurnResult().equals(TurnResult.EIGHT_BALL_IN_POCKET_FAIL.toString())) {
 			playTurnMessage.setTitle(MessageTitle.GAME_END);
 		} else {
 			playTurnMessage.setTitle(MessageTitle.POOL_PLAY_TURN);
@@ -80,7 +80,7 @@ public class PoolTableHandler {
 		poolMessage.setCue(message.getPoolMessage().getCue());
 		poolMessage.setCueBall(message.getPoolMessage().getCueBall());
 		poolMessage.setCanvas(message.getPoolMessage().getCanvas());
-		poolMessage.setTurnResult(playedTurn.getTurnResult());
+		poolMessage.setTurnResult(playedTurn.getTurnResult().toString());
 		playTurnMessage.setPoolMessage(poolMessage);
 		return playTurnMessage;
 	}

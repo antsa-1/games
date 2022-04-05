@@ -21,7 +21,7 @@ public class PoolMessage implements Serializable {
 	@JsonbProperty("canvas")
 	private Vector2d canvas;
 	@JsonbProperty("turnResult")
-	private TurnResult turnResult;
+	private String turnResult;
 
 	public Cue getCue() {
 		return cue;
@@ -47,11 +47,11 @@ public class PoolMessage implements Serializable {
 		this.canvas = canvas;
 	}
 
-	public TurnResult getTurnResult() {
+	public String getTurnResult() {
 		return turnResult;
 	}
 
-	public void setTurnResult(TurnResult turnResult) {
+	public void setTurnResult(String turnResult) {
 		this.turnResult = turnResult;
 	}
 
