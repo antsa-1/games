@@ -645,16 +645,16 @@ export default defineComponent({
 				return
 			}else if(this.isTableTopBoundry(ball) ){
 				//console.log("Top boundry"+JSON.stringify(ball.position))
-				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
+				ball.velocity.y = Math.abs(ball.velocity.y)
 			}else if(this.isTableBottomBoundry(ball)){
 				//console.log("Lower boundry"+JSON.stringify(ball.position))
-				ball.velocity = <IVector2> {x:ball.velocity.x, y: -ball.velocity.y}
+				ball.velocity.y = -Math.abs(ball.velocity.y)
 			}else if(this.isTableLeftBoundry(ball) ){
 				//console.log("Left boundry"+JSON.stringify(ball.position))
-				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
+				ball.velocity.x = Math.abs(ball.velocity.x)
 			}else if(this.isTableRightBoundry(ball) ){
 			//	console.log("Right boundry"+JSON.stringify(ball.position))
-				ball.velocity = <IVector2> {x:-ball.velocity.x, y: ball.velocity.y}
+				ball.velocity.x = -Math.abs(ball.velocity.x)
 			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){
 				//console.log("collided with pathway, that's all we know")
 			

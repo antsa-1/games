@@ -100,6 +100,7 @@ public class PoolTable extends Table implements PoolComponent {
 			changePlayerInTurn();
 		}
 		if (turnResult == TurnResult.HANDBALL) {
+			changePlayerInTurn();
 			expectingHandBallUpdate = true;
 		}
 		PoolTurn playedTurn = new PoolTurn();
@@ -154,7 +155,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@JsonbTransient
 	public List<Ball> getPlayerNotInTurnBalls() {
-		if (!playerInTurn.equals(playerA)) {
+		if (playerInTurn.equals(playerA)) {
 			return this.playerBBalls;
 		}
 		return this.playerABalls;

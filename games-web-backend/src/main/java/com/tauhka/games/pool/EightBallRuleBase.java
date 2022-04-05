@@ -233,6 +233,9 @@ public class EightBallRuleBase {
 		}
 
 		if (checkAndHandleTableBoundriesCollisions(table, ball)) {
+			if (ball.getNumber() == 11) {
+				System.out.println("f");
+			}
 			return;
 		}
 		if (checkAndHandlePocketPathwayCollisions(table, ball)) {
@@ -317,24 +320,23 @@ public class EightBallRuleBase {
 		double radius = ball.getDiameter() / 2;
 		if (isTableTopBondry(topLeft, topRight, ball.getPosition(), radius)) {
 			System.out.println("isTableTopBondry");
-			ball.getVelocity().y = -1 * ball.getVelocity().y;
+			ball.getVelocity().y = Math.abs(ball.getVelocity().y);
 			return true;
 		}
-
-		if (isTableLeftBoundry(left, ball.getPosition(), radius)) {
-			System.out.println("left");
-			ball.getVelocity().x = -1 * ball.getVelocity().x;
-			return true;
-		}
-
 		if (isTableBottomBoundry(bottomLeft, bottomRight, ball.getPosition(), radius)) {
 			System.out.println("bottom");
-			ball.getVelocity().y = -1 * ball.getVelocity().y;
+			ball.getVelocity().y = -Math.abs(ball.getVelocity().y);
 			return true;
 		}
+		if (isTableLeftBoundry(left, ball.getPosition(), radius)) {
+			System.out.println("left");
+			ball.getVelocity().x = Math.abs(ball.getVelocity().x);
+			return true;
+		}
+
 		if (isTableRightBoundry(right, ball.getPosition(), radius)) {
 			System.out.println("right");
-			ball.getVelocity().x = -1 * ball.getVelocity().x;
+			ball.getVelocity().x = -Math.abs(ball.getVelocity().x);
 			return true;
 		}
 
