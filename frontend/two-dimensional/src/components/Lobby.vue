@@ -305,7 +305,7 @@ export default defineComponent({
 						break
 					case "WATCH":
 						this.$store.dispatch("selectTable", data.table).then(() => {
-							this.watchTable(data.table)							
+							this.watchTable(data.table)
 						})
 						break
 					case "ADD_WATCHER":						
@@ -331,6 +331,11 @@ export default defineComponent({
 						break
 					case "POOL_HANDBALL":
 						this.$store.dispatch("poolHandBall", data.pool)
+						const handBallMessage:IChatMessage = {
+							from:data.from,
+							text:"Handball for "+data.table.playerInTurn.name
+						}
+						this.$store.dispatch("chat", handBallMessage);
 						break
 					case "POOL_PLAY_TURN":
 						console.log("POOL_PLAY_TURN json"+JSON.stringify(data)+ " playerInTurn table:"+data.table.playerInTurn.name +" playerInTurnStore:"+this.$store.getters.playerInTurn+ " I am:"+this.userName)
