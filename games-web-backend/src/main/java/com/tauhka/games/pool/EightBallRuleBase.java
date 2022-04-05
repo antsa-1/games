@@ -231,11 +231,16 @@ public class EightBallRuleBase {
 		if (isInMiddleArea(table, ball)) {
 			return;
 		}
+
+		if (checkAndHandleTableBoundriesCollisions(table, ball)) {
+			return;
+		}
+		if (checkAndHandlePocketPathwayCollisions(table, ball)) {
+			return;
+		}
 		if (checkAndHandlePockets(table, ball) != null) {
 			return;
 		}
-		checkAndHandlePocketPathwayCollisions(table, ball);
-		checkAndHandleTableBoundriesCollisions(table, ball);
 
 	}
 
@@ -276,7 +281,6 @@ public class EightBallRuleBase {
 				this.gotOwnBallInPocket = true;
 			}
 			if (table.getPlayerNotInTurnBalls().size() > opponentBalls && this.turnResult == null) {
-				//fails, most likely bug in table.putBallInPocket method
 				this.turnResult = TurnResult.HANDBALL;
 			}
 			removeFromNextTurn(balla);
@@ -334,7 +338,7 @@ public class EightBallRuleBase {
 			return true;
 		}
 
-		return true;
+		return false;
 	}
 
 	private boolean checkAndHandlePocketPathwayCollisions(PoolTable table, Ball ball) {
