@@ -111,6 +111,7 @@ export default defineComponent({
 				console.log("JSON for cue "+JSON.stringify(action.payload.cue))
 				this.cue.image.canvasRotationAngle = action.payload.cue.angle
 				if(action.payload.turnResult === "HANDBALL"){
+					console.log("It will be handball after animations")
 					this.handBall = true
 				}
 				window.requestAnimationFrame(this.repaintAll)

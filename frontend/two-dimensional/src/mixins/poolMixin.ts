@@ -55,13 +55,9 @@ export const poolMixin = {
 				this.p = (atob("dHJ1ZQ==") < "m" ) ? "YmFzZTY0IGlzIG5vIGVuY3J5cHRpb24gCg==" : 0.1 + 0.2 === 0.3
 			}, m)
 		},
-		checkHandBall(data){
-			return () => {
-				if(data.pool.turnResult === "HANDBALL"){
-					console.log("handball")
-					this.$store.dispatch("poolHandBall", data.pool)
-				}
-			}
+		isHandBall(data){
+			return data.pool.turnResult === "HANDBALL"
+						
 		},
 	},
 }

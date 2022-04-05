@@ -10,8 +10,8 @@ import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.PoolMessage;
 import com.tauhka.games.pool.PoolTable;
-import com.tauhka.games.pool.PoolTable.TurnResult;
 import com.tauhka.games.pool.PoolTurn;
+import com.tauhka.games.pool.TurnResult;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.enterprise.context.Dependent;
@@ -76,12 +76,12 @@ public class PoolTableHandler {
 		} else {
 			playTurnMessage.setTitle(MessageTitle.POOL_PLAY_TURN);
 		}
-		PoolMessage playTurn = new PoolMessage();
-		playTurn.setCue(message.getPoolMessage().getCue());
-		playTurn.setCueBall(message.getPoolMessage().getCueBall());
-		playTurn.setCanvas(message.getPoolMessage().getCanvas());
-		playTurn.setTurnResult(playedTurn.getTurnResult());
-		playTurnMessage.setPoolMessage(playTurn);
+		PoolMessage poolMessage = new PoolMessage();
+		poolMessage.setCue(message.getPoolMessage().getCue());
+		poolMessage.setCueBall(message.getPoolMessage().getCueBall());
+		poolMessage.setCanvas(message.getPoolMessage().getCanvas());
+		poolMessage.setTurnResult(playedTurn.getTurnResult());
+		playTurnMessage.setPoolMessage(poolMessage);
 		return playTurnMessage;
 	}
 

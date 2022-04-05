@@ -1,7 +1,6 @@
 package com.tauhka.games.pool;
 
 import com.tauhka.games.core.Vector2d;
-import com.tauhka.games.pool.PoolTable.TurnResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 

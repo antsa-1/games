@@ -6,7 +6,6 @@ import java.util.logging.Logger;
 
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.util.VectorUtil;
-import com.tauhka.games.pool.PoolTable.TurnResult;
 
 /**
  * @author antsa-1 from GitHub 28 Mar 2022
@@ -248,6 +247,9 @@ public class EightBallRuleBase {
 	}
 
 	private void removeFromNextTurn(Ball ball) {
+		if (ball.getNumber() == 0) {
+			return;
+		}
 		// vs. compare what is in the pockets after turn.. this is run many time
 		if (!removalBalls.contains(ball)) {
 			removalBalls.add(ball);

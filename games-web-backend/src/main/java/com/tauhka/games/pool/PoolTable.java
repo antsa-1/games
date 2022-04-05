@@ -22,10 +22,6 @@ public class PoolTable extends Table implements PoolComponent {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(PoolTable.class.getName());
 
-	public enum TurnResult {
-		HANDBALL, EIGHT_BALL_IN_POCKET_OK, EIGHT_BALL_IN_POCKET_FAIL, CONTINUE_TURN, CHANGE_TURN
-	}
-
 	@JsonbProperty("turn")
 	private PoolTurn turn;
 	@JsonbTransient
@@ -118,21 +114,33 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 	}
 
-	public boolean updateHandBall(User user, CueBall cueBall2) {
+	public boolean updateHandBall(User user, CueBall sample) {
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
 		if (!expectingHandBallUpdate) {
 			throw new IllegalArgumentException("HandBall update is not expected:" + this);
 		}
-		if (handBallPositionAllowed(cueBall2)) {
+		if (handBallPositionAllowed(sample)) {
 			// Different canvas sizes .. TODO
-			Vector2d position = cueBall2.getPosition();
-			cueBall2.setPosition(position);
+			Vector2d position = sample.getPosition();
+			this.cueBall.setPosition(position);
+			synchronized (this) {
+				this.notify();
+				try {
+					LOGGER.info("Pooltable instance waits handball gui repaint");
+					this.wait();
+					LOGGER.info("Pooltable instance waits handball continues");
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			expectingHandBallUpdate = false;
+			return true;
 		}
-	
-		expectingHandBallUpdate = false;
-		return true;
+		System.out.println("Handball position not allowed" + sample);
+		return false;
 	}
 
 	private boolean handBallPositionAllowed(CueBall cueBall2) {

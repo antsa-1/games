@@ -5,7 +5,7 @@ import java.io.Serializable;
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.pool.Cue;
 import com.tauhka.games.pool.CueBall;
-import com.tauhka.games.pool.PoolTable.TurnResult;
+import com.tauhka.games.pool.TurnResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 
