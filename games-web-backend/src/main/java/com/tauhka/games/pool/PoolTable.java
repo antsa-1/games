@@ -184,7 +184,7 @@ public class PoolTable extends Table implements PoolComponent {
 		ballToPocket.setInPocket(true);
 		Ball ballInPocket = this.playerABalls.isEmpty() ? null : this.playerABalls.get(0);
 		if (ballInPocket != null) {
-			if (ballInPocket.isLower() && ballToPocket.isLower()) {
+			if (ballInPocket.isSimilar(ballToPocket)) {
 				this.playerABalls.add(ballToPocket);
 				return;
 			}
@@ -193,7 +193,7 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 		ballInPocket = this.playerBBalls.isEmpty() ? null : this.playerBBalls.get(0);
 		if (ballInPocket != null) {
-			if (ballInPocket.isLower() && ballToPocket.isLower()) {
+			if (ballInPocket.isSimilar(ballToPocket)) {
 				this.playerBBalls.add(ballToPocket);
 				return;
 			}
