@@ -22,12 +22,12 @@ export const poolMixin = {
 	methods: {
 		hb(cueBall, canvas){			
 			const obj ={ title:"POOL_HANDBALL", message: this.theTable.tableId, pool:{cueBall:this.prepareHandBall(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
-			console.log("Handball send"+JSON.stringify(obj))
+			console.log("Sending handball to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
 		st(cue, cueBall, canvas){			
 			const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
-			console.log("Play turn"+JSON.stringify(obj))
+			console.log("Sending turn to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
         sp(cue, cueBall, canvas){

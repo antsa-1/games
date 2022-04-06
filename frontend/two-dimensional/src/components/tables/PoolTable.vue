@@ -13,7 +13,7 @@
 
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
-			<span v-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn. </span>
+			<span v-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn {{userName}} </span>
 			<span v-else-if="theTable?.playerInTurn === null" class="text-success"> Game ended </span>	
 			<div v-else class="text-danger"> In turn: {{theTable.playerInTurn?.name}}</div>			
 		</div>
@@ -42,6 +42,7 @@ const BALL_DIAMETER = 34
 const SECOND_IN_MILLIS = 1000
 const FRICTION = 0.991
 let cueForceInterval = undefined
+
 
 const DELTA = 1/8 // TODO if any lower the ball goes over to pocket in full speed
 let middleAreaTopLeft =<IVector2> {x: 125, y:130}
@@ -96,14 +97,7 @@ export default defineComponent({
     	})
 	},
 	computed: {
-			playerBPocketed(){
-				console.log("playerB pockets "+JSON.stringify(this.playerBBalls))
-				return this.playerBBalls
-			},
-			playerAPocketed(){
-				console.log("playerA pockets "+JSON.stringify(this.playerABalls))
-				return this.playerABalls
-			},
+			
 	},
 	mounted() {	
 		this.initTable()
@@ -111,16 +105,16 @@ export default defineComponent({
 			this.drawBoard()
 		}
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
-			//console.log("Action:"+action.type+ " payload:"+ JSON.stringify(action.payload))
+		
 			if(action.type === "poolUpdate"){
 				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
 				this.cue.image.visible = true
 			}else if(action.type === "poolPlayTurn"){
 				Object.assign(this.cue, action.payload.pool.cue)
-				console.log("JSON for cue "+JSON.stringify(action.payload.pool.cue))
+			
 				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
 				if(action.payload.pool.turnResult === "HANDBALL"){
-					console.log("It will be handball after animations")
+					
 					this.handBall = true
 				}
 				this.playerABalls = action.payload.table.playerABalls
@@ -129,7 +123,7 @@ export default defineComponent({
 				this.shootBall()
 			}
 			else if(action.type === "poolHandBall"){
-				console.log("Setting cueBall in handBall"+this.isPlayerInTurn())
+				
 				this.cueBall.position = action.payload.pool.cueBall.position
 				this.handBall = false
 				this.cueBall.image.visible = true		
@@ -155,7 +149,7 @@ export default defineComponent({
 		},
 		repaintComponent(component: IPoolComponent){
 			
-			//console.log("Painting:"+JSON.stringify(component))
+			
 			const image = component.image
 			if( !component.image.visible){
 				return
@@ -209,6 +203,7 @@ export default defineComponent({
 				this.repaintComponent(this.ballsRemaining[i])
 			}
 			this.repaintComponent(this.cue)
+			this.repaintNames()
 			//this.repaintTableParts()
 			//this.repaintPockets()
 			//this.repaintPathways()
@@ -375,10 +370,7 @@ export default defineComponent({
 			this.canvas.addEventListener("mouseup", this.handleMouseUp)
 			this.canvas.addEventListener("contextmenu",(e)=> e.preventDefault())
 			this.poolTable.mouseEnabled = true
-			if(!this.handBall){
-				console.log("lisätään mouselistenerit ja cue visilbe")
-			//	this.cue.image.visible = true
-			}
+		
 		},
 		removeMouseListeners(){
 			this.canvas.removeEventListener("mousemove", this.handleMouseMove)
@@ -407,7 +399,7 @@ export default defineComponent({
 			if(this.handBall && this.poolTable.mouseEnabled){
 				this.cueBall.position.x = event.offsetX
 				this.cueBall.position.y = event.offsetY
-				console.log("sending handBall:"+JSON.stringify(this.cueBall.position))
+			
 				this.hb(this.cueBall, this.canvas)
 			}
 			if(this.poolTable.mouseEnabled){
@@ -472,9 +464,9 @@ export default defineComponent({
 			}
 		},
 		handleAfterAnimation(){
-			console.log("HandleAfterAnimation")			
+			
 			if(this.isPlayerInTurn()){
-				console.log("HandleAfterAnimation my turn")
+			
 				this.addMouseListeners()
 				this.poolTable.mouseEnabled = true
 				this.cue.image.visible = true
@@ -489,16 +481,16 @@ export default defineComponent({
 			if(this.cue.force < 10 ){
 				this.cue.force = 10
 			}
-			console.log("shoot ball with cue "+JSON.stringify(this.cue))
+			
 			let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
 			this.cue.image.canvasDestination = dimensions
 			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
-			console.log("CueB velo"+JSON.stringify(this.cueBall.velocity))
+	
 			this.collideCueWithCueBall().then(() => {
 				this.cue.image.visible = false
 				this.cue.force = 0
 				this.handleCollisions().then(() => {
-					console.log("Animations done ball center position "+JSON.stringify(this.cueBall.position))
+				
 					this.handleAfterAnimation()				
 				})
 			})
@@ -508,7 +500,7 @@ export default defineComponent({
 				this.cue.position = this.cueBall.position
 				setTimeout(() => {
 					window.requestAnimationFrame(this.repaintAll)
-					console.log("CollideCueWithBall done" )
+				
 					resolve("Cue movement done")
 				}, 145)
 			})
@@ -520,8 +512,7 @@ export default defineComponent({
 					this.handleBallCollisions()
 					window.requestAnimationFrame(this.repaintAll)
 					if(!this.isAnyBallMoving()){	
-						clearInterval(collisionCheckInterval)
-						//this.printBallPositions()
+					
 						resolve("collisions checked")
 					}
 			}, 25)
@@ -535,11 +526,7 @@ export default defineComponent({
 				ball.velocity.y *= FRICTION						
 			})			
 		},
-		printBallPositions(){
-			this.ballsRemaining.forEach(ball => {
-				console.log("Ball final pos "+ball.number +" -> "+JSON.stringify(ball.position))					
-			})
-		},
+	
 		isInPocket(component:IBall){
 			// https://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
 			// (x - center_x)² + (y - center_y)² < radius²   			
@@ -580,28 +567,34 @@ export default defineComponent({
 				return pocket
 			}		
 		},
-		handleBallInPocket (component:IBall, pocket:IPocket){
-			if(component.number !== 0){
-				component.image.canvasDimension.x = component.image.canvasDimension.x * 0.8
-				component.image.canvasDimension.y = component.image.canvasDimension.y * 0.8
+		handleBallInPocket (ball:IBall, pocket:IPocket){
+			if(ball.number !== 0){
+				ball.image.canvasDimension.x = ball.image.canvasDimension.x * 0.8
+				ball.image.canvasDimension.y = ball.image.canvasDimension.y * 0.8
+			
+				
 				setTimeout(() => {
-					const found = this.playerABalls.find(ball => ball.number === component.number)
-					const startY = this.canvas.height / 20
+					const found = this.playerABalls.find(ball => ball.number === ball.number)
+					let factorial = this.playerABalls.length
+					const startY = this.canvas.height * 0.07
 					let startX = undefined
 					if(found){
-						 startX = this.canvas.width / 20						
+						console.log("playerA balls "+ball.number)
+						 startX = this.canvas.width * 0.08						 
 					}else{
-						 startX = this.canvas.width / 20 //relative.. todo
+						console.log("playerB balls "+ball.number)
+						 startX = this.canvas.width * 0.52
+						 factorial = this.playerBBalls.length
 					}
-					component.position.x = startX * component.number
-					component.position.y = startY
-					console.log("startX => "+startX +" JSON."+JSON.stringify(this.playerABalls))
+					ball.position.x = startX + factorial * ball.diameter
+					ball.position.y = startY
+					console.log("startX => "+startX +" factorial"+factorial+ "JSON."+JSON.stringify(this.playerABalls))
 					
-				},1000)
+				}, 1000)
 			}			
-			component.position = <IVector2> {x:pocket.center.x, y:pocket.center.y}
-			component.velocity.x = 0
-			component.velocity.y = 0
+			ball.position = <IVector2> {x:pocket.center.x, y:pocket.center.y}
+			ball.velocity.x = 0
+			ball.velocity.y = 0
 		},
 		handleBallCollisions(){			
 			for (let i = 0; i < this.ballsRemaining.length; i++){
@@ -613,7 +606,7 @@ export default defineComponent({
 					const firstBall:IBall = this.ballsRemaining[j]
 					const secondBall:IBall = this.ballsRemaining[i]
 					if(firstBall.inPocket || secondBall.inPocket){
-						console.log("breaking loop, in pocket "+firstBall.inPocket)
+					
 						break
 					}
 					if(this.isMoving(firstBall) || this.isMoving(secondBall) ){
@@ -653,7 +646,7 @@ export default defineComponent({
 			const v2tTag = <IVector2> {x: unitTangentVector.x * v2t, y:unitTangentVector.y * v2t}
 			componentA.velocity = <IVector2> { x: (v1nTag.x + v1tTag.x) , y: (v1nTag.y + v1tTag.y) }
 			componentB.velocity = <IVector2> { x: (v2nTag.x + v2tTag.x) , y: (v2nTag.y + v2tTag.y) }
-		//	console.log("After collsion: A:"+componentA.number+" pos:"+JSON.stringify(componentA.position)+" velo:"+JSON.stringify(componentA.velocity)+ " ***** B:"+componentB.number +" pos:"+JSON.stringify(componentB.position)+" velo:"+JSON.stringify(componentB.velocity))
+	
 		},
 		isMoving(component:IPoolComponent){
 			if(!component)
@@ -663,22 +656,22 @@ export default defineComponent({
 		checkAndHandleTableCollision(ball:IBall){
 		
 			if(this.isBallInMiddleArea(ball)){
-				//console.log("in middle area"+JSON.stringify(ball))
+			
 				return
 			}else if(this.isTableTopBoundry(ball) ){
-				//console.log("Top boundry"+JSON.stringify(ball.position))
+				
 				ball.velocity.y = Math.abs(ball.velocity.y)
 			}else if(this.isTableBottomBoundry(ball)){
-				//console.log("Lower boundry"+JSON.stringify(ball.position))
+			
 				ball.velocity.y = -Math.abs(ball.velocity.y)
 			}else if(this.isTableLeftBoundry(ball) ){
-				//console.log("Left boundry"+JSON.stringify(ball.position))
+				
 				ball.velocity.x = Math.abs(ball.velocity.x)
 			}else if(this.isTableRightBoundry(ball) ){
-			//	console.log("Right boundry"+JSON.stringify(ball.position))
+			
 				ball.velocity.x = -Math.abs(ball.velocity.x)
 			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){
-				//console.log("collided with pathway, that's all we know")
+				
 			
 			}else{
 				const pocket:IPocket = this.isInPocket(ball)
@@ -700,13 +693,13 @@ export default defineComponent({
 				const pocket:IPocket = this.poolTable.pockets[i]				
 				if(this.isPathwayBorderCollision(pocket.pathwayRight, ball, i)){					
 					let reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayRight, ball)
-					//console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+					
 					ball.velocity = reflectionVector
 					return true
 				} else if(this.isPathwayBorderCollision(pocket.pathwayLeft, ball, i)){
 					let reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayLeft, ball)
 					ball.velocity = reflectionVector
-				//	console.log("Ball currentVelcity:"+JSON.stringify(ball.velocity)+ " reflection:"+JSON.stringify(reflectionVector))
+				
 					return true
 				}				
 			}
@@ -727,10 +720,10 @@ export default defineComponent({
 		isPathwayBorderCollision(p:IPathWayBorder, ball:IBall){
 			// https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm  -> answer starting  "No one seems to consider projection ..."			
 			if(this.isBallInMiddleArea(ball)){
-				console.log("Ball in middle area")
+				
 				return false
 			}
-			//console.log("Ball not in middle area")
+		
 			const a:IVector2 = p.top
 			const b:IVector2 = p.bottom
 			const c:IVector2 = ball.position
@@ -748,7 +741,7 @@ export default defineComponent({
 			if(!distance){
 				distance = Math.sqrt(this.hypot2(c, d))
 			}
-			//console.log("Distance to pathWay"+distance)
+		
 			return distance <= ball.radius			
 		},
 		isBallInMiddleArea(ball:IBall){
@@ -825,7 +818,7 @@ export default defineComponent({
 		},
 		updatePointerLine(event:MouseEvent){
 			if(!event){
-				console.log("No event:")
+			
 				return
 			}
 			const cueBall = this.cueBall
@@ -843,10 +836,10 @@ export default defineComponent({
 			return ballNumber %2 ===0 ? "red":"yellow"
 		},
 		calculateRackRow(i){		
-			if(i===1 || i===8 || i==5){				
+			if(i===1 || i===8 || i==13){				
 				return 0
 			}
-			else if( i===5 || i==3 || i===15){				
+			else if( i===3 || i===15){				
 				return 1
 			}else if(i===10 || i===2|| i===15){			
 				return -1
@@ -859,7 +852,7 @@ export default defineComponent({
 				return 3
 			}else if(i===9){
 				return -3
-			}else if(i===13){
+			}else if(i===5){
 				return -4
 			}
 			else if(i===11){
@@ -961,6 +954,11 @@ export default defineComponent({
 					this.renderingContext.stroke()
 					this.renderingContext.closePath()			
 				}
+		},
+		repaintNames(){
+			this.renderingContext.font = "16px Arial";
+			this.renderingContext.fillText(this.theTable.playerA.name, this.canvas.width * 0.10, 25)
+			this.renderingContext.fillText(this.theTable.playerB.name, this.canvas.width * 0.55, 25)
 		}
 	},
 	
