@@ -120,9 +120,9 @@ public class PoolTableInitializer {
 	}
 
 	public static double calculateRackRow(int i) {
-		if (i == 1 || i == 8 || i == 5) {
+		if (i == 1 || i == 8 || i == 13) {
 			return 0;
-		} else if (i == 5 || i == 3 || i == 15) {
+		} else if ( i == 3 || i == 15) {
 			return 1;
 		} else if (i == 10 || i == 2 || i == 15) {
 			return -1;
@@ -134,7 +134,7 @@ public class PoolTableInitializer {
 			return 3;
 		} else if (i == 9) {
 			return -3;
-		} else if (i == 13) {
+		} else if (i == 5) {
 			return -4;
 		} else if (i == 11) {
 			return 4;
