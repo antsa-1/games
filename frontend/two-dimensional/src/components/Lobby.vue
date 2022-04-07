@@ -331,7 +331,7 @@ export default defineComponent({
 						break
 					case "POOL_HANDBALL":
 						console.log("HANDBALL from server ")
-						this.$store.dispatch("poolHandBall", data)
+						this.$store.dispatch("poolSetHandBall", data)
 						const handBallMessage:IChatMessage = {
 							from:data.from,
 							text:"Handball for "+data.table.playerInTurn.name
@@ -354,8 +354,12 @@ export default defineComponent({
 						this.$store.dispatch("leaveTable", data.who.name)
 						break
 					case "GAME_END":
-							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}							
-							this.$store.dispatch("move", lastSquare)
+							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
+							if(data.table.gameMode.gameNumber !== 3 ){
+								this.$store.dispatch("move", lastSquare)
+							} else{
+								this.$store.dispatch("poolPlayTurn", data)
+							}
 							console.log("RES:"+JSON.stringify(data.win))						
 							if(data.win.resultType==="DRAW"){
 								const gameResult:IGameResult={table:data.table,win:data.win}

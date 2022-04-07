@@ -20,7 +20,7 @@ public class EightBallRuleBase {
 	private int iterationCount = 0;
 	private List<Ball> removalBalls = new ArrayList<Ball>();
 	private boolean eightBallHitFirst = false;
-	private boolean anyBallHit = false;
+	private boolean ownBallHitFirst = false;
 	private boolean gotOwnBallInPocket = false;
 
 	public TurnResult playTurn(PoolTable table, PoolTurn turn) {
@@ -42,7 +42,7 @@ public class EightBallRuleBase {
 		if (turnResult == null && gotOwnBallInPocket) {
 			turnResult = TurnResult.CONTINUE_TURN;
 		}
-		if (!anyBallHit && turnResult == null) {
+		if (!ownBallHitFirst && turnResult == null) {
 			// No ball was hit
 			turnResult = TurnResult.HANDBALL;
 		}
@@ -55,7 +55,7 @@ public class EightBallRuleBase {
 		this.removalBalls = new ArrayList<Ball>();
 		this.eightBallHitFirst = false;
 		gotOwnBallInPocket = false;
-		anyBallHit = false;
+		ownBallHitFirst = false;
 
 	}
 
@@ -206,10 +206,12 @@ public class EightBallRuleBase {
 			}
 			if (!isAllowedToHit(table, firstBall)) {
 				this.turnResult = TurnResult.HANDBALL;
+			} else {
+				this.ownBallHitFirst = true;
 			}
 			iterationCount++;
 		}
-		this.anyBallHit = true;
+
 		Vector2d mtd = VectorUtil.multiply(normalVector, (firstBall.getDiameter() - normalVectorLength) / normalVectorLength);
 		firstBall.getPosition().x += mtd.x * 0.5;
 		firstBall.getPosition().y += mtd.y * 0.5;
@@ -272,7 +274,7 @@ public class EightBallRuleBase {
 			System.out.println("Ball:" + balla + " goes In Pocket:" + pocket);
 			if (balla.getNumber() == 8) {
 				// This should check the order of balls going in pocket if several balls at the same time goes
-				if (table.getPlayerInTurnBalls().size() != 8) {
+				if (table.getPlayerInTurnBalls().size() != 7) {
 					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
 				} else {
 					System.out.println("We have a winner ");
@@ -287,14 +289,14 @@ public class EightBallRuleBase {
 			balla.getVelocity().y = 0d;
 			balla.setPosition(pocket.getCenter());
 			int ownBalls = table.getPlayerInTurnBalls().size();
-			int opponentBalls = table.getPlayerNotInTurnBalls().size();
+//			int opponentBalls = table.getPlayerNotInTurnBalls().size();
 			table.putBallInPocket(balla, pocket);
 			if (table.getPlayerInTurnBalls().size() > ownBalls) {
 				this.gotOwnBallInPocket = true;
 			}
-			if (table.getPlayerNotInTurnBalls().size() > opponentBalls && this.turnResult == null) {
-				this.turnResult = TurnResult.HANDBALL;
-			}
+//			if (table.getPlayerNotInTurnBalls().size() > opponentBalls && this.turnResult == null) {
+//				this.turnResult = TurnResult.HANDBALL;
+//			}
 			removeFromNextTurn(balla);
 			break;
 		}

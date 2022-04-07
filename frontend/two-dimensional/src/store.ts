@@ -229,7 +229,7 @@ export const store = createStore<IStoreState>({
         poolPlayTurn(context, object) {
             // PoolTable has subscribed to this action
         },
-        poolHandBall(context,object){
+        poolSetHandBall(context,object){
             // PoolTable has subscribed to this action
         },        
         setUser(context, user: IUser) {

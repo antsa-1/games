@@ -15,7 +15,7 @@ export interface IEightBallGame {
     poolTable: IPoolTable,
     gameOptions: IEightBallGameOptions,
     mouseCoordsTemp: IVector2,
-    handBall: boolean
+    handBall: boolean,   
 }
 
 export interface IGameImage {
@@ -37,7 +37,7 @@ export interface IPoolTable extends IPoolComponent, ITable {
     bottomRightPart: IBoundry,
     bottomLeftPart: IBoundry,
     leftPart: IBoundry,
-    pockets: Array<IPocket>[], 
+    pockets: Array<IPocket>[],
 }
 
 export interface IBoundry {

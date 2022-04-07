@@ -42,12 +42,13 @@ const BALL_DIAMETER = 34
 const SECOND_IN_MILLIS = 1000
 const FRICTION = 0.991
 let cueForceInterval = undefined
-
+let collisionCheckInterval = undefined
 
 const DELTA = 1/8 // TODO if any lower the ball goes over to pocket in full speed
 let middleAreaTopLeft =<IVector2> {x: 125, y:130}
 let middleAreaBottomRight =<IVector2> {x: 1072, y:550}
-
+let requestedAnimationFrames =[]
+let showAnimation = true
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
@@ -64,7 +65,7 @@ export default defineComponent({
 				mouseCoordsTemp: undefined,
 				handBall:false,
 				playerABalls:[],
-				playerBBalls:[]
+				playerBBalls:[],				
 			}
 	},
 	beforeCreated(){
@@ -73,11 +74,7 @@ export default defineComponent({
 	created() {
 	
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
-			if (mutation.type === "move") {
-				this.animate(this.theTable.board[this.theTable.board.length -1])
-				this.playMoveNotification()
-				this.highlightLastSquareIfSelected()
-			}else if (mutation.type === "changeTurn") {
+			if (mutation.type === "changeTurn") {
 				if(state.theTable.playerInTurn.name === this.userName){
 					this.addMouseListeners()
 				//	this.startReducer()
@@ -105,26 +102,31 @@ export default defineComponent({
 			this.drawBoard()
 		}
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
-		
 			if(action.type === "poolUpdate"){
 				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
+			//	this.cue.force = action.payload.pool.cue.force
 				this.cue.image.visible = true
 			}else if(action.type === "poolPlayTurn"){
-				Object.assign(this.cue, action.payload.pool.cue)
-			
-				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
-				if(action.payload.pool.turnResult === "HANDBALL"){
-					
-					this.handBall = true
-				}
 				this.playerABalls = action.payload.table.playerABalls
 				this.playerBBalls = action.payload.table.playerBBalls
-				window.requestAnimationFrame(this.repaintAll)
-				this.shootBall()
+				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle				
+				if(action.payload.pool.turnResult === "HANDBALL"){
+					this.handBall = true				
+				}				
+				if(document.visibilityState === 'visible'){
+					Object.assign(this.cue, action.payload.pool.cue)
+					this.shootBall()
+				}else {
+					console.log("skipping animation, directly update lists")
+					this.updatePocketedBalls(action.payload.table.playerABalls, this.playerABalls)
+					this.updatePocketedBalls(action.payload.table.playerBBalls, this.playerBBalls)
+					this.updateRemainingBallPositions(action.payload.table.remainingBalls, this.ballsRemaining)
+				}
 			}
-			else if(action.type === "poolHandBall"){
+			else if(action.type === "poolSetHandBall"){
 				
 				this.cueBall.position = action.payload.pool.cueBall.position
+				this.cueBall.inPocket = false
 				this.handBall = false
 				this.cueBall.image.visible = true		
 				if(this.isPlayerInTurn()){
@@ -132,9 +134,11 @@ export default defineComponent({
 					this.addMouseListeners()
 				}
 			}
-			window.requestAnimationFrame(this.repaintAll)
+			this.animate()
 		})
 	},
+
+	
 	beforeUnmount() {
     	this.unsubscribe()
 		this.unsubscribeAction()
@@ -142,10 +146,32 @@ export default defineComponent({
   	},
 	methods: {
 		resize(){ 
-		
-			console.log("****RESIZE all components todo")
-			//this.initTable()
-			
+			console.log("****RESIZE all components todo")	
+		},
+		updateRemainingBallPositions(serverBalls:Array<IBall>, comparisonList:Array<IBall>){
+			serverBalls.forEach(serverBall => {
+				let	ball:IBall= comparisonList.find((ball) => ball.number === serverBall.number)	
+				this.updateBallPosition(ball, serverBall.position)
+			});
+		},
+		updateBallPosition(ball:IBall, position:IVector2){
+			ball.position.x = position.x
+			ball.position.y = position.y
+		},
+
+		updatePocketedBalls(serverBalls:Array<IBall>, pocketedList:Array<IBall>){
+			serverBalls.forEach(serverBall => {
+				let ball:IBall=	this.ballsRemaining.find(ball=> ball.number ===serverBall.number)
+				this.handleBallInPocket(ball)	
+			});
+		},
+
+		animate(always:boolean){
+			if(showAnimation &&  this.isDocumentVisible()){
+				requestAnimationFrame(this.repaintAll)				
+			}else{
+				console.log("not animating "+document.visibilityState)
+			}
 		},
 		repaintComponent(component: IPoolComponent){
 			
@@ -182,7 +208,7 @@ export default defineComponent({
 		
 		},
 		repaintAll(){
-			
+		
 			this.renderingContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
 			//Table
 			const t = this.poolTable.image
@@ -228,6 +254,7 @@ export default defineComponent({
 			this.canvas.height = canvasHeight
 			this.canvas.width = canvasWidth
 			window.addEventListener("resize", this.resize)
+			document.addEventListener("visibilitychange", this.onVisibilityChange);
 			let dimsPoolTable: IVector2 = {x: CANVAS_MAX_WIDTH, y: CANVAS_MAX_HEIGHT}
 			let poolTableImage = <IGameImage> {
 												image: <HTMLImageElement>document.getElementById("tableImg"), 
@@ -307,10 +334,26 @@ export default defineComponent({
 			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true}
 			 if (this.theTable.playerInTurn?.name === this.userName) {
 				this.addMouseListeners()
-			}
-			window.requestAnimationFrame(this.repaintAll)
+			}			
+			
+			this.animate()
 		}, 250)
 		
+		},
+		isDocumentVisible(){
+			return document.visibilityState === 'visible'
+		},
+		onVisibilityChange(){
+			
+			if (this.isDocumentVisible()) {
+				console.log(" VisibilityChange Visible, repainting all")
+				showAnimation =  true
+				requestAnimationFrame(this.repaintAll)
+			} else {
+				console.log("VisibilityChange: not visible")
+				showAnimation =  false
+				clearInterval(collisionCheckInterval)
+			}
 		},
 		isTableTopBoundry(component:IPoolComponent){
 		
@@ -390,7 +433,7 @@ export default defineComponent({
 			if(event.button === 2){
 				this.cueBall.position.x = event.offsetX
 				this.cueBall.position.y = event.offsetY
-				requestAnimationFrame(this.repaintAll)
+				this.animate()
 				return
 			}
 			if(event.button ===1){ // wheel or middle button
@@ -451,7 +494,7 @@ export default defineComponent({
 					}else {						
 						this.cueBall.image.visible = false
 					}
-					window.requestAnimationFrame(this.repaintAll)
+					this.animate()
 				}, 10)
 			}else{
 				this.cue.position.x = this.cueBall.position.x
@@ -459,7 +502,7 @@ export default defineComponent({
 				this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
 				if(this.isPlayerInTurn()){
 					this.updateCueAngle(event)
-					window.requestAnimationFrame(this.repaintAll)
+					this.animate()
 				}
 			}
 		},
@@ -474,9 +517,10 @@ export default defineComponent({
 			if(this.handBall){
 				this.cueBall.image.visible = false
 			}
-			requestAnimationFrame(this.repaintAll)
+			this.animate()
 		},
-		shootBall(showOnly:boolean){			
+		shootBall(){
+			console.log("shootBall")
 			this.poolTable.mouseEnabled = false
 			if(this.cue.force < 10 ){
 				this.cue.force = 10
@@ -487,10 +531,8 @@ export default defineComponent({
 			this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
 	
 			this.collideCueWithCueBall().then(() => {
-				this.cue.image.visible = false
-				this.cue.force = 0
-				this.handleCollisions().then(() => {
-				
+				this.cue.image.visible = false				
+				this.handleCollisions().then(() => {				
 					this.handleAfterAnimation()				
 				})
 			})
@@ -499,20 +541,21 @@ export default defineComponent({
 			return new Promise((resolve) => {
 				this.cue.position = this.cueBall.position
 				setTimeout(() => {
-					window.requestAnimationFrame(this.repaintAll)
-				
+					console.log("collideCueWithCueBall timeOut asking animation")
+					this.animate()
 					resolve("Cue movement done")
 				}, 145)
 			})
 		},
-		handleCollisions(){			
-			return new Promise((resolve) => {
-				const collisionCheckInterval = setInterval(() => {
+		handleCollisions(){	
+			return new Promise((resolve) => {				
+					collisionCheckInterval = setInterval(() => {
+					console.log("counting collisions")
 					this.updateBallProperties()
 					this.handleBallCollisions()
-					window.requestAnimationFrame(this.repaintAll)
+					this.animate()
 					if(!this.isAnyBallMoving()){	
-					
+						clearInterval(collisionCheckInterval)
 						resolve("collisions checked")
 					}
 			}, 25)
@@ -527,7 +570,7 @@ export default defineComponent({
 			})			
 		},
 	
-		isInPocket(component:IBall){
+		checkIfGoesToPocket(component:IBall){
 			// https://stackoverflow.com/questions/481144/equation-for-testing-if-a-point-is-inside-a-circle
 			// (x - center_x)² + (y - center_y)² < radius²   			
 			let pocket:IPocket = this.poolTable.pockets[0]
@@ -567,34 +610,46 @@ export default defineComponent({
 				return pocket
 			}		
 		},
-		handleBallInPocket (ball:IBall, pocket:IPocket){
+		handleBallInPocket (ball:IBall, pocket:IPocket){			
+			if(ball.inPocket){
+				return
+			}
+			ball.velocity.x = 0
+			ball.velocity.y = 0
+			if(pocket){
+				//Only in the active browser (animation) has the pocket
+				ball.position.x = pocket.center.x
+				ball.position.y = pocket.center.y
+			}
+			ball.inPocket = true
 			if(ball.number !== 0){
 				ball.image.canvasDimension.x = ball.image.canvasDimension.x * 0.8
 				ball.image.canvasDimension.y = ball.image.canvasDimension.y * 0.8
-			
-				
-				setTimeout(() => {
-					const found = this.playerABalls.find(ball => ball.number === ball.number)
-					let factorial = this.playerABalls.length
-					const startY = this.canvas.height * 0.07
-					let startX = undefined
-					if(found){
-						console.log("playerA balls "+ball.number)
-						 startX = this.canvas.width * 0.08						 
-					}else{
-						console.log("playerB balls "+ball.number)
-						 startX = this.canvas.width * 0.52
-						 factorial = this.playerBBalls.length
-					}
-					ball.position.x = startX + factorial * ball.diameter
-					ball.position.y = startY
-					console.log("startX => "+startX +" factorial"+factorial+ "JSON."+JSON.stringify(this.playerABalls))
-					
-				}, 1000)
+			}
+			this.animate()
+			if(ball.number == 0){
+				return
 			}			
-			ball.position = <IVector2> {x:pocket.center.x, y:pocket.center.y}
-			ball.velocity.x = 0
-			ball.velocity.y = 0
+			setTimeout(() => {
+				//Moves ball to the edge of the table
+				const found = this.playerABalls.find(balla => balla.number === ball.number)
+				let factorial = this.playerABalls.length
+				let startX = undefined
+				if(found){
+					console.log("to playerA pocket balls "+ball.number)
+					 startX = this.canvas.width * 0.08						 
+				}else{
+					console.log("to playerB balls "+ball.number)
+					 startX = this.canvas.width * 0.55
+					 factorial = this.playerBBalls.length
+				}
+				console.log("!PlayerA balls:"+JSON.stringify(this.playerABalls))
+				console.log("!PlayerB balls:"+JSON.stringify(this.playerBBalls))
+				ball.position.x = startX + factorial * ball.diameter
+				ball.position.y = this.canvas.height * 0.06
+				console.log("startX => "+startX +" factorial"+factorial+ "JSON."+JSON.stringify(this.playerABalls))
+				this.animate()
+			}, 1500)
 		},
 		handleBallCollisions(){			
 			for (let i = 0; i < this.ballsRemaining.length; i++){
@@ -602,12 +657,11 @@ export default defineComponent({
 				if(this.isMoving(ball)){
 					this.checkAndHandleTableCollision(ball)
 				}
-				for (let j = i+1; j<this.ballsRemaining.length; j++){
+				for (let j = i + 1; j < this.ballsRemaining.length; j++){
 					const firstBall:IBall = this.ballsRemaining[j]
 					const secondBall:IBall = this.ballsRemaining[i]
-					if(firstBall.inPocket || secondBall.inPocket){
-					
-						break
+					if(firstBall.inPocket || secondBall.inPocket){						
+						continue
 					}
 					if(this.isMoving(firstBall) || this.isMoving(secondBall) ){
 						this.checkAndHandleCollision(secondBall, firstBall)
@@ -674,7 +728,7 @@ export default defineComponent({
 				
 			
 			}else{
-				const pocket:IPocket = this.isInPocket(ball)
+				const pocket:IPocket = this.checkIfGoesToPocket(ball)
 				if(pocket){
 					this.handleBallInPocket(ball, pocket)
 					return 
@@ -803,16 +857,17 @@ export default defineComponent({
 			const tempAngle = Math.atan2(opposite, adjacent)
 			this.cue.angle = tempAngle
 			this.cue.image.canvasRotationAngle = tempAngle
-			window.requestAnimationFrame(this.repaintAll)
+			this.animate()
 			this.t(this.sp, 1000, this.cue, this.cueBall, this.canvas)
 		},
 		updateCueForce(){
 			this.cue.force += 10
 			this.cue.image.canvasDestination.x  -= 5
-			requestAnimationFrame(this.repaintAll)
+			this.animate()
 			
 			if(this.cue.force >= 250){
 				clearInterval(cueForceInterval)
+				this.poolTable.mouseEnabled = false
 				this.st(this.cue, this.cueBall, this.canvas)
 			}
 		},
@@ -957,8 +1012,8 @@ export default defineComponent({
 		},
 		repaintNames(){
 			this.renderingContext.font = "16px Arial";
-			this.renderingContext.fillText(this.theTable.playerA.name, this.canvas.width * 0.10, 25)
-			this.renderingContext.fillText(this.theTable.playerB.name, this.canvas.width * 0.55, 25)
+			this.renderingContext.fillText(this.theTable.playerA.name, this.canvas.width * 0.10, 20)
+			this.renderingContext.fillText(this.theTable.playerB.name, this.canvas.width * 0.55, 20)
 		}
 	},
 	

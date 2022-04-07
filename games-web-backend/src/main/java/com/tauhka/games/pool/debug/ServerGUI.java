@@ -59,7 +59,7 @@ public class ServerGUI implements Runnable {
 						ServerGUIComponent ballPanel = (ServerGUIComponent) canvasPanel.getComponent(i);
 						Ball ball = (Ball) ballPanel.getPoolComponent();
 						if (ball.isInPocket()) {
-							ballPanel.setBounds((int) ball.getNumber() * 35, 20, 141, 141);
+							ballPanel.setBounds((int) 40+ ball.getNumber() * 35, 15, 141, 141);
 						} else {
 							ballPanel.setBounds((int) ballPanel.getPoolComponent().getPosition().x - ball.getRadius().intValue(), (int) ballPanel.getPoolComponent().getPosition().y - ball.getRadius().intValue(), 141, 141);
 						}
