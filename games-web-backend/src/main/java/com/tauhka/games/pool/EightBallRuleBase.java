@@ -22,6 +22,7 @@ public class EightBallRuleBase {
 	private boolean eightBallHitFirst = false;
 	private boolean ownBallHitFirst = false;
 	private boolean gotOwnBallInPocket = false;
+	private boolean gotOpponentBallInPocket = false;
 
 	public TurnResult playTurn(PoolTable table, PoolTurn turn) {
 		this.reset();
@@ -30,22 +31,24 @@ public class EightBallRuleBase {
 		LOGGER.info("CueBall initial velocity:" + v + " angle:" + cue.getAngle() + " force:" + cue.getForce());
 		table.getCueBall().setVelocity(v);
 		handleBallsMovements(table);
-
 		for (Ball ball : removalBalls) {
 			table.getRemainingBalls().remove(ball);
-
 		}
 		if (table.isOpen() && eightBallHitFirst && removalBalls.size() > 0 && turnResult == null) {
 			System.out.println("EightBall tableOpen changeTurn");
 			turnResult = TurnResult.CHANGE_TURN;
 		}
-		if (turnResult == null && gotOwnBallInPocket) {
-			turnResult = TurnResult.CONTINUE_TURN;
-		}
 		if (!ownBallHitFirst && turnResult == null) {
 			// No ball was hit
 			turnResult = TurnResult.HANDBALL;
 		}
+		if (turnResult == null && gotOpponentBallInPocket) {
+			turnResult = TurnResult.CHANGE_TURN;
+		}
+		if (turnResult == null && gotOwnBallInPocket) {
+			turnResult = TurnResult.CONTINUE_TURN;
+		}
+
 		return turnResult != null ? turnResult : TurnResult.CHANGE_TURN;
 	}
 
@@ -56,7 +59,7 @@ public class EightBallRuleBase {
 		this.eightBallHitFirst = false;
 		gotOwnBallInPocket = false;
 		ownBallHitFirst = false;
-
+		gotOpponentBallInPocket = false;
 	}
 
 	public boolean isCueBallNewPositionAllowed(PoolTable table, Vector2d newPosition) {
@@ -289,14 +292,14 @@ public class EightBallRuleBase {
 			balla.getVelocity().y = 0d;
 			balla.setPosition(pocket.getCenter());
 			int ownBalls = table.getPlayerInTurnBalls().size();
-//			int opponentBalls = table.getPlayerNotInTurnBalls().size();
+			int opponentBalls = table.getPlayerNotInTurnBalls().size();
 			table.putBallInPocket(balla, pocket);
 			if (table.getPlayerInTurnBalls().size() > ownBalls) {
 				this.gotOwnBallInPocket = true;
 			}
-//			if (table.getPlayerNotInTurnBalls().size() > opponentBalls && this.turnResult == null) {
-//				this.turnResult = TurnResult.HANDBALL;
-//			}
+			if (table.getPlayerNotInTurnBalls().size() > opponentBalls) {
+				this.gotOpponentBallInPocket = true;
+			}
 			removeFromNextTurn(balla);
 			break;
 		}

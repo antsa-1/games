@@ -10,6 +10,7 @@ export interface IEightBallGame {
     ballsRemaining: Array<IBall>[],
     playerABalls: Array<IBall>[],
     playerBBalls: Array<IBall>[],
+    serverRemainingBalls:Array<IBall>[],
     cueBall: IBall,
     cue: ICue,
     poolTable: IPoolTable,

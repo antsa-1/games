@@ -49,6 +49,8 @@ let middleAreaTopLeft =<IVector2> {x: 125, y:130}
 let middleAreaBottomRight =<IVector2> {x: 1072, y:550}
 let requestedAnimationFrames =[]
 let showAnimation = true
+let animationInProcess = false
+//let ballImages=[]
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
@@ -65,7 +67,8 @@ export default defineComponent({
 				mouseCoordsTemp: undefined,
 				handBall:false,
 				playerABalls:[],
-				playerBBalls:[],				
+				playerBBalls:[],
+				serverRemainingBalls:[]
 			}
 	},
 	beforeCreated(){
@@ -105,22 +108,25 @@ export default defineComponent({
 			if(action.type === "poolUpdate"){
 				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
 			//	this.cue.force = action.payload.pool.cue.force
-				this.cue.image.visible = true
+			
 			}else if(action.type === "poolPlayTurn"){
 				this.playerABalls = action.payload.table.playerABalls
 				this.playerBBalls = action.payload.table.playerBBalls
-				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle				
+				this.serverRemainingBalls = action.payload.table.remainingBalls // for jumping browser tabs
+				this.cue.force = action.payload.pool.cue.force
+				this.cue.angle = action.payload.pool.cue.angle
+				
 				if(action.payload.pool.turnResult === "HANDBALL"){
 					this.handBall = true				
 				}				
-				if(document.visibilityState === 'visible'){
-					Object.assign(this.cue, action.payload.pool.cue)
+				if(this.isDocumentVisible()){
 					this.shootBall()
 				}else {
 					console.log("skipping animation, directly update lists")
 					this.updatePocketedBalls(action.payload.table.playerABalls, this.playerABalls)
 					this.updatePocketedBalls(action.payload.table.playerBBalls, this.playerBBalls)
 					this.updateRemainingBallPositions(action.payload.table.remainingBalls, this.ballsRemaining)
+					this.cue.force = 0
 				}
 			}
 			else if(action.type === "poolSetHandBall"){
@@ -129,8 +135,8 @@ export default defineComponent({
 				this.cueBall.inPocket = false
 				this.handBall = false
 				this.cueBall.image.visible = true		
-				if(this.isPlayerInTurn()){
-					this.cue.image.visible = true
+				if(this.isMyTurn()){
+				
 					this.addMouseListeners()
 				}
 			}
@@ -168,6 +174,7 @@ export default defineComponent({
 
 		animate(always:boolean){
 			if(showAnimation &&  this.isDocumentVisible()){
+				
 				requestAnimationFrame(this.repaintAll)				
 			}else{
 				console.log("not animating "+document.visibilityState)
@@ -228,8 +235,19 @@ export default defineComponent({
 			for( let i = 0; i < this.ballsRemaining.length; i++){
 				this.repaintComponent(this.ballsRemaining[i])
 			}
-			this.repaintComponent(this.cue)
+		/*	for( let i = 0; i < this.playerABalls.length; i++){
+				let ball:IBall = this.playerABalls[i]
+				ball.image = ballImages[ball.number]
+				this.repaintComponent(ball)
+			}
+			for( let i = 0; i < this.playerBBalls.length; i++){
+				let ball:IBall = this.playerBBalls[i]
+				ball.image = ballImages[ball.number]
+				this.repaintComponent(ball)
+			}
+			*/
 			this.repaintNames()
+			this.repaintComponent(this.cue)
 			//this.repaintTableParts()
 			//this.repaintPockets()
 			//this.repaintPathways()
@@ -348,12 +366,26 @@ export default defineComponent({
 			if (this.isDocumentVisible()) {
 				console.log(" VisibilityChange Visible, repainting all")
 				showAnimation =  true
-				requestAnimationFrame(this.repaintAll)
+				this.serverRemainingBalls.forEach(serverBall => {
+					let ball = this.ballsRemaining.find(ball => ball.number ===serverBall.number)
+					ball.position = serverBall.position
+				});
+				if(this.isMyTurn()){
+					this.poolTable.mouseEnabled = true
+					this.cue.image.visible = true
+					this.addMouseListeners()
+				} else{
+					this.poolTable.mouseEnabled = false
+					this.removeMouseListeners()
+				}
+				this.animate()
 			} else {
-				console.log("VisibilityChange: not visible")
-				showAnimation =  false
+				showAnimation =  false	
+				console.log("VisibilityChange: not visible, animationInProcess:"+animationInProcess)				
+				this.poolTable.mouseEnabled = false
+				this.removeMouseListeners()
 				clearInterval(collisionCheckInterval)
-			}
+			}			
 		},
 		isTableTopBoundry(component:IPoolComponent){
 		
@@ -397,6 +429,7 @@ export default defineComponent({
 							canvasDestination:{x:- ballDiameter/2, y: -ballDiameter/2},
 							visible: true
 			}
+		//	ballImages.push(ballImage)
 			return <IBall>{
 							image: ballImage,
 							diameter: ballDiameter,
@@ -424,7 +457,8 @@ export default defineComponent({
 			if(event.button ===2){				
 				return
 			}
-			if(this.poolTable.mouseEnabled && !this.handBall){
+				console.log("mousedown:"+this.poolTable.mouseEnabled)
+			if(this.poolTable.mouseEnabled && ! this.handBall){
 				cueForceInterval = setInterval(this.updateCueForce, 50)
 			}
 		},	
@@ -453,7 +487,7 @@ export default defineComponent({
 				}
 			}
 		},
-		isPlayerInTurn(){	
+		isMyTurn(){	
 			return this.theTable?.playerInTurn?.name === this.userName
 		},
 		isHandBallPositionAllowed(){
@@ -500,7 +534,7 @@ export default defineComponent({
 				this.cue.position.x = this.cueBall.position.x
 				this.cue.position.y = this.cueBall.position.y
 				this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
-				if(this.isPlayerInTurn()){
+				if(this.isMyTurn()){
 					this.updateCueAngle(event)
 					this.animate()
 				}
@@ -508,7 +542,7 @@ export default defineComponent({
 		},
 		handleAfterAnimation(){
 			
-			if(this.isPlayerInTurn()){
+			if(this.isMyTurn()){
 			
 				this.addMouseListeners()
 				this.poolTable.mouseEnabled = true
@@ -518,6 +552,7 @@ export default defineComponent({
 				this.cueBall.image.visible = false
 			}
 			this.animate()
+			animationInProcess = false
 		},
 		shootBall(){
 			console.log("shootBall")

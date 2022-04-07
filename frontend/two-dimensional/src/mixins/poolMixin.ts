@@ -59,5 +59,6 @@ export const poolMixin = {
 			return data.pool.turnResult === "HANDBALL"
 						
 		},
+		
 	},
 }
