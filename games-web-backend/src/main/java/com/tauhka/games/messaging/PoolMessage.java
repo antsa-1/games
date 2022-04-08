@@ -8,6 +8,7 @@ import com.tauhka.games.pool.CueBall;
 import com.tauhka.games.pool.TurnResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 /** @author antsa-1 from GitHub 26 Mar 2022 **/
 
@@ -18,7 +19,7 @@ public class PoolMessage implements Serializable {
 	private Cue cue;
 	@JsonbProperty("cueBall")
 	private CueBall cueBall;
-	@JsonbProperty("canvas")
+	@JsonbTransient
 	private Vector2d canvas;
 	@JsonbProperty("turnResult")
 	private String turnResult;

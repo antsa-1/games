@@ -32,6 +32,8 @@ public class PoolTable extends Table implements PoolComponent {
 	@JsonbProperty("playerBBalls")
 	private List<Ball> playerBBalls; // Player properties
 	@JsonbTransient
+	private CueBall cueBall;
+	@JsonbTransient
 	private List<Pocket> pockets;
 	@JsonbTransient
 	private List<Boundry> boundries;
@@ -39,8 +41,6 @@ public class PoolTable extends Table implements PoolComponent {
 	private Vector2d middleAreaStart;
 	@JsonbTransient
 	private Vector2d middleAreaEnd;
-	@JsonbTransient
-	private CueBall cueBall;
 	@JsonbTransient
 	private Canvas canvas;
 	@JsonbTransient
@@ -103,6 +103,7 @@ public class PoolTable extends Table implements PoolComponent {
 		PoolTurn playedTurn = new PoolTurn();
 		playedTurn.setTurnResult(turnResult.toString());
 		playedTurn.setCue(turn.getCue());
+		playedTurn.setCueBall(cueBall);
 		return playedTurn;
 
 	}
@@ -221,6 +222,11 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public void setCueBall(CueBall cueBall) {
 		this.cueBall = cueBall;
+	}
+
+	public void updateCueBallPosition(Vector2d position) {
+		this.cueBall.position.x = position.x;
+		this.cueBall.position.y = position.y;
 	}
 
 	public List<Boundry> getBoundries() {

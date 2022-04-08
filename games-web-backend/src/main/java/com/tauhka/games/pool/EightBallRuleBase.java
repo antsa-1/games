@@ -21,8 +21,8 @@ public class EightBallRuleBase {
 	private List<Ball> removalBalls = new ArrayList<Ball>();
 	private boolean eightBallHitFirst = false;
 	private boolean ownBallHitFirst = false;
-	private boolean gotOwnBallInPocket = false;
-	private boolean gotOpponentBallInPocket = false;
+	private boolean ownBallInPocket = false;
+	private boolean opponentBallInPocket = false;
 
 	public TurnResult playTurn(PoolTable table, PoolTurn turn) {
 		this.reset();
@@ -42,13 +42,13 @@ public class EightBallRuleBase {
 			// No ball was hit
 			turnResult = TurnResult.HANDBALL;
 		}
-		if (turnResult == null && gotOpponentBallInPocket) {
+		if (turnResult == null && opponentBallInPocket) {
 			turnResult = TurnResult.CHANGE_TURN;
 		}
-		if (turnResult == null && gotOwnBallInPocket) {
+		if (turnResult == null && ownBallInPocket) {
 			turnResult = TurnResult.CONTINUE_TURN;
 		}
-
+		//table.updateCueBallPosition()
 		return turnResult != null ? turnResult : TurnResult.CHANGE_TURN;
 	}
 
@@ -57,9 +57,9 @@ public class EightBallRuleBase {
 		this.iterationCount = 0;
 		this.removalBalls = new ArrayList<Ball>();
 		this.eightBallHitFirst = false;
-		gotOwnBallInPocket = false;
+		ownBallInPocket = false;
 		ownBallHitFirst = false;
-		gotOpponentBallInPocket = false;
+		opponentBallInPocket = false;
 	}
 
 	public boolean isCueBallNewPositionAllowed(PoolTable table, Vector2d newPosition) {
@@ -295,10 +295,10 @@ public class EightBallRuleBase {
 			int opponentBalls = table.getPlayerNotInTurnBalls().size();
 			table.putBallInPocket(balla, pocket);
 			if (table.getPlayerInTurnBalls().size() > ownBalls) {
-				this.gotOwnBallInPocket = true;
+				this.ownBallInPocket = true;
 			}
 			if (table.getPlayerNotInTurnBalls().size() > opponentBalls) {
-				this.gotOpponentBallInPocket = true;
+				this.opponentBallInPocket = true;
 			}
 			removeFromNextTurn(balla);
 			break;

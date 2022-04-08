@@ -77,9 +77,9 @@ public class PoolTableHandler {
 			playTurnMessage.setTitle(MessageTitle.POOL_PLAY_TURN);
 		}
 		PoolMessage poolMessage = new PoolMessage();
-		poolMessage.setCue(message.getPoolMessage().getCue());
-		poolMessage.setCueBall(message.getPoolMessage().getCueBall());
-		poolMessage.setCanvas(message.getPoolMessage().getCanvas());
+		poolMessage.setCue(playedTurn.getCue());
+		poolMessage.setCueBall(playedTurn.getCueBall());
+		//poolMessage.setCanvas(message.getPoolMessage().getCanvas());
 		poolMessage.setTurnResult(playedTurn.getTurnResult().toString());
 		playTurnMessage.setPoolMessage(poolMessage);
 		return playTurnMessage;

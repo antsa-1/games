@@ -8,9 +8,10 @@ export interface IPoolComponent {
 export interface IEightBallGame {
     canvas: HTMLCanvasElement,
     ballsRemaining: Array<IBall>[],
-    playerABalls: Array<IBall>[],
-    playerBBalls: Array<IBall>[],
-    serverRemainingBalls:Array<IBall>[],
+    resultPlayerABalls: Array<IBall>[],
+    resultPlayerBBalls: Array<IBall>[],
+    resultRemainingBalls:Array<IBall>[],
+    resultCueBallPosition:IVector2
     cueBall: IBall,
     cue: ICue,
     poolTable: IPoolTable,

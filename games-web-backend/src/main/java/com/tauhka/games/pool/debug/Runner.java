@@ -24,8 +24,8 @@ public class Runner {
 		// 0.04085316949817506 force 200 two bottom pocket pathway collisions
 		// 0.0522503382826774d / 220d -> top left collision to table
 
-		cue.setAngle(0.04938321090451913d); 
-		cue.setForce(170d);
+		cue.setAngle(0.0574905344833121d); 
+		cue.setForce(250d);
 		turn.setCue(cue);
 		p.playTurn(u,turn);
 		/* SET1 cue.setAngle(0.052751015925788396d); cue.setForce(120d); turn.setCue(cue); p.playTurn(u, turn); Thread.sleep(1000);
