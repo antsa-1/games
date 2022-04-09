@@ -277,6 +277,9 @@ public abstract class Table implements Serializable {
 	}
 
 	public synchronized boolean suggestRematch(User user) {
+		if (!isPlayer(user)) {
+			throw new IllegalArgumentException("Rematchplayer is not a player in the table:" + user);
+		}
 		if (this.rematchPlayer == null) {
 			this.rematchPlayer = user;
 			return false;

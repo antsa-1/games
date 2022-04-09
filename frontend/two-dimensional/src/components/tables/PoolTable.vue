@@ -19,7 +19,7 @@
 		</div>
 	</div>
 	<div class="col-xs-12 col-sm-8">
-			 <canvas id="canvas" width="400" height="400" style="border:1px solid" ></canvas>
+			 <canvas id="canvas" width="400" height="400" style="border:1px solid" :class="{'bg-secondary':theTable.playerInTurn ==null}" ></canvas>
     	</div>
 	<chat :id="theTable.id"> </chat>
 </template>
@@ -89,8 +89,12 @@ export default defineComponent({
 			}else if (mutation.type === "rematch" ){
 				this.initTable()
 			}
-			else if (mutation.type === "updateWinner" ){			
-				console.log("update winner")
+			else if (mutation.type === "poolGameEnded" ){			
+				console.log("PoolGame ended table")
+				this.theTable.playerInTurn = null
+				this.removeMouseListeners()
+				this.poolTable.mouseEnabled = false
+				
 			}else if(mutation.type === "setDraw"){
 				this.stopReducer()
 				this.removeMouseListener()
@@ -98,7 +102,9 @@ export default defineComponent({
     	})
 	},
 	computed: {
-			
+			showAnimationn(){
+				return this.isDocumentVisible && this.isOngoingGame() && this.gameOptions.useAnimation===true
+			}
 	},
 	mounted() {	
 		this.initTable()
@@ -244,24 +250,22 @@ export default defineComponent({
 			for( let i = 0; i < this.ballsRemaining.length; i++){
 				this.repaintComponent(this.ballsRemaining[i])
 			}
-		/*	for( let i = 0; i < this.resultPlayerABalls.length; i++){
-				let ball:IBall = this.resultPlayerABalls[i]
-				ball.image = ballImages[ball.number]
-				this.repaintComponent(ball)
-			}
-			for( let i = 0; i < this.resultPlayerBBalls.length; i++){
-				let ball:IBall = this.resultPlayerBBalls[i]
-				ball.image = ballImages[ball.number]
-				this.repaintComponent(ball)
-			}
-			*/
+			console.log("iOnGoing"+this.isOngoingGame() +" showAnimation"+showAnimation)
+			if(!this.isOngoingGame() && !showAnimation){
+				console.log("!!!!!!!!!")
+				this.repaintGameEnd()
+			}			
 			this.repaintNames()
 			this.repaintComponent(this.cue)
 			//this.repaintTableParts()
 			//this.repaintPockets()
 			//this.repaintPathways()
 		},
-		
+		repaintGameEnd(){
+			this.renderingContext.globalAlpha = 0.4
+			this.renderingContext.fillStyle = 'gray'
+			this.renderingContext.fillRect(0, 0, this.canvas.width, this.canvas.height)
+		},
 		initTable() {
 			console.log("****initTable")
 			this.ballsRemaining=[]
@@ -358,14 +362,12 @@ export default defineComponent({
 				this.ballsRemaining.push(ball)			
 			}
 			this.ballsRemaining.push(this.cueBall)
-			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true}
-			 if (this.theTable.playerInTurn?.name === this.userName) {
+			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true, useAnimation:true}
+			if (this.theTable.playerInTurn?.name === this.userName) {
 				this.addMouseListeners()
-			}			
-			
+			}
 			this.draw()
 		}, 250)
-		
 		},
 		isDocumentVisible(){
 			return document.visibilityState === 'visible'
@@ -374,7 +376,7 @@ export default defineComponent({
 			
 			if (this.isDocumentVisible()) {
 				console.log(" VisibilityChange Visible, repainting all")
-				showAnimation =  true
+				
 				this.resultRemainingBalls.forEach(serverBall => {
 					let ball = this.ballsRemaining.find(ball => ball.number === serverBall.number)
 					ball.position = serverBall.position
@@ -390,7 +392,13 @@ export default defineComponent({
 					this.poolTable.mouseEnabled = false
 					this.removeMouseListeners()
 				}
-				this.draw()
+				if(this.isOngoingGame()){
+					showAnimation =  true
+					this.draw()
+				}else{
+					requestAnimationFrame(this.repaintAll)
+				}
+				
 			} else {
 				showAnimation =  false	
 				console.log("VisibilityChange: not visible, animationInProcess:"+animationInProcess)				
@@ -554,7 +562,7 @@ export default defineComponent({
 		},
 		handleAfterAnimation(){
 			
-			if(this.isMyTurn()){
+			if(this.isMyTurn() && this.theTable.playerInTurn !== null){
 			
 				this.addMouseListeners()
 				this.poolTable.mouseEnabled = true
@@ -563,8 +571,13 @@ export default defineComponent({
 			if(this.handBall){
 			//	this.cueBall.image.visible = false
 			}
+			console.log("AFTER anim"+this.isOngoingGame())
+			if(!this.isOngoingGame()){
+				console.log("AFTER anim2"+this.isOngoingGame())
+				showAnimation = false
+			}
 			this.draw()
-			animationInProcess = false
+			
 		},
 		shootBall(){
 			console.log("shootBall")
@@ -596,8 +609,7 @@ export default defineComponent({
 		},
 		handleCollisions(){	
 			return new Promise((resolve) => {				
-					collisionCheckInterval = setInterval(() => {
-					console.log("counting collisions")
+					collisionCheckInterval = setInterval(() => {					
 					this.updateBallProperties()
 					this.handleBallCollisions()
 					this.draw()
@@ -1043,7 +1055,7 @@ export default defineComponent({
 					this.renderingContext.fillText("Mouse: x:"+this.mouseCoordsTemp.x +"  y:"+this.mouseCoordsTemp.y, 150, 50)
 					this.renderingContext.fillText("Ball:  x:"+this.cueBall.position.x +"  y:"+this.cueBall.position.y, 150, 40)
 				}
-						for( let i = 0; i < 6; i++){
+				for( let i = 0; i < 6; i++){
 					let pathway = this.poolTable.pockets[i].pathwayLeft 
 					if(!pathway)
 					break // testcode
@@ -1059,7 +1071,7 @@ export default defineComponent({
 				}
 		},
 		repaintNames(){
-			this.renderingContext.font = "16px Arial";
+			this.renderingContext.font = "bolder 16px Arial";			
 			this.renderingContext.fillText(this.theTable.playerA.name, this.canvas.width * 0.10, 20)
 			this.renderingContext.fillText(this.theTable.playerB.name, this.canvas.width * 0.55, 20)
 		}

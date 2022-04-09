@@ -2,10 +2,10 @@ package com.tauhka.games.messaging;
 
 import java.io.Serializable;
 
+import com.tauhka.games.core.User;
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.pool.Cue;
 import com.tauhka.games.pool.CueBall;
-import com.tauhka.games.pool.TurnResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
@@ -23,6 +23,8 @@ public class PoolMessage implements Serializable {
 	private Vector2d canvas;
 	@JsonbProperty("turnResult")
 	private String turnResult;
+	@JsonbProperty("winner")
+	private User winner;
 
 	public Cue getCue() {
 		return cue;
@@ -54,6 +56,14 @@ public class PoolMessage implements Serializable {
 
 	public void setTurnResult(String turnResult) {
 		this.turnResult = turnResult;
+	}
+
+	public User getWinner() {
+		return winner;
+	}
+
+	public void setWinner(User winner) {
+		this.winner = winner;
 	}
 
 }

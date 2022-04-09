@@ -110,6 +110,10 @@ export const store = createStore<IStoreState>({
             })
 
         },
+        poolGameEnded(state, message: IChatMessage){
+            console.log("PoolGameEnded")
+            state.theTable.chat.messages.unshift(message)
+        },
         removeTable(state, data: ITable) {
             state.tables = state.tables.filter((table) => {
 
@@ -231,7 +235,10 @@ export const store = createStore<IStoreState>({
         },
         poolSetHandBall(context,object){
             // PoolTable has subscribed to this action
-        },        
+        }, 
+        poolGameEnded(context,message:IChatMessage){
+            context.commit('poolGameEnded', message)
+        } ,
         setUser(context, user: IUser) {
             context.commit('setUser', user)
 

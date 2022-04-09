@@ -5,5 +5,9 @@ package com.tauhka.games.pool;
  **/
 
 public enum TurnResult {
-	HANDBALL, EIGHT_BALL_IN_POCKET_OK, EIGHT_BALL_IN_POCKET_FAIL, CONTINUE_TURN, CHANGE_TURN
+	HANDBALL, EIGHT_BALL_IN_POCKET_OK, EIGHT_BALL_IN_POCKET_FAIL, CONTINUE_TURN, CHANGE_TURN;
+
+	public static boolean isDecisive(TurnResult tr) {
+		return tr == EIGHT_BALL_IN_POCKET_FAIL || tr == EIGHT_BALL_IN_POCKET_OK;
+	}
 }

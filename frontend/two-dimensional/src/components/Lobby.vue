@@ -340,12 +340,8 @@ export default defineComponent({
 						break
 					case "POOL_PLAY_TURN":
 						//console.log("PLAY_TURN from server"+JSON.stringify(data,null,2)+ " playerInTurn table:"+data.table.playerInTurn.name +" playerInTurnStore:"+this.$store.getters.playerInTurn+ " I am:"+this.userName)
-						this.$store.dispatch("poolPlayTurn", data).then(() => {							
-							if(this.isTurnChangeToMe(data.table)){
-								console.log("Turn changed to me")
-								this.$store.dispatch("changeTurn", data.table.playerInTurn)
-							}else if(this.isTurnChangeFromMe(data.table)){
-								console.log("Turn from me")
+						this.$store.dispatch("poolPlayTurn", data).then(() => {						
+							if(this.$store.getters.playerInTurn.name !== data.table.playerInTurn){
 								this.$store.dispatch("changeTurn", data.table.playerInTurn)
 							}
 						})
@@ -357,36 +353,43 @@ export default defineComponent({
 							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
 							if(data.table.gameMode.gameNumber !== 3 ){
 								this.$store.dispatch("move", lastSquare)
-							} else{
-								this.$store.dispatch("poolPlayTurn", data)
-							}
-							console.log("RES:"+JSON.stringify(data.win))						
-							if(data.win.resultType==="DRAW"){
-								const gameResult:IGameResult={table:data.table,win:data.win}
-								
-								this.$store.dispatch("setDraw",gameResult);
-							}
-							else
-							{
-								const updateScoreMessage:IWinMessage =
-								{
-									winner:data.win.winner.name,
-									reason: IWinTitle.GAME,
-									winsA:data.table.playerA.wins,
-									winsB:data.table.playerB.wins,
-									from:"System"
-								}									
-								this.$store.dispatch("updateScore", updateScoreMessage);
-								const win:IWin={
-									fromX:data.win.fromX,
-									fromY:data.win.fromY,
-									toX:data.win.toX,
-									toY:data.win.toY,
-									resultType:data.win.resultType,
-									winner:{name:data.win.winner.name},	
-								}							
-								this.$store.dispatch("updateWinner", win);
-							}		
+								console.log("RES:"+JSON.stringify(data.win))						
+								if(data.win.resultType === "DRAW"){
+									const gameResult:IGameResult={table:data.table,win:data.win}								
+									this.$store.dispatch("setDraw",gameResult);
+								}
+								else {
+									const updateScoreMessage:IWinMessage =
+									{
+										winner:data.win.winner.name,
+										reason: IWinTitle.GAME,
+										winsA:data.table.playerA.wins,
+										winsB:data.table.playerB.wins,
+										from:"System"
+									}									
+									this.$store.dispatch("updateScore", updateScoreMessage);
+									const win:IWin = {
+										fromX:data.win.fromX,
+										fromY:data.win.fromY,
+										toX:data.win.toX,
+										toY:data.win.toY,
+										resultType:data.win.resultType,
+										winner:{name:data.win.winner.name},	
+									}							
+									this.$store.dispatch("updateWinner", win);
+								}
+								return
+							} 
+							if(data.table.gameMode.gameNumber === 3){
+								this.$store.dispatch("poolPlayTurn", data)								
+								let winner = data.pool.winner.name								
+								console.log("PoolGame ended" +winner)
+									const poolWinMessage:IChatMessage = {
+										from:data.from,
+										text:winner +" won" + " ( "+data.pool.turnResult.toLowerCase()	+" )"			
+								}
+								this.$store.dispatch("poolGameEnded", poolWinMessage)
+							}									
 						break;
 					case "WINNER":
 						const winMessage:IWinMessage={

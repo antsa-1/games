@@ -10,14 +10,14 @@ export interface IEightBallGame {
     ballsRemaining: Array<IBall>[],
     resultPlayerABalls: Array<IBall>[],
     resultPlayerBBalls: Array<IBall>[],
-    resultRemainingBalls:Array<IBall>[],
-    resultCueBallPosition:IVector2
+    resultRemainingBalls: Array<IBall>[],
+    resultCueBallPosition: IVector2
     cueBall: IBall,
     cue: ICue,
     poolTable: IPoolTable,
     gameOptions: IEightBallGameOptions,
     mouseCoordsTemp: IVector2,
-    handBall: boolean,   
+    handBall: boolean,    
 }
 
 export interface IGameImage {
@@ -80,5 +80,6 @@ export interface IVector2 {
 
 export interface IEightBallGameOptions {
     helperOrigo: boolean,
-    helperLine: boolean
+    helperLine: boolean,
+    useAnimation: boolean
 }

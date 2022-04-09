@@ -1,5 +1,6 @@
 package com.tauhka.games.pool;
 
+import com.tauhka.games.core.User;
 import com.tauhka.games.core.Vector2d;
 
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -21,6 +22,8 @@ public class PoolTurn {
 
 	@JsonbProperty("turnResult")
 	private String turnResult;
+	@JsonbProperty("winner")
+	private User winner;
 
 	public CueBall getCueBall() {
 		return cueBall;
@@ -60,6 +63,14 @@ public class PoolTurn {
 
 	public void setTurnResult(String turnResult) {
 		this.turnResult = turnResult;
+	}
+
+	public User getWinner() {
+		return winner;
+	}
+
+	public void setWinner(User winner) {
+		this.winner = winner;
 	}
 
 }

@@ -31,6 +31,7 @@ public class PoolTable extends Table implements PoolComponent {
 	private List<Ball> playerABalls; // Player properties
 	@JsonbProperty("playerBBalls")
 	private List<Ball> playerBBalls; // Player properties
+
 	@JsonbTransient
 	private CueBall cueBall;
 	@JsonbTransient
@@ -63,7 +64,7 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	@Override
-	public Object playTurn(User user, Object o) {
+	public synchronized Object playTurn(User user, Object o) {
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
@@ -93,6 +94,10 @@ public class PoolTable extends Table implements PoolComponent {
 		} else {
 			turnResult = this.eightBallRuleBase.playTurn(this, turn);
 		}
+		PoolTurn playedTurn = new PoolTurn();
+		if (TurnResult.isDecisive(turnResult)) {
+			checkWinner(turnResult, playedTurn);
+		}
 		if (turnResult == TurnResult.CHANGE_TURN) {
 			changePlayerInTurn();
 		}
@@ -100,12 +105,24 @@ public class PoolTable extends Table implements PoolComponent {
 			changePlayerInTurn();
 			expectingHandBallUpdate = true;
 		}
-		PoolTurn playedTurn = new PoolTurn();
+
 		playedTurn.setTurnResult(turnResult.toString());
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
 		return playedTurn;
 
+	}
+
+	private void checkWinner(TurnResult turnResult, PoolTurn playedTurn) {
+		if (TurnResult.EIGHT_BALL_IN_POCKET_OK == turnResult) {
+			playedTurn.setWinner(getPlayerInTurn());
+		} else if (TurnResult.EIGHT_BALL_IN_POCKET_FAIL == turnResult) {
+			if (playerInTurn.equals(playerA)) {
+				playedTurn.setWinner(playerB);
+			} else {
+				playedTurn.setWinner(playerA);
+			}
+		}
 	}
 
 	@Override
@@ -116,7 +133,7 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 	}
 
-	public boolean updateHandBall(User user, CueBall sample) {
+	public synchronized boolean updateHandBall(User user, CueBall sample) {
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
@@ -283,9 +300,7 @@ public class PoolTable extends Table implements PoolComponent {
 	@Override
 	public synchronized boolean suggestRematch(User user) {
 
-		super.suggestRematch(this.playerA);
-		super.suggestRematch(this.playerB);
-		this.notify();
+		super.suggestRematch(user);
 		return true;
 	}
 
