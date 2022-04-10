@@ -3,8 +3,7 @@ package com.tauhka.games.pool.debug;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -23,6 +22,7 @@ public class ServerGUI implements Runnable {
 	private PoolTable poolTable;
 	private JFrame frame;
 	private JPanel canvasPanel;
+	private static final Logger LOGGER = Logger.getLogger(ServerGUI.class.getName());
 
 	public ServerGUI(PoolTable poolTable) {
 		this.poolTable = poolTable;
@@ -59,7 +59,7 @@ public class ServerGUI implements Runnable {
 						ServerGUIComponent ballPanel = (ServerGUIComponent) canvasPanel.getComponent(i);
 						Ball ball = (Ball) ballPanel.getPoolComponent();
 						if (ball.isInPocket()) {
-							ballPanel.setBounds((int) 40+ ball.getNumber() * 35, 15, 141, 141);
+							ballPanel.setBounds((int) 40 + ball.getNumber() * 35, 15, 141, 141);
 						} else {
 							ballPanel.setBounds((int) ballPanel.getPoolComponent().getPosition().x - ball.getRadius().intValue(), (int) ballPanel.getPoolComponent().getPosition().y - ball.getRadius().intValue(), 141, 141);
 						}
@@ -83,11 +83,11 @@ public class ServerGUI implements Runnable {
 		try {
 			synchronized (poolTable) {
 				while (true) {
-					// System.out.println("ServerGui starts to wait");
+					// LOGGER.info("ServerGui starts to wait");
 					poolTable.wait();
-					// System.out.println("ServerGui continues after waiting");
+					// LOGGER.info("ServerGui continues after waiting");
 					updateSwingComponentPositions();
-					// System.out.println("ServerGui updated component positions, now notifies");
+					// LOGGER.info("ServerGui updated component positions, now notifies");
 					canvasPanel.revalidate();
 					canvasPanel.repaint();
 					Thread.sleep(20);
@@ -96,7 +96,7 @@ public class ServerGUI implements Runnable {
 			}
 
 		} catch (InterruptedException e) {
-			System.out.println("ServerGui interrupted");
+			LOGGER.info("ServerGui interrupted");
 		}
 	}
 

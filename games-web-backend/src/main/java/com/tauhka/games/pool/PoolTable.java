@@ -61,6 +61,7 @@ public class PoolTable extends Table implements PoolComponent {
 		// PoolPlayer p = new PoolPlayer() super(p,gameMode,randomizeStarte)
 		super(playerA, gameMode, randomizeStarter);
 		PoolTableInitializer.init(this);
+		expectingHandBallUpdate = true;
 	}
 
 	@Override
@@ -73,12 +74,10 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 		PoolTurn turn = (PoolTurn) o;
 
-		// VectorUtil.copy(middleAreaEnd);
 		TurnResult turnResult = null;
 		if (SERVER_GUI) {
 			LOGGER.info("Pooltable instance, server in testing mode");
 			synchronized (this) {
-				// When second pool turn comes from browser this blocks and does not proceed .. TODO
 				turnResult = this.eightBallRuleBase.playTurn(this, turn);
 				LOGGER.info("PoolTable instance made movements now notifying, threadId:" + Thread.currentThread().getId());
 				this.notify();
@@ -105,7 +104,6 @@ public class PoolTable extends Table implements PoolComponent {
 			changePlayerInTurn();
 			expectingHandBallUpdate = true;
 		}
-
 		playedTurn.setTurnResult(turnResult.toString());
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
@@ -158,7 +156,7 @@ public class PoolTable extends Table implements PoolComponent {
 			expectingHandBallUpdate = false;
 			return true;
 		}
-		System.out.println("Handball position not allowed" + sample);
+		LOGGER.info("Handball position not allowed" + sample);
 		return false;
 	}
 
