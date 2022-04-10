@@ -68,7 +68,6 @@ public class HorizontalEvaluations {
 					System.out.print(" _");
 				}
 				if (y == board.length - 1) {
-					System.out.println();
 				}
 			}
 		}
