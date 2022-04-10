@@ -38,7 +38,7 @@ public class MoveEvaluator {
 			}
 			board[move.getX()][move.getY()] = null;
 		}
-		// System.out.println("BEST MOVE:" + bestMove);
+		// LOGGER.info("BEST MOVE:" + bestMove);
 		return bestMove;
 	}
 
