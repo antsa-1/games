@@ -140,6 +140,7 @@ export default defineComponent({
 				
 				this.cueBall.position = action.payload.pool.cueBall.position
 				this.cueBall.inPocket = false
+				this.cue.position = this.cueBall.position
 				this.handBall = false
 				this.cueBall.image.visible = true		
 				if(this.isMyTurn()){
@@ -251,12 +252,13 @@ export default defineComponent({
 				this.repaintComponent(this.ballsRemaining[i])
 			}
 			console.log("iOnGoing"+this.isOngoingGame() +" showAnimation"+showAnimation)
-			if(!this.isOngoingGame() && !showAnimation){
-				console.log("!!!!!!!!!")
+			if(!this.isOngoingGame() && !showAnimation){				
 				this.repaintGameEnd()
 			}			
 			this.repaintNames()
-			this.repaintComponent(this.cue)
+			if(!this.handBall){
+				this.repaintComponent(this.cue)
+			}
 			//this.repaintTableParts()
 			//this.repaintPockets()
 			//this.repaintPathways()
@@ -340,7 +342,7 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x: 250, y: 311}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x:850, y: 35}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
 												velocity:<IVector2>{ x:0, y:0},												
@@ -353,6 +355,9 @@ export default defineComponent({
 												canvasDestination:{x: (-dimsCue.x-BALL_DIAMETER), y: -dimsCue.y/2},
 												canvasRotationAngle: { x:0, y:0 },
 												visible: true
+			}
+			if(this.isPlayerInTurn(this.userName)){
+				this.handBall = true
 			}
 			let cuePosition = <IVector2> { x: this.cueBall.position.x, y: this.cueBall.position.y }	//5	
 			let cueForce = 0
@@ -493,6 +498,7 @@ export default defineComponent({
 			if(event.button ===1){ // wheel or middle button
 			
 			}
+			console.log("HANDBALL:"+this.handBall +" mouseEnabled:"+this.poolTable.mouseEnabled)
 			if(this.handBall && this.poolTable.mouseEnabled){
 				this.cueBall.position.x = event.offsetX
 				this.cueBall.position.y = event.offsetY
@@ -511,6 +517,15 @@ export default defineComponent({
 			return this.theTable?.playerInTurn?.name === this.userName
 		},
 		isHandBallPositionAllowed(){
+			//Starting position position need to be behind the line			
+			if(!this.resultCueBallPosition){
+				//One way of finding out is this starting position selection
+				console.log("!!!!!")
+				if(this.mouseCoordsTemp.x > this.canvas.width * 0.25) {// relative line position
+				console.log("22222")
+					return false
+				}
+			}
 			//Table
 			if( this.mouseCoordsTemp.x > this.poolTable.leftPart.a + this.cueBall.radius &&  this.mouseCoordsTemp.x < this.poolTable.rightPart.a - this.cueBall.radius){
 				if(! (this.mouseCoordsTemp.y > this.poolTable.topLeftPart.a+ this.cueBall.radius && this.mouseCoordsTemp.y < this.poolTable.bottomRightPart.a -this.cueBall.radius) ){
@@ -545,7 +560,7 @@ export default defineComponent({
 				setTimeout(() => {
 					if(this.isHandBallPositionAllowed(event)){						
 						this.cueBall.image.visible = true
-					}else {						
+					}else {
 						this.cueBall.image.visible = false
 					}
 					this.draw()

@@ -286,7 +286,7 @@ export default defineComponent({
 						break;
 					case "START_GAME":						
 						this.$store.dispatch("startGame", data.table)
-						const tableC:ITable=data.table
+						const tableC:ITable = data.table
 						if (tableC.playerA.name === this.userName || tableC.playerB.name === this.userName ){
 							tableC.playerA.wins = 0
 							tableC.playerB.wins = 0
@@ -295,8 +295,8 @@ export default defineComponent({
 							this.watchTableButtonVisible = false
 							this.$store.dispatch("selectTable", data.table).then(() => {
 								this.openTable(data.table)
-							})
-						}			
+							})							
+						}
 						break
 					case "MOVE":
 						const square :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}					
@@ -334,12 +334,11 @@ export default defineComponent({
 						this.$store.dispatch("poolSetHandBall", data)
 						const handBallMessage:IChatMessage = {
 							from:data.from,
-							text:"Handball for "+data.table.playerInTurn.name
+							text:"Handball for " + data.table.playerInTurn.name
 						}
 						this.$store.dispatch("chat", handBallMessage);
 						break
-					case "POOL_PLAY_TURN":
-						//console.log("PLAY_TURN from server"+JSON.stringify(data,null,2)+ " playerInTurn table:"+data.table.playerInTurn.name +" playerInTurnStore:"+this.$store.getters.playerInTurn+ " I am:"+this.userName)
+					case "POOL_PLAY_TURN":						
 						this.$store.dispatch("poolPlayTurn", data).then(() => {						
 							if(this.$store.getters.playerInTurn.name !== data.table.playerInTurn){
 								this.$store.dispatch("changeTurn", data.table.playerInTurn)
