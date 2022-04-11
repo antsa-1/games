@@ -113,13 +113,14 @@ public class PoolTable extends Table implements PoolComponent {
 			changePlayerInTurn();
 			expectingHandBallUpdate = true;
 		}
-		if (playedTurn.getWinner() == null && getPlayerInTurnBalls().size() == 1) {
+		if (turnResult != TurnResult.HANDBALL && playedTurn.getWinner() == null && getPlayerInTurnBalls().size() == 7) {
 			turnResult = TurnResult.SELECT_POCKET;
 			expectingPocketSelection = true;
 		}
 		playedTurn.setTurnResult(turnResult.toString());
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
+		this.selectedPocket = null;
 		return playedTurn;
 	}
 
@@ -143,7 +144,7 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 	}
 
-	public synchronized boolean updateHandBall(User user, CueBall sample) {
+	public synchronized PoolTurn updateHandBall(User user, CueBall sample) {
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("HandBall update Player is not in turn in table:" + this);
 		}
@@ -153,6 +154,7 @@ public class PoolTable extends Table implements PoolComponent {
 		if (!expectingHandBallUpdate) {
 			throw new IllegalArgumentException("HandBall update is not expected:" + this);
 		}
+		PoolTurn turn = new PoolTurn();
 		if (handBallPositionAllowed(sample)) {
 			// Different canvas sizes .. TODO
 			Vector2d position = sample.getPosition();
@@ -169,10 +171,15 @@ public class PoolTable extends Table implements PoolComponent {
 				}
 			}
 			expectingHandBallUpdate = false;
-			return true;
+			if (getPlayerInTurnBalls().size() == 7) {
+				this.expectingPocketSelection = true;
+				turn.setTurnResult(TurnResult.SELECT_POCKET.toString());
+				return turn;
+			}
 		}
 		LOGGER.info("Handball position not allowed" + sample);
-		return false;
+		turn.setTurnResult(TurnResult.CONTINUE_TURN.toString());
+		return turn;
 	}
 
 	public synchronized PoolTurn selectPocket(User user, Integer pocketNumber) {
@@ -221,6 +228,10 @@ public class PoolTable extends Table implements PoolComponent {
 			return this.playerBBalls;
 		}
 		return this.playerABalls;
+	}
+
+	public Pocket getSelectedPocket() {
+		return selectedPocket;
 	}
 
 	public void handleHandBall(CueBall cueBall, Vector2d newPosition) {

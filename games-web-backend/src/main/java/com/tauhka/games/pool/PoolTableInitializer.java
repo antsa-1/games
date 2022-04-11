@@ -77,7 +77,7 @@ public class PoolTableInitializer {
 
 		left = new PathWay(new Vector2d(571d, 600d), new Vector2d(580d, 620d));
 		right = new PathWay(new Vector2d(644d, 600d), new Vector2d(635d, 620d));
-		center = new Vector2d(607d, 630d);
+		center = new Vector2d(607d, 628d);
 		pocket = new Pocket(center, radiusSmall, left, right);
 		pockets.add(pocket);
 

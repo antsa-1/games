@@ -56,7 +56,7 @@ public class EightBallRuleBase {
 		if (turnResult == null && ownBallInPocket) {
 			turnResult = TurnResult.CONTINUE_TURN;
 		}
-		
+
 		if (turnResult == null && cueBallInPocket) {
 			turnResult = TurnResult.HANDBALL;
 		}
@@ -286,10 +286,19 @@ public class EightBallRuleBase {
 				continue;
 			}
 			LOGGER.info("Ball:" + balla + " goes In Pocket:" + pocket);
+
+			balla.getVelocity().x = 0d;
+			balla.getVelocity().y = 0d;
+			balla.setPosition(pocket.getCenter());
+			int ownBalls = table.getPlayerInTurnBalls().size();
+			int opponentBalls = table.getPlayerNotInTurnBalls().size();
+			table.putBallInPocket(balla, pocket);
 			if (balla.getNumber() == 8) {
 				eightBallInPocket = true;
 				// This should check the order of balls going in pocket if several balls at the same time goes
 				if (table.getPlayerInTurnBalls().size() != 7) {
+					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
+				} else if (table.getSelectedPocket() == null || table.getSelectedPocket().hasEightBall()) {
 					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
 				} else {
 					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_OK;
@@ -298,12 +307,6 @@ public class EightBallRuleBase {
 				this.cueBallInPocket = true;
 
 			}
-			balla.getVelocity().x = 0d;
-			balla.getVelocity().y = 0d;
-			balla.setPosition(pocket.getCenter());
-			int ownBalls = table.getPlayerInTurnBalls().size();
-			int opponentBalls = table.getPlayerNotInTurnBalls().size();
-			table.putBallInPocket(balla, pocket);
 			if (table.getPlayerInTurnBalls().size() > ownBalls) {
 				this.ownBallInPocket = true;
 			}

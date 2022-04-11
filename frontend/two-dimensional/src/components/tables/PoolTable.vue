@@ -116,8 +116,6 @@ export default defineComponent({
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
 			if(action.type === "poolUpdate"){
 				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
-			//	this.cue.force = action.payload.pool.cue.force
-			
 			}else if(action.type === "poolPlayTurn"){
 				this.updateTurnResult(action)
 			
@@ -142,7 +140,6 @@ export default defineComponent({
 					this.updatePocketedBalls(this.resultPlayerABalls)
 					console.log("skipping animation, directly update lists222"+this.resultPlayerBBalls)
 					this.updatePocketedBalls(this.resultPlayerBBalls)
-
 					this.updateRemainingBallPositions(action.payload.table.remainingBalls, this.ballsRemaining)
 					this.cue.force = 0
 					if(action.payload.pool.turnResult === "SELECT_POCKET"){
@@ -152,22 +149,21 @@ export default defineComponent({
 				}
 			}
 			else if(action.type === "poolSetHandBall"){
-				
 				this.cueBall.position = action.payload.pool.cueBall.position
 				this.cueBall.inPocket = false
 				this.cue.position = this.cueBall.position
 				this.handBall = false
 				this.cueBall.image.visible = true		
-				if(this.isMyTurn()){				
+				if(this.isMyTurn()){
+					console.log("turnResult from handbakk:"+action.payload.pool.turnResult)
+					if(action.payload.pool.turnResult=="SELECT_POCKET"){
+						this.pocketSelection = true	
+					}
 					this.addMouseListeners()
 				}
 			}else if(action.type === "poolSelectPocket"){
-				
-				//this.cueBall.position = action.payload.pool.cueBall.position
-				//this.cueBall.inPocket = false
-				//this.cue.position = this.cueBall.position
 				console.log("nyt valittu pocket"+action.payload.pool.selectedPocket)
-				this.handBall = action.payload.pool.turnResult ==="HANDBALL" ? true: false
+				this.handBall = action.payload.pool.turnResult === "HANDBALL" ? true: false
 				this.cueBall.image.visible = true
 				this.cue.image.visible = true
 				this.pocketSelection = false
@@ -213,20 +209,15 @@ export default defineComponent({
 			ballsInPocket.forEach(serverBall => {
 				let ball:IBall=	this.ballsRemaining.find(ball => ball.number === serverBall.number)
 				this.handleBallInPocket(ball)	
-			});
+			})
 		},
 
-		draw(always:boolean){
+		draw(){
 			if(showAnimation &&  this.isDocumentVisible()){
-				
 				requestAnimationFrame(this.repaintAll)				
-			}else{
-				console.log("not animating "+document.visibilityState)
 			}
 		},
 		repaintComponent(component: IPoolComponent){
-			
-			
 			const image = component.image
 			if( !component.image.visible){
 				return
@@ -255,34 +246,18 @@ export default defineComponent({
 			}
 			this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
 			this.renderingContext.resetTransform()
-		
-		
 		},
-		repaintAll(){
-		
+		repaintAll(){		
 			this.renderingContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
 			//Table
-			const t = this.poolTable.image
 			this.repaintComponent(this.poolTable)
 			this.repaintComponent(this.cueBall)
-			
-			
-			
-			/*
-				void ctx.drawImage(image, dx, dy);
-				void ctx.drawImage(image, dx, dy, dWidth, dHeight);
-				void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
-					
-			*/
-		
-			
 			for( let i = 0; i < this.ballsRemaining.length; i++){
 				this.repaintComponent(this.ballsRemaining[i])
 			}
-			
 			if(!this.isOngoingGame() && !showAnimation){				
 				this.repaintGameEnd()
-			}			
+			}
 			this.repaintNames()
 			if(!this.handBall){
 				this.repaintComponent(this.cue)
@@ -290,25 +265,12 @@ export default defineComponent({
 			if(this.pocketSelection && this.isMyTurn()){
 				const highLightPocket = this.selectedPocket === null ? 0: this.selectedPocket
 				console.log("Pocket selection"+highLightPocket)
-				this.renderingContext.fillStyle = 'red';
-				this.renderingContext.lineWidth = 1
-				this.renderingContext.beginPath()			
-				this.renderingContext.arc(this.poolTable.pockets[highLightPocket].center.x, this.poolTable.pockets[highLightPocket].center.y, this.poolTable.pockets[highLightPocket].radius, 0, 2 * Math.PI)
-				this.renderingContext.stroke()
-				this.renderingContext.closePath()
-				this.renderingContext.fill()
+				this.repaintPocketSelection(highLightPocket)
 				this.renderingContext.font = "bolder 16px Arial"
 				this.renderingContext.fillText("Click to select pocket", 400, 35)
 				this.cue.image.visible = false
 			}else if(this.selectedPocket){
-				this.renderingContext.fillStyle = 'red';
-				this.renderingContext.lineWidth = 1
-				this.renderingContext.beginPath()			
-				this.renderingContext.arc(this.poolTable.pockets[this.selectedPocket].center.x, this.poolTable.pockets[this.selectedPocket].center.y, this.poolTable.pockets[this.selectedPocket].radius, 0, 2 * Math.PI)
-				this.renderingContext.stroke()
-				this.renderingContext.closePath()
-				this.renderingContext.fill()
-				this.renderingContext.font = "bolder 16px Arial"				
+				this.repaintPocketSelection(this.selectedPocket)				
 				this.cue.image.visible = true
 			}
 			this.renderingContext.fillStyle = 'black';
@@ -368,7 +330,7 @@ export default defineComponent({
 			const topMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:49}, radius:28, pathwayLeft:{top:{x:580,y:56}, bottom:{x:571, y:79}}, pathwayRight:{top:{x:635,y:56}, bottom:{x:644, y:79}}}
 			const topRightPocket:IPocket = <IPocket> {center: {x: 1144, y:61}, radius:32, pathwayLeft:{top:{x:1112,y:56}, bottom:{x:1089, y:79}}, pathwayRight:{top:{x:1144,y:93}, bottom:{x:1122, y:118}}}
 			const bottomRightPocket:IPocket = <IPocket> {center: {x: 1144, y:614}, radius:32, pathwayLeft:{top:{x:1091, y:600}, bottom:{x:1112, y:620}}, pathwayRight:{top:{x:1122,y:562}, bottom:{x:1142, y:580}}}
-			const bottomMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:630}, radius:28, pathwayLeft:{top:{x:571, y:600}, bottom:{x:580, y:620}}, pathwayRight:{top:{x:644,y:600}, bottom:{x:635, y:620}}}
+			const bottomMiddlePocket:IPocket = <IPocket> {center: {x: 607, y:628}, radius:28, pathwayLeft:{top:{x:571, y:600}, bottom:{x:580, y:620}}, pathwayRight:{top:{x:644,y:600}, bottom:{x:635, y:620}}}
 			const bottomLeftPocket:IPocket = <IPocket> {center: {x: 65, y:614}, radius:32, pathwayLeft:{top:{x:80,y:558}, bottom:{x:54, y:584}}, pathwayRight:{top:{x:118,y:600}, bottom:{x:98, y:620}}}
 			this.poolTable.pockets.push(topLeftPocket)
 			this.poolTable.pockets.push(topMiddlePocket)
@@ -395,7 +357,7 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x:850, y: 35}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x:1030, y: 150}, //311 is hardcoded for testing purposes
 												number:0,
 												color:"white",
 												velocity:<IVector2>{ x:0, y:0},												
@@ -431,10 +393,7 @@ export default defineComponent({
 			return document.visibilityState === 'visible'
 		},
 		onVisibilityChange(){
-			
 			if (this.isDocumentVisible()) {
-				console.log(" VisibilityChange Visible, repainting all")
-				
 				this.resultRemainingBalls.forEach(serverBall => {
 					let ball = this.ballsRemaining.find(ball => ball.number === serverBall.number)
 					ball.position = serverBall.position
@@ -458,8 +417,7 @@ export default defineComponent({
 				}
 				
 			} else {
-				showAnimation =  false	
-				console.log("VisibilityChange: not visible, animationInProcess:"+animationInProcess)				
+				showAnimation = false			
 				this.poolTable.mouseEnabled = false
 				this.removeMouseListeners()
 				clearInterval(collisionCheckInterval)
@@ -507,7 +465,6 @@ export default defineComponent({
 							canvasDestination:{x:- ballDiameter/2, y: -ballDiameter/2},
 							visible: true
 			}
-		//	ballImages.push(ballImage)
 			return <IBall>{
 							image: ballImage,
 							diameter: ballDiameter,
@@ -585,10 +542,7 @@ export default defineComponent({
 		isHandBallPositionAllowed(){
 			//Starting position position need to be behind the line			
 			if(!this.resultCueBallPosition){
-				
-			
 				if(this.mouseCoordsTemp.x > this.canvas.width * 0.25) {// relative line position
-				
 					return false
 				}
 			}
@@ -663,10 +617,8 @@ export default defineComponent({
 					showAnimation = false
 				}
 				this.draw()
-				console.log("Resolving after anim")
-			resolve("resolve after animation")
+				resolve("resolve after animation")
 			})
-			
 		},
 		shootBall(){
 			console.log("shootBall")
@@ -1168,6 +1120,15 @@ export default defineComponent({
 			this.renderingContext.font = "bolder 16px Arial";			
 			this.renderingContext.fillText(this.theTable.playerA.name, this.canvas.width * 0.10, 20)
 			this.renderingContext.fillText(this.theTable.playerB.name, this.canvas.width * 0.55, 20)
+		},
+		repaintPocketSelection(selection:number){
+			this.renderingContext.fillStyle = 'blue';
+			this.renderingContext.lineWidth = 1
+			this.renderingContext.beginPath()
+			this.renderingContext.arc(this.poolTable.pockets[selection].center.x, this.poolTable.pockets[selection].center.y, this.poolTable.pockets[selection].radius, 0, 2 * Math.PI)
+			this.renderingContext.stroke()
+			this.renderingContext.closePath()
+			this.renderingContext.fill()	
 		}
 	},
 	

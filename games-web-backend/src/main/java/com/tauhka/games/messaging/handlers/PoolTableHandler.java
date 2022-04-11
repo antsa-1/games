@@ -51,15 +51,15 @@ public class PoolTableHandler {
 		updateMessage.setTitle(MessageTitle.POOL_SELECT_POCKET);
 		PoolMessage selectPocketMessage = new PoolMessage();
 		selectPocketMessage.setSelectedPocket(selectedPocketTurn.getSelectedPocket());
-		//selectPocketMessage.setCueBall(message.getPoolMessage().getCueBall());
-		//selectPocketMessage.setCanvas(message.getPoolMessage().getCanvas());
+		// selectPocketMessage.setCueBall(message.getPoolMessage().getCueBall());
+		// selectPocketMessage.setCanvas(message.getPoolMessage().getCanvas());
 		updateMessage.setPoolMessage(selectPocketMessage);
 		return updateMessage;
 	}
 
 	public Message updateHandBall(CommonEndpoint endpoint, Message message) {
 		PoolTable table = (PoolTable) findUserTable(endpoint);
-		table.updateHandBall(endpoint.getUser(), message.getPoolMessage().getCueBall());
+		PoolTurn turn = table.updateHandBall(endpoint.getUser(), message.getPoolMessage().getCueBall());
 		Message updateMessage = new Message();
 		updateMessage.setFrom(SYSTEM);
 		updateMessage.setTable(table);
@@ -67,6 +67,7 @@ public class PoolTableHandler {
 		PoolMessage updateCueBallPositionMessage = new PoolMessage();
 		updateCueBallPositionMessage.setCueBall(message.getPoolMessage().getCueBall());
 		updateCueBallPositionMessage.setCanvas(message.getPoolMessage().getCanvas());
+		updateCueBallPositionMessage.setTurnResult(turn.getTurnResult());
 		updateMessage.setPoolMessage(updateCueBallPositionMessage);
 		return updateMessage;
 	}
