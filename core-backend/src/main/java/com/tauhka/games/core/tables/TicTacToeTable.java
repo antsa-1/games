@@ -8,6 +8,7 @@ import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.Move;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.twodimen.GameResult;
+import com.tauhka.games.core.twodimen.GridGameResult;
 import com.tauhka.games.core.twodimen.ai.TwoDimensionalBoardAdapter;
 import com.tauhka.games.core.twodimen.util.WinnerChecker;
 
@@ -94,11 +95,11 @@ public class TicTacToeTable extends Table {
 
 	public GameResult checkWinAndDraw() {
 		int requiredTokenConnects = this.gameMode.getRequiredConnections();
-		GameResult result = WinnerChecker.checkWinner(this.board, requiredTokenConnects);
+		GridGameResult result = WinnerChecker.checkWinner(this.board, requiredTokenConnects);
 		if (result == null) {
 			// No winner, is it a draw?
 			if (isDraw()) {
-				result = new GameResult();
+				result = new GridGameResult();
 				result.setResultType(GameResultType.DRAW);
 				result.setStartInstant(this.gameStartedInstant);
 				result.setGameMode(this.gameMode);
