@@ -92,7 +92,6 @@ export default defineComponent({
 				this.initTable()
 			}
 			else if (mutation.type === "poolGameEnded" ){			
-				console.log("PoolGame ended table")
 				this.theTable.playerInTurn = null
 				this.removeMouseListeners()
 				this.poolTable.mouseEnabled = false
@@ -126,24 +125,18 @@ export default defineComponent({
 				if(action.payload.pool.turnResult === "HANDBALL"){
 					this.handBall = true
 				}
-				if(this.isDocumentVisible()){
-					console.log("Action starting shootBall")
-					this.shootBall().then(() => {
-						console.log("action done shootball")
-						if(action.payload.pool.turnResult === "SELECT_POCKET"){
-							console.log("Pool nyt pocketSelection")
+				if(this.isDocumentVisible()){					
+					this.shootBall().then(() => {					
+						if(action.payload.pool.turnResult === "SELECT_POCKET"){						
 							this.pocketSelection = true	
 						}
 				})
-				}else {
-					console.log("skipping animation, directly update lists"+this.resultPlayerABalls)
-					this.updatePocketedBalls(this.resultPlayerABalls)
-					console.log("skipping animation, directly update lists222"+this.resultPlayerBBalls)
+				}else {					
+					this.updatePocketedBalls(this.resultPlayerABalls)				
 					this.updatePocketedBalls(this.resultPlayerBBalls)
 					this.updateRemainingBallPositions(action.payload.table.remainingBalls, this.ballsRemaining)
 					this.cue.force = 0
-					if(action.payload.pool.turnResult === "SELECT_POCKET"){
-						console.log("Pool nyt pocketSelection")
+					if(action.payload.pool.turnResult === "SELECT_POCKET"){						
 						this.pocketSelection = true					
 					}
 				}
@@ -154,15 +147,13 @@ export default defineComponent({
 				this.cue.position = this.cueBall.position
 				this.handBall = false
 				this.cueBall.image.visible = true		
-				if(this.isMyTurn()){
-					console.log("turnResult from handbakk:"+action.payload.pool.turnResult)
+				if(this.isMyTurn()){					
 					if(action.payload.pool.turnResult=="SELECT_POCKET"){
 						this.pocketSelection = true	
 					}
 					this.addMouseListeners()
 				}
-			}else if(action.type === "poolSelectPocket"){
-				console.log("nyt valittu pocket"+action.payload.pool.selectedPocket)
+			}else if(action.type === "poolSelectPocket"){			
 				this.handBall = action.payload.pool.turnResult === "HANDBALL" ? true: false
 				this.cueBall.image.visible = true
 				this.cue.image.visible = true
@@ -186,15 +177,13 @@ export default defineComponent({
 		resize(){ 
 			console.log("****RESIZE all components todo")	
 		},
-		updateTurnResult(action){
-			console.log("PlayerA balls"+action.payload.table.playerABalls)
+		updateTurnResult(action){		
 			this.resultPlayerABalls = action.payload.table.playerABalls
 			this.resultPlayerBBalls = action.payload.table.playerBBalls
 			this.resultRemainingBalls = action.payload.table.remainingBalls // for jumping browser tabs
 			this.resultCueBallPosition = action.payload.pool.cueBall.position
 		},
-		updateRemainingBallPositions(serverBalls:Array<IBall>, comparisonList:Array<IBall>){
-			console.log("updateRemainingBallPositions "+serverBalls)
+		updateRemainingBallPositions(serverBalls:Array<IBall>, comparisonList:Array<IBall>){			
 			serverBalls.forEach(serverBall => {
 				let	ball:IBall= comparisonList.find((ball) => ball.number === serverBall.number)	
 				this.updateBallPosition(ball, serverBall.position)
@@ -263,8 +252,7 @@ export default defineComponent({
 				this.repaintComponent(this.cue)
 			}
 			if(this.pocketSelection && this.isMyTurn()){
-				const highLightPocket = this.selectedPocket === null ? 0: this.selectedPocket
-				console.log("Pocket selection"+highLightPocket)
+				const highLightPocket = this.selectedPocket === null ? 0: this.selectedPocket				
 				this.repaintPocketSelection(highLightPocket)
 				this.renderingContext.font = "bolder 16px Arial"
 				this.renderingContext.fillText("Click to select pocket", 400, 35)
@@ -494,10 +482,8 @@ export default defineComponent({
 			}
 			if(!this.poolTable.mouseEnabled ){
 				return
-			}
-			console.log("mousedown:" + this.poolTable.mouseEnabled)
-			if(this.pocketSelection){
-				console.log("Select pocket is on")
+			}		
+			if(this.pocketSelection){			
 				return
 			}
 			else if(this.poolTable.mouseEnabled && ! this.handBall){
@@ -518,8 +504,7 @@ export default defineComponent({
 			if(!this.poolTable.mouseEnabled){
 				return
 			}
-			if(this.pocketSelection){
-				console.log("SelectedPocket="+JSON.stringify(this.selectedPocket))
+			if(this.pocketSelection){				
 				this.sendPocketSelection(this.selectedPocket)
 				this.removeMouseListeners()
 				return
@@ -574,8 +559,7 @@ export default defineComponent({
 			}
 			this.mouseCoordsTemp = <IVector2> {x:event.offsetX, y: event.offsetY}
 			if(this.pocketSelection){
-				this.selectedPocket = this.getClosestPocket(event)
-				console.log("Selected pocket"+this.selectedPocket)
+				this.selectedPocket = this.getClosestPocket(event)				
 				this.draw()
 				return
 			}
@@ -610,18 +594,15 @@ export default defineComponent({
 				}
 				if(this.handBall){
 				//	this.cueBall.image.visible = false
-				}
-				console.log("AFTER anim"+this.isOngoingGame())
-				if(!this.isOngoingGame()){
-					console.log("AFTER anim2"+this.isOngoingGame())
+				}				
+				if(!this.isOngoingGame()){					
 					showAnimation = false
 				}
 				this.draw()
 				resolve("resolve after animation")
 			})
 		},
-		shootBall(){
-			console.log("shootBall")
+		shootBall(){		
 			return new Promise((resolve) => {
 				this.poolTable.mouseEnabled = false
 				if(this.cue.force < 10 ){
@@ -635,8 +616,7 @@ export default defineComponent({
 				this.collideCueWithCueBall().then(() => {
 					this.cue.image.visible = false				
 					this.handleCollisions().then(() => {				
-						this.handleAfterAnimation().then(()=>{
-							console.log("ShootBall anims done__ ")
+						this.handleAfterAnimation().then(()=>{							
 							resolve("ShootBall resolving")
 						})		
 					})
@@ -646,8 +626,7 @@ export default defineComponent({
 		collideCueWithCueBall(){
 			return new Promise((resolve) => {
 				this.cue.position = this.cueBall.position
-				setTimeout(() => {
-					console.log("collideCueWithCueBall timeOut asking animation")
+				setTimeout(() => {					
 					this.draw()
 					resolve("Cue movement done")
 				}, 145)
@@ -680,43 +659,36 @@ export default defineComponent({
 			// (x - center_x)² + (y - center_y)² < radius²   			
 			let pocket:IPocket = this.poolTable.pockets[0]
 			let inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
-			if(inPocket){
-				console.log("pockets[0]:"+inPocket +JSON.stringify(component.position))
+			if(inPocket){			
 				return pocket
 			}
 			pocket = this.poolTable.topMiddlePocket
 			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
-			if(inPocket){
-				console.log("topMiddlePocket:"+inPocket +JSON.stringify(component.position))
+			if(inPocket){				
 				return pocket
 			}
 			pocket = this.poolTable.topRightPocket
 			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
-			if(inPocket){
-				console.log("topRightPocket:"+inPocket +JSON.stringify(component.position))
+			if(inPocket){				
 				return pocket
 			}
 			pocket = this.poolTable.bottomRightPocket
 			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
-			if(inPocket){
-				console.log("bottomRightPocket:"+inPocket +JSON.stringify(component.position))
+			if(inPocket){				
 				return pocket
 			}
 			pocket = this.poolTable.bottomMiddlePocket
 			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
-			if(inPocket){
-				console.log("bottomRMiddlePocket:"+inPocket +JSON.stringify(component.position))
+			if(inPocket){				
 				return pocket
 			}
 			pocket = this.poolTable.bottomLeftPocket
 			inPocket = Math.pow(component.position.x - pocket.center.x, 2) + Math.pow(component.position.y - pocket.center.y, 2) <= Math.pow(pocket.radius, 2)
-			if(inPocket){
-				console.log("bottomLeftPocket:"+inPocket +JSON.stringify(component.position))
+			if(inPocket){			
 				return pocket
 			}		
 		},
-		handleBallInPocket (ball:IBall, pocket:IPocket){
-			console.log("Handle ballIn pocket")	
+		handleBallInPocket (ball:IBall, pocket:IPocket){			
 			if(ball.inPocket){
 				return
 			}
@@ -741,19 +713,14 @@ export default defineComponent({
 				const found = this.resultPlayerABalls.find(balla => balla.number === ball.number)
 				let factorial = this.resultPlayerABalls.length
 				let startX = undefined
-				if(found){
-					console.log("to playerA pocket balls "+ball.number)
+				if(found){					
 					 startX = this.canvas.width * 0.08						 
-				}else{
-					console.log("to playerB balls "+ball.number)
+				}else{					
 					 startX = this.canvas.width * 0.55
 					 factorial = this.resultPlayerBBalls.length
-				}
-				console.log("!PlayerA balls:"+JSON.stringify(this.resultPlayerABalls))
-				console.log("!PlayerB balls:"+JSON.stringify(this.resultPlayerBBalls))
+				}			
 				ball.position.x = startX + factorial * ball.diameter
-				ball.position.y = this.canvas.height * 0.06
-				console.log("startX => "+startX +" factorial"+factorial+ "JSON."+JSON.stringify(this.resultPlayerABalls))
+				ball.position.y = this.canvas.height * 0.06			
 				this.draw()
 			}, 1500)
 		},
@@ -1145,7 +1112,4 @@ export default defineComponent({
 
 <!--
  * 	@author antsa-1 from GitHub 
-  	  Guidance from
-  	// Youtube -> ' JavaScript + HTML5 GameDev Tutorial: 8-Ball Pool Game (parts 1 and 2) '->
- 	// https://www.youtube.com/watch?v=Am8rT9xICRs
  -->

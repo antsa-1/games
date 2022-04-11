@@ -346,23 +346,18 @@ public class EightBallRuleBase {
 
 		double radius = ball.getDiameter() / 2;
 		if (isTableTopBondry(topLeft, topRight, ball.getPosition(), radius)) {
-			LOGGER.info("isTableTopBondry");
 			ball.getVelocity().y = Math.abs(ball.getVelocity().y);
 			return true;
 		}
 		if (isTableBottomBoundry(bottomLeft, bottomRight, ball.getPosition(), radius)) {
-			LOGGER.info("bottom");
 			ball.getVelocity().y = -Math.abs(ball.getVelocity().y);
 			return true;
 		}
 		if (isTableLeftBoundry(left, ball.getPosition(), radius)) {
-			LOGGER.info("left");
 			ball.getVelocity().x = Math.abs(ball.getVelocity().x);
 			return true;
 		}
-
 		if (isTableRightBoundry(right, ball.getPosition(), radius)) {
-			LOGGER.info("right");
 			ball.getVelocity().x = -Math.abs(ball.getVelocity().x);
 			return true;
 		}
@@ -373,12 +368,10 @@ public class EightBallRuleBase {
 	private boolean checkAndHandlePocketPathwayCollisions(PoolTable table, Ball ball) {
 		for (Pocket pocket : table.getPockets()) {
 			if (this.isPathwayBorderCollision(table, pocket.getPathWayRight(), ball)) {
-				LOGGER.info("IS PATHWAY COL1" + ball);
 				Vector2d reflectionVector = calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathWayRight(), ball);
 				ball.setVelocity(reflectionVector);
 				return true;
 			} else if (this.isPathwayBorderCollision(table, pocket.getPathwayLeft(), ball)) {
-				LOGGER.info("IS PATHWAY COL2");
 				Vector2d reflectionVector = calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathwayLeft(), ball);
 				ball.setVelocity(reflectionVector);
 				return true;

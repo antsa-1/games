@@ -332,8 +332,7 @@ export default defineComponent({
 					case "POOL_SELECT_POCKET":
 						this.$store.dispatch("poolSelectPocket", data)
 						break
-					case "POOL_HANDBALL":
-						console.log("HANDBALL from server ")
+					case "POOL_HANDBALL":						
 						this.$store.dispatch("poolSetHandBall", data)
 						const handBallMessage:IChatMessage = {
 							from:data.from,
@@ -354,8 +353,7 @@ export default defineComponent({
 					case "GAME_END":
 							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
 							if(data.table.gameMode.gameNumber !== 3 ){
-								this.$store.dispatch("move", lastSquare)
-								console.log("RES:"+JSON.stringify(data.win))						
+								this.$store.dispatch("move", lastSquare)													
 								if(data.win.resultType === "DRAW"){
 									const gameResult:IGameResult={table:data.table,win:data.win}								
 									this.$store.dispatch("setDraw",gameResult);
@@ -384,8 +382,7 @@ export default defineComponent({
 							} 
 							if(data.table.gameMode.gameNumber === 3){
 								this.$store.dispatch("poolPlayTurn", data)								
-								let winner = data.pool.winner.name								
-								console.log("PoolGame ended" +winner)
+								let winner = data.pool.winner.name
 									const poolWinMessage:IChatMessage = {
 										from:data.from,
 										text:winner +" won" + " ( "+data.pool.turnResult.toLowerCase()	+" )"			
