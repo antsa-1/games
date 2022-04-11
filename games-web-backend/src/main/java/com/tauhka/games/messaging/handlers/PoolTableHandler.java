@@ -42,12 +42,23 @@ public class PoolTableHandler {
 		return updateMessage;
 	}
 
+	public Message selectPocket(CommonEndpoint endpoint, Message message) {
+		PoolTable table = (PoolTable) findUserTable(endpoint);
+		PoolTurn selectedPocketTurn = table.selectPocket(endpoint.getUser(), message.getPoolMessage().getSelectedPocket());
+		Message updateMessage = new Message();
+		updateMessage.setFrom(SYSTEM);
+		updateMessage.setTable(table);
+		updateMessage.setTitle(MessageTitle.POOL_SELECT_POCKET);
+		PoolMessage selectPocketMessage = new PoolMessage();
+		selectPocketMessage.setSelectedPocket(selectedPocketTurn.getSelectedPocket());
+		//selectPocketMessage.setCueBall(message.getPoolMessage().getCueBall());
+		//selectPocketMessage.setCanvas(message.getPoolMessage().getCanvas());
+		updateMessage.setPoolMessage(selectPocketMessage);
+		return updateMessage;
+	}
+
 	public Message updateHandBall(CommonEndpoint endpoint, Message message) {
 		PoolTable table = (PoolTable) findUserTable(endpoint);
-
-		if (!table.isPlayerInTurn(endpoint.getUser())) {
-			return null; // after turn ui not working properly, it still send updates..
-		}
 		table.updateHandBall(endpoint.getUser(), message.getPoolMessage().getCueBall());
 		Message updateMessage = new Message();
 		updateMessage.setFrom(SYSTEM);
@@ -94,4 +105,5 @@ public class PoolTableHandler {
 		}
 		return tableOptional.get();
 	}
+
 }

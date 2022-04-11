@@ -17,7 +17,9 @@ export interface IEightBallGame {
     poolTable: IPoolTable,
     gameOptions: IEightBallGameOptions,
     mouseCoordsTemp: IVector2,
-    handBall: boolean,    
+    handBall: boolean,
+    pocketSelection: boolean,
+    selectedPocket:IPocket
 }
 
 export interface IGameImage {
@@ -52,7 +54,7 @@ export interface IPocket {
     center: IVector2,
     radius: number,
     pathwayRight: IPathWayBorder,
-    pathwayLeft: IPathWayBorder
+    pathwayLeft: IPathWayBorder,
 }
 export interface IPathWayBorder {
     top: IVector2,

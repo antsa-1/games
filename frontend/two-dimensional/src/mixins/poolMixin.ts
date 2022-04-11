@@ -20,6 +20,11 @@ export const poolMixin = {
 
 	},
 	methods: {
+		sendPocketSelection(pocketNumber:number){
+			const obj ={ title:"POOL_SELECT_POCKET", message: this.theTable.tableId, pool:{selectedPocket:pocketNumber}}
+			console.log("Sending pocket selection to server"+JSON.stringify(obj))
+			this.user.webSocket.send(JSON.stringify(obj))
+		},
 		hb(cueBall, canvas){			
 			const obj ={ title:"POOL_HANDBALL", message: this.theTable.tableId, pool:{cueBall:this.prepareHandBall(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
 			console.log("Sending handball to server"+JSON.stringify(obj))
@@ -48,22 +53,37 @@ export const poolMixin = {
 		t(p, m, cue, cueBall, canvas, i = false){			
 			if(this.p){				
 				return
-			}			
+			}
 			this.p =  0 <= 0x0
-			setTimeout(()=> {				
+			setTimeout(()=> {
 				p(cue, cueBall, canvas)
 				this.p = (atob("dHJ1ZQ==") < "m" ) ? "YmFzZTY0IGlzIG5vIGVuY3J5cHRpb24gCg==" : 0.1 + 0.2 === 0.3
 			}, m)
 		},
 		isHandBall(data){
 			return data.pool.turnResult === "HANDBALL"
-						
 		},
 		isOngoingGame(){
 			if( this.theTable.playerInTurn){			
 				return true
 			}			
 			return false
-		}
+		},
+		getClosestPocket(event:MouseEvent):number{
+			if(event.offsetY < this.canvas.height / 2){
+				if(event.offsetX < this.canvas.width /3){
+					return 0
+				}else if(event.offsetX < this.canvas.width * 0.66){
+					return 1
+				}
+				return 2
+			}
+			if(event.offsetX < this.canvas.width /3){
+				return 5
+			}else if(event.offsetX < this.canvas.width * 0.66){
+				return 4
+			}
+			return 3
+		},		
 	},
 }

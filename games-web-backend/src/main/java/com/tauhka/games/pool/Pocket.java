@@ -12,6 +12,7 @@ public final class Pocket {
 	private final double radius;
 	private final PathWay pathWayRight;
 	private final PathWay pathwayLeft;
+	private boolean containsEightBall;
 
 	public Pocket(Vector2d center, double radius, PathWay pathWayRight, PathWay pathwayLeft) {
 		super();
@@ -19,6 +20,7 @@ public final class Pocket {
 		this.radius = radius;
 		this.pathWayRight = pathWayRight;
 		this.pathwayLeft = pathwayLeft;
+		this.containsEightBall = false;
 	}
 
 	public Vector2d getCenter() {
@@ -35,6 +37,14 @@ public final class Pocket {
 
 	public PathWay getPathwayLeft() {
 		return pathwayLeft;
+	}
+
+	public boolean hasEightBall() {
+		return containsEightBall;
+	}
+
+	public void setContainsEightBall(boolean containsEightBall) {
+		this.containsEightBall = containsEightBall;
 	}
 
 }

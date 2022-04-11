@@ -236,6 +236,9 @@ export const store = createStore<IStoreState>({
         poolSetHandBall(context,object){
             // PoolTable has subscribed to this action
         }, 
+        poolSelectPocket(context,object){
+            // PoolTable has subscribed to this action
+        }, 
         poolGameEnded(context,message:IChatMessage){
             context.commit('poolGameEnded', message)
         } ,

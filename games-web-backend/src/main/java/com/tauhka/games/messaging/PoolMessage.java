@@ -25,6 +25,8 @@ public class PoolMessage implements Serializable {
 	private String turnResult;
 	@JsonbProperty("winner")
 	private User winner;
+	@JsonbProperty("selectedPocket")
+	private int selectedPocket;
 
 	public Cue getCue() {
 		return cue;
@@ -64,6 +66,14 @@ public class PoolMessage implements Serializable {
 
 	public void setWinner(User winner) {
 		this.winner = winner;
+	}
+
+	public int getSelectedPocket() {
+		return selectedPocket;
+	}
+
+	public void setSelectedPocket(int selectedPocket) {
+		this.selectedPocket = selectedPocket;
 	}
 
 }

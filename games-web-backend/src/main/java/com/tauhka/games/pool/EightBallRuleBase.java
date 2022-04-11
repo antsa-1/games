@@ -23,6 +23,8 @@ public class EightBallRuleBase {
 	private boolean ownBallHitFirst = false;
 	private boolean ownBallInPocket = false;
 	private boolean opponentBallInPocket = false;
+	private boolean cueBallInPocket = false;
+	private boolean eightBallInPocket = false;
 
 	public TurnResult playTurn(PoolTable table, PoolTurn turn) {
 		this.reset();
@@ -34,8 +36,14 @@ public class EightBallRuleBase {
 		for (Ball ball : removalBalls) {
 			table.getRemainingBalls().remove(ball);
 		}
+		determineTurnResult(table);
+		// table.updateCueBallPosition()
+		return turnResult != null ? turnResult : TurnResult.CHANGE_TURN;
+	}
+
+	private TurnResult determineTurnResult(PoolTable table) {
 		if (table.isOpen() && eightBallHitFirst && removalBalls.size() > 0 && turnResult == null) {
-			System.out.println("EightBall tableOpen changeTurn");
+			LOGGER.info("EightBall tableOpen changeTurn");
 			turnResult = TurnResult.CHANGE_TURN;
 		}
 		if (!ownBallHitFirst && turnResult == null) {
@@ -48,18 +56,28 @@ public class EightBallRuleBase {
 		if (turnResult == null && ownBallInPocket) {
 			turnResult = TurnResult.CONTINUE_TURN;
 		}
-		//table.updateCueBallPosition()
+		
+		if (turnResult == null && cueBallInPocket) {
+			turnResult = TurnResult.HANDBALL;
+		}
+		// CueBall might roll to pocket as last ball
+		if (eightBallInPocket && cueBallInPocket && table.getPlayerInTurnBalls().size() != 7) {
+			turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
+		}
+
 		return turnResult != null ? turnResult : TurnResult.CHANGE_TURN;
 	}
 
 	private void reset() {
-		this.turnResult = null;
-		this.iterationCount = 0;
-		this.removalBalls = new ArrayList<Ball>();
-		this.eightBallHitFirst = false;
+		turnResult = null;
+		iterationCount = 0;
+		removalBalls = new ArrayList<Ball>();
+		eightBallHitFirst = false;
 		ownBallInPocket = false;
 		ownBallHitFirst = false;
 		opponentBallInPocket = false;
+		cueBallInPocket = false;
+		eightBallInPocket = false;
 	}
 
 	public boolean isCueBallNewPositionAllowed(PoolTable table, Vector2d newPosition) {
@@ -69,21 +87,17 @@ public class EightBallRuleBase {
 		double y = newPosition.y;
 
 		if (!(left.a + radius > x)) {
-			System.out.println("CueBall fail1");
 			return false;
 		}
 		if (!(left.b + radius > y)) {
-			System.out.println("CueBall fail2");
 			return false;
 		}
 
 		Boundry right = table.getBoundries().get(2);
 		if (!(right.a - radius < x)) {
-			System.out.println("CueBall fail3");
 			return false;
 		}
 		if (!(right.b - radius < y)) {
-			System.out.println("CueBall fail4");
 			return false;
 		}
 
@@ -195,9 +209,7 @@ public class EightBallRuleBase {
 	/* Mathematics from -> ' JavaScript + HTML5 GameDev Tutorial: 8-Ball Pool Game (part 2) ' from 15:42 -> // https://www.youtube.com/watch?v=Am8rT9xICRs */
 	private void collide(PoolTable table, Ball firstBall, Ball secondBall) {
 		Vector2d normalVector = VectorUtil.subtractVectors(firstBall.getPosition(), secondBall.getPosition());
-		if (Double.isNaN(firstBall.getPosition().x)) {
-			System.out.println("Changed to Nan");
-		}
+
 		double normalVectorLength = VectorUtil.calculateVectorLength(normalVector);
 		if (normalVectorLength > firstBall.getDiameter()) {
 			// LOGGER.info("No collision between:" + firstBall + " and " + secondBall);
@@ -235,7 +247,7 @@ public class EightBallRuleBase {
 		firstBall.setVelocity(firstBallVelocity);
 		Vector2d secondBallVelocity = new Vector2d(v2nTag.x + v2tTag.x, v2nTag.y + v2tTag.y);
 		secondBall.setVelocity(secondBallVelocity);
-		// System.out.println("After collision A:" + firstBall + " B:" + secondBall);
+		// LOGGER.info("After collision A:" + firstBall + " B:" + secondBall);
 	}
 
 	private void checkAndHandleTableCollisions(PoolTable table, Ball ball) {
@@ -245,7 +257,6 @@ public class EightBallRuleBase {
 
 		if (checkAndHandleTableBoundriesCollisions(table, ball)) {
 			if (ball.getNumber() == 11) {
-				System.out.println("f");
 			}
 			return;
 		}
@@ -274,19 +285,18 @@ public class EightBallRuleBase {
 			if (!isBallInPocket(table, balla, pocket)) {
 				continue;
 			}
-			System.out.println("Ball:" + balla + " goes In Pocket:" + pocket);
+			LOGGER.info("Ball:" + balla + " goes In Pocket:" + pocket);
 			if (balla.getNumber() == 8) {
+				eightBallInPocket = true;
 				// This should check the order of balls going in pocket if several balls at the same time goes
 				if (table.getPlayerInTurnBalls().size() != 7) {
 					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
 				} else {
-					System.out.println("We have a winner ");
 					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_OK;
 				}
 			} else if (balla.getNumber() == 0) {
-				if (this.turnResult == null) {
-					this.turnResult = TurnResult.HANDBALL;
-				}
+				this.cueBallInPocket = true;
+
 			}
 			balla.getVelocity().x = 0d;
 			balla.getVelocity().y = 0d;
@@ -333,23 +343,23 @@ public class EightBallRuleBase {
 
 		double radius = ball.getDiameter() / 2;
 		if (isTableTopBondry(topLeft, topRight, ball.getPosition(), radius)) {
-			System.out.println("isTableTopBondry");
+			LOGGER.info("isTableTopBondry");
 			ball.getVelocity().y = Math.abs(ball.getVelocity().y);
 			return true;
 		}
 		if (isTableBottomBoundry(bottomLeft, bottomRight, ball.getPosition(), radius)) {
-			System.out.println("bottom");
+			LOGGER.info("bottom");
 			ball.getVelocity().y = -Math.abs(ball.getVelocity().y);
 			return true;
 		}
 		if (isTableLeftBoundry(left, ball.getPosition(), radius)) {
-			System.out.println("left");
+			LOGGER.info("left");
 			ball.getVelocity().x = Math.abs(ball.getVelocity().x);
 			return true;
 		}
 
 		if (isTableRightBoundry(right, ball.getPosition(), radius)) {
-			System.out.println("right");
+			LOGGER.info("right");
 			ball.getVelocity().x = -Math.abs(ball.getVelocity().x);
 			return true;
 		}
@@ -360,12 +370,12 @@ public class EightBallRuleBase {
 	private boolean checkAndHandlePocketPathwayCollisions(PoolTable table, Ball ball) {
 		for (Pocket pocket : table.getPockets()) {
 			if (this.isPathwayBorderCollision(table, pocket.getPathWayRight(), ball)) {
-				System.out.println("IS PATHWAY COL1" + ball);
+				LOGGER.info("IS PATHWAY COL1" + ball);
 				Vector2d reflectionVector = calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathWayRight(), ball);
 				ball.setVelocity(reflectionVector);
 				return true;
 			} else if (this.isPathwayBorderCollision(table, pocket.getPathwayLeft(), ball)) {
-				System.out.println("IS PATHWAY COL2");
+				LOGGER.info("IS PATHWAY COL2");
 				Vector2d reflectionVector = calculateBallVelocityOnPathwayBorderCollision(table, pocket.getPathwayLeft(), ball);
 				ball.setVelocity(reflectionVector);
 				return true;

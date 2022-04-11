@@ -24,6 +24,8 @@ public class PoolTurn {
 	private String turnResult;
 	@JsonbProperty("winner")
 	private User winner;
+	@JsonbProperty("selectedPocket")
+	private Integer selectedPocket;
 
 	public CueBall getCueBall() {
 		return cueBall;
@@ -71,6 +73,14 @@ public class PoolTurn {
 
 	public void setWinner(User winner) {
 		this.winner = winner;
+	}
+
+	public Integer getSelectedPocket() {
+		return selectedPocket;
+	}
+
+	public void setSelectedPocket(Integer selectedPocket) {
+		this.selectedPocket = selectedPocket;
 	}
 
 }
