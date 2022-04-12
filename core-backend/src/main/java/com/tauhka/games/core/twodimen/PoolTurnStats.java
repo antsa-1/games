@@ -144,7 +144,7 @@ public class PoolTurnStats {
 			return this;
 		}
 
-		public PoolTurnBuilder cueBallX(double cueBallX) {
+		public PoolTurnBuilder cueBallX(Double cueBallX) {
 			this.cueBallX = cueBallX;
 			return this;
 		}
@@ -157,12 +157,12 @@ public class PoolTurnStats {
 			return winnerId;
 		}
 
-		public PoolTurnBuilder cueBallY(double cueBallY) {
+		public PoolTurnBuilder cueBallY(Double cueBallY) {
 			this.cueBallY = cueBallY;
 			return this;
 		}
 
-		public PoolTurnBuilder selectedPocket(int selectedPocket) {
+		public PoolTurnBuilder selectedPocket(Integer selectedPocket) {
 			this.selectedPocket = selectedPocket;
 			return this;
 		}
