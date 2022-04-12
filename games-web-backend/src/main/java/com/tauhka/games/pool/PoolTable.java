@@ -176,8 +176,10 @@ public class PoolTable extends Table implements PoolComponent {
 				turn.setTurnResult(TurnResult.SELECT_POCKET.toString());
 				return turn;
 			}
+			LOGGER.info("Handball position was allowed" + sample);
+		} else {
+			LOGGER.info("Handball position not allowed" + sample);
 		}
-		LOGGER.info("Handball position not allowed" + sample);
 		turn.setTurnResult(TurnResult.CONTINUE_TURN.toString());
 		return turn;
 	}

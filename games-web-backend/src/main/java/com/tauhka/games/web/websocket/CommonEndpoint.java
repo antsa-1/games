@@ -109,7 +109,7 @@ public class CommonEndpoint {
 					}
 				}
 			} else if (message.getTitle() == MessageTitle.POOL_UPDATE) {
-				gameMessage = pooltableHandler.update(this, message);
+				gameMessage = pooltableHandler.updateCuePosition(this, message);
 				sendMessageToAllInTableExcept(gameMessage, user);
 			} else if (message.getTitle() == MessageTitle.POOL_PLAY_TURN) {
 				gameMessage = pooltableHandler.playTurn(this, message);

@@ -19,7 +19,6 @@ import com.tauhka.games.core.stats.RankingCalculator;
 import com.tauhka.games.core.twodimen.GameResult;
 
 import jakarta.annotation.Resource;
-import jakarta.ejb.EJBContext;
 import jakarta.ejb.Stateless;
 import jakarta.enterprise.event.ObservesAsync;
 
@@ -33,10 +32,9 @@ public class StatisticsEJB { // To core package?!?!?
 	private static final String UPDATE_TICTACTOE_PLAYER_RANKINGS_SQL = "UPDATE user SET ranking_tictactoe = CASE WHEN id =? THEN ? WHEN id = ? THEN ? END WHERE id IN (?,?)";
 	private static final String UPDATE_CONNECT_FOUR_PLAYER_RANKINGS_SQL = "UPDATE user SET ranking_connectfour = CASE WHEN id =? THEN ? WHEN id = ? THEN ? END WHERE id IN (?,?)";
 
+
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource gamesDataSource;
-	@Resource
-	private EJBContext ejbContext;
 
 	public void observeGameResult(@ObservesAsync GameStatisticsEvent gameStats) {
 
@@ -58,6 +56,8 @@ public class StatisticsEJB { // To core package?!?!?
 			updateGameCount(gameStats);
 		}
 	}
+
+	
 
 	// Updates User-table
 	private void updatePlayerRankingsToDatabase(GameStatisticsEvent gameStats) {

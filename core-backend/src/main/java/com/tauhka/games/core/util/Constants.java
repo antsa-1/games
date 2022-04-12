@@ -22,7 +22,7 @@ public final class Constants {
 	public static final String WEBSOCKET_LOCALHOST_ORIGIN = "http://localhost:8080"; //
 	public static final String SYSTEM = "System";
 	public static final String NULL = "null";
-	public static final String LOG_PREFIX = "TICTACTOE_";
+	public static final String LOG_PREFIX = "TAUHKA_";
 	public static final String LOG_PREFIX_PORTAL = LOG_PREFIX + "PORTAL ";
 	public static final String LOG_PREFIX_GAMES = LOG_PREFIX + "GAMES ";
 
