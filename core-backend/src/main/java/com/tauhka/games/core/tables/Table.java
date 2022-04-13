@@ -287,6 +287,13 @@ public abstract class Table implements Serializable {
 		if (this.rematchPlayer.equals(user)) {
 			return false;
 		}
+		if (this.startingPlayer.equals(playerA)) {
+			this.startingPlayer = playerB;
+			this.playerInTurn = playerB;
+		} else {
+			this.startingPlayer = playerA;
+			this.playerInTurn = playerA;
+		}
 		startRematch();
 		return true;
 	}
