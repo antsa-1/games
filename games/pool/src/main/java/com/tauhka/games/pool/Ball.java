@@ -8,9 +8,6 @@ import com.tauhka.games.core.Vector2d;
 
 public class Ball implements PoolComponent {
 
-	enum Color {
-		YELLOW, RED, BLACK, WHITE
-	}
 
 	private int number;
 	private Color color;

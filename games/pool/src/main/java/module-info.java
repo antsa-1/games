@@ -5,5 +5,5 @@ module tauhka.pool {
 	requires jakarta.json.bind;
 	requires java.desktop;
 	requires java.logging;
-	requires tauhka.core;
+	requires transitive tauhka.core;
 }

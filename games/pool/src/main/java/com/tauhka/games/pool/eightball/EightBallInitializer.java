@@ -1,17 +1,24 @@
-package com.tauhka.games.pool;
+package com.tauhka.games.pool.eightball;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import com.tauhka.games.core.Vector2d;
-import com.tauhka.games.pool.Ball.Color;
+import com.tauhka.games.pool.Ball;
+import com.tauhka.games.pool.Boundry;
+import com.tauhka.games.pool.Canvas;
+import com.tauhka.games.pool.Color;
+import com.tauhka.games.pool.CueBall;
+import com.tauhka.games.pool.PathWay;
+import com.tauhka.games.pool.Pocket;
+import com.tauhka.games.pool.PoolTable;
 
 /**
  * @author antsa-1 from GitHub 31 Mar 2022
  **/
 
-public class PoolTableInitializer {
+public class EightBallInitializer {
 
 	public static void init(PoolTable table) {
 		Canvas canvas = new Canvas(new Vector2d(1200d, 677d));
@@ -23,10 +30,10 @@ public class PoolTableInitializer {
 			}
 			Ball ball = null;
 			if (i == 8) {
-				Vector2d position = new Vector2d(canvas.getSize().x * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().y / 2 + (ballDiameter * 0.5 * PoolTableInitializer.calculateRackRow(i)));
+				Vector2d position = new Vector2d(canvas.getSize().x * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().y / 2 + (ballDiameter * 0.5 * EightBallInitializer.calculateRackRow(i)));
 				ball = new Ball(i, Color.BLACK, position, ballDiameter);
 			} else {
-				Vector2d position = new Vector2d(canvas.getSize().x * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().y / 2 + (ballDiameter * 0.5 * PoolTableInitializer.calculateRackRow(i)));
+				Vector2d position = new Vector2d(canvas.getSize().x * 0.65 + (ballDiameter * 0.9d * calculateRackColumn(i)), canvas.getSize().y / 2 + (ballDiameter * 0.5 * EightBallInitializer.calculateRackRow(i)));
 				ball = new Ball(i, i < 8 ? Color.RED : Color.YELLOW, position, ballDiameter);
 			}
 			ball.setVelocity(new Vector2d(0d, 0d));
@@ -35,14 +42,14 @@ public class PoolTableInitializer {
 		CueBall cueBall = new CueBall(0, Color.WHITE, new Vector2d(250d, 311d), ballDiameter);
 		cueBall.setVelocity(new Vector2d(0d, 0d));
 		remainingBalls.add(cueBall);
-		List<Boundry> boundries = PoolTableInitializer.initBoundries();
+		List<Boundry> boundries = EightBallInitializer.initBoundries();
 		table.setCueBall(cueBall);
 		table.setRemainingBalls(remainingBalls);
 		table.setMiddleAreaStart(new Vector2d(125d, 130d));
 		table.setMiddleAreaEnd(new Vector2d(1072d, 550d));
 		table.setBoundries(boundries);
 		table.setCanvas(canvas);
-		table.setPockets(PoolTableInitializer.initPockets());
+		table.setPockets(EightBallInitializer.initPockets());
 		table.setPlayerABalls(new ArrayList<Ball>(8));
 		table.setPlayerBBalls(new ArrayList<Ball>(8));
 		table.setEightBallRuleBase(new EightBallRuleBase());

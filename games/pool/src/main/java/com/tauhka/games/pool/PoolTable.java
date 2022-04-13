@@ -10,6 +10,8 @@ import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.pool.debug.ServerGUI;
+import com.tauhka.games.pool.eightball.EightBallInitializer;
+import com.tauhka.games.pool.eightball.EightBallRuleBase;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
@@ -69,7 +71,7 @@ public class PoolTable extends Table implements PoolComponent {
 	public PoolTable(User playerA, GameMode gameMode, boolean randomizeStarter) {
 		// PoolPlayer p = new PoolPlayer() super(p,gameMode,randomizeStarte)
 		super(playerA, gameMode, randomizeStarter);
-		PoolTableInitializer.init(this);
+		EightBallInitializer.init(this);
 		expectingHandBallUpdate = true;
 	}
 

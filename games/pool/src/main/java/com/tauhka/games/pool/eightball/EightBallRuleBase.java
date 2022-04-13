@@ -1,4 +1,4 @@
-package com.tauhka.games.pool;
+package com.tauhka.games.pool.eightball;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +6,14 @@ import java.util.logging.Logger;
 
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.util.VectorUtil;
+import com.tauhka.games.pool.Ball;
+import com.tauhka.games.pool.Boundry;
+import com.tauhka.games.pool.Cue;
+import com.tauhka.games.pool.PathWay;
+import com.tauhka.games.pool.Pocket;
+import com.tauhka.games.pool.PoolTable;
+import com.tauhka.games.pool.PoolTurn;
+import com.tauhka.games.pool.TurnResult;
 
 /**
  * @author antsa-1 from GitHub 28 Mar 2022
