@@ -8,8 +8,11 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.tauhka.games.core.GameResultType;
+import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.stats.PoolGameStatisticsEvent;
 import com.tauhka.games.core.tables.Table;
+import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.twodimen.PoolTurnStats;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
@@ -32,7 +35,9 @@ import jakarta.inject.Inject;
 public class PoolTableHandler {
 	private static final Logger LOGGER = Logger.getLogger(PoolTableHandler.class.getName());
 	@Inject
-	private Event<PoolGameStatisticsEvent> statisticsEvent;
+	private Event<PoolGameStatisticsEvent> poolStatsEvent;
+	@Inject
+	private Event<GameStatisticsEvent> statisticsEvent;
 
 	public Message updateCuePosition(CommonEndpoint endpoint, Message message) {
 		Table table = findUserTable(endpoint);
@@ -69,7 +74,7 @@ public class PoolTableHandler {
 		// selectPocketMessage.setCueBall(message.getPoolMessage().getCueBall());
 		// selectPocketMessage.setCanvas(message.getPoolMessage().getCanvas());
 		updateMessage.setPoolMessage(selectPocketMessage);
-		createTurnToDatabase(incomingTurn, table, selectedPocketTurn, endpoint, TurnType.POCKET_SELECTION);
+		addTurnToDatabase(incomingTurn, table, selectedPocketTurn, endpoint, TurnType.POCKET_SELECTION);
 		return updateMessage;
 	}
 
@@ -87,9 +92,9 @@ public class PoolTableHandler {
 		PoolMessage updateCueBallPositionMessage = new PoolMessage();
 		updateCueBallPositionMessage.setCueBall(message.getPoolMessage().getCueBall());
 		updateCueBallPositionMessage.setCanvas(message.getPoolMessage().getCanvas());
-		updateCueBallPositionMessage.setTurnResult(turn.getTurnResult());
+		updateCueBallPositionMessage.setTurnResult(turn.getTurnResult().toString());
 		updateMessage.setPoolMessage(updateCueBallPositionMessage);
-		createTurnToDatabase(incomingTurn, table, turn, endpoint, TurnType.HANDBALL);
+		addTurnToDatabase(incomingTurn, table, turn, endpoint, TurnType.HANDBALL);
 		return updateMessage;
 	}
 
@@ -104,8 +109,9 @@ public class PoolTableHandler {
 		Message playTurnMessage = new Message();
 		playTurnMessage.setFrom(SYSTEM);
 		playTurnMessage.setTable(table);
-		if (playedTurn.getTurnResult().equals(TurnResult.EIGHT_BALL_IN_POCKET_OK.toString()) || playedTurn.getTurnResult().equals(TurnResult.EIGHT_BALL_IN_POCKET_FAIL.toString())) {
+		if (TurnResult.isDecisive(playedTurn.getTurnResult())) {
 			playTurnMessage.setTitle(MessageTitle.GAME_END);
+			addGameToDataBase(table, playedTurn, GameResultType.WIN_BY_PLAY);
 		} else {
 			playTurnMessage.setTitle(MessageTitle.POOL_PLAY_TURN);
 		}
@@ -115,11 +121,24 @@ public class PoolTableHandler {
 		poolMessage.setWinner(playedTurn.getWinner());
 		poolMessage.setTurnResult(playedTurn.getTurnResult().toString());
 		playTurnMessage.setPoolMessage(poolMessage);
-		createTurnToDatabase(incomingTurn, table, playedTurn, endpoint, TurnType.PLAY);
+		addTurnToDatabase(incomingTurn, table, playedTurn, endpoint, TurnType.PLAY);
 		return playTurnMessage;
 	}
 
-	private void createTurnToDatabase(PoolTurn incomingTurn, PoolTable table, PoolTurn resultingTurn, CommonEndpoint endpoint, TurnType type) {
+	private void addGameToDataBase(PoolTable table, PoolTurn resultingTurn, GameResultType gameResultType) {
+		GameResult gameResult = new GameResult();
+		gameResult.setGameMode(table.getGameMode());
+		gameResult.setStartInstant(table.getGameStartedInstant());
+		gameResult.setPlayerA(table.getPlayerA());
+		gameResult.setPlayerB(table.getPlayerB());
+		gameResult.setWinner(resultingTurn.getWinner());
+		gameResult.setResultType(gameResultType);
+		GameStatisticsEvent statsEvent = new GameStatisticsEvent();
+		statsEvent.setGameResult(gameResult);
+		statisticsEvent.fireAsync(statsEvent);
+	}
+
+	private void addTurnToDatabase(PoolTurn incomingTurn, PoolTable table, PoolTurn resultingTurn, CommonEndpoint endpoint, TurnType type) {
 		try {
 			String user = endpoint.getUser().getName();
 			String userId = endpoint.getUser().getId() == null ? endpoint.getUser().getName() : endpoint.getUser().getId().toString();
@@ -129,10 +148,10 @@ public class PoolTableHandler {
 			Double cueAngle = incomingTurn.getCue() == null ? null : incomingTurn.getCue().getAngle();
 			Double cueX = incomingTurn.getCueBall() == null ? null : incomingTurn.getCueBall().getPosition().x;
 			Double cueY = incomingTurn.getCueBall() == null ? null : incomingTurn.getCueBall().getPosition().y;
-			Integer selectedPocket = resultingTurn.getSelectedPocket() == null ? -1 : resultingTurn.getSelectedPocket();
-			PoolTurnStats result = new PoolTurnStats.PoolTurnBuilder(cueForce, cueAngle).cueBallX(cueX).cueBallY(cueY)
+			Integer selectedPocket = resultingTurn.getSelectedPocket() == null ? null : resultingTurn.getSelectedPocket();
+			PoolTurnStats result = new PoolTurnStats.PoolTurnBuilder().force(cueForce).angle(cueAngle).cueBallX(cueX).cueBallY(cueY)
 					.remainingBalls(table.getRemainingBalls().stream().map(ball -> String.valueOf(ball.getNumber())).collect(Collectors.joining(","))).playerId(userId).playerName(user).turnResult(resultingTurn.getTurnResult().toString())
-					.gameId(table.getTableId()).winner(winnerName).winnerId(winnerId).selectedPocket(selectedPocket).turnType(type.getAsText()).build();
+					.gameId(table.getGameId()).winner(winnerName).winnerId(winnerId).selectedPocket(selectedPocket).turnType(type.getAsText()).build();
 			PoolGameStatisticsEvent statsEvent = new PoolGameStatisticsEvent();
 			statsEvent.setGameResult(result);
 			fireStatisticsEvent(result);
@@ -144,7 +163,7 @@ public class PoolTableHandler {
 	private void fireStatisticsEvent(PoolTurnStats turnResult) {
 		PoolGameStatisticsEvent statsEvent = new PoolGameStatisticsEvent();
 		statsEvent.setGameResult(turnResult);
-		statisticsEvent.fireAsync(statsEvent);
+		poolStatsEvent.fireAsync(statsEvent);
 	}
 
 	public Table findUserTable(CommonEndpoint endpoint) {

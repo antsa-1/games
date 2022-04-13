@@ -21,6 +21,10 @@ public class TopPlayer implements Serializable {
 	private int rankingConnectFour;
 	@JsonbProperty("playedConnectFours")
 	private int playedConnectFours;
+	@JsonbProperty("rankingEightBall")
+	private int rankingEightBall;
+	@JsonbProperty("playedEightBalls")
+	private int playedEightBalls;
 
 	public String getNickname() {
 		return nickname;
@@ -60,6 +64,22 @@ public class TopPlayer implements Serializable {
 
 	public void setPlayedConnectFours(int playedConnectFours) {
 		this.playedConnectFours = playedConnectFours;
+	}
+
+	public int getRankingEightBall() {
+		return rankingEightBall;
+	}
+
+	public void setRankingEightBall(int rankingEightBall) {
+		this.rankingEightBall = rankingEightBall;
+	}
+
+	public int getPlayedEightBalls() {
+		return playedEightBalls;
+	}
+
+	public void setPlayedEightBalls(int playedEightBalls) {
+		this.playedEightBalls = playedEightBalls;
 	}
 
 }

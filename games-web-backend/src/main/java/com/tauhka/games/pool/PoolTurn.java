@@ -21,7 +21,7 @@ public class PoolTurn {
 	private Vector2d handBall;
 
 	@JsonbProperty("turnResult")
-	private String turnResult;
+	private TurnResult turnResult;
 	@JsonbProperty("winner")
 	private User winner;
 	@JsonbProperty("selectedPocket")
@@ -59,11 +59,11 @@ public class PoolTurn {
 		this.handBall = handBall;
 	}
 
-	public String getTurnResult() {
+	public TurnResult getTurnResult() {
 		return turnResult;
 	}
 
-	public void setTurnResult(String turnResult) {
+	public void setTurnResult(TurnResult turnResult) {
 		this.turnResult = turnResult;
 	}
 

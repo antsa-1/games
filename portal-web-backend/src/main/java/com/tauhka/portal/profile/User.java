@@ -49,6 +49,10 @@ public class User implements Serializable {
 	@JsonbProperty("tictactoes")
 	private List<Game> ticatactoes;
 
+	@Transient
+	@JsonbProperty("eightBalls")
+	private List<Game> eightBalls;
+
 	public String getProfileText() {
 		return profileText;
 	}
@@ -95,6 +99,14 @@ public class User implements Serializable {
 
 	public void setTicatactoes(List<Game> ticatactoes) {
 		this.ticatactoes = ticatactoes;
+	}
+
+	public List<Game> getEightBalls() {
+		return eightBalls;
+	}
+
+	public void setEightBalls(List<Game> eightBalls) {
+		this.eightBalls = eightBalls;
 	}
 
 	@Override

@@ -42,8 +42,9 @@ public class UserEJB {
 	private static final String REGISTER_INSERT = "insert into user(name,id,email,password,salt) values (?,?,?,?,?)";
 	private static final String REMOVE_ACTIVE_LOGIN = "delete from login where id= (?)";
 	private static final String TOP_TICTACTOE_PLAYERS_SQL = "SELECT DISTINCT name,ranking_tictactoe FROM user ORDER BY ranking_tictactoe DESC LIMIT 20;";
+	private static final String TOP_EIGHT_BALL_PLAYERS_SQL = "SELECT DISTINCT name,ranking_eightball FROM user ORDER BY ranking_eightball DESC LIMIT 20;";
 	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT name,ranking_connectfour FROM user ORDER BY ranking_connectfour DESC LIMIT 20;";
-	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes FROM game_counter";
+	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes,eightballs FROM game_counter";
 
 	public LoginOutput login(String name, String password) {
 		LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB login:");
@@ -72,7 +73,7 @@ public class UserEJB {
 				if (!passwordHash.verifyHash(password, salt, secret)) {
 					throw new IllegalArgumentException("UserEJB password failure for:" + name);
 				}
-				boolean pwChange = rs.getBoolean("Force_passWord_change");
+				boolean pwChange = rs.getBoolean("force_password_change");
 				rs.close();
 				LoginOutput user = new LoginOutput();
 				user.setNickName(namee);
@@ -181,9 +182,9 @@ public class UserEJB {
 		Connection con = null;
 		try {
 			con = portalDatasource.getConnection();
+			TopLists topLists = new TopLists();
 			stmt = con.prepareStatement(TOP_TICTACTOE_PLAYERS_SQL);
 			ResultSet rs = stmt.executeQuery();
-			TopLists topLists = new TopLists();
 			topLists.setFetchInstant(Instant.now());
 			while (rs.next()) {
 				TopPlayer t = new TopPlayer();
@@ -203,15 +204,28 @@ public class UserEJB {
 				topLists.addConnectFourPlayer(t);
 			}
 			rs2.close();
+
 			stmt = con.prepareStatement(SELECT_GAME_COUNTS_SQL);
 			ResultSet rs3 = stmt.executeQuery();
 			if (rs3.next()) {
 				int connectFours = rs3.getInt("connectfours");
 				int tictactoes = rs3.getInt("tictactoes");
+				int eightBalls = rs3.getInt("eightballs");
 				topLists.setTotalConnectFours(connectFours);
 				topLists.setTotalTictactoes(tictactoes);
+				topLists.setTotalEightBalls(eightBalls);
 			}
 			rs3.close();
+			stmt = con.prepareStatement(TOP_EIGHT_BALL_PLAYERS_SQL);
+			ResultSet rs4 = stmt.executeQuery();
+			while (rs4.next()) {
+				TopPlayer t = new TopPlayer();
+				t.setNickname(rs4.getString("name"));
+				t.setRankingEightBall((int) rs4.getDouble("ranking_eightball"));
+				t.setPlayedEightBalls(USER_NAME_MIN_LENGTH);
+				topLists.addEightBallPlayer(t);
+			}
+			rs4.close();
 			return topLists;
 
 		} catch (SQLException e) {

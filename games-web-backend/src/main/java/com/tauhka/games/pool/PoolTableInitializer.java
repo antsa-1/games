@@ -2,6 +2,7 @@ package com.tauhka.games.pool;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.pool.Ball.Color;
@@ -45,6 +46,7 @@ public class PoolTableInitializer {
 		table.setPlayerABalls(new ArrayList<Ball>(8));
 		table.setPlayerBBalls(new ArrayList<Ball>(8));
 		table.setEightBallRuleBase(new EightBallRuleBase());
+		table.setGameId(UUID.randomUUID());
 	}
 
 	private static List<Pocket> initPockets() {
@@ -122,7 +124,7 @@ public class PoolTableInitializer {
 	public static double calculateRackRow(int i) {
 		if (i == 1 || i == 8 || i == 13) {
 			return 0;
-		} else if ( i == 3 || i == 15) {
+		} else if (i == 3 || i == 15) {
 			return 1;
 		} else if (i == 10 || i == 2 || i == 15) {
 			return -1;

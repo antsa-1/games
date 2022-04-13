@@ -25,9 +25,9 @@ public class RankingCalculator {
 		User playerA = result.getPlayerA();
 		User playerB = result.getPlayerB();
 		User winner = result.getWinner();
-		boolean connectFour = result.getGameMode().isConnectFour();
-		Double aRankingInitial = connectFour ? playerA.getRankingConnectFour() : playerA.getRankingTictactoe();
-		Double bRankingInitial = connectFour ? playerB.getRankingConnectFour() : playerB.getRankingTictactoe();
+//		boolean connectFour = result.getGameMode().isConnectFour();
+		Double aRankingInitial = playerA.getRanking(result.getGameMode());
+		Double bRankingInitial = playerB.getRanking(result.getGameMode());
 		playerA.setInitialCalculationsRank(aRankingInitial);
 		playerB.setInitialCalculationsRank(bRankingInitial);
 		Double aExpectedPercentage = 1 / (1 + Math.pow(10, (bRankingInitial - aRankingInitial) / 400d));
@@ -56,13 +56,17 @@ public class RankingCalculator {
 
 		}
 		// 100 minimum
-		if (connectFour) {
+		if (result.getGameMode().isEightBall()) {
+			playerA.setRankingEightBall(newRankingA < 100 ? 100d : newRankingA);
+			playerB.setRankingEightBall(newRankingB < 100 ? 100d : newRankingB);
+		} else if (result.getGameMode().isConnectFour()) {
 			playerA.setRankingConnectFour(newRankingA < 100 ? 100d : newRankingA);
 			playerB.setRankingConnectFour(newRankingB < 100 ? 100d : newRankingB);
-		} else {
+		} else if (result.getGameMode().isTicTacToe()) {
 			playerA.setRankingTictactoe(newRankingA < 100 ? 100d : newRankingA);
 			playerB.setRankingTictactoe(newRankingB < 100 ? 100d : newRankingB);
 		}
-		LOGGER.info("RankingCalculator:" + playerA.getName() + " from:" + aRankingInitial + " to:" + newRankingA + " and:" + playerB.getName() + " from:" + bRankingInitial + " to:" + newRankingB + " isConnectFour" + connectFour);
+		LOGGER.info("RankingCalculator:" + playerA.getName() + " from:" + aRankingInitial + " to:" + newRankingA + " and:" + playerB.getName() + " from:" + bRankingInitial + " to:" + newRankingB + " gameMode"
+				+ result.getGameMode().getGameNumber());
 	}
 }

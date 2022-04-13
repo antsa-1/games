@@ -17,12 +17,16 @@ public class TopLists {
 	private List<TopPlayer> connectFourList;
 	@JsonbProperty("tictactoes")
 	private List<TopPlayer> ticTacToeList;
+	@JsonbProperty("eightBalls")
+	private List<TopPlayer> eightBallsList;
 	@JsonbProperty("instant")
 	private Instant fetchInstant;
 	@JsonbProperty("totalConnectFours")
 	private int totalConnectFours;
 	@JsonbProperty("totalTictactoes")
 	private int totalTictactoes;
+	@JsonbProperty("totalEightBalls")
+	private int totalEightBalls;
 
 	@JsonbTransient
 	public void addConnectFourPlayer(TopPlayer topPlayer) {
@@ -38,6 +42,14 @@ public class TopLists {
 			this.ticTacToeList = new ArrayList<TopPlayer>();
 		}
 		this.ticTacToeList.add(topPlayer);
+	}
+
+	@JsonbTransient
+	public void addEightBallPlayer(TopPlayer topPlayer) {
+		if (this.eightBallsList == null) {
+			this.eightBallsList = new ArrayList<TopPlayer>();
+		}
+		this.eightBallsList.add(topPlayer);
 	}
 
 	public List<TopPlayer> getConnectFourList() {
@@ -58,6 +70,22 @@ public class TopLists {
 
 	public void setTotalTictactoes(int totalTictactoes) {
 		this.totalTictactoes = totalTictactoes;
+	}
+
+	public List<TopPlayer> getEightBallsList() {
+		return eightBallsList;
+	}
+
+	public void setEightBallsList(List<TopPlayer> eightBallsList) {
+		this.eightBallsList = eightBallsList;
+	}
+
+	public int getTotalEightBalls() {
+		return totalEightBalls;
+	}
+
+	public void setTotalEightBalls(int totalEightBalls) {
+		this.totalEightBalls = totalEightBalls;
 	}
 
 	public Instant getFetchInstant() {

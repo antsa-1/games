@@ -96,8 +96,8 @@ public class PoolTurnStats {
 	}
 
 	public static class PoolTurnBuilder {
-		private final Double angle;
-		private final Double force;
+		private Double angle;
+		private Double force;
 		private String playerId;
 		private String playerName;
 		private UUID gameId;
@@ -110,9 +110,14 @@ public class PoolTurnStats {
 		private String winnerId;
 		private String turnType;
 
-		public PoolTurnBuilder(Double force, Double angle) {
-			this.angle = angle;
+		public PoolTurnBuilder force(Double force) {
 			this.force = force;
+			return this;
+		}
+
+		public PoolTurnBuilder angle(Double angle) {
+			this.angle = angle;
+			return this;
 		}
 
 		public PoolTurnBuilder playerId(String playerId) {

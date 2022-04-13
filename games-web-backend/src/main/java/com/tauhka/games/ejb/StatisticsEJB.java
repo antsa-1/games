@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
@@ -29,9 +30,10 @@ public class StatisticsEJB { // To core package?!?!?
 	private static final String INSERT_GAME_RESULT_SQL = "INSERT INTO game (playera_id, playerb_id, winner_id, game_id, game_type,start_time,end_time, result,playera_username,playerb_username,playera_start_ranking,playera_end_ranking,playerb_start_ranking,playerb_end_ranking,winner_username) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?);";
 	private static final String UPDATE_TICTACTOE_GAMES_COUNT_SQL = "UPDATE game_counter SET tictactoes= tictactoes+1";
 	private static final String UPDATE_CONNECT_FOUR_GAMES_COUNT_SQL = "UPDATE game_counter SET connectfours= connectfours+1";
+	private static final String UPDATE_EIGHT_BALL_GAMES_COUNT_SQL = "UPDATE game_counter SET eightballs= eightballs+1";
 	private static final String UPDATE_TICTACTOE_PLAYER_RANKINGS_SQL = "UPDATE user SET ranking_tictactoe = CASE WHEN id =? THEN ? WHEN id = ? THEN ? END WHERE id IN (?,?)";
 	private static final String UPDATE_CONNECT_FOUR_PLAYER_RANKINGS_SQL = "UPDATE user SET ranking_connectfour = CASE WHEN id =? THEN ? WHEN id = ? THEN ? END WHERE id IN (?,?)";
-
+	private static final String UPDATE_EIGHT_BALL_PLAYER_RANKINGS_SQL = "UPDATE user SET ranking_eightball = CASE WHEN id =? THEN ? WHEN id = ? THEN ? END WHERE id IN (?,?)";
 
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource gamesDataSource;
@@ -57,8 +59,6 @@ public class StatisticsEJB { // To core package?!?!?
 		}
 	}
 
-	
-
 	// Updates User-table
 	private void updatePlayerRankingsToDatabase(GameStatisticsEvent gameStats) {
 
@@ -66,14 +66,13 @@ public class StatisticsEJB { // To core package?!?!?
 		PreparedStatement stmt = null;
 		Connection con = null;
 		try {
-			boolean connectFour = res.getGameMode().isConnectFour();
 			con = gamesDataSource.getConnection();
-			String sql = connectFour ? UPDATE_CONNECT_FOUR_PLAYER_RANKINGS_SQL : UPDATE_TICTACTOE_PLAYER_RANKINGS_SQL;
+			String sql = getUpdateRankingSQL(res.getGameMode());
 			stmt = con.prepareStatement(sql);
 			User userA = res.getPlayerA();
 			User userB = res.getPlayerB();
-			Double rankingA = connectFour ? userA.getRankingConnectFour() : userA.getRankingTictactoe();
-			Double rankingB = connectFour ? userB.getRankingConnectFour() : userB.getRankingTictactoe();
+			Double rankingA = userA.getRanking(res.getGameMode());
+			Double rankingB = userB.getRanking(res.getGameMode());
 
 			stmt.setString(1, userA.getId() != null ? userA.getId().toString() : null);
 			stmt.setDouble(2, rankingA);
@@ -105,6 +104,16 @@ public class StatisticsEJB { // To core package?!?!?
 		}
 	}
 
+	private String getUpdateRankingSQL(GameMode gameMode) {
+		if (gameMode.isConnectFour()) {
+			return UPDATE_CONNECT_FOUR_PLAYER_RANKINGS_SQL;
+		}
+		if (gameMode.isTicTacToe()) {
+			return UPDATE_TICTACTOE_PLAYER_RANKINGS_SQL;
+		}
+		return UPDATE_EIGHT_BALL_PLAYER_RANKINGS_SQL;
+	}
+
 	// No user input in this sql
 	private void updateGameCount(GameStatisticsEvent gameStats) {
 		PreparedStatement stmt = null;
@@ -112,7 +121,7 @@ public class StatisticsEJB { // To core package?!?!?
 		int gameNumber = gameStats.getGameResult().getGameMode().getGameNumber();
 		try {
 			con = gamesDataSource.getConnection();
-			stmt = con.prepareStatement(gameNumber == 1 ? UPDATE_TICTACTOE_GAMES_COUNT_SQL : UPDATE_CONNECT_FOUR_GAMES_COUNT_SQL);
+			stmt = con.prepareStatement(getGameCountSQL(gameStats.getGameResult().getGameMode()));
 			int dbRes = stmt.executeUpdate();
 			if (dbRes > 0) {
 				LOGGER.info(LOG_PREFIX_GAMES + "StatisticsEJB updated gameAmounts for anonymous players game" + gameNumber);
@@ -133,6 +142,19 @@ public class StatisticsEJB { // To core package?!?!?
 			}
 		}
 
+	}
+
+	private String getGameCountSQL(GameMode mode) {
+		if (mode.isConnectFour()) {
+			return UPDATE_CONNECT_FOUR_GAMES_COUNT_SQL;
+		}
+		if (mode.isEightBall()) {
+			return UPDATE_EIGHT_BALL_GAMES_COUNT_SQL;
+		}
+		if (mode.isTicTacToe()) {
+			return UPDATE_TICTACTOE_GAMES_COUNT_SQL;
+		}
+		throw new IllegalArgumentException("No sql for gameMode:" + mode);
 	}
 
 	private boolean isBothPlayersLoggedIn(GameStatisticsEvent gameStats) {
@@ -157,13 +179,12 @@ public class StatisticsEJB { // To core package?!?!?
 		Connection con = null;
 		try {
 			con = gamesDataSource.getConnection();
-			boolean connectFour = res.getGameMode().isConnectFour();
 			stmt = con.prepareStatement(INSERT_GAME_RESULT_SQL);
 			User userA = res.getPlayerA();
 			User userB = res.getPlayerB();
 			UUID winnerId = res.getWinner() != null ? res.getWinner().getId() : null;
-			Double endRankingA = connectFour ? userA.getRankingConnectFour() : userA.getRankingTictactoe();
-			Double endRankingB = connectFour ? userB.getRankingConnectFour() : userB.getRankingTictactoe();
+			Double endRankingA = userA.getRanking(gameEvent.getGameResult().getGameMode());
+			Double endRankingB = userB.getRanking(gameEvent.getGameResult().getGameMode());
 			stmt.setString(1, userA.getId() != null ? userA.getId().toString() : null);
 			stmt.setString(2, userB.getId() != null ? userB.getId().toString() : null);
 			// Winner, can be null if draw
@@ -206,11 +227,10 @@ public class StatisticsEJB { // To core package?!?!?
 
 	private void setupStartRankingsWithoutCalculations(GameStatisticsEvent gameStats) {
 		GameResult result = gameStats.getGameResult();
-		boolean connectFour = result.getGameMode().isConnectFour();
 		User playerA = result.getPlayerA();
 		User playerB = result.getPlayerB();
-		Double aRankingInitial = connectFour ? playerA.getRankingConnectFour() : playerA.getRankingTictactoe();
-		Double bRankingInitial = connectFour ? playerB.getRankingConnectFour() : playerB.getRankingTictactoe();
+		Double aRankingInitial = playerA.getRanking(gameStats.getGameResult().getGameMode());
+		Double bRankingInitial = playerB.getRanking(gameStats.getGameResult().getGameMode());
 		playerA.setInitialCalculationsRank(aRankingInitial);
 		playerB.setInitialCalculationsRank(bRankingInitial);
 	}

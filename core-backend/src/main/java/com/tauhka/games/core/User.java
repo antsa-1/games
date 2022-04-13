@@ -13,7 +13,8 @@ public class User { // Combine with Portal User.java?
 	private Double rankingTictactoe = 0d;
 	@JsonbProperty("rankingConnectFour")
 	private Double rankingConnectFour = 0d;
-
+	@JsonbProperty("rankingEightBall")
+	private Double rankingEightBall = 0d;
 	@JsonbProperty
 	private GameToken gameToken;
 	@JsonbTransient
@@ -41,8 +42,30 @@ public class User { // Combine with Portal User.java?
 		this.name = name;
 	}
 
+	public Double getRanking(GameMode gameMode) {
+		if (gameMode.isEightBall()) {
+			return rankingEightBall;
+		}
+		if (gameMode.isConnectFour()) {
+			return rankingConnectFour;
+		}
+
+		if (gameMode.isTicTacToe()) {
+			return rankingTictactoe;
+		}
+		throw new IllegalArgumentException("No ranking found for:" + gameMode);
+	}
+
 	public Double getRankingTictactoe() {
 		return rankingTictactoe;
+	}
+
+	public Double getRankingEightBall() {
+		return rankingEightBall;
+	}
+
+	public void setRankingEightBall(Double rankingEightBall) {
+		this.rankingEightBall = rankingEightBall;
 	}
 
 	public void setRankingTictactoe(Double rankingTictactoe) {

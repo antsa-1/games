@@ -1,6 +1,7 @@
 package com.tauhka.games.pool;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.GameMode;
@@ -55,6 +56,8 @@ public class PoolTable extends Table implements PoolComponent {
 	private boolean expectingPocketSelection;
 	@JsonbTransient
 	private TurnResult turnResult;
+	@JsonbTransient
+	private UUID gameId;
 
 	static {
 		String env = System.getProperty("Server_Environment");
@@ -117,7 +120,7 @@ public class PoolTable extends Table implements PoolComponent {
 			turnResult = TurnResult.SELECT_POCKET;
 			expectingPocketSelection = true;
 		}
-		playedTurn.setTurnResult(turnResult.toString());
+		playedTurn.setTurnResult(turnResult);
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
@@ -173,14 +176,14 @@ public class PoolTable extends Table implements PoolComponent {
 			expectingHandBallUpdate = false;
 			if (getPlayerInTurnBalls().size() == 7) {
 				this.expectingPocketSelection = true;
-				turn.setTurnResult(TurnResult.SELECT_POCKET.toString());
+				turn.setTurnResult(TurnResult.SELECT_POCKET);
 				return turn;
 			}
 			LOGGER.info("Handball position was allowed" + sample);
 		} else {
 			LOGGER.info("Handball position not allowed" + sample);
 		}
-		turn.setTurnResult(TurnResult.CONTINUE_TURN.toString());
+		turn.setTurnResult(TurnResult.CONTINUE_TURN);
 		return turn;
 	}
 
@@ -198,9 +201,9 @@ public class PoolTable extends Table implements PoolComponent {
 		expectingPocketSelection = false;
 		PoolTurn pocketSelectedTurn = new PoolTurn();
 		if (expectingHandBallUpdate) {
-			pocketSelectedTurn.setTurnResult(TurnResult.HANDBALL.toString());
+			pocketSelectedTurn.setTurnResult(TurnResult.HANDBALL);
 		} else {
-			pocketSelectedTurn.setTurnResult(TurnResult.CONTINUE_TURN.toString());
+			pocketSelectedTurn.setTurnResult(TurnResult.CONTINUE_TURN);
 		}
 		pocketSelectedTurn.setSelectedPocket(pocketNumber);
 		return pocketSelectedTurn;
@@ -328,8 +331,17 @@ public class PoolTable extends Table implements PoolComponent {
 		return null;
 	}
 
+	public UUID getGameId() {
+		return gameId;
+	}
+
+	public void setGameId(UUID gameId) {
+		this.gameId = gameId;
+	}
+
 	@Override
 	protected Table startRematch() {
+		this.gameId = UUID.randomUUID();
 		return this;
 	}
 
@@ -351,9 +363,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized boolean suggestRematch(User user) {
-
-		super.suggestRematch(user);
-		return true;
+		return super.suggestRematch(user);
 	}
 
 	public Vector2d getPosition() {

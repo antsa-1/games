@@ -62,9 +62,9 @@ public final class GameMode {
 		this.x = x;
 		this.requiredConnections = requiredConnectionsToWin;
 		this.gameNumber = gameNumber;
-		String s="";
+		String s = "";
 		if (requiredConnectionsToWin > 0) {
-			s= " connect " + requiredConnectionsToWin;
+			s = " connect " + requiredConnectionsToWin;
 		}
 		this.name = Integer.toString(x) + "x" + Integer.toString(y) + s;
 
@@ -75,8 +75,20 @@ public final class GameMode {
 		return this.gameNumber == 2;
 	}
 
+	@JsonbTransient
+	public boolean isTicTacToe() {
+		return this.gameNumber == 1;
+	}
+
+	@JsonbTransient
+	public boolean isEightBall() {
+		return this.gameNumber == 3;
+	}
+
 	public static String getBoardDescription(int gameMode) {
+	
 		GameMode mode = GameMode.getGameMode(gameMode);
+
 		return mode.getX() + "x" + mode.getY() + " /" + mode.getRequiredConnections();
 	}
 

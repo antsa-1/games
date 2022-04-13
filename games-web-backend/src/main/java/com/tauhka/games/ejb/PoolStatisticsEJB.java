@@ -9,8 +9,11 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.stats.PoolGameStatisticsEvent;
+import com.tauhka.games.core.stats.RankingCalculator;
 import com.tauhka.games.core.twodimen.PoolTurnStats;
+import com.tauhka.games.messaging.util.GamesUtils;
 
 import jakarta.annotation.Resource;
 import jakarta.ejb.Stateless;
@@ -26,8 +29,8 @@ public class PoolStatisticsEJB {
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource gamesDataSource;
 
-	// Idea for storing the turn data is to help check found bugs and later others could watch the games how they were played
-	public void observePoolTurn(@ObservesAsync PoolGameStatisticsEvent poolTurnStats) {
+	// Idea for storing the turn data is to help finding bugs and later others could watch the games how they were played
+	public void observePoolTurnEvents(@ObservesAsync PoolGameStatisticsEvent poolTurnStats) {
 		LOGGER.info("PoolStatisticsEJB should update now database with poolTurnUpdate " + poolTurnStats);
 		if (poolTurnStats == null) {
 			throw new IllegalArgumentException("No statistics for database:" + poolTurnStats);// Tells which one was null

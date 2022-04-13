@@ -114,10 +114,12 @@ export interface IUser {
 export interface ITopLists {
 	connectFours: IPlayerStats[],
 	tictactoes: IPlayerStats[],
+	eightBalls: IPlayerStats[],
 	errorFlag: boolean,
 	dateTime: string,
 	totalTictactoes: number,
 	totalConnectFours: number,
+	totalEightBalls:number
 }
 
 export interface IPlayerStats {
@@ -127,14 +129,16 @@ export interface IPlayerStats {
 	playedConnectFoursAgainstAI: number,
 	rankingConnectFour: number,
 	rankingTicTacToe: number,
+	rankingEightBall: number,
 }
 
 export interface IProfile extends IFetchResult {
 	stats: IPlayerStats,
 	text: string,
 	memberSince: string,
-	tictactoes: IGame[]
-	connectFours: IGame[]
+	tictactoes: IGame[],
+	connectFours: IGame[],
+	eightBalls: IGame[]
 }
 export interface IFetchResult {
 	status: number,
