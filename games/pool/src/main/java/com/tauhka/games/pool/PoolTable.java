@@ -370,11 +370,7 @@ public class PoolTable extends Table implements PoolComponent {
 		return new Vector2d(0d, 0d);
 	}
 
-	@Override
-	public int getNumber() {
-		// TODO Auto-generated method stub
-		return -1;
-	}
+
 
 	public Vector2d getMiddleAreaStart() {
 		return middleAreaStart;
@@ -398,6 +394,12 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public void setEightBallRuleBase(EightBallRuleBase eightBallRuleBase) {
 		this.eightBallRuleBase = eightBallRuleBase;
+	}
+
+	@Override
+	public int getNumber() {
+		// TODO Auto-generated method stub
+		return -1;
 	}
 
 }
