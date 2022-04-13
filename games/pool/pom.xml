@@ -20,7 +20,7 @@
 			<artifactId>games-core</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>jakarta.json.bind</groupId>
 			<artifactId>jakarta.json.bind-api</artifactId>
@@ -35,31 +35,7 @@
 	</dependencies>
 	<build>
 		<finalName>PoolGame</finalName>
-		<plugins>
-
-			<!-- download source code in Eclipse, best practice -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.9</version>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<downloadJavadocs>false</downloadJavadocs>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-				<configuration>
-					<source>12</source>
-					<target>12</target>
-				</configuration>
-			</plugin>
-
-
-		</plugins>
+		<plugins></plugins>
 	</build>
 
 </project>
