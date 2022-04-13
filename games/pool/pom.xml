@@ -14,6 +14,17 @@
 		<artifactId>games</artifactId>
 		<version>1.0.0</version>
 	</parent>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
+				<version>5.8.2</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>com.tauhka</groupId>
@@ -31,11 +42,15 @@
 			<artifactId>maven-jar-plugin</artifactId>
 			<version>3.2.2</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>PoolGame</finalName>
-		
+
 	</build>
 
 </project>

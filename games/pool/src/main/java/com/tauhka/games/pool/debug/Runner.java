@@ -4,6 +4,7 @@ import com.tauhka.games.core.User;
 import com.tauhka.games.pool.Cue;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.pool.PoolTurn;
+import com.tauhka.games.pool.TurnResult;
 
 /**
  * @author antsa-1 from GitHub 28 Mar 2022
@@ -19,6 +20,7 @@ public class Runner {
 		p.joinTableAsPlayer(u2);
 		PoolTurn turn = new PoolTurn();
 		Cue cue = new Cue();
+	//	p.updateHandBall(u, null)
 		// -0.01425565337077744 -> osuu force 70
 		// -0.18982631837040745d) -> yli force 65
 		// 0.04085316949817506 force 200 two bottom pocket pathway collisions

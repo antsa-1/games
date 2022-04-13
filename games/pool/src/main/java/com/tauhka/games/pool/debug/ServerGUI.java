@@ -83,7 +83,7 @@ public class ServerGUI implements Runnable {
 		try {
 			synchronized (poolTable) {
 				while (true) {
-					// LOGGER.info("ServerGui starts to wait");
+					LOGGER.info("ServerGui starts to wait");
 					poolTable.wait();
 					// LOGGER.info("ServerGui continues after waiting");
 					updateSwingComponentPositions();
