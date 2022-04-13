@@ -16,14 +16,10 @@ export const tablesMixin = {
 					
 				return true
 			}
-			else if(this.theTable.playerInTurn.name!==this.userName){
+			else if(this.theTable.playerInTurn.name !== this.userName){
 					
 				return true
-			}else if(this.theTable && this.theTable.board&& this.theTable.board.length<4){
-					
-				return true
-			}
-				
+			}				
 			return false
 		},
 		rematchButtonEnabled(){

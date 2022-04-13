@@ -344,6 +344,9 @@ public class PoolTable extends Table implements PoolComponent {
 	@Override
 	protected Table startRematch() {
 		this.gameId = UUID.randomUUID();
+		EightBallInitializer.init(this);
+		expectingHandBallUpdate = true;
+		super.resetRematchPlayer();
 		return this;
 	}
 

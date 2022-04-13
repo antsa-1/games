@@ -5,7 +5,7 @@
 			<button v-if="resignButtonVisible" :disabled ="resignButtonDisabled" @click="resign" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
 				Resign 
 			</button>			
-			<button @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
+			<button v-if="rematchButtonEnabled" @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
 				Rematch
 			</button>
 		</div>
@@ -89,6 +89,7 @@ export default defineComponent({
 				//	this.stopReducer()
 				}
 			}else if (mutation.type === "rematch" ){
+				console.log("REMATCH")
 				this.initTable()
 			}
 			else if (mutation.type === "poolGameEnded" ){			
@@ -273,7 +274,11 @@ export default defineComponent({
 		},
 		initTable() {
 			console.log("****initTable")
-			this.ballsRemaining=[]
+			this.ballsRemaining = []
+			this.resultPlayerABalls = [],
+			this.resultPlayerBBalls = [],
+			this.resultRemainingBalls = [],
+			this.resultCueBallPosition = undefined,
 			setTimeout( () => {
 			
 			
