@@ -35,7 +35,7 @@
 	</dependencies>
 	<build>
 		<finalName>PoolGame</finalName>
-		<plugins></plugins>
+		
 	</build>
 
 </project>
