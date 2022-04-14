@@ -22,7 +22,7 @@ import com.tauhka.games.pool.TurnResult;
 /* https://openjdk.java.net/jeps/417 JEP 417: Vector API (Third Incubator) any help here with jdk 18? */
 public class EightBallRuleBase {
 	private static final Logger LOGGER = Logger.getLogger(EightBallRuleBase.class.getName());
-	private final double DELTA = 0.25d;
+	private final double DELTA = 1 / 6d;
 	private final double FRICTION = 0.991d;
 	private TurnResult turnResult;
 	private int iterationCount = 0;

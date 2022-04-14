@@ -31,7 +31,6 @@ import {IPoolTable, ICue, IBall, IPocket, IEightBallGame, IVector2, IGameImage, 
 import { loginMixin, } from "../../mixins/mixins";
 import { tablesMixin} from "../../mixins/tablesMixin";
 import { poolMixin} from "../../mixins/poolMixin";
-import { useRoute } from "vue-router";
 import Chat from "../Chat.vue";
 
 const CANVAS_MAX_WIDTH = 1200
@@ -39,18 +38,15 @@ const CANVAS_MAX_HEIGHT = 677
 const CUE_MAX_WIDTH = 900
 const CUE_MAX_HEIGHT = 12
 const BALL_DIAMETER = 34
-const SECOND_IN_MILLIS = 1000
 const FRICTION = 0.991
+let counterA = 0
+let counterB = 0
 let cueForceInterval = undefined
 let collisionCheckInterval = undefined
 
-const DELTA = 1/4 // TODO if any lower the ball goes over to pocket in full speed
-let middleAreaTopLeft =<IVector2> {x: 125, y:130}
-let middleAreaBottomRight =<IVector2> {x: 1072, y:550}
-let requestedAnimationFrames =[]
+const DELTA = 1/6
 let showAnimation = true
-let animationInProcess = false
-//let ballImages=[]
+
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
@@ -387,6 +383,8 @@ export default defineComponent({
 				this.poolTable.mouseEnabled = true
 			}
 			showAnimation = true
+			counterA = 0
+			counterB = 0
 			this.removeMouseListeners()
 			this.addMouseListeners()
 			this.draw()
@@ -401,8 +399,7 @@ export default defineComponent({
 					let ball = this.ballsRemaining.find(ball => ball.number === serverBall.number)
 					ball.position = serverBall.position
 					ball.velocity.x = 0
-					ball.velocity.y = 0
-					console.log("SetBallVelocity:"+ball.number +" = " +ball.velocity.x +" _ "+ ball.velocity.y)
+					ball.velocity.y = 0					
 				})
 				this.updatePocketedBalls(this.resultPlayerABalls)				
 				this.updatePocketedBalls(this.resultPlayerBBalls)
@@ -519,10 +516,7 @@ export default defineComponent({
 				this.cueBall.position.y = event.offsetY
 				this.draw()
 				return
-			}
-			if(event.button ===1){ // wheel or middle button
-			
-			}
+			}			
 			if(!this.poolTable.mouseEnabled){
 				return
 			}
@@ -609,15 +603,10 @@ export default defineComponent({
 		handleAfterAnimation(){
 			return new Promise((resolve) => {
 				if(this.isMyTurn() && this.theTable.playerInTurn !== null){
-				
-					
 					this.poolTable.mouseEnabled = true
 					this.cue.image.visible = true
 					this.cue.force = 0
-				}
-				if(this.handBall){
-				//	this.cueBall.image.visible = false
-				}				
+				}							
 				if(!this.isOngoingGame()){					
 					showAnimation = false
 				}
@@ -630,8 +619,7 @@ export default defineComponent({
 				this.poolTable.mouseEnabled = false
 				if(this.cue.force < 10 ){
 					this.cue.force = 10
-				}
-				
+				}				
 				let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
 				this.cue.image.canvasDestination = dimensions
 				this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
@@ -730,24 +718,30 @@ export default defineComponent({
 			if(ball.number === 0 || ball.number === 8){
 				return
 			}			
-			console.log("HAndleBall in pocket:"+JSON.stringify(ball))
 			this.draw()
 			setTimeout(() => {
 				//Moves ball to the edge of the table
 				const found = this.resultPlayerABalls.find(balla => balla.number === ball.number)
-				let factorial = this.resultPlayerABalls.length
+				if(found){
+					console.log("Ball found from A:"+ball.number)
+					counterA++
+				}else{
+					console.log("Ball found from B:"+ball.number)
+					counterB++
+				}
+				let factorial = counterA
 				let startX = undefined
 				if(found){					
 					 startX = this.canvas.width * 0.08						 
 				}else{					
 					 startX = this.canvas.width * 0.55
-					 factorial = this.resultPlayerBBalls.length
+					 factorial = counterB
+					 console.log("Factorial from B"+factorial)
 				}			
 				ball.position.x = startX + factorial * ball.diameter
-				ball.position.y = this.canvas.height * 0.06
-				
+				ball.position.y = this.canvas.height * 0.06				
 				this.draw()
-			}, 1500)
+			}, 5500)
 		},
 		handleBallCollisions(){			
 			for (let i = 0; i < this.ballsRemaining.length; i++){
