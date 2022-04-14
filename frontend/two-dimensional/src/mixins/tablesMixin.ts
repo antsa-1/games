@@ -96,8 +96,8 @@ export const tablesMixin = {
 		openTable(table:ITable){
 			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.tableId})
 		},
-		watchTable(table:ITable){
-			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.tableId, params: { watch: "1" }})			
+		openWatcherTable(table:ITable){
+			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.tableId, params: { watch: "1"}})			
 		},
 		getTableName(gameNumber:number):string{
 			if(gameNumber === 1){

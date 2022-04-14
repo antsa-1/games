@@ -97,8 +97,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/portal/connectfour/:watch?',
         component: TableConnectFour,
-        name: "TableConnectFour",
-        props: true,
+        name: "TableConnectFour",        
         beforeEnter: (to, from, next) => {
             if (!store.state.user || !store.state.theTable) {
                 next('/');
@@ -111,15 +110,8 @@ const routes: RouteRecordRaw[] = [
         path: '/portal/pool/:watch?',
         component: PoolTable,
         name: "PoolTable",
-        props: true,
-      
+        props: true,  
         beforeEnter: (to, from, next) => {
-            
-           /* let playerA:IPlayer={name:"playerA", gameToken:IGameToken.X}
-            let playerB:IPlayer={name:"playerB", gameToken:IGameToken.O}
-            let table:ITable= {playerA:playerA,playerB:playerB,playerInTurn:playerA,gameMode:undefined,board:undefined,chat:null,tableId:"a",x:0,y:0}
-            store.state.theTable=table
-            */
             if (!store.state.user || !store.state.theTable) {
                 next('/');
             } else {

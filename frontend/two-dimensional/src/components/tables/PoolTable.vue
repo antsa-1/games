@@ -51,7 +51,7 @@ export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
 	mixins: [loginMixin, tablesMixin, poolMixin],
-	props:["watch"],
+	props: ["watch"],
 	data():IEightBallGame{
 		return{
 				canvas: undefined,	
@@ -97,14 +97,17 @@ export default defineComponent({
     	})
 	},
 	computed: {
-			showAnimationn(){
-				return this.isDocumentVisible && this.isOngoingGame() && this.gameOptions.useAnimation===true
-			}
+			
 	},
 	mounted() {	
 		this.initTable()
-		if(this.watch === "1"){
-			this.drawBoard()
+		if(this.watch === "1"){			
+			this.resultPlayerABalls = this.theTable.playerABalls
+			this.resultPlayerBBalls = this.theTable.playerBBalls
+			this.updatePocketedBalls(this.theTable.playerABalls)
+			this.updatePocketedBalls(this.theTable.playerBBalls)
+			this.updateRemainingBallPositions(this.theTable.remainingBalls, this.ballsRemaining)
+			this.draw()
 		}
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
 			if(action.type === "poolUpdate"){
@@ -194,14 +197,17 @@ export default defineComponent({
 		},
 
 		updatePocketedBalls(ballsInPocket:Array<IBall>){
+			if(!ballsInPocket){
+				return
+			}
 			ballsInPocket.forEach(serverBall => {
 				let ball:IBall=	this.ballsRemaining.find(ball => ball.number === serverBall.number)
-				this.handleBallInPocket(ball)	
+				this.handleBallInPocket(ball, null, 0)	
 			})
 		},
 
 		draw(){
-			if(showAnimation &&  this.isDocumentVisible()){
+			if(showAnimation && this.isDocumentVisible()){
 				requestAnimationFrame(this.repaintAll)				
 			}
 		},
@@ -278,11 +284,11 @@ export default defineComponent({
 		initTable() {
 			console.log("****initTable")
 			this.ballsRemaining = []
-			this.resultPlayerABalls = [],
-			this.resultPlayerBBalls = [],
-			this.resultRemainingBalls = [],
-			this.resultCueBallPosition = undefined,
-			setTimeout( () => {
+			this.resultPlayerABalls = []
+			this.resultPlayerBBalls = []
+			this.resultRemainingBalls = []
+			this.resultCueBallPosition = undefined
+			
 			
 			
 			let windowWidth = window.innerWidth
@@ -388,7 +394,7 @@ export default defineComponent({
 			this.removeMouseListeners()
 			this.addMouseListeners()
 			this.draw()
-		}, 500)
+		
 		},
 		isDocumentVisible(){
 			return document.visibilityState === 'visible'
@@ -699,7 +705,7 @@ export default defineComponent({
 				return pocket
 			}		
 		},
-		handleBallInPocket (ball:IBall, pocket:IPocket){			
+		handleBallInPocket (ball:IBall, pocket:IPocket, timeout = 2500){			
 			if(ball.inPocket){
 				return
 			}
@@ -741,7 +747,7 @@ export default defineComponent({
 				ball.position.x = startX + factorial * ball.diameter
 				ball.position.y = this.canvas.height * 0.06				
 				this.draw()
-			}, 5500)
+			}, timeout)
 		},
 		handleBallCollisions(){			
 			for (let i = 0; i < this.ballsRemaining.length; i++){

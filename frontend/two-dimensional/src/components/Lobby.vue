@@ -306,7 +306,7 @@ export default defineComponent({
 					case "WATCH":
 						console.log("watch arrived selecting table "+data.table)
 						this.$store.dispatch("selectTable", data.table).then(() => {
-							this.watchTable(data.table)
+							this.openWatcherTable(data.table)
 						})
 						break
 					case "ADD_WATCHER":						
@@ -458,8 +458,7 @@ export default defineComponent({
 		isOwnTable(table:ITable){
 			return	table?.playerA?.name === this.userName
 		},
-		watchTable(table:ITable){
-			
+		watchTable(table:ITable){			
 			const obj = { title: "WATCH",message:table.tableId};
 			this.user.webSocket.send(JSON.stringify(obj));
 		},
