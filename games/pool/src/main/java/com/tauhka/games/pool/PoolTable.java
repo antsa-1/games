@@ -64,7 +64,7 @@ public class PoolTable extends Table implements PoolComponent {
 	static {
 		String env = System.getProperty("Server_Environment");
 		String ui = System.getProperty("Server_ShowUI");
-		SERVER_GUI = true;
+		SERVER_GUI = false;
 		/* else if (env.equalsIgnoreCase(Constants.ENVIRONMENT_DEVELOPMENT) && gui.equalsIgnoreCase("Server_ActivateGUI")) { SERVER_GUI = true; } else { SERVER_GUI = true; } */
 	}
 
@@ -77,6 +77,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized Object playTurn(User user, Object o) {
+		System.out.println("PLAY TURN" + ((PoolTurn) o).getCue());
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
@@ -126,6 +127,7 @@ public class PoolTable extends Table implements PoolComponent {
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
+		System.out.println("PLAYED TURN");
 		return playedTurn;
 	}
 
@@ -164,15 +166,17 @@ public class PoolTable extends Table implements PoolComponent {
 			// Different canvas sizes .. TODO
 			Vector2d position = sample.getPosition();
 			this.cueBall.setPosition(position);
-			synchronized (this) {
-				this.notify();
-				try {
-					LOGGER.info("Pooltable instance waits handball gui repaint");
-					this.wait();
-					LOGGER.info("Pooltable instance waits handball continues");
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if (SERVER_GUI) {
+				synchronized (this) {
+					this.notify();
+					try {
+						LOGGER.info("Pooltable instance waits handball gui repaint");
+						this.wait();
+						LOGGER.info("Pooltable instance waits handball continues");
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 			expectingHandBallUpdate = false;
@@ -249,6 +253,7 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public void putBallInPocket(Ball ballToPocket, Pocket pocket) {
+		System.out.println("InComing:" + ballToPocket.getNumber() + " pocket:" + pocket.getCenter());
 		if (ballToPocket.getNumber() == 0) {
 			return;
 		}
@@ -257,6 +262,7 @@ public class PoolTable extends Table implements PoolComponent {
 			return;
 		}
 		ballToPocket.setInPocket(true);
+		ballToPocket.setVelocity(new Vector2d(0d, 0d));
 		Ball ballInPocket = this.playerABalls.isEmpty() ? null : this.playerABalls.get(0);
 		if (ballInPocket != null) {
 			if (ballInPocket.isSimilar(ballToPocket)) {
@@ -374,8 +380,6 @@ public class PoolTable extends Table implements PoolComponent {
 	public Vector2d getPosition() {
 		return new Vector2d(0d, 0d);
 	}
-
-
 
 	public Vector2d getMiddleAreaStart() {
 		return middleAreaStart;

@@ -44,7 +44,7 @@ const FRICTION = 0.991
 let cueForceInterval = undefined
 let collisionCheckInterval = undefined
 
-const DELTA = 1/8 // TODO if any lower the ball goes over to pocket in full speed
+const DELTA = 1/4 // TODO if any lower the ball goes over to pocket in full speed
 let middleAreaTopLeft =<IVector2> {x: 125, y:130}
 let middleAreaBottomRight =<IVector2> {x: 1072, y:550}
 let requestedAnimationFrames =[]
@@ -82,7 +82,7 @@ export default defineComponent({
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
 			if (mutation.type === "changeTurn") {
 				if(state.theTable.playerInTurn.name === this.userName){
-					this.addMouseListeners()
+					
 				//	this.startReducer()
 				}else{
 					//this.removeMouseListeners()
@@ -94,12 +94,9 @@ export default defineComponent({
 			}
 			else if (mutation.type === "poolGameEnded" ){			
 				this.theTable.playerInTurn = null
-				this.removeMouseListeners()
+				this.poolTable.mouseEnabled = false 
 				this.poolTable.mouseEnabled = false
 				
-			}else if(mutation.type === "setDraw"){
-				this.stopReducer()
-				this.removeMouseListener()
 			}			
     	})
 	},
@@ -116,6 +113,8 @@ export default defineComponent({
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
 			if(action.type === "poolUpdate"){
 				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
+				this.cue.angle = action.payload.pool.cue.angle
+				
 			}else if(action.type === "poolPlayTurn"){
 				this.updateTurnResult(action)
 			
@@ -125,6 +124,8 @@ export default defineComponent({
 				this.selectedPocket = null
 				if(action.payload.pool.turnResult === "HANDBALL"){
 					this.handBall = true
+					
+					console.log("CueBAll position in handball"+	this.resultCueBallPosition)
 				}
 				if(this.isDocumentVisible()){					
 					this.shootBall().then(() => {					
@@ -144,15 +145,16 @@ export default defineComponent({
 			}
 			else if(action.type === "poolSetHandBall"){
 				this.cueBall.position = action.payload.pool.cueBall.position
+				this.resultCueBallPosition = action.payload.pool.cueBall.position
 				this.cueBall.inPocket = false
 				this.cue.position = this.cueBall.position
 				this.handBall = false
 				this.cueBall.image.visible = true		
 				if(this.isMyTurn()){					
-					if(action.payload.pool.turnResult=="SELECT_POCKET"){
+					if(action.payload.pool.turnResult == "SELECT_POCKET"){
 						this.pocketSelection = true	
 					}
-					this.addMouseListeners()
+					this.poolTable.mouseEnabled = true
 				}
 			}else if(action.type === "poolSelectPocket"){			
 				this.handBall = action.payload.pool.turnResult === "HANDBALL" ? true: false
@@ -161,7 +163,7 @@ export default defineComponent({
 				this.pocketSelection = false
 				this.selectedPocket = action.payload.pool.selectedPocket
 				if(this.isMyTurn()){
-					this.addMouseListeners()
+					this.poolTable.mouseEnabled = true
 				}
 			}
 			this.draw()
@@ -234,7 +236,12 @@ export default defineComponent({
 				this.renderingContext.stroke()
 				
 			}
-			this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
+			
+			if(!this.isMyTurn() && component.hasOwnProperty('force')){
+				this.renderingContext.drawImage(image.image, 1430, 0, 100, 22,  image.canvasDestination.x+825, image.canvasDestination.y,88, 10)
+			}else {
+			 this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
+			}
 			this.renderingContext.resetTransform()
 		},
 		repaintAll(){		
@@ -350,7 +357,7 @@ export default defineComponent({
 												image: cueBallImage,
 												diameter: BALL_DIAMETER,
 												radius: BALL_DIAMETER/2,
-												position: <IVector2> {x:1030, y: 150}, //311 is hardcoded for testing purposes
+												position: <IVector2> {x:1030, y: 150}, 
 												number:0,
 												color:"white",
 												velocity:<IVector2>{ x:0, y:0},												
@@ -377,10 +384,13 @@ export default defineComponent({
 			this.ballsRemaining.push(this.cueBall)
 			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true, useAnimation:true}
 			if (this.theTable.playerInTurn?.name === this.userName) {
-				this.addMouseListeners()
+				this.poolTable.mouseEnabled = true
 			}
+			showAnimation = true
+			this.removeMouseListeners()
+			this.addMouseListeners()
 			this.draw()
-		}, 250)
+		}, 500)
 		},
 		isDocumentVisible(){
 			return document.visibilityState === 'visible'
@@ -390,20 +400,28 @@ export default defineComponent({
 				this.resultRemainingBalls.forEach(serverBall => {
 					let ball = this.ballsRemaining.find(ball => ball.number === serverBall.number)
 					ball.position = serverBall.position
+					ball.velocity.x = 0
+					ball.velocity.y = 0
+					console.log("SetBallVelocity:"+ball.number +" = " +ball.velocity.x +" _ "+ ball.velocity.y)
 				})
+				this.updatePocketedBalls(this.resultPlayerABalls)				
+				this.updatePocketedBalls(this.resultPlayerBBalls)
 				if(this.resultCueBallPosition){ // Does not exist in the very beginning
 					this.cueBall.position = this.resultCueBallPosition
+					this.cueBall.velocity.x = 0
+					this.cueBall.velocity.y = 0
 				}
 				if(this.isMyTurn()){
 					this.poolTable.mouseEnabled = true
 					this.cue.image.visible = true
-					this.addMouseListeners()
+					this.cue.force = 0
+					this.poolTable.mouseEnabled = true
 				} else{
 					this.poolTable.mouseEnabled = false
-					this.removeMouseListeners()
+				
 				}
 				if(this.isOngoingGame()){
-					showAnimation =  true
+					showAnimation = true
 					this.draw()
 				}else{
 					requestAnimationFrame(this.repaintAll)
@@ -411,8 +429,7 @@ export default defineComponent({
 				
 			} else {
 				showAnimation = false			
-				this.poolTable.mouseEnabled = false
-				this.removeMouseListeners()
+				this.poolTable.mouseEnabled = false				
 				clearInterval(collisionCheckInterval)
 			}			
 		},
@@ -511,7 +528,7 @@ export default defineComponent({
 			}
 			if(this.pocketSelection){				
 				this.sendPocketSelection(this.selectedPocket)
-				this.removeMouseListeners()
+				this.poolTable.mouseEnabled = false
 				return
 			}
 			else if(this.handBall){
@@ -520,7 +537,7 @@ export default defineComponent({
 			
 				this.hb(this.cueBall, this.canvas)
 			}			
-			this.removeMouseListeners()
+			this.poolTable.mouseEnabled = false
 			clearInterval(cueForceInterval)
 			if(!this.handBall){
 				this.st(this.cue, this.cueBall, this.canvas)
@@ -593,9 +610,10 @@ export default defineComponent({
 			return new Promise((resolve) => {
 				if(this.isMyTurn() && this.theTable.playerInTurn !== null){
 				
-					this.addMouseListeners()
+					
 					this.poolTable.mouseEnabled = true
 					this.cue.image.visible = true
+					this.cue.force = 0
 				}
 				if(this.handBall){
 				//	this.cueBall.image.visible = false
@@ -709,10 +727,11 @@ export default defineComponent({
 				ball.image.canvasDimension.x = ball.image.canvasDimension.x * 0.8
 				ball.image.canvasDimension.y = ball.image.canvasDimension.y * 0.8
 			}
-			this.draw()
 			if(ball.number === 0 || ball.number === 8){
 				return
 			}			
+			console.log("HAndleBall in pocket:"+JSON.stringify(ball))
+			this.draw()
 			setTimeout(() => {
 				//Moves ball to the edge of the table
 				const found = this.resultPlayerABalls.find(balla => balla.number === ball.number)
@@ -725,7 +744,8 @@ export default defineComponent({
 					 factorial = this.resultPlayerBBalls.length
 				}			
 				ball.position.x = startX + factorial * ball.diameter
-				ball.position.y = this.canvas.height * 0.06			
+				ball.position.y = this.canvas.height * 0.06
+				
 				this.draw()
 			}, 1500)
 		},

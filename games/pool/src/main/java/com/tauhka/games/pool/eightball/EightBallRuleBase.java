@@ -58,6 +58,9 @@ public class EightBallRuleBase {
 			// No ball was hit
 			turnResult = TurnResult.HANDBALL;
 		}
+		if (turnResult == null && cueBallInPocket) {
+			turnResult = TurnResult.HANDBALL;
+		}
 		if (turnResult == null && opponentBallInPocket) {
 			turnResult = TurnResult.CHANGE_TURN;
 		}
@@ -65,9 +68,6 @@ public class EightBallRuleBase {
 			turnResult = TurnResult.CONTINUE_TURN;
 		}
 
-		if (turnResult == null && cueBallInPocket) {
-			turnResult = TurnResult.HANDBALL;
-		}
 		// CueBall might roll to pocket as last ball
 		if (eightBallInPocket && cueBallInPocket && table.getPlayerInTurnBalls().size() != 7) {
 			turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
@@ -133,14 +133,7 @@ public class EightBallRuleBase {
 			if (!isAnyBallMoving(table.getRemainingBalls())) {
 				break;
 			}
-			/*try {
-				table.notify();
-				table.wait();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			*/
+			/* try { table.notify(); table.wait(); } catch (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); } */
 		}
 	}
 

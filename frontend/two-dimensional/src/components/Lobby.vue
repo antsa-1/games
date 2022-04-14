@@ -304,6 +304,7 @@ export default defineComponent({
 						this.$store.dispatch("changeTurn", data.table.playerInTurn)
 						break
 					case "WATCH":
+						console.log("watch arrived selecting table "+data.table)
 						this.$store.dispatch("selectTable", data.table).then(() => {
 							this.watchTable(data.table)
 						})
