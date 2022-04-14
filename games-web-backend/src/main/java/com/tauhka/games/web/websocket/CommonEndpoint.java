@@ -72,13 +72,13 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.CREATE_TABLE) {
 				gameMessage = tableHandler.createTable(message, this);
 				sendCommonMessage(gameMessage);
-			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) { // Ei REMOVE_TABLE sisään
+			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) { 
 				gameMessage = tableHandler.leaveTable(message, this);
 				if (gameMessage != null) {
 					sendMessageToTable(gameMessage.getTable(), gameMessage);
 					sendCommonMessage(tableHandler.createRemoveTableMessage(gameMessage.getTable(), this));
 				}
-			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) { // Ei REMOVE_TABLE sisään
+			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) { 
 				gameMessage = tableHandler.joinTable(message, this);
 				sendCommonMessage(gameMessage);
 			} else if (message.getTitle() == MessageTitle.REMOVE_TABLE) {
