@@ -22,7 +22,7 @@ import com.tauhka.games.pool.TurnResult;
 /* https://openjdk.java.net/jeps/417 JEP 417: Vector API (Third Incubator) any help here with jdk 18? */
 public class EightBallRuleBase {
 	private static final Logger LOGGER = Logger.getLogger(EightBallRuleBase.class.getName());
-	private final double DELTA = 0.125d;
+	private final double DELTA = 0.25d;
 	private final double FRICTION = 0.991d;
 	private TurnResult turnResult;
 	private int iterationCount = 0;
@@ -133,13 +133,14 @@ public class EightBallRuleBase {
 			if (!isAnyBallMoving(table.getRemainingBalls())) {
 				break;
 			}
-			try {
+			/*try {
 				table.notify();
 				table.wait();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			*/
 		}
 	}
 
@@ -306,7 +307,7 @@ public class EightBallRuleBase {
 				// This should check the order of balls going in pocket if several balls at the same time goes
 				if (table.getPlayerInTurnBalls().size() != 7) {
 					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
-				} else if (table.getSelectedPocket() == null || table.getSelectedPocket().hasEightBall()) {
+				} else if (table.getSelectedPocket() == null || !table.getSelectedPocket().hasEightBall()) {
 					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
 				} else {
 					this.turnResult = TurnResult.EIGHT_BALL_IN_POCKET_OK;
