@@ -77,7 +77,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized Object playTurn(User user, Object o) {
-		System.out.println("PLAY TURN" + ((PoolTurn) o).getCue());
+		System.out.println("PLAY TURN" + ((PoolTurn) o).getCue() + " user:" + user.getName());
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
@@ -90,24 +90,8 @@ public class PoolTable extends Table implements PoolComponent {
 		PoolTurn turn = (PoolTurn) o;
 
 		TurnResult turnResult = null;
-		if (SERVER_GUI) {
-			LOGGER.info("Pooltable instance, server in testing mode");
-			synchronized (this) {
-				turnResult = this.eightBallRuleBase.playTurn(this, turn);
-				LOGGER.info("PoolTable instance made movements now notifying, threadId:" + Thread.currentThread().getId());
-				this.notify();
-				try {
-					LOGGER.info("Pooltable instance waits for Swing components to update");
-					this.wait();
-					LOGGER.info("pooltable waiting done, continues");
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					LOGGER.info("Pooltable instance, thread interrupted" + Thread.currentThread().getId());
-				}
-			}
-		} else {
-			turnResult = this.eightBallRuleBase.playTurn(this, turn);
-		}
+
+		turnResult = this.eightBallRuleBase.playTurn(this, turn);
 		PoolTurn playedTurn = new PoolTurn();
 		if (TurnResult.isDecisive(turnResult)) {
 			checkWinner(turnResult, playedTurn);
@@ -162,7 +146,7 @@ public class PoolTable extends Table implements PoolComponent {
 			throw new IllegalArgumentException("HandBall update is not expected:" + this);
 		}
 		PoolTurn turn = new PoolTurn();
-		if (handBallPositionAllowed(sample)) {
+		if (eightBallRuleBase.isCueBallNewPositionAllowed(this, sample)) {
 			// Different canvas sizes .. TODO
 			Vector2d position = sample.getPosition();
 			this.cueBall.setPosition(position);
@@ -188,6 +172,8 @@ public class PoolTable extends Table implements PoolComponent {
 			LOGGER.info("Handball position was allowed" + sample);
 		} else {
 			LOGGER.info("Handball position not allowed" + sample);
+			turn.setTurnResult(TurnResult.HANDBALL);
+			return turn;
 		}
 		turn.setTurnResult(TurnResult.CONTINUE_TURN);
 		return turn;
@@ -215,8 +201,31 @@ public class PoolTable extends Table implements PoolComponent {
 		return pocketSelectedTurn;
 	}
 
-	private boolean handBallPositionAllowed(CueBall cueBall2) {
-		// TODO Auto-generated method stub
+	public boolean handBallPositionAllowed(CueBall cueBall) {
+		Boundry left = this.boundries.get(5);
+		Boundry right = this.boundries.get(2);
+		Boundry topLeft = this.boundries.get(0);
+		Boundry bottomRight = this.boundries.get(3);
+		double x = cueBall.getPosition().x;
+		double y = cueBall.getPosition().y;
+		double r = cueBall.getRadius();
+		if (x > left.a + r && x < right.a - r) {
+			System.out.println("boundry1");
+			if (!(y > topLeft.a + r && y < bottomRight.a - r)) {
+				System.out.println("boundry2");
+				return false;
+			}
+		} else {
+			System.out.println("boundry3");
+			return false;
+		}
+		for (Ball ball : remainingBalls) {
+			if (eightBallRuleBase.areBallsIntersecting(ball, cueBall)) {
+				System.out.println("balls intersecting" + ball.getNumber());
+				System.out.println("G");
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -243,13 +252,6 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public Pocket getSelectedPocket() {
 		return selectedPocket;
-	}
-
-	public void handleHandBall(CueBall cueBall, Vector2d newPosition) {
-		if (eightBallRuleBase.isCueBallNewPositionAllowed(this, newPosition)) {
-			this.cueBall.setPosition(newPosition);
-		}
-		throw new IllegalArgumentException("CueBall new position is not allowed:" + newPosition);
 	}
 
 	public void putBallInPocket(Ball ballToPocket, Pocket pocket) {
@@ -290,6 +292,14 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public Canvas getCanvas() {
 		return canvas;
+	}
+
+	public boolean isExpectingHandball() {
+		return this.expectingHandBallUpdate;
+	}
+
+	public boolean isExpectingPocketSelection() {
+		return this.expectingPocketSelection;
 	}
 
 	public void setCanvas(Canvas canvas) {
@@ -395,10 +405,6 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public void setMiddleAreaEnd(Vector2d middleAreaEnd) {
 		this.middleAreaEnd = middleAreaEnd;
-	}
-
-	public EightBallRuleBase getEightBallRuleBase() {
-		return eightBallRuleBase;
 	}
 
 	public void setEightBallRuleBase(EightBallRuleBase eightBallRuleBase) {

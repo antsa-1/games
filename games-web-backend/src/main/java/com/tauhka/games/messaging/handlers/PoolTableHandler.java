@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.tauhka.games.core.GameResultType;
+import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.stats.PoolGameStatisticsEvent;
 import com.tauhka.games.core.tables.Table;
@@ -17,6 +18,8 @@ import com.tauhka.games.core.twodimen.PoolTurnStats;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.PoolMessage;
+import com.tauhka.games.pool.CueBall;
+import com.tauhka.games.pool.PoolAI;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.pool.PoolTurn;
 import com.tauhka.games.pool.TurnResult;
@@ -99,13 +102,18 @@ public class PoolTableHandler {
 	}
 
 	public Message playTurn(CommonEndpoint endpoint, Message message) {
-		// ServerSide calcs?
 		PoolTurn incomingTurn = new PoolTurn();
 		incomingTurn.setCanvas(message.getPoolMessage().getCanvas());
 		incomingTurn.setCue(message.getPoolMessage().getCue());
 		incomingTurn.setCueBall(message.getPoolMessage().getCueBall());
 		PoolTable table = (PoolTable) findUserTable(endpoint);
 		PoolTurn playedTurn = (PoolTurn) table.playTurn(endpoint.getUser(), incomingTurn);
+		Message playTurnMessage = createPlayedTurnMessage(table, playedTurn);
+		addTurnToDatabase(incomingTurn, table, playedTurn, endpoint, TurnType.PLAY);
+		return playTurnMessage;
+	}
+
+	private Message createPlayedTurnMessage(PoolTable table, PoolTurn playedTurn) {
 		Message playTurnMessage = new Message();
 		playTurnMessage.setFrom(SYSTEM);
 		playTurnMessage.setTable(table);
@@ -115,14 +123,55 @@ public class PoolTableHandler {
 		} else {
 			playTurnMessage.setTitle(MessageTitle.POOL_PLAY_TURN);
 		}
+		PoolMessage poolMessage = createPoolMessage(playedTurn);
+		playTurnMessage.setPoolMessage(poolMessage);
+		return playTurnMessage;
+	}
+
+	private PoolMessage createPoolMessage(PoolTurn playedTurn) {
 		PoolMessage poolMessage = new PoolMessage();
 		poolMessage.setCue(playedTurn.getCue());
 		poolMessage.setCueBall(playedTurn.getCueBall());
 		poolMessage.setWinner(playedTurn.getWinner());
 		poolMessage.setTurnResult(playedTurn.getTurnResult().toString());
-		playTurnMessage.setPoolMessage(poolMessage);
-		addTurnToDatabase(incomingTurn, table, playedTurn, endpoint, TurnType.PLAY);
-		return playTurnMessage;
+		return poolMessage;
+	}
+
+	public Message makeComputerMove(Table table) {
+		PoolTable poolTable = (PoolTable) table;
+		PoolAI poolAI = (PoolAI) table.getPlayerInTurn();
+		if (poolTable.isExpectingHandball()) {
+			CueBall cueBall = new CueBall();
+			Vector2d position = new Vector2d(100d, 100d);
+			cueBall.setPosition(position);
+			PoolTurn playedTurn = poolTable.updateHandBall(poolAI, cueBall);
+			PoolMessage poolMessage = new PoolMessage();
+			poolMessage.setCueBall(poolTable.getCueBall());
+			poolMessage.setTurnResult(playedTurn.getTurnResult().toString());
+			Message handBallMessage = new Message();
+			handBallMessage.setFrom(SYSTEM);
+			handBallMessage.setTable(table);
+			handBallMessage.setTitle(MessageTitle.POOL_HANDBALL);
+			handBallMessage.setPoolMessage(poolMessage);
+			return handBallMessage;
+		}
+		if (poolTable.isExpectingPocketSelection()) {
+			System.out.println("POCKET");
+			PoolTurn selectedPocketTurn = poolTable.selectPocket(poolAI, Integer.valueOf(1));
+			PoolMessage poolMessage = new PoolMessage();
+			poolMessage.setCueBall(poolTable.getCueBall());
+			poolMessage.setTurnResult(selectedPocketTurn.getTurnResult().toString());
+			Message selectedPocketMessage = new Message();
+			selectedPocketMessage.setFrom(SYSTEM);
+			selectedPocketMessage.setTable(table);
+			selectedPocketMessage.setTitle(MessageTitle.POOL_SELECT_POCKET);
+			selectedPocketMessage.setPoolMessage(poolMessage);
+			return selectedPocketMessage;
+		}
+		PoolTurn turnToBePlayed = poolAI.playAITurn(poolTable);
+		PoolTurn playedTurn = (PoolTurn) table.playTurn(poolAI, turnToBePlayed);
+		Message message = createPlayedTurnMessage(poolTable, playedTurn);
+		return message;
 	}
 
 	private void addGameToDataBase(PoolTable table, PoolTurn resultingTurn, GameResultType gameResultType) {

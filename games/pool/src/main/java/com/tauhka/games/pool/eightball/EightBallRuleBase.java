@@ -9,6 +9,7 @@ import com.tauhka.games.core.util.VectorUtil;
 import com.tauhka.games.pool.Ball;
 import com.tauhka.games.pool.Boundry;
 import com.tauhka.games.pool.Cue;
+import com.tauhka.games.pool.CueBall;
 import com.tauhka.games.pool.PathWay;
 import com.tauhka.games.pool.Pocket;
 import com.tauhka.games.pool.PoolTable;
@@ -22,7 +23,7 @@ import com.tauhka.games.pool.TurnResult;
 /* https://openjdk.java.net/jeps/417 JEP 417: Vector API (Third Incubator) any help here with jdk 18? */
 public class EightBallRuleBase {
 	private static final Logger LOGGER = Logger.getLogger(EightBallRuleBase.class.getName());
-	private final double DELTA = 1 / 6d;
+	private final double DELTA = 0.125d;
 	private final double FRICTION = 0.991d;
 	private TurnResult turnResult;
 	private int iterationCount = 0;
@@ -38,7 +39,7 @@ public class EightBallRuleBase {
 		this.reset();
 		Cue cue = turn.getCue();
 		Vector2d v = VectorUtil.calculateCueBallInitialVelocity(cue.getForce(), cue.getAngle());
-		LOGGER.info("CueBall initial velocity:" + v + " angle:" + cue.getAngle() + " force:" + cue.getForce());
+		// LOGGER.info("CueBall initial velocity:" + v + " angle:" + cue.getAngle() + " force:" + cue.getForce());
 		table.getCueBall().setVelocity(v);
 		handleBallsMovements(table);
 		for (Ball ball : removalBalls) {
@@ -88,29 +89,31 @@ public class EightBallRuleBase {
 		eightBallInPocket = false;
 	}
 
-	public boolean isCueBallNewPositionAllowed(PoolTable table, Vector2d newPosition) {
+	public boolean isCueBallNewPositionAllowed(PoolTable table, CueBall cueBall) {
 		Boundry left = table.getBoundries().get(5);
-		double radius = table.getCueBall().getRadius();
-		double x = newPosition.x;
-		double y = newPosition.y;
-
-		if (!(left.a + radius > x)) {
-			return false;
-		}
-		if (!(left.b + radius > y)) {
-			return false;
-		}
-
 		Boundry right = table.getBoundries().get(2);
-		if (!(right.a - radius < x)) {
+		Boundry topLeft = table.getBoundries().get(0);
+		Boundry bottomRight = table.getBoundries().get(3);
+		double x = cueBall.getPosition().x;
+		double y = cueBall.getPosition().y;
+		double r = cueBall.getRadius();
+		if (x > left.a + r && x < right.a - r) {
+			System.out.println("boundry1");
+			if (!(y > topLeft.a + r && y < bottomRight.a - r)) {
+				System.out.println("boundry2");
+				return false;
+			}
+		} else {
+			System.out.println("boundry3");
 			return false;
 		}
-		if (!(right.b - radius < y)) {
-			return false;
-		}
-
-		for (Ball b : table.getRemainingBalls()) {
-			if (areBallsIntersecting(b, table.getCueBall())) {
+		for (Ball ball : table.getRemainingBalls()) {
+			if (ball.getNumber() == 0) {
+				continue;
+			}
+			if (areBallsIntersecting(ball, cueBall)) {
+				System.out.println("balls intersecting" + ball.getNumber());
+				System.out.println("G");
 				return false;
 			}
 		}
@@ -119,11 +122,11 @@ public class EightBallRuleBase {
 
 	public boolean areBallsIntersecting(Ball ball, Ball cueBall) {
 		double x = Math.abs(ball.getPosition().x - cueBall.getPosition().x);
-		if (x <= ball.getRadius()) {
+		if (x > ball.getRadius()) {
 			return false;
 		}
 		double y = Math.abs(ball.getPosition().y - cueBall.getPosition().y);
-		return y <= ball.getRadius();
+		return y < ball.getRadius();
 	}
 
 	private void handleBallsMovements(PoolTable table) {

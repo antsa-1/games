@@ -1,9 +1,8 @@
 package com.tauhka.games.core.ai;
 
 import com.tauhka.games.core.User;
-import com.tauhka.games.core.twodimen.ai.CommonAI;
+import com.tauhka.games.core.twodimen.ai.GridAI;
 
-//Computer player, different class for differentiating playerType. Could be enum type field also.
-public class ArtificialUser extends User implements CommonAI {
+public class ArtificialUser extends User implements GridAI, AI {
 
 }

@@ -15,6 +15,7 @@ import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.handlers.PoolTableHandler;
 import com.tauhka.games.messaging.handlers.TableHandler;
 import com.tauhka.games.messaging.handlers.UserHandler;
+import com.tauhka.games.pool.PoolTable;
 
 import jakarta.inject.Inject;
 import jakarta.websocket.CloseReason;
@@ -72,13 +73,13 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.CREATE_TABLE) {
 				gameMessage = tableHandler.createTable(message, this);
 				sendCommonMessage(gameMessage);
-			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) { 
+			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) {
 				gameMessage = tableHandler.leaveTable(message, this);
 				if (gameMessage != null) {
 					sendMessageToTable(gameMessage.getTable(), gameMessage);
 					sendCommonMessage(tableHandler.createRemoveTableMessage(gameMessage.getTable(), this));
 				}
-			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) { 
+			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) {
 				gameMessage = tableHandler.joinTable(message, this);
 				sendCommonMessage(gameMessage);
 			} else if (message.getTitle() == MessageTitle.REMOVE_TABLE) {
@@ -114,6 +115,11 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.POOL_PLAY_TURN) {
 				gameMessage = pooltableHandler.playTurn(this, message);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
+				while (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
+					Message artMoveMessage = pooltableHandler.makeComputerMove(gameMessage.getTable());
+					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
+					Thread.sleep(5000);
+				}
 			} else if (message.getTitle() == MessageTitle.POOL_HANDBALL) {
 				gameMessage = pooltableHandler.updateHandBall(this, message);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);

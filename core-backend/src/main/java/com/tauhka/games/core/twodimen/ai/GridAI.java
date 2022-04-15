@@ -9,7 +9,7 @@ import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.twodimen.util.MoveHelper;
 import com.tauhka.games.core.twodimen.util.WinnerChecker;
 
-public interface CommonAI {
+public interface GridAI {
 
 	public default Move calculateBestMove(TicTacToeTable table) {
 		Move move = null;

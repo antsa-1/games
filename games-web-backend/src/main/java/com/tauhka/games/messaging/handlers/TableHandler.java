@@ -21,6 +21,7 @@ import com.tauhka.games.core.tables.TicTacToeTable;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.pool.PoolAI;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
@@ -54,16 +55,17 @@ public class TableHandler {
 		} else if (GameMode.POOL == gameMode.getGameNumber()) {
 			PoolTable p = new PoolTable(endpoint.getUser(), gameMode, message.getRandomStarter());
 			table = p;
-		
+
 		} else {
 			table = new TicTacToeTable(endpoint.getUser(), gameMode, false);
 		}
 		CommonEndpoint.TABLES.put(table.getTableId(), table);
 		if (message.getComputer()) {
-			ArtificialUser user = new ArtificialUser();
+			User user = gameMode.getGameNumber() == GameMode.POOL ? new PoolAI() : new ArtificialUser();
 			user.setName(OLAV_COMPUTER);
 			user.setRankingTictactoe(OLAV_COMPUTER_TICTACTOE_RANKING);
 			user.setRankingConnectFour(OLAV_COMPUTER_CONNECT_FOUR_RANKING);
+			user.setRankingEightBall(null);
 			user.setId(UUID.fromString(OLAV_COMPUTER_ID));
 			table.joinTableAsPlayer(user);
 			Message message_ = new Message();

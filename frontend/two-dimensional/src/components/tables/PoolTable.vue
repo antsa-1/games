@@ -44,7 +44,7 @@ let counterB = 0
 let cueForceInterval = undefined
 let collisionCheckInterval = undefined
 
-const DELTA = 1/6
+const DELTA = 1/8
 let showAnimation = true
 
 export default defineComponent({

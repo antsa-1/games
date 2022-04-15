@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.ai.AI;
 import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
 
@@ -68,7 +69,7 @@ public abstract class Table implements Serializable {
 
 	@JsonbTransient
 	public boolean isArtificialPlayerInTurn() {
-		return this.playerInTurn != null && this.playerInTurn instanceof ArtificialUser;
+		return this.playerInTurn != null && this.playerInTurn instanceof AI;
 	}
 
 	public boolean isWaitingOpponent() {

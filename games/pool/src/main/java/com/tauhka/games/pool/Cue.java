@@ -56,12 +56,11 @@ public class Cue {
 		this.angle = angle;
 	}
 
-	public JLabel getImageLabel() {
-		return imageLabel;
+	@Override
+	public String toString() {
+		return "Cue [velocity=" + velocity + ", force=" + force + ", position=" + position + ", angle=" + angle + "]";
 	}
 
-	public void setImageLabel(JLabel imageLabel) {
-		this.imageLabel = imageLabel;
-	}
+
 
 }

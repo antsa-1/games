@@ -113,6 +113,7 @@ public class EightBallInitializer {
 		boundries.add(bottomLeft);
 		boundries.add(left);
 		return boundries;
+		
 	}
 
 	public static double calculateRackColumn(int i) {
