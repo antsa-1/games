@@ -251,8 +251,8 @@ public abstract class Table implements Serializable {
 		this.playerB = playerB;
 		this.gameStartedInstant = Instant.now();
 		if (this.randomizeStarter) {
-			int i = ThreadLocalRandom.current().nextInt(1, 51);
-			if (i % 2 == 0) {
+			int i = ThreadLocalRandom.current().nextInt(1, 1001);
+			if (i > 500) {
 				this.startingPlayer = playerA;
 				playerInTurn = playerA;
 			} else {
