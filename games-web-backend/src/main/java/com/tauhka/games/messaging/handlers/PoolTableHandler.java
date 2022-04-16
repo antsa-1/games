@@ -141,10 +141,7 @@ public class PoolTableHandler {
 		PoolTable poolTable = (PoolTable) table;
 		PoolAI poolAI = (PoolAI) table.getPlayerInTurn();
 		if (poolTable.isExpectingHandball()) {
-			CueBall cueBall = new CueBall();
-			Vector2d position = new Vector2d(100d, 100d);
-			cueBall.setPosition(position);
-			PoolTurn playedTurn = poolTable.updateHandBall(poolAI, cueBall);
+			PoolTurn playedTurn = poolAI.findHandBallPlace(poolTable, poolAI);
 			PoolMessage poolMessage = new PoolMessage();
 			poolMessage.setCueBall(poolTable.getCueBall());
 			poolMessage.setTurnResult(playedTurn.getTurnResult().toString());

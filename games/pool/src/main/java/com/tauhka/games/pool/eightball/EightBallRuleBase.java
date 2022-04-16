@@ -101,13 +101,10 @@ public class EightBallRuleBase {
 		double y = cueBall.getPosition().y;
 		double r = cueBall.getRadius();
 		if (x > left.a + r && x < right.a - r) {
-			System.out.println("boundry1");
 			if (!(y > topLeft.a + r && y < bottomRight.a - r)) {
-				System.out.println("boundry2");
 				return false;
 			}
 		} else {
-			System.out.println("boundry3");
 			return false;
 		}
 		for (Ball ball : table.getRemainingBalls()) {
@@ -115,12 +112,14 @@ public class EightBallRuleBase {
 				continue;
 			}
 			if (areBallsIntersecting(ball, cueBall)) {
-				System.out.println("balls intersecting" + ball.getNumber());
-				System.out.println("G");
 				return false;
 			}
 		}
 		return true;
+	}
+
+	public boolean isFirstTurnPlayed() {
+		return this.iterationCount >= 0;
 	}
 
 	public boolean areBallsIntersecting(Ball ball, Ball cueBall) {

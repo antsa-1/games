@@ -136,6 +136,10 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 	}
 
+	public boolean isFirstTurnPlayed() {
+		return eightBallRuleBase.isFirstTurnPlayed();
+	}
+
 	public synchronized PoolTurn updateHandBall(User user, CueBall sample) {
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("HandBall update Player is not in turn in table:" + this);

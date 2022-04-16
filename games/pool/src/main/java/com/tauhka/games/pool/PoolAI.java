@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.ai.AI;
 
 /**
@@ -70,5 +71,33 @@ public class PoolAI extends User implements AI {
 			ball.setColor(Color.YELLOW);
 		}
 		return ball;
+	}
+
+	public PoolTurn findHandBallPlace(PoolTable poolTable, PoolAI poolAI) {
+
+		CueBall cueBall = new CueBall();
+		Double x = 400d;
+		Double y = 300d;
+		if (!poolTable.isFirstTurnPlayed()) {
+			x = 200d;
+			y = 300d;
+		}
+
+		Vector2d position = new Vector2d(x, y);
+		cueBall.setPosition(position);
+		PoolTurn turn = null;
+		while ((turn = poolTable.updateHandBall(poolAI, cueBall)).getTurnResult() == TurnResult.HANDBALL) {
+			if (poolTable.isFirstTurnPlayed()) {
+				x++;
+			}
+			y++;
+			System.out.println("POSITION:x" + x + " y:" + y);
+			position = new Vector2d(x, y);
+			cueBall.setPosition(position);
+			if (x > 1000 || y > 1000) {
+				throw new RuntimeException("Could not find handball place, fail");
+			}
+		}
+		return turn;
 	}
 }
