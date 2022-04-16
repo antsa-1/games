@@ -254,7 +254,7 @@ export default defineComponent({
 			for( let i = 0; i < this.ballsRemaining.length; i++){
 				this.repaintComponent(this.ballsRemaining[i])
 			}
-			if(!this.isOngoingGame() && !showAnimation){				
+			if(!this.isOngoingGame() && !showAnimation){
 				this.repaintGameEnd()
 			}
 			this.repaintNames()

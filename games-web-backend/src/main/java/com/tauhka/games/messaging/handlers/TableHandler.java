@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.Move;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.ai.AI;
 import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.tables.ConnectFourTable;
@@ -216,7 +217,7 @@ public class TableHandler {
 		GameResult gameResult = table.resign(endpoint.getUser());
 		if (gameResult != null && gameResult.getWinner() != null) {
 			// For Artificial player set Rematch-state ready
-			if (table.getOpponent(endpoint.getUser()) instanceof ArtificialUser) {
+			if (table.getOpponent(endpoint.getUser()) instanceof AI) {
 				table.suggestRematch(table.getOpponent(endpoint.getUser()));
 			}
 			Message winnerMessage = new Message();

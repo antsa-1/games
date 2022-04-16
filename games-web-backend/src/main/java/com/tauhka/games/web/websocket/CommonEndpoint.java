@@ -16,6 +16,7 @@ import com.tauhka.games.messaging.handlers.PoolTableHandler;
 import com.tauhka.games.messaging.handlers.TableHandler;
 import com.tauhka.games.messaging.handlers.UserHandler;
 import com.tauhka.games.pool.PoolTable;
+import com.tauhka.games.pool.TurnResult;
 
 import jakarta.inject.Inject;
 import jakarta.websocket.CloseReason;
@@ -105,7 +106,12 @@ public class CommonEndpoint {
 				if (gameMessage != null) {
 					sendMessageToTable(gameMessage.getTable(), gameMessage);
 					if (gameMessage.getTable().isArtificialPlayerInTurn()) {
-						Message artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+						Message artMoveMessage = null;
+						if (gameMessage.getTable() instanceof PoolTable) {
+							playPoolAITurns(gameMessage);
+						} else {
+							artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+						}
 						sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 					}
 				}
@@ -115,11 +121,8 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.POOL_PLAY_TURN) {
 				gameMessage = pooltableHandler.playTurn(this, message);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
-				while (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
-					Message artMoveMessage = pooltableHandler.makeComputerMove(gameMessage.getTable());
-					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
-					Thread.sleep(5000);
-				}
+
+				playPoolAITurns(gameMessage);
 			} else if (message.getTitle() == MessageTitle.POOL_HANDBALL) {
 				gameMessage = pooltableHandler.updateHandBall(this, message);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
@@ -134,6 +137,17 @@ public class CommonEndpoint {
 			this.onClose(session, null);
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "CommonEndpoint onMessagessa virhe", e);
+		}
+	}
+
+	private void playPoolAITurns(Message gameMessage) throws InterruptedException {
+		while (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
+			Thread.sleep(20000); // 14 seconds is just a number, too long for somebody and too short for somebody.. TODO
+			Message artMoveMessage = pooltableHandler.makeComputerMove(gameMessage.getTable());
+			sendMessageToTable(gameMessage.getTable(), artMoveMessage);
+			if (TurnResult.isDecisive(artMoveMessage.getPoolMessage().getTurnResult())) {
+				break;
+			}
 		}
 	}
 

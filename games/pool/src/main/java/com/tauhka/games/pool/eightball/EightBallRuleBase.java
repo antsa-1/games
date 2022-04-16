@@ -70,7 +70,10 @@ public class EightBallRuleBase {
 		}
 
 		// CueBall might roll to pocket as last ball
-		if (eightBallInPocket && cueBallInPocket && table.getPlayerInTurnBalls().size() != 7) {
+		if (eightBallInPocket && cueBallInPocket) {
+			turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
+		}
+		if (eightBallInPocket && table.getPlayerInTurnBalls().size() != 7) {
 			turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
 		}
 

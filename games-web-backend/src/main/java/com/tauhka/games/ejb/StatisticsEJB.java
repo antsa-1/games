@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.ai.AI;
 import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.stats.RankingCalculator;
@@ -168,7 +169,7 @@ public class StatisticsEJB { // To core package?!?!?
 	private boolean isOneRegisteredPlayer(GameStatisticsEvent gameStats) {
 		User playerA = gameStats.getGameResult().getPlayerA();
 		User playerB = gameStats.getGameResult().getPlayerB();
-		boolean computerPlayer = playerB instanceof ArtificialUser;
+		boolean computerPlayer = playerB instanceof AI;
 		// Computer sits always on playerB position
 		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) || !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START) && !computerPlayer;
 	}

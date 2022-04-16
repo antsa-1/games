@@ -156,10 +156,10 @@ public class PoolTableHandler {
 			return handBallMessage;
 		}
 		if (poolTable.isExpectingPocketSelection()) {
-			System.out.println("POCKET");
 			PoolTurn selectedPocketTurn = poolTable.selectPocket(poolAI, Integer.valueOf(1));
 			PoolMessage poolMessage = new PoolMessage();
 			poolMessage.setCueBall(poolTable.getCueBall());
+			poolMessage.setSelectedPocket(selectedPocketTurn.getSelectedPocket());
 			poolMessage.setTurnResult(selectedPocketTurn.getTurnResult().toString());
 			Message selectedPocketMessage = new Message();
 			selectedPocketMessage.setFrom(SYSTEM);
@@ -168,7 +168,7 @@ public class PoolTableHandler {
 			selectedPocketMessage.setPoolMessage(poolMessage);
 			return selectedPocketMessage;
 		}
-		PoolTurn turnToBePlayed = poolAI.playAITurn(poolTable);
+		PoolTurn turnToBePlayed = poolAI.createTurn(poolTable);
 		PoolTurn playedTurn = (PoolTurn) table.playTurn(poolAI, turnToBePlayed);
 		Message message = createPlayedTurnMessage(poolTable, playedTurn);
 		return message;

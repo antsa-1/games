@@ -149,7 +149,7 @@ public abstract class Table implements Serializable {
 	public void initRematchForArtificialPlayer() {
 
 		// PlayerA can't be Artificial player since it does not create tables
-		if (this.playerB != null && this.playerB instanceof ArtificialUser) {
+		if (this.playerB != null && this.playerB instanceof AI) {
 			this.suggestRematch(this.playerB);
 		}
 	}

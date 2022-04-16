@@ -10,4 +10,8 @@ public enum TurnResult {
 	public static boolean isDecisive(TurnResult tr) {
 		return tr == EIGHT_BALL_IN_POCKET_FAIL || tr == EIGHT_BALL_IN_POCKET_OK;
 	}
+
+	public static boolean isDecisive(String tr) {
+		return tr.equals(EIGHT_BALL_IN_POCKET_OK.toString()) || tr.equals(EIGHT_BALL_IN_POCKET_FAIL.toString());
+	}
 }

@@ -328,12 +328,15 @@ export default defineComponent({
 						})
 						break
 					case "POOL_UPDATE":
+					
 						this.$store.dispatch("poolUpdate", data)
 						break
 					case "POOL_SELECT_POCKET":
+						console.log("POOL_SELECT_POCKET in")
 						this.$store.dispatch("poolSelectPocket", data)
 						break
-					case "POOL_HANDBALL":						
+					case "POOL_HANDBALL":
+						console.log("POOL_HANDBALL in")					
 						this.$store.dispatch("poolSetHandBall", data)
 						const handBallMessage:IChatMessage = {
 							from:data.from,
@@ -342,8 +345,10 @@ export default defineComponent({
 						this.$store.dispatch("chat", handBallMessage);
 						break
 					case "POOL_PLAY_TURN":
+						console.log("POOL_PLAY_TURN in")		
 						this.$store.dispatch("poolPlayTurn", data).then(() => {
 							if(this.$store.getters.playerInTurn.name !== data.table.playerInTurn){
+								console.log("POOL_PLAY_TURN also turn changed")	
 								this.$store.dispatch("changeTurn", data.table.playerInTurn)
 							}
 						})

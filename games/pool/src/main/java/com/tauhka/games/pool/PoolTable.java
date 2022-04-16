@@ -77,7 +77,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized Object playTurn(User user, Object o) {
-		System.out.println("PLAY TURN" + ((PoolTurn) o).getCue() + " user:" + user.getName());
+		LOGGER.info("PLAY TURN" + ((PoolTurn) o).getCue() + " user:" + user.getName());
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
@@ -95,6 +95,7 @@ public class PoolTable extends Table implements PoolComponent {
 		PoolTurn playedTurn = new PoolTurn();
 		if (TurnResult.isDecisive(turnResult)) {
 			checkWinner(turnResult, playedTurn);
+			super.initRematchForArtificialPlayer();
 		}
 		if (turnResult == TurnResult.CHANGE_TURN) {
 			changePlayerInTurn();
