@@ -517,12 +517,7 @@ export default defineComponent({
 		},	
 	
 		handleMouseUp(event:MouseEvent){
-			if(event.button === 2){
-				this.cueBall.position.x = event.offsetX
-				this.cueBall.position.y = event.offsetY
-				this.draw()
-				return
-			}			
+				
 			if(!this.poolTable.mouseEnabled){
 				return
 			}
