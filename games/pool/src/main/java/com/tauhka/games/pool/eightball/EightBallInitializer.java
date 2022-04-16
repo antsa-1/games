@@ -54,6 +54,7 @@ public class EightBallInitializer {
 		table.setPlayerBBalls(new ArrayList<Ball>(8));
 		table.setEightBallRuleBase(new EightBallRuleBase());
 		table.setGameId(UUID.randomUUID());
+		table.setBreaked(false);
 	}
 
 	private static List<Pocket> initPockets() {
@@ -113,7 +114,7 @@ public class EightBallInitializer {
 		boundries.add(bottomLeft);
 		boundries.add(left);
 		return boundries;
-		
+
 	}
 
 	public static double calculateRackColumn(int i) {

@@ -38,6 +38,18 @@ public class EightBallRuleBase {
 	public TurnResult playTurn(PoolTable table, PoolTurn turn) {
 		this.reset();
 		Cue cue = turn.getCue();
+		if (cue.getForce() < 10) {
+			LOGGER.severe("Cue force was set below minimum 10");
+			cue.setForce(10d);
+		} else if (cue.getForce() > 250) {
+			LOGGER.severe("Cue force was set over maximum:" + cue.getForce());
+			cue.setForce(250d);
+		}
+		double angle = cue.getAngle();
+		if (Math.abs(angle) > Math.PI * 2) {
+			LOGGER.severe("Cue force was set over maximum:" + cue.getForce());
+			cue.setAngle(Math.PI);
+		}
 		Vector2d v = VectorUtil.calculateCueBallInitialVelocity(cue.getForce(), cue.getAngle());
 		// LOGGER.info("CueBall initial velocity:" + v + " angle:" + cue.getAngle() + " force:" + cue.getForce());
 		table.getCueBall().setVelocity(v);
@@ -116,10 +128,6 @@ public class EightBallRuleBase {
 			}
 		}
 		return true;
-	}
-
-	public boolean isFirstTurnPlayed() {
-		return this.iterationCount >= 0;
 	}
 
 	public boolean areBallsIntersecting(Ball ball, Ball cueBall) {
@@ -223,6 +231,7 @@ public class EightBallRuleBase {
 			return;
 		}
 		if (iterationCount == 0) { // Cue ball should be secondBall in the first round
+			table.setBreaked(true);
 			if (firstBall.isEightBall()) {
 				this.eightBallHitFirst = true;
 			}

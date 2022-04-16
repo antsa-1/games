@@ -74,6 +74,17 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.CREATE_TABLE) {
 				gameMessage = tableHandler.createTable(message, this);
 				sendCommonMessage(gameMessage);
+				Thread.sleep(2000);
+				if (gameMessage.getTable().isArtificialPlayerInTurn()) {
+					Message artMoveMessage = null;
+					if (gameMessage.getTable() instanceof PoolTable) {
+						playPoolAITurns(gameMessage);
+					} else {
+						artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+					}
+					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
+				}
+
 			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) {
 				gameMessage = tableHandler.leaveTable(message, this);
 				if (gameMessage != null) {

@@ -60,6 +60,8 @@ public class PoolTable extends Table implements PoolComponent {
 	private TurnResult turnResult;
 	@JsonbTransient
 	private UUID gameId;
+	@JsonbTransient
+	private boolean breaked;
 
 	static {
 		String env = System.getProperty("Server_Environment");
@@ -136,8 +138,12 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 	}
 
-	public boolean isFirstTurnPlayed() {
-		return eightBallRuleBase.isFirstTurnPlayed();
+	public void setBreaked(boolean breaked) {
+		this.breaked = breaked;
+	}
+
+	public boolean isBreaked() {
+		return breaked;
 	}
 
 	public synchronized PoolTurn updateHandBall(User user, CueBall sample) {

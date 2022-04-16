@@ -56,6 +56,7 @@ public abstract class Table implements Serializable {
 		this.tableId = UUID.randomUUID();
 		this.playerA = playerA;
 		this.gameMode = gameMode;
+		this.randomizeStarter = randomizeStarter;
 		if (!randomizeStarter) {
 			this.playerInTurn = playerA;
 		}

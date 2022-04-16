@@ -32,7 +32,7 @@ public class PoolAI extends User implements AI {
 		double angle = calculateAngle(cueBall, ownBall);
 		Cue cue = new Cue();
 		cue.setAngle(angle);
-		cue.setForce(150d);
+		cue.setForce(225d);
 		PoolTurn turn = new PoolTurn();
 		turn.setCue(cue);
 		return turn;
@@ -74,20 +74,18 @@ public class PoolAI extends User implements AI {
 	}
 
 	public PoolTurn findHandBallPlace(PoolTable poolTable, PoolAI poolAI) {
-
 		CueBall cueBall = new CueBall();
 		Double x = 400d;
 		Double y = 300d;
-		if (!poolTable.isFirstTurnPlayed()) {
-			x = 200d;
-			y = 300d;
+		if (!poolTable.isBreaked()) {
+			x = ThreadLocalRandom.current().nextDouble(225, 290);
+			y = ThreadLocalRandom.current().nextDouble(225, 375);
 		}
-
 		Vector2d position = new Vector2d(x, y);
 		cueBall.setPosition(position);
 		PoolTurn turn = null;
 		while ((turn = poolTable.updateHandBall(poolAI, cueBall)).getTurnResult() == TurnResult.HANDBALL) {
-			if (poolTable.isFirstTurnPlayed()) {
+			if (poolTable.isBreaked()) {
 				x++;
 			}
 			y++;
