@@ -25,8 +25,10 @@ export const poolMixin = {
 			console.log("Sending pocket selection to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
 		},
-		hb(cueBall, canvas){			
-			const obj ={ title:"POOL_HANDBALL", message: this.theTable.tableId, pool:{cueBall:this.prepareHandBall(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
+		hb(xc:number, yc:number, canvas){
+			let position:IVector2 = {x:xc, y:yc}
+			let cueBalla :IBall = <IBall> {position}
+			const obj = { title:"POOL_HANDBALL", message: this.theTable.tableId, pool:{cueBall:cueBalla, canvas:{x:canvas.width, y:canvas.height}}}            
 			console.log("Sending handball to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
