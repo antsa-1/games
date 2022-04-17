@@ -1,5 +1,6 @@
 package com.tauhka.games.messaging;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.twodimen.ai.TwoDimensionalBoardAdapter;
@@ -27,9 +28,9 @@ public class MessageEncoder implements Encoder.Text<Message> {
 			String retVal = jsonb.toJson(message, Message.class);
 			return retVal;
 		} catch (Exception e) {
-			LOGGER.severe("Encode error in MessageEncoder:" + e.getMessage());
+			LOGGER.log(Level.SEVERE, "Encode error in MessageEncoder:", e);
 		}
-		return null;
+		throw new IllegalArgumentException("MessageEncode could not form json");
 	}
 
 }

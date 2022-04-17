@@ -7,6 +7,7 @@ import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.pool.Cue;
 import com.tauhka.games.pool.CueBall;
 
+import jakarta.json.bind.annotation.JsonbNillable;
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
 

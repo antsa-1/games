@@ -174,6 +174,7 @@ public class PoolTable extends Table implements PoolComponent {
 					}
 				}
 			}
+			turn.setCueBall(this.cueBall);
 			expectingHandBallUpdate = false;
 			if (getPlayerInTurnBalls().size() == 7) {
 				this.expectingPocketSelection = true;
@@ -181,13 +182,13 @@ public class PoolTable extends Table implements PoolComponent {
 				return turn;
 			}
 			LOGGER.info("Handball position was allowed" + sample);
+			turn.setTurnResult(TurnResult.CONTINUE_TURN);
+			return turn;
 		} else {
 			LOGGER.info("Handball position not allowed" + sample);
-			turn.setTurnResult(TurnResult.HANDBALL);
+			turn.setTurnResult(TurnResult.HANDBALL_FAIL);
 			return turn;
 		}
-		turn.setTurnResult(TurnResult.CONTINUE_TURN);
-		return turn;
 	}
 
 	public synchronized PoolTurn selectPocket(User user, Integer pocketNumber) {

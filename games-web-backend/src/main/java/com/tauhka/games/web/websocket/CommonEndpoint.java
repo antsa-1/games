@@ -136,7 +136,11 @@ public class CommonEndpoint {
 				playPoolAITurns(gameMessage);
 			} else if (message.getTitle() == MessageTitle.POOL_HANDBALL) {
 				gameMessage = pooltableHandler.updateHandBall(this, message);
-				sendMessageToTable(gameMessage.getTable(), gameMessage);
+				if (gameMessage.getPoolMessage().getTurnResult().equals(TurnResult.HANDBALL_FAIL.toString())) {
+					sendPrivateMessage(gameMessage);
+				} else {
+					sendMessageToTable(gameMessage.getTable(), gameMessage);
+				}
 			} else if (message.getTitle() == MessageTitle.POOL_SELECT_POCKET) {
 				gameMessage = pooltableHandler.selectPocket(this, message);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);

@@ -18,7 +18,6 @@ import com.tauhka.games.core.twodimen.PoolTurnStats;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.PoolMessage;
-import com.tauhka.games.pool.CueBall;
 import com.tauhka.games.pool.PoolAI;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.pool.PoolTurn;
@@ -81,20 +80,21 @@ public class PoolTableHandler {
 		return updateMessage;
 	}
 
-	public Message updateHandBall(CommonEndpoint endpoint, Message message) {
+	public Message updateHandBall(CommonEndpoint endpoint, Message incomingMessage) {
 		PoolTable table = (PoolTable) findUserTable(endpoint);
 		PoolTurn incomingTurn = new PoolTurn();
-		incomingTurn.setCanvas(message.getPoolMessage().getCanvas());
-		incomingTurn.setCue(message.getPoolMessage().getCue());
-		incomingTurn.setCueBall(message.getPoolMessage().getCueBall());
-		PoolTurn turn = table.updateHandBall(endpoint.getUser(), message.getPoolMessage().getCueBall());
+		incomingTurn.setCanvas(incomingMessage.getPoolMessage().getCanvas());
+		incomingTurn.setCue(incomingMessage.getPoolMessage().getCue());
+		incomingTurn.setCueBall(incomingMessage.getPoolMessage().getCueBall());
+		PoolTurn turn = table.updateHandBall(endpoint.getUser(), incomingMessage.getPoolMessage().getCueBall());
 		Message updateMessage = new Message();
 		updateMessage.setFrom(SYSTEM);
 		updateMessage.setTable(table);
 		updateMessage.setTitle(MessageTitle.POOL_HANDBALL);
 		PoolMessage updateCueBallPositionMessage = new PoolMessage();
-		updateCueBallPositionMessage.setCueBall(message.getPoolMessage().getCueBall());
-		updateCueBallPositionMessage.setCanvas(message.getPoolMessage().getCanvas());
+		updateCueBallPositionMessage.setCueBall(turn.getCueBall());
+		updateCueBallPositionMessage.setCue(incomingMessage.getPoolMessage().getCue());
+		//updateCueBallPositionMessage.setCanvas(new Vector2d());
 		updateCueBallPositionMessage.setTurnResult(turn.getTurnResult().toString());
 		updateMessage.setPoolMessage(updateCueBallPositionMessage);
 		addTurnToDatabase(incomingTurn, table, turn, endpoint, TurnType.HANDBALL);
