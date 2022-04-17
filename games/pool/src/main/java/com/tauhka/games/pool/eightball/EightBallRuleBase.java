@@ -112,6 +112,10 @@ public class EightBallRuleBase {
 		double x = cueBall.getPosition().x;
 		double y = cueBall.getPosition().y;
 		double r = cueBall.getRadius();
+		if (!table.isBreaked() && x > 299) { // hardcoded value. it will be a different story to make the table responsive
+			LOGGER.info("Wrong handball position during break... UI check, todo?");
+			return false;
+		}
 		if (x > left.a + r && x < right.a - r) {
 			if (!(y > topLeft.a + r && y < bottomRight.a - r)) {
 				return false;
@@ -132,11 +136,11 @@ public class EightBallRuleBase {
 
 	public boolean areBallsIntersecting(Ball ball, Ball cueBall) {
 		double x = Math.abs(ball.getPosition().x - cueBall.getPosition().x);
-		if (x > ball.getRadius()) {
+		if (x > ball.getDiameter()) {
 			return false;
 		}
 		double y = Math.abs(ball.getPosition().y - cueBall.getPosition().y);
-		return y < ball.getRadius();
+		return y < ball.getDiameter();
 	}
 
 	private void handleBallsMovements(PoolTable table) {
