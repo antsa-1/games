@@ -336,13 +336,19 @@ export default defineComponent({
 						this.$store.dispatch("poolSelectPocket", data)
 						break
 					case "POOL_HANDBALL":
-						console.log("POOL_HANDBALL in")					
-						this.$store.dispatch("poolSetHandBall", data)
-						const handBallMessage:IChatMessage = {
-							from:data.from,
-							text:"Handball set by " + data.table.playerInTurn.name
+						
+						if(data.pool.turnResult === "HANDBALL_FAIL"){
+							console.log("POOL_HANDBALL in failed ")
+							this.$store.dispatch("poolSetHandBallFail", data)
+						}else{	
+							console.log("POOL_HANDBALL in ok ")
+							this.$store.dispatch("poolSetHandBall", data)
+							const handBallMessage:IChatMessage = {
+								from:data.from,
+								text:"Handball set by " + data.table.playerInTurn.name
+							}
+							this.$store.dispatch("chat", handBallMessage);
 						}
-						this.$store.dispatch("chat", handBallMessage);
 						break
 					case "POOL_PLAY_TURN":
 						console.log("POOL_PLAY_TURN in")		
