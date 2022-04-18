@@ -119,6 +119,10 @@ export const tablesMixin = {
 		isTurnChangeFromMe(tableFromServer:ITable){			
 			return tableFromServer.playerInTurn.name !== this.userName && this.$store.getters.playerInTurn.name === this.userName
 		},
+		isTurnChangeToMe2(nextPlayerName:string){
+			console.log("isTurnChangeToMe2 nextPlayer:"+nextPlayerName+ "  storePlayerinInTurn "+this.$store.getters.playerInTurn.name+ "  myName:"+this.userName)
+			return nextPlayerName !== this.userName && this.$store.getters.playerInTurn.name === this.userName
+		}
 		
 	},
 };

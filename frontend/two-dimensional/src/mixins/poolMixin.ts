@@ -32,14 +32,14 @@ export const poolMixin = {
 			console.log("Sending handball to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
-		st(cue, cueBall, canvas){			
+		sendTurn(cue, cueBall, canvas){			
 			const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
 			console.log("Sending turn to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
         sp(cue, cueBall, canvas){
 			const obj ={ title:"POOL_UPDATE", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}
-			this.user.webSocket.send(JSON.stringify(obj))
+		//	this.user.webSocket.send(JSON.stringify(obj))
         },
 		prepareHandBall(object){
 			const {image, color, ...object2} = object			

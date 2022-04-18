@@ -332,16 +332,15 @@ export default defineComponent({
 						this.$store.dispatch("poolUpdate", data)
 						break
 					case "POOL_SELECT_POCKET":
-						console.log("POOL_SELECT_POCKET in")
+						console.log("LOBBY:POOL_SELECT_POCKET in")
 						this.$store.dispatch("poolSelectPocket", data)
 						break
-					case "POOL_HANDBALL":
-						
+					case "POOL_HANDBALL":						
 						if(data.pool.turnResult === "HANDBALL_FAIL"){
-							console.log("POOL_HANDBALL in failed ")
+							console.log("LOBBY POOL_HANDBALL in failed ")
 							this.$store.dispatch("poolSetHandBallFail", data)
 						}else{	
-							console.log("POOL_HANDBALL in ok ")
+							console.log("LOBBY:POOL_HANDBALL in  ")
 							this.$store.dispatch("poolSetHandBall", data)
 							const handBallMessage:IChatMessage = {
 								from:data.from,
@@ -351,12 +350,9 @@ export default defineComponent({
 						}
 						break
 					case "POOL_PLAY_TURN":
-						console.log("POOL_PLAY_TURN in")		
+						console.log("Lobby POOL_PLAY_TURN in")		
 						this.$store.dispatch("poolPlayTurn", data).then(() => {
-							if(this.$store.getters.playerInTurn.name !== data.table.playerInTurn){
-								console.log("POOL_PLAY_TURN also turn changed")	
-								this.$store.dispatch("changeTurn", data.table.playerInTurn)
-							}
+					
 						})
 						break
 					case "LEAVE_TABLE":	

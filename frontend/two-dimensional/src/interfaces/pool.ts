@@ -1,4 +1,4 @@
-import { IBaseTable, ITable } from "@/interfaces/interfaces"
+import { IBaseTable, ITable, IPlayer } from "@/interfaces/interfaces"
 
 export interface IPoolComponent {
     position: IVector2,
@@ -19,7 +19,22 @@ export interface IEightBallGame {
     mouseCoordsTemp: IVector2,
     handBall: boolean,
     pocketSelection: boolean,
-    selectedPocket:IPocket
+    selectedPocket: IPocket,
+    turnQueue: Array<ITurn>[]
+}
+
+export interface ITurn {
+    cue?: ICue,
+    cueBall?: IBall,
+    selectedPocket?: number,
+    selectPocket?: boolean
+    turnResult?: string,
+    setHandBall?: boolean,
+    askHandBallPosition?: boolean
+    playerInTurnAfterTurnPlayed: IPlayer
+}
+export interface ITurnResult {
+    text: string
 }
 
 export interface IGameImage {

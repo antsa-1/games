@@ -147,7 +147,7 @@ export const store = createStore<IStoreState>({
             state.theTable.board.push(square)
         },
         changeTurn(state, playerInTurn: IPlayer) {
-
+            console.log("STORE:turnChange "+playerInTurn.name)
             state.theTable = { ...state.theTable, playerInTurn: playerInTurn }
 
         },

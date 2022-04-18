@@ -79,7 +79,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized Object playTurn(User user, Object o) {
-		LOGGER.info("PLAY TURN" + ((PoolTurn) o).getCue() + " user:" + user.getName());
+		System.out.println("PLAY TURN" + ((PoolTurn) o).getCue() + " user:" + user.getName());
 		if (!user.equals(this.playerInTurn)) {
 			throw new IllegalArgumentException("Player is not in turn in table:" + this);
 		}
@@ -110,11 +110,12 @@ public class PoolTable extends Table implements PoolComponent {
 			turnResult = TurnResult.SELECT_POCKET;
 			expectingPocketSelection = true;
 		}
+
 		playedTurn.setTurnResult(turnResult);
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
-		System.out.println("PLAYED TURN");
+		System.out.println("PLAYED TURN turnResult = " + turnResult.toString());
 		return playedTurn;
 	}
 
@@ -187,6 +188,7 @@ public class PoolTable extends Table implements PoolComponent {
 		} else {
 			LOGGER.info("Handball position not allowed" + sample);
 			turn.setTurnResult(TurnResult.HANDBALL_FAIL);
+			//turn.setCueBall(sample);
 			return turn;
 		}
 	}
@@ -210,6 +212,7 @@ public class PoolTable extends Table implements PoolComponent {
 			pocketSelectedTurn.setTurnResult(TurnResult.CONTINUE_TURN);
 		}
 		pocketSelectedTurn.setSelectedPocket(pocketNumber);
+		pocketSelectedTurn.setCueBall(this.cueBall);
 		return pocketSelectedTurn;
 	}
 

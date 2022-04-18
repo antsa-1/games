@@ -31,7 +31,7 @@ public class PoolStatisticsEJB {
 
 	// Idea for storing the turn data is to help finding bugs and later others could watch the games how they were played
 	public void observePoolTurnEvents(@ObservesAsync PoolGameStatisticsEvent poolTurnStats) {
-		LOGGER.info("PoolStatisticsEJB should update now database with poolTurnUpdate " + poolTurnStats);
+		LOGGER.fine("PoolStatisticsEJB should update now database with poolTurnUpdate " + poolTurnStats);
 		if (poolTurnStats == null) {
 			throw new IllegalArgumentException("No statistics for database:" + poolTurnStats);// Tells which one was null
 		}
@@ -61,7 +61,7 @@ public class PoolStatisticsEJB {
 			stmt.setString(12, poolTurnResult.getTurnType());
 			int dbRes = stmt.executeUpdate();
 			if (dbRes > 0) {
-				LOGGER.info(LOG_PREFIX_GAMES + "PoolStatisticsEJB updated updatePoolTurn:" + poolTurnResult);
+				LOGGER.fine(LOG_PREFIX_GAMES + "PoolStatisticsEJB updated updatePoolTurn:" + poolTurnResult);
 				return;
 			}
 			return;

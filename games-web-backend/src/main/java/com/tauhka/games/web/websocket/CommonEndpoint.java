@@ -157,7 +157,7 @@ public class CommonEndpoint {
 
 	private void playPoolAITurns(Message gameMessage) throws InterruptedException {
 		while (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
-			Thread.sleep(20000); // 14 seconds is just a number, too long for somebody and too short for somebody.. TODO
+			//Thread.sleep(20000); // 14 seconds is just a number, too long for somebody and too short for somebody.. TODO
 			Message artMoveMessage = pooltableHandler.makeComputerMove(gameMessage.getTable());
 			sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 			if (TurnResult.isDecisive(artMoveMessage.getPoolMessage().getTurnResult())) {

@@ -8,7 +8,6 @@ import com.tauhka.games.core.Vector2d;
 
 public class Ball implements PoolComponent {
 
-
 	private int number;
 	private Color color;
 	protected Vector2d position;
@@ -31,6 +30,9 @@ public class Ball implements PoolComponent {
 	}
 
 	public boolean isMoving() {
+		if (this.velocity == null) {
+			return false;
+		}
 		return !this.velocity.isZero();
 	}
 
