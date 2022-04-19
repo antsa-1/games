@@ -113,6 +113,7 @@ export default defineComponent({
 	},
 	mounted() {	
 		this.initTable()
+
 		if(this.watch === "1"){			
 			this.resultPlayerABalls = this.theTable.playerABalls
 			this.resultPlayerBBalls = this.theTable.playerBBalls
@@ -121,20 +122,14 @@ export default defineComponent({
 			this.updateRemainingBallPositions(this.theTable.remainingBalls, this.ballsRemaining)
 			this.draw()
 		}
+
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
 			if(action.type === "poolUpdate"){
 				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
 				this.cue.angle = action.payload.pool.cue.angle
-				
 			}else if(action.type === "poolPlayTurn"){
-				this.updateTurnResult(action)
-			
-				
-				this.selectedPocket = null // hides the blue color
-			///	if(action.payload.pool.turnResult === "HANDBALL"){
-			//		this.handBall = true					
-			//		
-			//	}
+				this.createAfterTurnSnapshot(action)
+				this.resetInstanceVariables()
 				if(this.isDocumentVisible()){
 					this.createShootBallTurn(action)
 					if(action.payload.pool.turnResult === "CHANGE_TURN"){
@@ -146,24 +141,20 @@ export default defineComponent({
 						this.createAskPocketSelectionTurn(action)
 					}
 				}else {
+					console.log("Document not visible, shootBall comes in")
 					this.updatePocketedBalls(this.resultPlayerABalls)				
 					this.updatePocketedBalls(this.resultPlayerBBalls)
 					this.updateRemainingBallPositions(action.payload.table.remainingBalls, this.ballsRemaining)					
-					if(action.payload.pool.turnResult === "HANDBALL"){
-						
+					if(action.payload.pool.turnResult === "HANDBALL"){						
 						this.handBall = true
-					}
-					this.cue.force = 0
-					if(action.payload.pool.turnResult === "ASK_POCKET_SELECTION"){			
-						
+					}					
+					if(action.payload.pool.turnResult === "ASK_POCKET_SELECTION"){						
 						this.pocketSelection = true
 					}
 				}
 			}else if(action.type === "poolSetHandBallFail"){
 				this.createAskHandBallPositionTurn(action)
-			}
-			else if(action.type === "poolSetHandBall"){
-				
+			}else if(action.type === "poolSetHandBall"){				
 				this.createPoolSetHandBallTurn(action)
 			}else if(action.type === "poolSelectPocket"){
 				
@@ -178,6 +169,14 @@ export default defineComponent({
 		this.leaveTable()
   	},
 	methods: {
+		resetInstanceVariables(){
+			this.handBall = false
+			this.selectedPocket = false
+			this.pocketSelection = false
+			this.cue.force = 0
+		//	this.cue.image.visible = false
+			this.cue.position = this.cueBall.position
+		},
 		dequeueTurns(){
 			
 			if(this.turnQueue.length === 0 || queueBlocked ){				
@@ -218,7 +217,7 @@ export default defineComponent({
 			}else if(turn.nextTurnPlayer){
 				this.$store.dispatch("changeTurn", turn.nextTurnPlayer).then(() => {
 					this.unblockQueue(500)		
-				})			
+				})
 			}	
 		},
 		unblockQueue(timeout:number = 2500){
@@ -296,7 +295,7 @@ export default defineComponent({
 			this.cue.force = 0
 			this.cueBall.image.visible = true
 		},
-		updateTurnResult(action){		
+		createAfterTurnSnapshot(action){		
 			this.resultPlayerABalls = action.payload.table.playerABalls
 			this.resultPlayerBBalls = action.payload.table.playerBBalls
 			this.resultRemainingBalls = action.payload.table.remainingBalls // for jumping browser tabs
