@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.tauhka.games.core.GameResultType;
-import com.tauhka.games.core.Vector2d;
+import com.tauhka.games.core.User;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.stats.PoolGameStatisticsEvent;
 import com.tauhka.games.core.tables.Table;
@@ -73,10 +73,11 @@ public class PoolTableHandler {
 		updateMessage.setTitle(MessageTitle.POOL_SELECT_POCKET);
 		PoolMessage selectPocketMessage = new PoolMessage();
 		selectPocketMessage.setSelectedPocket(selectedPocketTurn.getSelectedPocket());
+		selectPocketMessage.setCueBall(selectedPocketTurn.getCueBall());
 		// selectPocketMessage.setCueBall(message.getPoolMessage().getCueBall());
 		// selectPocketMessage.setCanvas(message.getPoolMessage().getCanvas());
 		updateMessage.setPoolMessage(selectPocketMessage);
-		addTurnToDatabase(incomingTurn, table, selectedPocketTurn, endpoint, TurnType.POCKET_SELECTION);
+		addTurnToDatabase(incomingTurn, table, selectedPocketTurn, endpoint.getUser(), TurnType.POCKET_SELECTION);
 		return updateMessage;
 	}
 
@@ -94,10 +95,10 @@ public class PoolTableHandler {
 		PoolMessage updateCueBallPositionMessage = new PoolMessage();
 		updateCueBallPositionMessage.setCueBall(turn.getCueBall());
 		updateCueBallPositionMessage.setCue(incomingMessage.getPoolMessage().getCue());
-		//updateCueBallPositionMessage.setCanvas(new Vector2d());
+		// updateCueBallPositionMessage.setCanvas(new Vector2d());
 		updateCueBallPositionMessage.setTurnResult(turn.getTurnResult().toString());
 		updateMessage.setPoolMessage(updateCueBallPositionMessage);
-		addTurnToDatabase(incomingTurn, table, turn, endpoint, TurnType.HANDBALL);
+		addTurnToDatabase(incomingTurn, table, turn, endpoint.getUser(), TurnType.HANDBALL);
 		return updateMessage;
 	}
 
@@ -109,7 +110,7 @@ public class PoolTableHandler {
 		PoolTable table = (PoolTable) findUserTable(endpoint);
 		PoolTurn playedTurn = (PoolTurn) table.playTurn(endpoint.getUser(), incomingTurn);
 		Message playTurnMessage = createPlayedTurnMessage(table, playedTurn);
-		addTurnToDatabase(incomingTurn, table, playedTurn, endpoint, TurnType.PLAY);
+		addTurnToDatabase(incomingTurn, table, playedTurn, endpoint.getUser(), TurnType.PLAY);
 		return playTurnMessage;
 	}
 
@@ -142,6 +143,7 @@ public class PoolTableHandler {
 		PoolAI poolAI = (PoolAI) table.getPlayerInTurn();
 		if (poolTable.isExpectingHandball()) {
 			PoolTurn playedTurn = poolAI.findHandBallPlace(poolTable, poolAI);
+			playedTurn.setTurnType(TurnType.HANDBALL);
 			PoolMessage poolMessage = new PoolMessage();
 			poolMessage.setCueBall(poolTable.getCueBall());
 			poolMessage.setTurnResult(playedTurn.getTurnResult().toString());
@@ -150,6 +152,10 @@ public class PoolTableHandler {
 			handBallMessage.setTable(table);
 			handBallMessage.setTitle(MessageTitle.POOL_HANDBALL);
 			handBallMessage.setPoolMessage(poolMessage);
+			PoolTurn incomingTurn = new PoolTurn();
+			incomingTurn.setCueBall(playedTurn.getCueBall());
+			// CueBall position from what was accepted by backend within "incomingTurn"
+			addTurnToDatabase(incomingTurn, poolTable, playedTurn, poolAI, TurnType.HANDBALL);
 			return handBallMessage;
 		}
 		if (poolTable.isExpectingPocketSelection()) {
@@ -163,11 +169,13 @@ public class PoolTableHandler {
 			selectedPocketMessage.setTable(table);
 			selectedPocketMessage.setTitle(MessageTitle.POOL_SELECT_POCKET);
 			selectedPocketMessage.setPoolMessage(poolMessage);
+			addTurnToDatabase(selectedPocketTurn, poolTable, selectedPocketTurn, poolAI, TurnType.POCKET_SELECTION);
 			return selectedPocketMessage;
 		}
 		PoolTurn turnToBePlayed = poolAI.createTurn(poolTable);
 		PoolTurn playedTurn = (PoolTurn) table.playTurn(poolAI, turnToBePlayed);
 		Message message = createPlayedTurnMessage(poolTable, playedTurn);
+		addTurnToDatabase(turnToBePlayed, poolTable, playedTurn, poolAI, TurnType.PLAY);
 		return message;
 	}
 
@@ -184,10 +192,10 @@ public class PoolTableHandler {
 		statisticsEvent.fireAsync(statsEvent);
 	}
 
-	private void addTurnToDatabase(PoolTurn incomingTurn, PoolTable table, PoolTurn resultingTurn, CommonEndpoint endpoint, TurnType type) {
+	private void addTurnToDatabase(PoolTurn incomingTurn, PoolTable table, PoolTurn resultingTurn, User usera, TurnType type) {
 		try {
-			String user = endpoint.getUser().getName();
-			String userId = endpoint.getUser().getId() == null ? endpoint.getUser().getName() : endpoint.getUser().getId().toString();
+			String user = usera.getName();
+			String userId = usera.getId() == null ? user : usera.getId().toString();
 			String winnerName = resultingTurn.getWinner() == null ? null : resultingTurn.getWinner().getName();
 			String winnerId = resultingTurn.getWinner() == null ? winnerName : resultingTurn.getWinner().getId() == null ? winnerName : resultingTurn.getWinner().getId().toString();
 			Double cueForce = incomingTurn.getCue() == null ? null : incomingTurn.getCue().getForce();

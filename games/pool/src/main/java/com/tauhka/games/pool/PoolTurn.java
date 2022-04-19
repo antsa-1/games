@@ -27,6 +27,9 @@ public class PoolTurn {
 	@JsonbProperty("selectedPocket")
 	private Integer selectedPocket;
 
+	@JsonbProperty("turnType")
+	private TurnType turnType;
+
 	public CueBall getCueBall() {
 		return cueBall;
 	}
@@ -45,6 +48,14 @@ public class PoolTurn {
 
 	public Vector2d getCanvas() {
 		return canvas;
+	}
+
+	public TurnType getTurnType() {
+		return turnType;
+	}
+
+	public void setTurnType(TurnType turnType) {
+		this.turnType = turnType;
 	}
 
 	public void setCanvas(Vector2d canvas) {

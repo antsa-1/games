@@ -180,15 +180,17 @@ public class PoolTable extends Table implements PoolComponent {
 			if (getPlayerInTurnBalls().size() == 7) {
 				this.expectingPocketSelection = true;
 				turn.setTurnResult(TurnResult.SELECT_POCKET);
+				turn.setCueBall(sample);
 				return turn;
 			}
 			LOGGER.info("Handball position was allowed" + sample);
 			turn.setTurnResult(TurnResult.CONTINUE_TURN);
+			turn.setCueBall(sample);
 			return turn;
 		} else {
-			LOGGER.info("Handball position not allowed" + sample);
+			LOGGER.info("Handball position not allowed" + sample + " user:" + user);
 			turn.setTurnResult(TurnResult.HANDBALL_FAIL);
-			//turn.setCueBall(sample);
+			turn.setCueBall(sample);
 			return turn;
 		}
 	}
@@ -213,6 +215,7 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 		pocketSelectedTurn.setSelectedPocket(pocketNumber);
 		pocketSelectedTurn.setCueBall(this.cueBall);
+		LOGGER.info(user.getName() + " selectedPocket:" + pocketNumber);
 		return pocketSelectedTurn;
 	}
 
@@ -270,13 +273,12 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public void putBallInPocket(Ball ballToPocket, Pocket pocket) {
-		System.out.println("InComing:" + ballToPocket.getNumber() + " pocket:" + pocket.getCenter());
+		System.out.println("InComing:" + ballToPocket.getNumber() + " pocket:" + pocket.getCenter() + " player:" + this.playerInTurn.getName());
 		if (ballToPocket.getNumber() == 0) {
 			return;
 		}
 		if (ballToPocket.getNumber() == 8) {
 			pocket.setContainsEightBall(true);
-			return;
 		}
 		ballToPocket.setInPocket(true);
 		ballToPocket.setVelocity(new Vector2d(0d, 0d));

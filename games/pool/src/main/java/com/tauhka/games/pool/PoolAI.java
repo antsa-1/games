@@ -35,6 +35,7 @@ public class PoolAI extends User implements AI {
 		cue.setForce(225d);
 		PoolTurn turn = new PoolTurn();
 		turn.setCue(cue);
+		turn.setTurnType(TurnType.PLAY);
 		return turn;
 	}
 
@@ -84,7 +85,7 @@ public class PoolAI extends User implements AI {
 		Vector2d position = new Vector2d(x, y);
 		cueBall.setPosition(position);
 		PoolTurn turn = null;
-		while ((turn = poolTable.updateHandBall(poolAI, cueBall)).getTurnResult() == TurnResult.HANDBALL) {
+		while (poolTable.isExpectingHandball()) {
 			if (poolTable.isBreaked()) {
 				x++;
 			}
@@ -92,6 +93,7 @@ public class PoolAI extends User implements AI {
 			System.out.println("POSITION:x" + x + " y:" + y);
 			position = new Vector2d(x, y);
 			cueBall.setPosition(position);
+			turn = poolTable.updateHandBall(poolAI, cueBall);
 			if (x > 1000 || y > 1000) {
 				throw new RuntimeException("Could not find handball place, fail");
 			}
