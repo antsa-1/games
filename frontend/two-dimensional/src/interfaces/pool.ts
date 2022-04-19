@@ -33,7 +33,6 @@ export interface ITurn {
     askPocketSelection?: boolean,
     nextTurnPlayer?: IPlayer
     shootBall?: boolean
-    changePlayerInTurn?: IPlayer
 }
 export interface ITurnResult {
     text: string

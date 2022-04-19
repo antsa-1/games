@@ -172,8 +172,6 @@ export default defineComponent({
 			this.draw()
 		})
 	},
-
-	
 	beforeUnmount() {
     	this.unsubscribe()
 		this.unsubscribeAction()
@@ -193,28 +191,22 @@ export default defineComponent({
 				this.shootBall(turn).then(() => {
 					console.log("running turn shootBall has been done ")
 					this.selectedPocket = null
-					this.unblockQueue()							
+					this.unblockQueue(200)							
 				})
 			}
 			if(turn.setHandBall){
 				console.log("running turn setHandBall "+JSON.stringify(this.cueBall.position))			
-				this.cueBall.position = turn.cueBall.position
-				this.resultCueBallPosition = turn.cueBall.position
-				this.cueBall.inPocket = false
-				this.cue.position = this.cueBall.position
-				this.handBall = false
-				this.cue.force = 0
-				this.cueBall.image.visible = true
-				this.unblockQueue()				
+				this.setHandBall(turn)
+				this.unblockQueue(0)				
 			} else if(turn.setSelectedPocket){
 				console.log("running turn setSelectedPocket "+turn.setSelectedPocket)
 				this.selectedPocket = turn.setSelectedPocket
 				this.pocketSelection = false				
-				this.unblockQueue()				
+				this.unblockQueue(2000)				
 			} else if(turn.askHandBallPosition){
 				console.log("running turn askHandBallPosition "+turn.askHandBallPosition)			
 				this.handBall = true
-				this.unblockQueue()		
+				this.unblockQueue(0)		
 			}
 			else if(turn.askPocketSelection){
 				console.log("running turn askPocketSelection "+turn.askPocketSelection + "myTurn:"+this.isMyTurn()+" nextTurnPlayer"+turn.nextTurnPlayer)
@@ -222,24 +214,22 @@ export default defineComponent({
 					console.log("Turn wille changed to me pocketselection")
 					this.pocketSelection = true
 				}	
-				this.unblockQueue()
-			}else if(turn.changePlayerInTurn){
-				this.$store.dispatch("changeTurn", turn.changePlayerInTurn).then(() => {
-					this.unblockQueue()		
+				this.unblockQueue(0)
+			}else if(turn.nextTurnPlayer){
+				this.$store.dispatch("changeTurn", turn.nextTurnPlayer).then(() => {
+					this.unblockQueue(500)		
 				})			
 			}	
 		},
-		unblockQueue(){
-			queueBlocked = false
-			
+		unblockQueue(timeout:number = 2500){
+			queueBlocked = false			
 			this.cue.image.visible = true
-				if(this.isMyTurn()){
-					this.poolTable.mouseEnabled = true
-				}
-			setTimeout(() => {			
-				
+			if(this.isMyTurn()){
+				this.poolTable.mouseEnabled = true
+			}
+			setTimeout(() => {
 				this.dequeueTurns()	
-			},2500)	
+			}, timeout)	
 		},
 		createAskHandBallPositionTurn(action){
 			
@@ -263,7 +253,7 @@ export default defineComponent({
 		},
 		createChangePlayerTurn(action){
 			let player:IPlayer = action.payload.table.playerInTurn
-			let turn:ITurn = {changePlayerInTurn:player}
+			let turn:ITurn = {nextTurnPlayer:player}
 			this.turnQueue.splice(this.turnQueue.length, 0, turn)
 		},
 		createShootBallTurn(action){
@@ -296,6 +286,15 @@ export default defineComponent({
 		},
 		resize(){ 
 			
+		},
+		setHandBall(turn:ITurn){
+			this.cueBall.position = turn.cueBall.position
+			this.resultCueBallPosition = turn.cueBall.position
+			this.cueBall.inPocket = false
+			this.cue.position = this.cueBall.position
+			this.handBall = false
+			this.cue.force = 0
+			this.cueBall.image.visible = true
 		},
 		updateTurnResult(action){		
 			this.resultPlayerABalls = action.payload.table.playerABalls
