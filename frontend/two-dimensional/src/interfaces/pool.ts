@@ -26,12 +26,14 @@ export interface IEightBallGame {
 export interface ITurn {
     cue?: ICue,
     cueBall?: IBall,
-    selectedPocket?: number,
-    selectPocket?: boolean
-    turnResult?: string,
+    setSelectedPocket?: number,
     setHandBall?: boolean,
-    askHandBallPosition?: boolean
-    playerInTurnAfterTurnPlayed: IPlayer
+    turnResult?: string,
+    askHandBallPosition?: boolean,
+    askPocketSelection?: boolean,
+    playerInTurnAfterTurnPlayed?: IPlayer
+    shootBall?: boolean
+    changePlayerInTurn?: IPlayer
 }
 export interface ITurnResult {
     text: string
