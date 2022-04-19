@@ -74,9 +74,11 @@ public class PoolTableHandler {
 		PoolMessage selectPocketMessage = new PoolMessage();
 		selectPocketMessage.setSelectedPocket(selectedPocketTurn.getSelectedPocket());
 		selectPocketMessage.setCueBall(selectedPocketTurn.getCueBall());
+		selectPocketMessage.setWhoPlayed(selectedPocketTurn.getPlayer());
 		// selectPocketMessage.setCueBall(message.getPoolMessage().getCueBall());
 		// selectPocketMessage.setCanvas(message.getPoolMessage().getCanvas());
 		updateMessage.setPoolMessage(selectPocketMessage);
+		updateMessage.setTable(table);
 		addTurnToDatabase(incomingTurn, table, selectedPocketTurn, endpoint.getUser(), TurnType.POCKET_SELECTION);
 		return updateMessage;
 	}
@@ -88,6 +90,7 @@ public class PoolTableHandler {
 		incomingTurn.setCue(incomingMessage.getPoolMessage().getCue());
 		incomingTurn.setCueBall(incomingMessage.getPoolMessage().getCueBall());
 		PoolTurn turn = table.updateHandBall(endpoint.getUser(), incomingMessage.getPoolMessage().getCueBall());
+		// Turn.java directly to PoolMessage, now only mapping.. TODO?
 		Message updateMessage = new Message();
 		updateMessage.setFrom(SYSTEM);
 		updateMessage.setTable(table);
@@ -95,9 +98,11 @@ public class PoolTableHandler {
 		PoolMessage updateCueBallPositionMessage = new PoolMessage();
 		updateCueBallPositionMessage.setCueBall(turn.getCueBall());
 		updateCueBallPositionMessage.setCue(incomingMessage.getPoolMessage().getCue());
+		updateCueBallPositionMessage.setWhoPlayed(turn.getPlayer());
 		// updateCueBallPositionMessage.setCanvas(new Vector2d());
 		updateCueBallPositionMessage.setTurnResult(turn.getTurnResult().toString());
 		updateMessage.setPoolMessage(updateCueBallPositionMessage);
+		updateMessage.setTable(table);
 		addTurnToDatabase(incomingTurn, table, turn, endpoint.getUser(), TurnType.HANDBALL);
 		return updateMessage;
 	}
@@ -135,6 +140,7 @@ public class PoolTableHandler {
 		poolMessage.setCueBall(playedTurn.getCueBall());
 		poolMessage.setWinner(playedTurn.getWinner());
 		poolMessage.setTurnResult(playedTurn.getTurnResult().toString());
+		poolMessage.setWhoPlayed(playedTurn.getPlayer());
 		return poolMessage;
 	}
 

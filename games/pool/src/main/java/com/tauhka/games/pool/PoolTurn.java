@@ -26,7 +26,8 @@ public class PoolTurn {
 	private User winner;
 	@JsonbProperty("selectedPocket")
 	private Integer selectedPocket;
-
+	@JsonbProperty("player")
+	private String player;
 	@JsonbProperty("turnType")
 	private TurnType turnType;
 
@@ -60,6 +61,14 @@ public class PoolTurn {
 
 	public void setCanvas(Vector2d canvas) {
 		this.canvas = canvas;
+	}
+
+	public String getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(String player) {
+		this.player = player;
 	}
 
 	public Vector2d getHandBall() {

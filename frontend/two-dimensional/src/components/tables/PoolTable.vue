@@ -68,6 +68,7 @@ export default defineComponent({
 				resultPlayerBBalls:[],
 				resultRemainingBalls:[],
 				resultCueBallPosition: undefined,
+				resultOfTurn:undefined,
 				pocketSelection:false,
 				selectedPocket:undefined,
 				turnQueue:[]
@@ -124,13 +125,21 @@ export default defineComponent({
 		}
 
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
-			if(action.type === "poolUpdate"){
-				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
-				this.cue.angle = action.payload.pool.cue.angle
-			}else if(action.type === "poolPlayTurn"){
-				this.createAfterTurnSnapshot(action)
+				if(action.type !== "poolPlayTurn" && action.type !== "poolSetHandBall" && action.type !== "poolSelectPocket"){
+					console.log("disregarded action:"+action.type) 
+					return				
+				}
 				this.resetInstanceVariables()
-				if(this.isDocumentVisible()){
+				this.createTableSnapshot(action)
+				if(!this.isDocumentVisible) {
+					console.log("Document not visible, shootBall comes in")
+					this.updatePocketedBalls(this.resultPlayerABalls)				
+					this.updatePocketedBalls(this.resultPlayerBBalls)
+					this.updateRemainingBallPositions(action.payload.table.remainingBalls, this.ballsRemaining)					
+					return
+				}
+				//Document is visible
+				if(action.type === "poolPlayTurn"){
 					this.createShootBallTurn(action)
 					if(action.payload.pool.turnResult === "CHANGE_TURN"){
 						this.createChangePlayerTurn(action)
@@ -140,27 +149,14 @@ export default defineComponent({
 					}else if(action.payload.pool.turnResult === "ASK_POCKET_SELECTION"){											
 						this.createAskPocketSelectionTurn(action)
 					}
-				}else {
-					console.log("Document not visible, shootBall comes in")
-					this.updatePocketedBalls(this.resultPlayerABalls)				
-					this.updatePocketedBalls(this.resultPlayerBBalls)
-					this.updateRemainingBallPositions(action.payload.table.remainingBalls, this.ballsRemaining)					
-					if(action.payload.pool.turnResult === "HANDBALL"){						
-						this.handBall = true
-					}					
-					if(action.payload.pool.turnResult === "ASK_POCKET_SELECTION"){						
-						this.pocketSelection = true
-					}
+				}else if(action.type === "poolSetHandBallFail"){
+					this.createAskHandBallPositionTurn(action)
+				}else if(action.type === "poolSetHandBall"){				
+					this.createPoolSetHandBallTurn(action)
+				}else if(action.type === "poolSelectPocket"){				
+					this.createSelectPocketTurn(action)
 				}
-			}else if(action.type === "poolSetHandBallFail"){
-				this.createAskHandBallPositionTurn(action)
-			}else if(action.type === "poolSetHandBall"){				
-				this.createPoolSetHandBallTurn(action)
-			}else if(action.type === "poolSelectPocket"){
-				
-				this.createSelectPocketTurn(action)
-			}
-			this.draw()
+				this.draw()		
 		})
 	},
 	beforeUnmount() {
@@ -176,6 +172,7 @@ export default defineComponent({
 			this.cue.force = 0
 		//	this.cue.image.visible = false
 			this.cue.position = this.cueBall.position
+			this.resultOfTurn = null
 		},
 		dequeueTurns(){
 			
@@ -194,9 +191,9 @@ export default defineComponent({
 				})
 			}
 			if(turn.setHandBall){
-				console.log("running turn setHandBall "+JSON.stringify(this.cueBall.position))			
+				console.log("running turn setHandBall "+JSON.stringify(this.cueBall.position))
 				this.setHandBall(turn)
-				this.unblockQueue(0)				
+				this.unblockQueue(0)
 			} else if(turn.setSelectedPocket){
 				console.log("running turn setSelectedPocket "+turn.setSelectedPocket)
 				this.selectedPocket = turn.setSelectedPocket
@@ -210,7 +207,7 @@ export default defineComponent({
 			else if(turn.askPocketSelection){
 				console.log("running turn askPocketSelection "+turn.askPocketSelection + "myTurn:"+this.isMyTurn()+" nextTurnPlayer"+turn.nextTurnPlayer)
 				if(this.isTurnChangeToMe2(turn.nextTurnPlayer)){
-					console.log("Turn wille changed to me pocketselection")
+					console.log("Turn wille changed to me pocketselectsion")
 					this.pocketSelection = true
 				}	
 				this.unblockQueue(0)
@@ -230,58 +227,53 @@ export default defineComponent({
 				this.dequeueTurns()	
 			}, timeout)	
 		},
-		createAskHandBallPositionTurn(action){
+		createAskHandBallPositionTurn(action):ITurn{
 			
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askHandBallPosition:true, askPocketSelection:false, setSelectedPocket: null, setHandBall:false}
 			this.turnQueue.splice(this.turnQueue.length, 0, turn)
-			
+			return turn
 		},
-		createAskPocketSelectionTurn(action){
+		createAskPocketSelectionTurn(action):ITurn{
 			
 			let selectedPocket = action.payload.pool.selectedPocket
 			let nextTurnPlayer:IPlayer = action.payload.table.playerInTurn
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askPocketSelection:true, setSelectedPocket: null, setHandBall:null,nextTurnPlayer:nextTurnPlayer}
-			this.turnQueue.splice(this.turnQueue.length, 0, turn)			
+			this.turnQueue.splice(this.turnQueue.length, 0, turn)
+			return turn
 		},
-		createSelectPocketTurn(action){
+		createSelectPocketTurn(action):ITurn{
 		
 			let selectedPocket = action.payload.pool.selectedPocket
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askPocketSelection:false, setSelectedPocket: selectedPocket, setHandBall:null}
 			this.turnQueue.splice(this.turnQueue.length, 0, turn)
-			
+			return turn
 		},
-		createChangePlayerTurn(action){
+		createChangePlayerTurn(action):ITurn{
 			let player:IPlayer = action.payload.table.playerInTurn
 			let turn:ITurn = {nextTurnPlayer:player}
 			this.turnQueue.splice(this.turnQueue.length, 0, turn)
+			return turn
 		},
-		createShootBallTurn(action){
+		createShootBallTurn(action):ITurn{
 			let cue:ICue = action.payload.pool.cue
 			cue.force = action.payload.pool.cue.force
 			cue.angle = action.payload.pool.cue.angle
 			let turn:ITurn = {shootBall:true, cue:cue, turnResult:action.payload.pool.turnResult}
-			this.turnQueue.splice(this.turnQueue.length, 0, turn)			
+			this.turnQueue.splice(this.turnQueue.length, 0, turn)		
+			return turn	
 		},
-		createPoolSetHandBallTurn(action){
-			
+		createPoolSetHandBallTurn(action):ITurn{
 			let { ...cueBallTemp} = this.cueBall
 			cueBallTemp.position = action.payload.pool.cueBall.position
 			cueBallTemp.inPocket = false
-			cueBallTemp.image.visible = true
-		//	this.cueBall.position = action.payload.pool.cueBall.position
-			this.resultCueBallPosition = action.payload.pool.cueBall.position
-			//this.cueBall.inPocket = false
-			
+			cueBallTemp.image.visible = true		
+			this.resultCueBallPosition = action.payload.pool.cueBall.position			
 			let cueTemp:ICue = {... this.cue}
 			cueTemp.force = 0
-			cueTemp.position = cueBallTemp.position
-		//	this.handBall = false
-			let turn:ITurn = {cue:cueTemp,cueBall:cueBallTemp,turnResult:action.payload.pool.turnResult,setHandBall:true,nextTurnPlayer:action.payload.table.playerInTurn}
-		//	this.cueBall.image.visible = true
-			
+			cueTemp.position = cueBallTemp.position		
+			let turn:ITurn = {cue:cueTemp,cueBall:cueBallTemp,turnResult:action.payload.pool.turnResult,setHandBall:true,nextTurnPlayer:action.payload.table.playerInTurn}		
 			this.turnQueue.splice(this.turnQueue.length, 0, turn)
-			
-			
+			return turn			
 		},
 		resize(){ 
 			
@@ -295,11 +287,37 @@ export default defineComponent({
 			this.cue.force = 0
 			this.cueBall.image.visible = true
 		},
-		createAfterTurnSnapshot(action){		
-			this.resultPlayerABalls = action.payload.table.playerABalls
-			this.resultPlayerBBalls = action.payload.table.playerBBalls
-			this.resultRemainingBalls = action.payload.table.remainingBalls // for jumping browser tabs
-			this.resultCueBallPosition = action.payload.pool.cueBall.position
+		createTableSnapshot(action){
+			let table = action.payload.table
+			console.log("*** CREATIN TABLE SNAPSHOT ***"+action.type+"  action:"+JSON.stringify(action))
+			if(table){
+				this.resultPlayerABalls = action.payload.table.playerABalls
+				this.resultPlayerBBalls = action.payload.table.playerBBalls
+				this.resultRemainingBalls = action.payload.table.remainingBalls // for jumping browser tab				
+			}
+			let pool = action.payload.pool
+			console.log("SnapShot2:"+JSON.stringify(pool))
+			if(pool){
+				this.resultCueBallPosition = pool.cueBall.position
+				if(pool.turnResult === "HANDBALL" && !this.isMe(pool.whoPlayed)){
+					console.log("snapshot: handball happened and player was:"+pool.whoPlayed +" so it is my handball")					
+					let turn:ITurn = this.createAskHandBallPositionTurn(action)
+					console.log("snapshot lastTurn:"+JSON.stringify(turn))
+					this.resultOfTurn = turn
+				}
+				else if(pool.turnResult === "ASK_POCKET_SELECTION" && this.isMe(table.playerInTurn.name)){
+					console.log("snapshot: ASK_POCKET_SELECTION happened and player was:"+pool.whoPlayed +" playerInTurn:"+table.playerInTurn.name)						
+					let turn:ITurn = this.createAskPocketSelectionTurn(action)
+					console.log("snapshot lastTurn2:"+JSON.stringify(turn))
+					this.resultOfTurn = turn
+				}else if(pool.turnResult === "ASK_POCKET_SELECTION" && !this.isMe(table.playerInTurn.name)){
+					console.log("snapshot: ASK_POCKET_SELECTION happened and player was:"+pool.whoPlayed +" playerInTurn:"+table.playerInTurn.name)
+				}else if(pool.turnResult === "CHANGE_TURN" && !this.isMe(pool.whoPlayed)){
+					let turn:ITurn = this.createChangePlayerTurn(action)
+					console.log("snapshot createChangePlayerTurn:"+JSON.stringify(turn))
+					this.resultOfTurn = turn
+				}
+			}
 		},
 		updateRemainingBallPositions(serverBalls:Array<IBall>, comparisonList:Array<IBall>){			
 			serverBalls.forEach(serverBall => {
@@ -518,55 +536,45 @@ export default defineComponent({
 			return document.visibilityState === 'visible'
 		},
 		onVisibilityChange(){
-			if (this.isDocumentVisible()) {
-				
-				
-				if(this.turnQueue.length > 0 && this.isOngoingGame()){
-					const lastTurn = this.turnQueue[this.turnQueue.length-1]
-					if(this.isMyTurn() && lastTurn.turnResult === "HANDBALL"){
-						
-						this.handBall = true
-					}
-					if(this.isMyTurn() && lastTurn.turnResult === "SELECT_POCKET"){
-						
-						this.pocketSelection = true	
-					}
-				}
-				
-				queueBlocked = false
-				this.turnQueue.splice(0, this.turnQueue.length) // Clear the whole array
-				
-				this.resultRemainingBalls.forEach(serverBall => {
-					let ball = this.ballsRemaining.find(ball => ball.number === serverBall.number)
-					ball.position = serverBall.position
-					ball.velocity.x = 0
-					ball.velocity.y = 0
-				})
-				this.updatePocketedBalls(this.resultPlayerABalls)
-				this.updatePocketedBalls(this.resultPlayerBBalls)
-				if(this.resultCueBallPosition){ // Does not exist in the very beginning
-					this.cueBall.position = this.resultCueBallPosition
-					this.cueBall.velocity.x = 0
-					this.cueBall.velocity.y = 0
-				}
-				if(this.isMyTurn()){
-					this.poolTable.mouseEnabled = true
-					this.cue.image.visible = true
-					this.cue.force = 0				
-				} else{
-					this.poolTable.mouseEnabled = false
-				}
-				if(this.isOngoingGame()){
-					showAnimation = true
-					this.draw()
-				}else{
-					requestAnimationFrame(this.repaintAll)
-				}
+			if (this.isDocumentVisible()) {					
+				this.clearTurnQueue()							
+				this.createTableFromSnapShot()
+				this.setupMouseAndCo()
 			} else {
-				showAnimation = false			
+				queueBlocked = true	
+				showAnimation = false
 				this.poolTable.mouseEnabled = false				
 				clearInterval(collisionCheckInterval)
 			}			
+		},
+		setupMouseAndCo(){
+			if(this.isMyTurn()){
+				this.poolTable.mouseEnabled = true				
+			}
+		},
+		clearTurnQueue(){
+			queueBlocked = true
+			this.turnQueue.splice(0, this.turnQueue.length)
+			queueBlocked = false
+		},
+		createTableFromSnapShot(){
+			console.log("CreateTable from snapshot")			
+			this.resultRemainingBalls.forEach(serverBall => {
+				let ball = this.ballsRemaining.find(ball => ball.number === serverBall.number)
+				ball.position = serverBall.position
+				ball.velocity.x = 0
+				ball.velocity.y = 0
+			})
+			this.updatePocketedBalls(this.resultPlayerABalls)
+			this.updatePocketedBalls(this.resultPlayerBBalls)
+			if(this.resultCueBallPosition){ // Does not exist in the very beginning
+				this.cueBall.position = this.resultCueBallPosition
+				this.cueBall.velocity.x = 0
+				this.cueBall.velocity.y = 0
+			}
+			queueBlocked = false
+			console.log("Back visible pushing to queue "+JSON.stringify(this.resultOfTurn))
+			this.turnQueue.push(this.resultOfTurn)
 		},
 		isTableTopBoundry(component:IPoolComponent){
 		

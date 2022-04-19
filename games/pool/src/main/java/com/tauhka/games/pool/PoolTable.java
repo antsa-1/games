@@ -95,6 +95,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 		turnResult = this.eightBallRuleBase.playTurn(this, turn);
 		PoolTurn playedTurn = new PoolTurn();
+		playedTurn.setPlayer(user.getName());
 		if (TurnResult.isDecisive(turnResult)) {
 			checkWinner(turnResult, playedTurn);
 			super.initRematchForArtificialPlayer();
@@ -158,6 +159,7 @@ public class PoolTable extends Table implements PoolComponent {
 			throw new IllegalArgumentException("HandBall update is not expected:" + this);
 		}
 		PoolTurn turn = new PoolTurn();
+		turn.setPlayer(user.getName());
 		if (eightBallRuleBase.isCueBallNewPositionAllowed(this, sample)) {
 			// Different canvas sizes .. TODO
 			Vector2d position = sample.getPosition();
@@ -203,6 +205,7 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 		pocketSelectedTurn.setSelectedPocket(pocketNumber);
 		pocketSelectedTurn.setCueBall(this.cueBall);
+		pocketSelectedTurn.setPlayer(user.getName());
 		LOGGER.info(user.getName() + " selectedPocket:" + pocketNumber);
 		return pocketSelectedTurn;
 	}
@@ -227,8 +230,6 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 		for (Ball ball : remainingBalls) {
 			if (eightBallRuleBase.areBallsIntersecting(ball, cueBall)) {
-				System.out.println("balls intersecting" + ball.getNumber());
-				System.out.println("G");
 				return false;
 			}
 		}

@@ -7,7 +7,6 @@ import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.pool.Cue;
 import com.tauhka.games.pool.CueBall;
 
-import jakarta.json.bind.annotation.JsonbNillable;
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
 
@@ -28,6 +27,8 @@ public class PoolMessage implements Serializable {
 	private User winner;
 	@JsonbProperty("selectedPocket")
 	private int selectedPocket;
+	@JsonbProperty("whoPlayed")
+	private String whoPlayed;
 
 	public Cue getCue() {
 		return cue;
@@ -63,6 +64,14 @@ public class PoolMessage implements Serializable {
 
 	public User getWinner() {
 		return winner;
+	}
+
+	public String getWhoPlayed() {
+		return whoPlayed;
+	}
+
+	public void setWhoPlayed(String whoPlayed) {
+		this.whoPlayed = whoPlayed;
 	}
 
 	public void setWinner(User winner) {

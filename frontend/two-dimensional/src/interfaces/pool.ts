@@ -12,6 +12,7 @@ export interface IEightBallGame {
     resultPlayerBBalls: Array<IBall>[],
     resultRemainingBalls: Array<IBall>[],
     resultCueBallPosition: IVector2
+    resultOfTurn: ITurn,
     cueBall: IBall,
     cue: ICue,
     poolTable: IPoolTable,
