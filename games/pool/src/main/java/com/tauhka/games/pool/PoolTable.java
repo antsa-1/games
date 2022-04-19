@@ -107,7 +107,7 @@ public class PoolTable extends Table implements PoolComponent {
 			expectingHandBallUpdate = true;
 		}
 		if (turnResult != TurnResult.HANDBALL && playedTurn.getWinner() == null && getPlayerInTurnBalls().size() == 7) {
-			turnResult = TurnResult.SELECT_POCKET;
+			turnResult = TurnResult.ASK_POCKET_SELECTION;
 			expectingPocketSelection = true;
 		}
 
@@ -162,24 +162,12 @@ public class PoolTable extends Table implements PoolComponent {
 			// Different canvas sizes .. TODO
 			Vector2d position = sample.getPosition();
 			this.cueBall.setPosition(position);
-			if (SERVER_GUI) {
-				synchronized (this) {
-					this.notify();
-					try {
-						LOGGER.info("Pooltable instance waits handball gui repaint");
-						this.wait();
-						LOGGER.info("Pooltable instance waits handball continues");
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
+
 			turn.setCueBall(this.cueBall);
 			expectingHandBallUpdate = false;
 			if (getPlayerInTurnBalls().size() == 7) {
 				this.expectingPocketSelection = true;
-				turn.setTurnResult(TurnResult.SELECT_POCKET);
+				turn.setTurnResult(TurnResult.ASK_POCKET_SELECTION);
 				turn.setCueBall(sample);
 				return turn;
 			}
