@@ -31,7 +31,7 @@ export interface ITurn {
     turnResult?: string,
     askHandBallPosition?: boolean,
     askPocketSelection?: boolean,
-    playerInTurnAfterTurnPlayed?: IPlayer
+    nextTurnPlayer?: IPlayer
     shootBall?: boolean
     changePlayerInTurn?: IPlayer
 }
