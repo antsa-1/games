@@ -141,6 +141,7 @@ export default defineComponent({
 				if(!this.isDocumentVisible) {								
 					return
 				}
+				console.log("INCOMING:"+action.type)
 				this.produceTurns(action)
 				this.draw()		
 		})
@@ -178,6 +179,7 @@ export default defineComponent({
 			if(turn.shootBall){
 				console.log("running turn shootBall ")
 				this.shootingBall = true
+				this.firstTurnPlayed = true
 				this.shootBall(turn).then(() => {
 					console.log("running turn shootBall has been done ")
 					this.selectedPocket = null
@@ -187,7 +189,7 @@ export default defineComponent({
 					this.shootingBall = false
 				})
 			}
-			if(turn.setHandBall){
+			else if(turn.setHandBall){
 				console.log("running turn setHandBall "+JSON.stringify(this.cueBall.position))
 				this.setHandBall(turn)
 				const timeout = this.isMyTurn()? 0 : 2000
@@ -205,9 +207,10 @@ export default defineComponent({
 			}else if(turn.lastTurn){
 				console.log("Last turn:"+JSON.stringify(turn))
 				this.theTable.playerInTurn = null
+				this.clearTurnQueue()
+				this.turnQueue.blocked = true
 				const message:IChatMessage = {from:"System",text:turn.winner + " won " + "( "+turn.winReason.toLowerCase() +" )"}
-				this.$store.dispatch("chat", message)
-				this.unblockQueue(0)
+				this.$store.dispatch("chat", message)				
 			}
 			else if(turn.askPocketSelection){
 				console.log("running turn askPocketSelection "+turn.askPocketSelection + "myTurn:"+this.isMyTurn()+" nextTurnPlayer"+turn.nextTurnPlayer.name)
@@ -223,7 +226,7 @@ export default defineComponent({
 		unblockQueue(timeout:number = 0){
 			this.turnQueue.blocked = false			
 			this.cue.image.visible = true
-		
+			console.log("Unblocked queue"+timeout)
 			this.draw()
 			setTimeout(() => {
 				this.consumeTurns()	
@@ -312,7 +315,7 @@ export default defineComponent({
 			cueBallTemp.position = action.payload.pool.cueBall.position
 			cueBallTemp.inPocket = false
 			cueBallTemp.image.visible = true		
-			//this.resultCueBallPosition = action.payload.pool.cueBall.position			
+			//this.firstTurnPlayed = action.payload.pool.cueBall.position			
 			let cueTemp:ICue = {... this.cue}
 			cueTemp.force = 0
 			cueTemp.position = cueBallTemp.position		
@@ -325,8 +328,7 @@ export default defineComponent({
 			
 		},
 		setHandBall(turn:ITurn){
-			this.cueBall.position = turn.cueBall.position
-			this.resultCueBallPosition = turn.cueBall.position
+			this.cueBall.position = turn.cueBall.position			
 			this.cueBall.inPocket = false
 			this.cue.position = this.cueBall.position
 			this.handBall = false
@@ -335,7 +337,7 @@ export default defineComponent({
 		},
 		createTableSnapshot(action){
 			console.log("*** CREATIN TABLE SNAPSHOT ***"+action.type)
-			this.resultSnapshot = action		
+			this.resultSnapshot = action			
 		},
 		updateRemainingBallPositions(serverBalls:Array<IBall>, comparisonList:Array<IBall>){		
 			serverBalls.forEach(serverBall => {
@@ -660,17 +662,19 @@ export default defineComponent({
 				this.pocketSelection = true
 			}
 			else if(pool.turnResult === "EIGHT_BALL_IN_POCKET_OK" ){
+				this.theTable.playerInTurn = null
 				if(this.isMe(pool.whoPlayed))	{
-					console.log("I won! !!")
+					console.log("I won v1")
 				}else{
-					console.log("I lost! !!")
+					console.log("I lost v1")
 				}				
 			}
 			else if(pool.turnResult === "EIGHT_BALL_IN_POCKET_FAIL" ){
+				this.theTable.playerInTurn = null
 				if(this.isMe(pool.whoPlayed))	{
-					console.log("I lost! !!")
+					console.log("I lost v2")
 				}else{
-					console.log("I wnonn! !!")
+					console.log("I won v2")
 				}				
 			}	
 			requestAnimationFrame(this.repaintAll)
@@ -754,12 +758,13 @@ export default defineComponent({
 			}
 			else if(this.mouseEnabled && ! this.handBall){
 				this.cue.force = 0
-				//console.log("setting interval! mouse down ja sallittu")
+				console.log("setting interval! mouse down ja sallittu")
 				cueForceInterval = setInterval(this.updateCueForce, 50)
 			}
 		},	
 	
 		handleMouseUp(event:MouseEvent){
+			clearInterval(cueForceInterval)
 			
 			if(!this.mouseEnabled){
 				return
@@ -775,8 +780,8 @@ export default defineComponent({
 				this.cueBall.position.y = event.offsetY				
 				this.hb(event.offsetX, event.offsetY, this.canvas)
 			}			
-			clearInterval(cueForceInterval)
 			if(!this.handBall){
+				console.log("MouseUp -> sendTurn")
 				this.sendTurn(this.cue, this.cueBall, this.canvas)
 			}
 		},
@@ -785,7 +790,7 @@ export default defineComponent({
 		},
 		isHandBallPositionAllowed(){
 			//Starting position position need to be behind the line			
-			if(!this.resultCueBallPosition){
+			if(!this.firstTurnPlayed){
 				if(this.mouseCoordsTemp.x > this.canvas.width * 0.25) {// relative line position
 					return false
 				}
