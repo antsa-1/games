@@ -81,13 +81,13 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized Object playTurn(User user, Object o) {
-		System.out.println("Playing turn:"+user.getName());
+		System.out.println("Playing turn:" + user.getName());
 		checkBasicGuards(user);
 		if (expectingPocketSelection) {
-			throw new IllegalArgumentException("Expecting pocket selection:" + this +" user:"+user.getName());
+			throw new IllegalArgumentException("Expecting pocket selection:" + this + " user:" + user.getName());
 		}
 		if (expectingHandBallUpdate) {
-			throw new IllegalArgumentException("Expecting handball update:" + this+" user:"+user.getName());
+			throw new IllegalArgumentException("Expecting handball update:" + this + " user:" + user.getName());
 		}
 		PoolTurn turn = (PoolTurn) o;
 
@@ -97,6 +97,7 @@ public class PoolTable extends Table implements PoolComponent {
 		PoolTurn playedTurn = new PoolTurn();
 		playedTurn.setPlayer(user.getName());
 		if (TurnResult.isDecisive(turnResult)) {
+			gameOver = true;
 			checkWinner(turnResult, playedTurn);
 			super.initRematchForArtificialPlayer();
 		}
@@ -116,7 +117,7 @@ public class PoolTable extends Table implements PoolComponent {
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
-		System.out.println("PLAYED TURN turnResult = " + turnResult.toString()+" player:"+user.getName());
+		System.out.println("PLAYED TURN turnResult = " + turnResult.toString() + " player:" + user.getName());
 		return playedTurn;
 	}
 
@@ -159,7 +160,7 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public synchronized PoolTurn updateHandBall(User user, CueBall sample) {
-		System.out.println("Updatehandball by:"+user.getName());
+		System.out.println("Updatehandball by:" + user.getName());
 		checkBasicGuards(user);
 		if (expectingPocketSelection) {
 			throw new IllegalArgumentException("HandBall update is not expected:" + this);
@@ -180,25 +181,25 @@ public class PoolTable extends Table implements PoolComponent {
 				this.expectingPocketSelection = true;
 				turn.setTurnResult(TurnResult.ASK_POCKET_SELECTION);
 				turn.setCueBall(sample);
-				System.out.println("Updatehandball updated by:"+user.getName());
+				System.out.println("Updatehandball updated by:" + user.getName());
 				return turn;
 			}
 			LOGGER.info("Handball position was allowed" + sample);
 			turn.setTurnResult(TurnResult.CONTINUE_TURN);
 			turn.setCueBall(sample);
-			System.out.println("Updatehandball updated by:"+user.getName());
+			System.out.println("Updatehandball updated by:" + user.getName());
 			return turn;
 		} else {
 			LOGGER.info("Handball position not allowed" + sample + " user:" + user);
 			turn.setTurnResult(TurnResult.HANDBALL_FAIL);
 			turn.setCueBall(sample);
-			System.out.println("Updatehandball updated by:"+user.getName());
+			System.out.println("Updatehandball updated by:" + user.getName());
 			return turn;
 		}
 	}
 
 	public synchronized PoolTurn selectPocket(User user, Integer pocketNumber) {
-		System.out.println("selectPocket  by:"+user.getName());
+		System.out.println("selectPocket  by:" + user.getName());
 		checkBasicGuards(user);
 		if (!expectingPocketSelection) {
 			throw new IllegalArgumentException("It's not allowed to select pocket update is not expected:" + user + " _ " + this);
