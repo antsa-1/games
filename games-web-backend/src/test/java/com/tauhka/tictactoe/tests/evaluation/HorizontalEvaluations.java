@@ -62,11 +62,7 @@ public class HorizontalEvaluations {
 	public void printBoard(GameToken board[][]) {
 		for (int x = 0; x < board.length; x++) {
 			for (int y = 0; y < board.length; y++) {
-				if (board[y][x] != null)
-					System.out.print(board[y][x] + " ");
-				else {
-					System.out.print(" _");
-				}
+
 				if (y == board.length - 1) {
 				}
 			}

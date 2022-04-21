@@ -90,7 +90,6 @@ public class PoolAI extends User implements AI {
 				x++;
 			}
 			y++;
-			System.out.println("POSITION:x" + x + " y:" + y);
 			position = new Vector2d(x, y);
 			cueBall.setPosition(position);
 			turn = poolTable.updateHandBall(poolAI, cueBall);

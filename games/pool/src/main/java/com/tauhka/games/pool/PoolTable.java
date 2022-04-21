@@ -81,7 +81,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized Object playTurn(User user, Object o) {
-		System.out.println("Playing turn:" + user.getName());
+		LOGGER.fine("Playing turn:" + user.getName());
 		checkBasicGuards(user);
 		if (expectingPocketSelection) {
 			throw new IllegalArgumentException("Expecting pocket selection:" + this + " user:" + user.getName());
@@ -117,7 +117,7 @@ public class PoolTable extends Table implements PoolComponent {
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
-		System.out.println("PLAYED TURN turnResult = " + turnResult.toString() + " player:" + user.getName());
+		LOGGER.fine("PLAYED TURN turnResult = " + turnResult.toString() + " player:" + user.getName());
 		return playedTurn;
 	}
 
@@ -160,7 +160,7 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public synchronized PoolTurn updateHandBall(User user, CueBall sample) {
-		System.out.println("Updatehandball by:" + user.getName());
+		LOGGER.fine("Updatehandball by:" + user.getName());
 		checkBasicGuards(user);
 		if (expectingPocketSelection) {
 			throw new IllegalArgumentException("HandBall update is not expected:" + this);
@@ -181,25 +181,25 @@ public class PoolTable extends Table implements PoolComponent {
 				this.expectingPocketSelection = true;
 				turn.setTurnResult(TurnResult.ASK_POCKET_SELECTION);
 				turn.setCueBall(sample);
-				System.out.println("Updatehandball updated by:" + user.getName());
+				LOGGER.fine("Updatehandball updated by:" + user.getName());
 				return turn;
 			}
 			LOGGER.info("Handball position was allowed" + sample);
 			turn.setTurnResult(TurnResult.CONTINUE_TURN);
 			turn.setCueBall(sample);
-			System.out.println("Updatehandball updated by:" + user.getName());
+			LOGGER.fine("Updatehandball updated by:" + user.getName());
 			return turn;
 		} else {
 			LOGGER.info("Handball position not allowed" + sample + " user:" + user);
 			turn.setTurnResult(TurnResult.HANDBALL_FAIL);
 			turn.setCueBall(sample);
-			System.out.println("Updatehandball updated by:" + user.getName());
+			LOGGER.fine("Updatehandball updated by:" + user.getName());
 			return turn;
 		}
 	}
 
 	public synchronized PoolTurn selectPocket(User user, Integer pocketNumber) {
-		System.out.println("selectPocket  by:" + user.getName());
+		LOGGER.fine("selectPocket  by:" + user.getName());
 		checkBasicGuards(user);
 		if (!expectingPocketSelection) {
 			throw new IllegalArgumentException("It's not allowed to select pocket update is not expected:" + user + " _ " + this);
@@ -231,13 +231,13 @@ public class PoolTable extends Table implements PoolComponent {
 		double y = cueBall.getPosition().y;
 		double r = cueBall.getRadius();
 		if (x > left.a + r && x < right.a - r) {
-			System.out.println("boundry1");
+			LOGGER.fine("boundry1");
 			if (!(y > topLeft.a + r && y < bottomRight.a - r)) {
-				System.out.println("boundry2");
+				LOGGER.fine("boundry2");
 				return false;
 			}
 		} else {
-			System.out.println("boundry3");
+			LOGGER.fine("boundry3");
 			return false;
 		}
 		for (Ball ball : remainingBalls) {
@@ -274,7 +274,7 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public void putBallInPocket(Ball ballToPocket, Pocket pocket) {
-		System.out.println("InComing:" + ballToPocket.getNumber() + " pocket:" + pocket.getCenter() + " player:" + this.playerInTurn.getName());
+		LOGGER.fine("InComing:" + ballToPocket.getNumber() + " pocket:" + pocket.getCenter() + " player:" + this.playerInTurn.getName());
 		if (ballToPocket.getNumber() == 0) {
 			return;
 		}
