@@ -8,11 +8,7 @@ export interface IPoolComponent {
 export interface IEightBallGame {
     canvas: HTMLCanvasElement,
     ballsRemaining: Array<IBall>[],
-    resultPlayerABalls: Array<IBall>[],
-    resultPlayerBBalls: Array<IBall>[],
-    resultRemainingBalls: Array<IBall>[],
-    resultCueBallPosition: IVector2
-    resultOfTurn: ITurn,
+    resultSnapshot: any, //action
     cueBall: IBall,
     cue: ICue,
     poolTable: IPoolTable,
@@ -21,9 +17,14 @@ export interface IEightBallGame {
     handBall: boolean,
     pocketSelection: boolean,
     selectedPocket: IPocket,
-    turnQueue: Array<ITurn>[]
-}
+    turnQueue: ITurnQueue,
+    shootingBall: boolean,
 
+}
+export interface ITurnQueue {
+    turns: Array<ITurn>[],
+    blocked: boolean
+}
 export interface ITurn {
     cue?: ICue,
     cueBall?: IBall,
@@ -32,8 +33,13 @@ export interface ITurn {
     turnResult?: string,
     askHandBallPosition?: boolean,
     askPocketSelection?: boolean,
-    nextTurnPlayer?: IPlayer
-    shootBall?: boolean
+    nextTurnPlayer?: IPlayer,
+    changePlayer?:boolean,
+    shootBall?: boolean,
+    lastTurn: boolean,
+    winner?: string,
+    winReason?: string,
+    whoPlayed: string
 }
 export interface ITurnResult {
     text: string

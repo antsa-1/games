@@ -8,7 +8,6 @@ import com.tauhka.games.core.twodimen.ai.TwoDimensionalBoardAdapter;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.JsonbConfig;
-import jakarta.websocket.EncodeException;
 import jakarta.websocket.Encoder;
 
 public class MessageEncoder implements Encoder.Text<Message> {
@@ -23,7 +22,7 @@ public class MessageEncoder implements Encoder.Text<Message> {
 	}
 
 	@Override
-	public String encode(Message message) throws EncodeException {
+	public String encode(Message message) throws IllegalArgumentException {
 		try {
 			String retVal = jsonb.toJson(message, Message.class);
 			return retVal;

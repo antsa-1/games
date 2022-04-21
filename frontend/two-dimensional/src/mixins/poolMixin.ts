@@ -21,20 +21,21 @@ export const poolMixin = {
 	},
 	methods: {
 		sendPocketSelection(pocketNumber:number){
+			pocketNumber = pocketNumber === null? 0: pocketNumber
 			const obj ={ title:"POOL_SELECT_POCKET", message: this.theTable.tableId, pool:{selectedPocket:pocketNumber}}
-			console.log("Sending pocket selection to server"+JSON.stringify(obj))
+			console.log("*** Sending pocket selection to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
 		},
 		hb(xc:number, yc:number, canvas){
 			let position:IVector2 = {x:xc, y:yc}
 			let cueBalla :IBall = <IBall> {position}
 			const obj = { title:"POOL_HANDBALL", message: this.theTable.tableId, pool:{cueBall:cueBalla, canvas:{x:canvas.width, y:canvas.height}}}            
-			console.log("Sending handball to server"+JSON.stringify(obj))
+			console.log("*** Sending handball to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
 		sendTurn(cue, cueBall, canvas){			
 			const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
-			console.log("Sending turn to server"+JSON.stringify(obj))
+			console.log("*** Sending turn to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
         sp(cue, cueBall, canvas){

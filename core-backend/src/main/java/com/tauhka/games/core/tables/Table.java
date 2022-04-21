@@ -13,7 +13,6 @@ import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.AI;
-import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.twodimen.GameResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;

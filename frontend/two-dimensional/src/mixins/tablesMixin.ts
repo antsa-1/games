@@ -1,4 +1,4 @@
-import { ITable } from "@/interfaces/interfaces";
+import { ITable,IPlayer } from "@/interfaces/interfaces";
 
 export const tablesMixin = {
 	data() {
@@ -112,7 +112,9 @@ export const tablesMixin = {
 		isPlayerInTurn(userName:string){
 			return this.theTable.playerInTurn.name === userName
 		},
-			
+		isTurnChange(nextPlayerName:string){
+			return this.$store.getters.playerInTurn.name !== nextPlayerName
+		},
 		isTurnChangeToMe(tableFromServer:ITable){			
 			return tableFromServer.playerInTurn.name === this.userName && this.$store.getters.playerInTurn.name !== this.userName
 		},
@@ -121,7 +123,21 @@ export const tablesMixin = {
 		},
 		isTurnChangeToMe2(nextPlayerName:string){
 			console.log("isTurnChangeToMe2 nextPlayer:"+nextPlayerName+ "  storePlayerinInTurn "+this.$store.getters.playerInTurn.name+ "  myName:"+this.userName)
-			return nextPlayerName !== this.userName && this.$store.getters.playerInTurn.name === this.userName
+			return nextPlayerName === this.userName && this.$store.getters.playerInTurn.name !== this.userName
+		},
+		shouldChangeTurn(playerInTurn:IPlayer){
+			if(!this.$store.getters.playerInTurn){
+				return false
+			}
+			if(this.$store.getters.playerInTurn.name === playerInTurn.name){
+				return false
+			}
+			return true
+		},
+		async changeTurnIfRequired(playerInTurn:IPlayer){
+			if(this.shouldChangeTurn(playerInTurn)){
+				await this.$store.dispatch("changeTurn", playerInTurn)
+			}
 		},
 		isMe(userName:string){
 			return this.userName === userName

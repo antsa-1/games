@@ -389,14 +389,9 @@ export default defineComponent({
 								return
 							} 
 							if(data.table.gameMode.gameNumber === 3){
-								this.$store.dispatch("poolPlayTurn", data)								
-								let winner = data.pool.winner.name
-									const poolWinMessage:IChatMessage = {
-										from:data.from,
-										text:winner +" won" + " ( "+data.pool.turnResult.toLowerCase()	+" )"			
-								}
-								this.$store.dispatch("poolGameEnded", poolWinMessage)
-							}									
+								this.$store.dispatch("poolPlayTurn", data)										
+								this.$store.dispatch("poolGameEnded", data)
+							}
 						break;
 					case "WINNER":
 						const winMessage:IWinMessage={

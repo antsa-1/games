@@ -62,6 +62,8 @@ public class PoolTable extends Table implements PoolComponent {
 	private UUID gameId;
 	@JsonbTransient
 	private boolean breaked;
+	@JsonbTransient
+	private boolean gameOver;
 
 	static {
 		String env = System.getProperty("Server_Environment");
@@ -79,15 +81,13 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized Object playTurn(User user, Object o) {
-		System.out.println("PLAY TURN" + ((PoolTurn) o).getCue() + " user:" + user.getName());
-		if (!user.equals(this.playerInTurn)) {
-			throw new IllegalArgumentException("Player is not in turn in table:" + this);
-		}
+		System.out.println("Playing turn:"+user.getName());
+		checkBasicGuards(user);
 		if (expectingPocketSelection) {
-			throw new IllegalArgumentException("Expecting pocket selection:" + this);
+			throw new IllegalArgumentException("Expecting pocket selection:" + this +" user:"+user.getName());
 		}
 		if (expectingHandBallUpdate) {
-			throw new IllegalArgumentException("Expecting handball update:" + this);
+			throw new IllegalArgumentException("Expecting handball update:" + this+" user:"+user.getName());
 		}
 		PoolTurn turn = (PoolTurn) o;
 
@@ -116,8 +116,18 @@ public class PoolTable extends Table implements PoolComponent {
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
-		System.out.println("PLAYED TURN turnResult = " + turnResult.toString());
+		System.out.println("PLAYED TURN turnResult = " + turnResult.toString()+" player:"+user.getName());
 		return playedTurn;
+	}
+
+	private void checkBasicGuards(User user) {
+		if (gameOver) {
+			LOGGER.info("GameOver in table " + this + " user:" + user.getName());
+			throw new IllegalArgumentException("GameOver in table:" + this + " user:" + user.getName());
+		}
+		if (!user.equals(this.playerInTurn)) {
+			throw new IllegalArgumentException("Player is not in turn in table:" + this + " user:" + user.getName());
+		}
 	}
 
 	private void checkWinner(TurnResult turnResult, PoolTurn playedTurn) {
@@ -149,9 +159,8 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public synchronized PoolTurn updateHandBall(User user, CueBall sample) {
-		if (!user.equals(this.playerInTurn)) {
-			throw new IllegalArgumentException("HandBall update Player is not in turn in table:" + this);
-		}
+		System.out.println("Updatehandball by:"+user.getName());
+		checkBasicGuards(user);
 		if (expectingPocketSelection) {
 			throw new IllegalArgumentException("HandBall update is not expected:" + this);
 		}
@@ -171,24 +180,26 @@ public class PoolTable extends Table implements PoolComponent {
 				this.expectingPocketSelection = true;
 				turn.setTurnResult(TurnResult.ASK_POCKET_SELECTION);
 				turn.setCueBall(sample);
+				System.out.println("Updatehandball updated by:"+user.getName());
 				return turn;
 			}
 			LOGGER.info("Handball position was allowed" + sample);
 			turn.setTurnResult(TurnResult.CONTINUE_TURN);
 			turn.setCueBall(sample);
+			System.out.println("Updatehandball updated by:"+user.getName());
 			return turn;
 		} else {
 			LOGGER.info("Handball position not allowed" + sample + " user:" + user);
 			turn.setTurnResult(TurnResult.HANDBALL_FAIL);
 			turn.setCueBall(sample);
+			System.out.println("Updatehandball updated by:"+user.getName());
 			return turn;
 		}
 	}
 
 	public synchronized PoolTurn selectPocket(User user, Integer pocketNumber) {
-		if (!user.equals(this.playerInTurn)) {
-			throw new IllegalArgumentException("selectPocket Player is not in turn in table:" + this);
-		}
+		System.out.println("selectPocket  by:"+user.getName());
+		checkBasicGuards(user);
 		if (!expectingPocketSelection) {
 			throw new IllegalArgumentException("It's not allowed to select pocket update is not expected:" + user + " _ " + this);
 		}
@@ -300,10 +311,12 @@ public class PoolTable extends Table implements PoolComponent {
 		return canvas;
 	}
 
+	@JsonbTransient
 	public boolean isExpectingHandball() {
 		return this.expectingHandBallUpdate;
 	}
 
+	@JsonbTransient
 	public boolean isExpectingPocketSelection() {
 		return this.expectingPocketSelection;
 	}
@@ -368,6 +381,7 @@ public class PoolTable extends Table implements PoolComponent {
 		this.gameId = UUID.randomUUID();
 		EightBallInitializer.init(this);
 		expectingHandBallUpdate = true;
+		gameOver = false;
 		super.resetRematchPlayer();
 		return this;
 	}

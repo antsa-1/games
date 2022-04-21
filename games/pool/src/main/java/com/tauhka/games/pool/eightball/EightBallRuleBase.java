@@ -91,6 +91,9 @@ public class EightBallRuleBase {
 		if (eightBallInPocket && turnResult == TurnResult.HANDBALL) {
 			turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
 		}
+		if (eightBallInPocket && !eightBallHitFirst) {
+			turnResult = TurnResult.EIGHT_BALL_IN_POCKET_FAIL;
+		}
 
 		return turnResult != null ? turnResult : TurnResult.CHANGE_TURN;
 	}
