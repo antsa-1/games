@@ -14,7 +14,7 @@
 
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
-			<span v-if="shootingBall" class="text-success">Playing turn</span>
+			<span v-if="playingTurn" class="text-success">Playing turn</span>
 			<span v-else-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn {{userName}} </span>
 			<span v-else-if="theTable?.playerInTurn === null" class="text-success"> Game ended </span>	
 			<div v-else class="text-danger"> In turn: {{theTable.playerInTurn?.name}}</div>			
@@ -46,9 +46,7 @@ const FRICTION = 0.991
 
 let cueForceInterval = undefined
 let collisionCheckInterval = undefined
-
 const DELTA = 1/8
-let promises = []
 
 export default defineComponent({
 	components: { Chat },
@@ -66,7 +64,7 @@ export default defineComponent({
 				gameOptions: undefined,
 				mouseCoordsTemp: undefined,
 				handBall:false,
-				shootingBall: false,
+				playingTurn: false,
 				resultSnapshot:undefined,
 				pocketSelection:false,
 				selectedPocket:null,
@@ -76,14 +74,8 @@ export default defineComponent({
 	watch: {
 		turnQueueLength: {
       		handler(newValue, oldVal) {
-				if(newValue > oldVal){
-					console.log("Added turn in the queue, turns:"+newValue+ " length:"+ this.turnQueue.turns.length)
+				if(newValue > oldVal){					
 					this.consumeTurns()
-				}else if(newValue === oldVal){
-					console.log("what happend same vals:"+newValue+ " length:"+ this.turnQueue.turns.length)
-				}
-				else{
-					console.log("Removed turn from queue, turns:"+newValue +" length:"+this.turnQueue.turns.length)
 				}
 			}
     	},
@@ -121,6 +113,10 @@ export default defineComponent({
 				}
 				return this.$store.getters.playerInTurn.name === this.userName && this.poolTable.mouseEnabled
 			},
+			cueVisible(){
+			
+				return this.mouseEnabled
+			},
 			infoText(){
 				
 			}
@@ -135,17 +131,23 @@ export default defineComponent({
 			this.draw()
 		}
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
-				if(action.type !== "poolPlayTurn" && action.type !== "poolSetHandBall" && action.type !== "poolSelectPocket" 
-					&& action.type !== "poolSetHandBallFail" && action.type !== "poolGameEnded"){					
-					return
-				}
-				this.resetInstanceVariables()
-				this.createTableSnapshot(action)
-				if(!this.isDocumentVisible) {								
-					return
-				}				
-				this.produceTurns(action)
-				this.draw()		
+			if(action.type ==="poolUpdate"){
+				this.cue.image.canvasRotationAngle = action.payload.pool.cue.angle
+				this.cue.angle = action.payload.pool.cue.angle
+				this.draw()
+				return
+			}
+			if(action.type !== "poolPlayTurn" && action.type !== "poolSetHandBall" && action.type !== "poolSelectPocket" 
+				&& action.type !== "poolSetHandBallFail" && action.type !== "poolGameEnded"){					
+				return
+			}
+			this.resetInstanceVariables()
+			this.createTableSnapshot(action)
+			if(!this.isDocumentVisible) {								
+				return
+			}				
+			this.produceTurns(action)
+			this.draw()		
 		})
 	},
 	beforeUnmount() {
@@ -158,11 +160,9 @@ export default defineComponent({
 			this.handBall = false
 			this.selectedPocket = null
 			this.pocketSelection = false
-			this.cue.force = 0
-		//	this.cue.image.visible = false
+			this.cue.force = 0	
 			this.cue.position = this.cueBall.position
-			this.resultSnapshot = null
-			
+			this.resultSnapshot = null			
 		},
 		consumeTurns(){
 			if(this.turnQueue.turns.length === 0 ){			
@@ -179,8 +179,7 @@ export default defineComponent({
 			const turn:ITurn = this.turnQueue.turns.splice(0, 1)[0]			
 			console.log("Starting to consume turn "+JSON.stringify(turn))
 			if(turn.shootBall){
-				console.log("shoot ball")
-				this.shootingBall = true
+				console.log("shoot ball")				
 				this.firstTurnPlayed = true
 				this.shootBall(turn).then(() => {
 					console.log("shoot ball done")
@@ -188,7 +187,7 @@ export default defineComponent({
 					this.cue.force = 0
 					const timeout = this.isMyTurn()? 0 : 1500
 					this.unblockQueue(timeout)
-					this.shootingBall = false
+					this.playingTurn = false
 				})
 			}
 			else if(turn.setHandBall){
@@ -445,10 +444,9 @@ export default defineComponent({
 				return
 			}
 			this.renderingContext.translate(component.position.x, component.position.y)
-			if(image.canvasRotationAngle){
+			if(image.canvasRotationAngle){				
 				this.renderingContext.rotate(image.canvasRotationAngle)
-			}
-		
+			}		
 			//void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 			if(!image.canvasDestination){
 				image.canvasDestination = <IVector2> {x:0, y:0}
@@ -468,9 +466,9 @@ export default defineComponent({
 			}
 			
 			if(!this.isMyTurn() && component.hasOwnProperty('force')){
-				this.renderingContext.drawImage(image.image, 1430, 0, 100, 22,  image.canvasDestination.x+825, image.canvasDestination.y,88, 10)
+				this.renderingContext.drawImage(image.image, 1430, 0, 100, 22,  image.canvasDestination.x+825, image.canvasDestination.y, 88, 10)
 			}else {
-			 this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
+			 	this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
 			}
 			this.renderingContext.resetTransform()
 		},
@@ -486,7 +484,7 @@ export default defineComponent({
 				this.repaintGameEnd()
 			}
 			this.repaintNames()
-			if(!this.handBall){
+			if(!this.handBall && !this.playingTurn){
 				this.repaintComponent(this.cue)
 			}
 			if(this.handBall && this.isMyTurn() ){
@@ -497,11 +495,9 @@ export default defineComponent({
 				const highLightPocket = this.selectedPocket === null ? 0: this.selectedPocket				
 				this.repaintPocketSelection(highLightPocket)
 				this.renderingContext.font = "bolder 16px Arial"
-				this.renderingContext.fillText("Click to select pocket", 400, 35)
-				this.cue.image.visible = false
+				this.renderingContext.fillText("Click to select pocket", 400, 35)				
 			}else if(this.selectedPocket !==null){
 				this.repaintPocketSelection(this.selectedPocket)				
-				this.cue.image.visible = true
 			}
 			this.renderingContext.fillStyle = 'black';
 			//this.repaintTableParts()
@@ -628,8 +624,7 @@ export default defineComponent({
 			if (this.isDocumentVisible()) {			
 				clearInterval(cueForceInterval)
 				clearInterval(collisionCheckInterval)
-				this.createTableFromSnapShot()
-				this.setupMouseAndCo()
+				this.createTableFromSnapShot()				
 				this.clearTurnQueue()
 				this.unblockQueue(0)
 				this.draw()
@@ -638,10 +633,7 @@ export default defineComponent({
 				clearInterval(cueForceInterval)			
 				clearInterval(collisionCheckInterval)
 			}			
-		},
-		setupMouseAndCo(){
-		
-		},
+		},		
 		clearTurnQueue(){
 			//this.turnQueue.blocked = true
 			this.turnQueue.turns.splice(0, this.turnQueue.turns.length)
@@ -655,7 +647,7 @@ export default defineComponent({
 			}
 			let table = this.resultSnapshot.payload.table
 			let pool = this.resultSnapshot.payload.pool
-			this.shootingBall = false
+			this.playingTurn = false
 			this.updatePocketedBalls(table.playerABalls)
 			this.updatePocketedBalls(table.playerBBalls, false)
 			this.updateRemainingBallPositions(table.remainingBalls, this.ballsRemaining)	
@@ -836,8 +828,7 @@ export default defineComponent({
 				return
 			}
 			this.mouseCoordsTemp = <IVector2> {x:event.offsetX, y: event.offsetY}
-			if(this.pocketSelection){
-				
+			if(this.pocketSelection){				
 				this.selectedPocket = this.getClosestPocket(event)				
 				this.draw()
 				return
@@ -866,19 +857,17 @@ export default defineComponent({
 			}
 		},
 		handleAfterAnimation(){
-			console.log("handleAfterAnimation")
+			
 			return new Promise((resolve) => {
-				if(this.isMyTurn() && this.theTable.playerInTurn !== null){
-					this.cue.image.visible = true
+				if(this.isMyTurn() && this.theTable.playerInTurn !== null){					
 					this.cue.force = 0
 				}
-				this.draw()
-				console.log("handleAfterAnimation resolve")
+				this.draw()				
 				resolve("resolve after animation")
 			})
 		},
 		shootBall(turn:ITurn){		
-			return new Promise((resolve) => {
+			return new Promise((resolve) => {				
 				if(this.cue.force < 10 ){
 					this.cue.force = 10
 				}
@@ -888,12 +877,10 @@ export default defineComponent({
 				this.cue.image.canvasRotationAngle = turn.cue.angle
 				this.cue.image.canvasDestination = dimensions
 				this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
-				this.collideCueWithCueBall().then(() => {					
-					this.cue.image.visible = false				
-					this.handleCollisions().then(() => {		
-						console.log("handleAfterAnimation starting")					
-						this.handleAfterAnimation().then(() => {
-							console.log("handleAfterAnimation done")								
+				this.collideCueWithCueBall().then(() => {
+					this.playingTurn = true								
+					this.handleCollisions().then(() => {											
+						this.handleAfterAnimation().then(() => {														
 							resolve("animations done")
 						})
 					})
@@ -909,16 +896,14 @@ export default defineComponent({
 				}, 145)
 			})
 		},
-		handleCollisions(){	
-			console.log("handleCollisions starting")		
+		handleCollisions(){						
 			return new Promise((resolve) => {				
 					collisionCheckInterval = setInterval(() => {					
 					this.updateBallProperties()
 					this.handleBallCollisions()
 					this.draw()
 					if(!this.isAnyBallMoving()){	
-						clearInterval(collisionCheckInterval)
-						console.log("handleCollisions done")
+						clearInterval(collisionCheckInterval)						
 						resolve("collisions checked")
 					}
 			}, 25)
@@ -1180,8 +1165,8 @@ export default defineComponent({
 			let adjacent = this.mousePoint.x - this.cueBall.position.x
 			const tempAngle = Math.atan2(opposite, adjacent)
 			this.cue.angle = tempAngle
-			this.cue.canvasRotationAngle = tempAngle			
-			this.t(this.sp, 1000, this.cue, this.cueBall, this.canvas)
+			this.cue.image.canvasRotationAngle = tempAngle				
+			this.t(this.sp, 1000, this.cue, this.cueBall, this.canvas)			
 		},
 		updateCueForce(){
 			this.cue.force += 10		

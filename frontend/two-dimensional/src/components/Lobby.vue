@@ -327,8 +327,7 @@ export default defineComponent({
 							//this.$router.push({ name: 'Table', id:data.table.id})
 						})
 						break
-					case "POOL_UPDATE":
-					
+					case "POOL_UPDATE":					
 						this.$store.dispatch("poolUpdate", data)
 						break
 					case "POOL_SELECT_POCKET":

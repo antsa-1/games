@@ -18,7 +18,7 @@ export interface IEightBallGame {
     pocketSelection: boolean,
     selectedPocket: IPocket,
     turnQueue: ITurnQueue,
-    shootingBall: boolean,
+    playingTurn: boolean,
 
 }
 export interface ITurnQueue {

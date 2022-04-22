@@ -40,7 +40,7 @@ export const poolMixin = {
         },
         sp(cue, cueBall, canvas){
 			const obj ={ title:"POOL_UPDATE", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}
-		//	this.user.webSocket.send(JSON.stringify(obj))
+			this.user.webSocket.send(JSON.stringify(obj))
         },
 		prepareHandBall(object){
 			const {image, color, ...object2} = object			
