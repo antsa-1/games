@@ -162,11 +162,17 @@ public class EightBallRuleBase {
 
 	private void updatePositionsAndApplyFriction(PoolTable table) {
 		for (Ball ball : table.getRemainingBalls()) {
+			if (ball.isInPocket()) {
+				ball.getVelocity().x = 0;
+				ball.getVelocity().y = 0;
+				continue;
+			}
 			Vector2d changeInPosition = VectorUtil.multiply(ball.getVelocity(), DELTA);
 			Vector2d currentPosition = ball.getPosition();
 			ball.setPosition(VectorUtil.addVectors(changeInPosition, currentPosition));
 			Vector2d newVelocity = VectorUtil.multiply(ball.getVelocity(), FRICTION);
 			ball.setVelocity(newVelocity);
+
 		}
 	}
 

@@ -2,6 +2,7 @@
 <template>
 	<div class="row">
 		<div class="col">
+			
 			<button v-if="resignButtonVisible" :disabled ="resignButtonDisabled" @click="resign" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
 				Resign 
 			</button>			
@@ -19,6 +20,7 @@
 			<div v-else class="text-danger"> In turn: {{theTable.playerInTurn?.name}}</div>			
 		</div>
 	</div>
+	
 	<div class="col-xs-12 col-sm-8">
 			 <canvas id="canvas" width="400" height="400" style="border:1px solid" :class="{'bg-secondary':theTable.playerInTurn ==null}" ></canvas>
     	</div>
@@ -46,7 +48,7 @@ let cueForceInterval = undefined
 let collisionCheckInterval = undefined
 
 const DELTA = 1/8
-let showAnimation = true
+let promises = []
 
 export default defineComponent({
 	components: { Chat },
@@ -75,10 +77,13 @@ export default defineComponent({
 		turnQueueLength: {
       		handler(newValue, oldVal) {
 				if(newValue > oldVal){
-					console.log("Added turn in the queue, turns:"+this.turnQueue.turns.length)
+					console.log("Added turn in the queue, turns:"+newValue+ " length:"+ this.turnQueue.turns.length)
 					this.consumeTurns()
-				}else{
-					console.log("Removed turn from queue, turns:"+this.turnQueue.turns.length)
+				}else if(newValue === oldVal){
+					console.log("what happend same vals:"+newValue+ " length:"+ this.turnQueue.turns.length)
+				}
+				else{
+					console.log("Removed turn from queue, turns:"+newValue +" length:"+this.turnQueue.turns.length)
 				}
 			}
     	},
@@ -105,13 +110,13 @@ export default defineComponent({
     	})
 	},
 	computed: {
-			turnQueueLength(){
-				
+			turnQueueLength(){				
 				return this.turnQueue.turns.length
 			},
 			mouseEnabled(){
 				const playerInTurn = this.$store.getters.playerInTurn
 				if(!playerInTurn){
+					console.log("mouse disabled no playerInTurn")
 					return false
 				}
 				return this.$store.getters.playerInTurn.name === this.userName && this.poolTable.mouseEnabled
@@ -123,25 +128,22 @@ export default defineComponent({
 	},
 	mounted() {	
 		this.initTable()
-
 		if(this.watch === "1"){	
 			this.clearTurnQueue()	
 			this.createTableFromSnapShot()
+			this.unblockQueue()
 			this.draw()
 		}
-
 		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
 				if(action.type !== "poolPlayTurn" && action.type !== "poolSetHandBall" && action.type !== "poolSelectPocket" 
-					&& action.type !== "poolSetHandBallFail" && action.type !== "poolGameEnded"){
-					
+					&& action.type !== "poolSetHandBallFail" && action.type !== "poolGameEnded"){					
 					return
 				}
 				this.resetInstanceVariables()
 				this.createTableSnapshot(action)
 				if(!this.isDocumentVisible) {								
 					return
-				}
-				
+				}				
 				this.produceTurns(action)
 				this.draw()		
 		})
@@ -166,7 +168,7 @@ export default defineComponent({
 			if(this.turnQueue.turns.length === 0 ){			
 				const enabled = this.isMyTurn() ? true: false
 				this.poolTable.mouseEnabled = enabled
-				console.log("TurnQueue is empty, mouseEnabled")
+				console.log("TurnQueue is empty, mouseEnabled "+this.poolTable.mouseEnabled)
 				return
 			}
 			if(this.turnQueue.blocked){
@@ -177,11 +179,11 @@ export default defineComponent({
 			const turn:ITurn = this.turnQueue.turns.splice(0, 1)[0]			
 			console.log("Starting to consume turn "+JSON.stringify(turn))
 			if(turn.shootBall){
-				
+				console.log("shoot ball")
 				this.shootingBall = true
 				this.firstTurnPlayed = true
 				this.shootBall(turn).then(() => {
-					
+					console.log("shoot ball done")
 					this.selectedPocket = null
 					this.cue.force = 0
 					const timeout = this.isMyTurn()? 0 : 1500
@@ -205,12 +207,13 @@ export default defineComponent({
 				this.cueBall.image.visible = true
 				this.unblockQueue(0)
 			}else if(turn.lastTurn){
-				
+				console.log("Last turn consumed")
 				this.theTable.playerInTurn = null
 				this.clearTurnQueue()
 				this.turnQueue.blocked = true
 				const message:IChatMessage = {from:"System",text:turn.winner + " won " + "( "+turn.winReason.toLowerCase() +" )"}
-				this.$store.dispatch("chat", message)				
+				this.$store.dispatch("chat", message)
+				this.draw()		
 			}
 			else if(turn.askPocketSelection){
 				
@@ -224,9 +227,7 @@ export default defineComponent({
 			}	
 		},
 		unblockQueue(timeout:number = 0){
-			this.turnQueue.blocked = false			
-			this.cue.image.visible = true
-			
+			this.turnQueue.blocked = false
 			this.draw()
 			setTimeout(() => {
 				this.consumeTurns()	
@@ -240,12 +241,16 @@ export default defineComponent({
 					this.createChangePlayerTurn(action)
 				}else if(action.payload.pool.turnResult === "HANDBALL"){
 					this.createChangePlayerTurn(action)
-					this.createAskHandBallPositionTurn(action)
+					if(!this.isMe(action.payload.pool.whoPlayed)){
+						this.createAskHandBallPositionTurn(action)
+					}					
 				}else if(action.payload.pool.turnResult === "ASK_POCKET_SELECTION"){	
 					if(this.isTurnChange(action.payload.table.playerInTurn)){
 						this.createChangePlayerTurn(action)						
 					}
-					this.createAskPocketSelectionTurn(action)
+					if(this.isMe(action.payload.table.playerInTurn.name)){
+						this.createAskPocketSelectionTurn(action)
+					}
 				}
 			}else if(action.type === "poolSetHandBallFail"){
 				this.createAskHandBallPositionTurn(action)
@@ -255,7 +260,9 @@ export default defineComponent({
 					if(this.isTurnChange(action.payload.table.playerInTurn)){
 						this.createChangePlayerTurn(action)						
 					}
-					this.createAskPocketSelectionTurn(action)
+					if(this.isMe(action.payload.table.playerInTurn.name)){
+						this.createAskPocketSelectionTurn(action)
+					}
 				}
 			}else if(action.type === "poolSelectPocket"){	
 				this.createSelectPocketTurn(action)
@@ -268,6 +275,7 @@ export default defineComponent({
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askHandBallPosition:true, askPocketSelection:false, setSelectedPocket: null, setHandBall:false, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}
 			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
+			console.log("produced: createAskHandBallPositionTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createAskPocketSelectionTurn(action):ITurn{
@@ -277,6 +285,7 @@ export default defineComponent({
 			let turn:ITurn = {changePlayer:false, turnResult:action.payload.pool.turnResult, askPocketSelection:true, setSelectedPocket: null, setHandBall:null,nextTurnPlayer:nextTurnPlayer, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}
 			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
+			console.log("produced: createAskPocketSelectionTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createSelectPocketTurn(action):ITurn{		
@@ -284,6 +293,7 @@ export default defineComponent({
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askPocketSelection:false, setSelectedPocket: selectedPocket, setHandBall:null, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}
 			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
+			console.log("produced: createSelectPocketTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createLastTurn(action):ITurn{
@@ -292,13 +302,15 @@ export default defineComponent({
 			let turn:ITurn = { askPocketSelection:false, setSelectedPocket: null, setHandBall:null, lastTurn:true,winner:winner, winReason:turnResult,whoPlayed:action.payload.pool.whoPlayed}
 			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
+		
+			console.log("produced: createLastTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createChangePlayerTurn(action):ITurn{
 			let player:IPlayer = action.payload.table.playerInTurn
-			let turn:ITurn = {changePlayer:true, nextTurnPlayer:player, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}
-			
+			let turn:ITurn = {changePlayer:true, nextTurnPlayer:player, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
+			console.log("produced: createChangePlayerTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createShootBallTurn(action):ITurn{
@@ -308,6 +320,7 @@ export default defineComponent({
 			let turn:ITurn = {shootBall:true, cue:cue, turnResult:action.payload.pool.turnResult, lastTurn: false, whoPlayed:action.payload.pool.whoPlayed}
 			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
+			console.log("produced: createShootBallTurn"+this.turnQueue.turns.length)
 			return turn	
 		},
 		createPoolSetHandBallTurn(action):ITurn{
@@ -322,6 +335,7 @@ export default defineComponent({
 			let turn:ITurn = {cue:cueTemp,cueBall:cueBallTemp,turnResult:action.payload.pool.turnResult,setHandBall:true,nextTurnPlayer:action.payload.table.playerInTurn, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}		
 			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
+			console.log("produced: createPoolSetHandBallTurn"+this.turnQueue.turns.length)
 			return turn			
 		},
 		resize(){ 
@@ -382,6 +396,7 @@ export default defineComponent({
 			}	
 		},
 		movePocketedBallToEdgeOfTable(ball:IBall){
+			
 			if(ball.number === 8 || ball.number === 0){
 				return
 			}
@@ -420,7 +435,7 @@ export default defineComponent({
 		},
 
 		draw(){
-			if(showAnimation && this.isDocumentVisible()){
+			if(this.isDocumentVisible()){
 				requestAnimationFrame(this.repaintAll)				
 			}
 		},
@@ -597,7 +612,7 @@ export default defineComponent({
 			this.ballsRemaining.push(this.cueBall)
 			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true, useAnimation:true}
 			
-			showAnimation = true
+			//showAnimation = true
 		
 			if(!(this.watch === "1")){
 				this.removeMouseListeners()
@@ -609,18 +624,18 @@ export default defineComponent({
 			return document.visibilityState === 'visible'
 		},
 		onVisibilityChange(){
-			
-			if (this.isDocumentVisible()) {					
-				showAnimation = true
-				this.clearTurnQueue()
+			console.log("visibility change")
+			if (this.isDocumentVisible()) {			
+				clearInterval(cueForceInterval)
+				clearInterval(collisionCheckInterval)
 				this.createTableFromSnapShot()
 				this.setupMouseAndCo()
+				this.clearTurnQueue()
+				this.unblockQueue(0)
 				this.draw()
-				this.turnQueue.blocked = false
 			} else {
 				this.turnQueue.blocked = true	
-				showAnimation = false
-				//this.mouseEnabled = false				
+				clearInterval(cueForceInterval)			
 				clearInterval(collisionCheckInterval)
 			}			
 		},
@@ -628,12 +643,12 @@ export default defineComponent({
 		
 		},
 		clearTurnQueue(){
-			this.turnQueue.blocked = true
+			//this.turnQueue.blocked = true
 			this.turnQueue.turns.splice(0, this.turnQueue.turns.length)
-			this.turnQueue.blocked = false
+			//this.turnQueue.blocked = false
 		},
 		createTableFromSnapShot(){
-			
+			console.log("create table from snapshot")
 			if(!this.resultSnapshot)	{
 				//No events yet
 				return
@@ -749,24 +764,23 @@ export default defineComponent({
 				return
 			}
 			
-			if(!this.mouseEnabled ){
+			if(!this.poolTable.mouseEnabled ){
 				return
 			}
 			
 			if(this.pocketSelection){			
 				return
 			}
-			else if(this.mouseEnabled && ! this.handBall){
-				this.cue.force = 0
-				
+			else if(this.poolTable.mouseEnabled && ! this.handBall){
+				this.cue.force = 0				
 				cueForceInterval = setInterval(this.updateCueForce, 50)
 			}
 		},	
 	
 		handleMouseUp(event:MouseEvent){
-			clearInterval(cueForceInterval)
 			
-			if(!this.mouseEnabled){
+			
+			if(!this.poolTable.mouseEnabled){
 				return
 			}
 			
@@ -781,7 +795,7 @@ export default defineComponent({
 				this.hb(event.offsetX, event.offsetY, this.canvas)
 			}			
 			if(!this.handBall){
-				
+				clearInterval(cueForceInterval)
 				this.sendTurn(this.cue, this.cueBall, this.canvas)
 			}
 		},
@@ -818,7 +832,7 @@ export default defineComponent({
 			return true
 		},
 		handleMouseMove(event:MouseEvent){
-			if(! this.mouseEnabled){
+			if(! this.poolTable.mouseEnabled){
 				return
 			}
 			this.mouseCoordsTemp = <IVector2> {x:event.offsetX, y: event.offsetY}
@@ -852,43 +866,37 @@ export default defineComponent({
 			}
 		},
 		handleAfterAnimation(){
+			console.log("handleAfterAnimation")
 			return new Promise((resolve) => {
 				if(this.isMyTurn() && this.theTable.playerInTurn !== null){
-				//	this.mouseEnabled = true
 					this.cue.image.visible = true
 					this.cue.force = 0
-				}							
-				if(!this.isOngoingGame()){		
-					showAnimation = false
 				}
 				this.draw()
+				console.log("handleAfterAnimation resolve")
 				resolve("resolve after animation")
 			})
 		},
 		shootBall(turn:ITurn){		
 			return new Promise((resolve) => {
-				//this.mouseEnabled = false
-				
 				if(this.cue.force < 10 ){
 					this.cue.force = 10
 				}
-				let dimensions: IVector2 = {x: -CUE_MAX_WIDTH-BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
+				let dimensions: IVector2 = {x: -CUE_MAX_WIDTH - BALL_DIAMETER/2, y: -CUE_MAX_HEIGHT /2}
 				this.cue.force = turn.cue.force
 				this.cue.angle = turn.cue.angle
 				this.cue.image.canvasRotationAngle = turn.cue.angle
 				this.cue.image.canvasDestination = dimensions
 				this.cueBall.velocity = <IVector2>{x : this.cue.force * Math.cos(this.cue.image.canvasRotationAngle),y: this.cue.force * Math.sin(this.cue.image.canvasRotationAngle)}
-		
-				this.collideCueWithCueBall().then(() => {
-					
+				this.collideCueWithCueBall().then(() => {					
 					this.cue.image.visible = false				
-					this.handleCollisions().then(() => {
-							
+					this.handleCollisions().then(() => {		
+						console.log("handleAfterAnimation starting")					
 						this.handleAfterAnimation().then(() => {
-							
+							console.log("handleAfterAnimation done")								
 							resolve("animations done")
-						})					
-					})					
+						})
+					})
 				})
 			})
 		},
@@ -902,6 +910,7 @@ export default defineComponent({
 			})
 		},
 		handleCollisions(){	
+			console.log("handleCollisions starting")		
 			return new Promise((resolve) => {				
 					collisionCheckInterval = setInterval(() => {					
 					this.updateBallProperties()
@@ -909,15 +918,19 @@ export default defineComponent({
 					this.draw()
 					if(!this.isAnyBallMoving()){	
 						clearInterval(collisionCheckInterval)
+						console.log("handleCollisions done")
 						resolve("collisions checked")
 					}
 			}, 25)
 			})
 		},
 		updateBallProperties(){
+			
 			for(let i = 0;i <this.ballsRemaining.length; i++){
 				let ball:IBall = this.ballsRemaining[i]
+			//	console.log("updateBallProperties ball:"+ball.number +" inPocket:"+ball.inPocket)
 				if(ball.inPocket){
+					ball.velocity = <IVector2> {x: 0, y: 0}
 					continue
 				}
 				ball.position.x += ball.velocity.x * DELTA
@@ -966,12 +979,14 @@ export default defineComponent({
 			for (let i = 0; i < this.ballsRemaining.length; i++){
 				const ball:IBall = this.ballsRemaining[i]
 				if(this.isMoving(ball) && !ball.inPocket){
+					
 					this.checkAndHandleTableCollision(ball)
 				}
 				for (let j = i + 1; j < this.ballsRemaining.length; j++){
 					const firstBall:IBall = this.ballsRemaining[j]
 					const secondBall:IBall = this.ballsRemaining[i]
-					if(firstBall.inPocket || secondBall.inPocket){									
+					if(firstBall.inPocket || secondBall.inPocket){	
+					//	console.log("handleBallCollisions 33")							
 						continue
 					}
 					if(this.isMoving(firstBall) || this.isMoving(secondBall) ){
@@ -1010,33 +1025,27 @@ export default defineComponent({
 			v2nTag = <IVector2> {x: unitNormalVector.x * v2nTag, y:unitNormalVector.y * v2nTag}
 			const v2tTag = <IVector2> {x: unitTangentVector.x * v2t, y:unitTangentVector.y * v2t}
 			componentA.velocity = <IVector2> { x: (v1nTag.x + v1tTag.x) , y: (v1nTag.y + v1tTag.y) }
-			componentB.velocity = <IVector2> { x: (v2nTag.x + v2tTag.x) , y: (v2nTag.y + v2tTag.y) }
-	
+			componentB.velocity = <IVector2> { x: (v2nTag.x + v2tTag.x) , y: (v2nTag.y + v2tTag.y) }	
 		},
+
 		isMoving(component:IPoolComponent){
 			if(!component)
 			return false
 			return component.velocity.x !== 0 || component.velocity.y !==0
 		},
-		checkAndHandleTableCollision(ball:IBall){
-		
-			if(this.isBallInMiddleArea(ball)){
-			
+
+		checkAndHandleTableCollision(ball:IBall){		
+			if(this.isBallInMiddleArea(ball)){			
 				return
-			}else if(this.isTableTopBoundry(ball) ){
-				
+			}else if(this.isTableTopBoundry(ball) ){				
 				ball.velocity.y = Math.abs(ball.velocity.y)
-			}else if(this.isTableBottomBoundry(ball)){
-			
+			}else if(this.isTableBottomBoundry(ball)){			
 				ball.velocity.y = -Math.abs(ball.velocity.y)
-			}else if(this.isTableLeftBoundry(ball) ){
-				
+			}else if(this.isTableLeftBoundry(ball) ){				
 				ball.velocity.x = Math.abs(ball.velocity.x)
-			}else if(this.isTableRightBoundry(ball) ){
-			
+			}else if(this.isTableRightBoundry(ball) ){			
 				ball.velocity.x = -Math.abs(ball.velocity.x)
-			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){
-				
+			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){			
 			
 			}else{
 				const pocket:IPocket = this.checkIfGoesToPocket(ball)
@@ -1044,12 +1053,12 @@ export default defineComponent({
 					this.putBallInMiddleOfPocket(ball, pocket)
 					setTimeout(() => {
 						this.movePocketedBallToEdgeOfTable(ball)
-					}, 2500)
+						this.draw()
+					}, 1500)
 					
 					return 
 				}
 			}
-			//this.updatePositionAndVelocity(ball)
 		},
 		updatePositionAndVelocity(ball:IBall){
 			ball.position.x += ball.velocity.x * DELTA
@@ -1062,13 +1071,11 @@ export default defineComponent({
 				const pocket:IPocket = this.poolTable.pockets[i]				
 				if(this.isPathwayBorderCollision(pocket.pathwayRight, ball, i)){					
 					let reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayRight, ball)
-					
 					ball.velocity = reflectionVector
 					return true
 				} else if(this.isPathwayBorderCollision(pocket.pathwayLeft, ball, i)){
 					let reflectionVector = this.calculateBallVelocityOnPathwayBorderCollision(pocket.pathwayLeft, ball)
 					ball.velocity = reflectionVector
-				
 					return true
 				}				
 			}
@@ -1089,10 +1096,8 @@ export default defineComponent({
 		isPathwayBorderCollision(p:IPathWayBorder, ball:IBall){
 			// https://stackoverflow.com/questions/1073336/circle-line-segment-collision-detection-algorithm  -> answer starting  "No one seems to consider projection ..."			
 			if(this.isBallInMiddleArea(ball)){
-				
 				return false
 			}
-		
 			const a:IVector2 = p.top
 			const b:IVector2 = p.bottom
 			const c:IVector2 = ball.position
@@ -1110,7 +1115,6 @@ export default defineComponent({
 			if(!distance){
 				distance = Math.sqrt(this.hypot2(c, d))
 			}
-		
 			return distance <= ball.radius			
 		},
 		isBallInMiddleArea(ball:IBall){
@@ -1129,29 +1133,34 @@ export default defineComponent({
 		projectVectorOnVector(vectorA:IVector2, vectorB:IVector2){
 			const scalar = this.dotProduct(vectorA, vectorB) / this.dotProduct(vectorB, vectorB)
 			return <IVector2>{x: scalar * vectorB.x, y: scalar * vectorB.y}
-		},			
+		},
+
 		calculateLength(vector:IVector2){
 			// = same as magnitude of Vector
 			const length = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2))			
 			return length
 		},
+
 		calculateVectorLength(component:IPoolComponent) :IPoolComponent {
 			//Magnitude
-			const length = Math.sqrt((Math.pow(component.velocity.x, 2) + Math.pow(component.velocity.y, 2)))			
-			if(length < 5){				
+			const length = Math.sqrt((Math.pow(component.velocity.x, 2) + Math.pow(component.velocity.y, 2)))					
+			if(length < 5){
 				component.velocity = <IVector2> {x: 0, y: 0}
-			}
+			}			
 			return component
 		},
+
 		multiplyVector(vector:IVector2, scalar:number ): IVector2{
 			return <IVector2>{ x: vector.x * scalar, y: vector.y * scalar}
 		},
+
 		addVectors(vectorA:IVector2, vectorB: IVector2 ): IVector2{
 			return <IVector2>{ x: vectorA.x + vectorB.x, y: vectorA.y + vectorB.y}
 		},
 		subtractVectors(vectorA:IVector2, vectorB: IVector2 ): IVector2{
 			return <IVector2>{ x: vectorA.x - vectorB.x, y: vectorA.y - vectorB.y}
 		},
+
 		dotProduct(vectorA:IVector2, vectorB: IVector2 ): number{
 			return vectorA.x * vectorB.x + vectorA.y * vectorB.y
 		},
@@ -1166,31 +1175,26 @@ export default defineComponent({
 			}
 			return false
 		},
-		updateCueAngle(event:MouseEvent){
-			
+		updateCueAngle(event:MouseEvent){			
 			let opposite = this.mousePoint.y - this.cueBall.position.y
 			let adjacent = this.mousePoint.x - this.cueBall.position.x
 			const tempAngle = Math.atan2(opposite, adjacent)
 			this.cue.angle = tempAngle
-			this.cue.canvasRotationAngle = tempAngle
-			
+			this.cue.canvasRotationAngle = tempAngle			
 			this.t(this.sp, 1000, this.cue, this.cueBall, this.canvas)
 		},
 		updateCueForce(){
-		//	
-			this.cue.force += 10
+			this.cue.force += 10		
 			this.cue.image.canvasDestination.x  -= 5
 			this.draw()
-			//
 			if(this.cue.force >= 250){
 				clearInterval(cueForceInterval)
-			//	
+				this.poolTable.mouseEnabled = false
 				this.sendTurn(this.cue, this.cueBall, this.canvas)
 			}
 		},
 		updatePointerLine(event:MouseEvent){
-			if(!event){
-			
+			if(!event){			
 				return
 			}
 			const cueBall = this.cueBall
@@ -1232,6 +1236,7 @@ export default defineComponent({
 			}
 			return -4
 		},
+
 		calculateRackColumn(i){			
 			if(i===1){
 				return 1
@@ -1245,8 +1250,8 @@ export default defineComponent({
 			}
 			return 5
 		},
-		repaintTableParts(poolTable:IPoolTable){
-		
+
+		repaintTableParts(poolTable:IPoolTable){		
 			this.renderingContext.moveTo(this.poolTable.leftPart.a, this.poolTable.leftPart.b)
 				this.renderingContext.lineTo(this.poolTable.leftPart.a, this.poolTable.leftPart.c)			
 				this.renderingContext.stroke()
@@ -1272,6 +1277,7 @@ export default defineComponent({
 				this.renderingContext.stroke()
 				this.renderingContext.closePath()
 		},
+
 		repaintPockets(){
 			this.renderingContext.fillStyle = 'red';
 			this.renderingContext.lineWidth = 1;
@@ -1306,6 +1312,7 @@ export default defineComponent({
 			this.renderingContext.closePath();
 			this.renderingContext.fill()
 		},
+
 		repaintPathways(){
 			if(this.mouseCoordsTemp){
 					this.renderingContext.fillStyle = 'black';
@@ -1327,12 +1334,14 @@ export default defineComponent({
 					this.renderingContext.closePath()			
 				}
 		},
+
 		repaintNames(){
 			this.renderingContext.font = "bolder 16px Arial";
 			this.renderingContext.fillStyle = "black"
 			this.renderingContext.fillText(this.theTable.playerA.name, this.canvas.width * 0.10, 20)
 			this.renderingContext.fillText(this.theTable.playerB.name, this.canvas.width * 0.55, 20)
 		},
+		
 		repaintPocketSelection(selection:number){
 			this.renderingContext.fillStyle = 'blue';
 			this.renderingContext.lineWidth = 1
