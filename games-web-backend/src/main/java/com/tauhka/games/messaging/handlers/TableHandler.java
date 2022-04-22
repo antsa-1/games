@@ -1,7 +1,7 @@
 package com.tauhka.games.messaging.handlers;
 
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER;
-import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_CONNECT_FOUR_RANKING;
+import static com.tauhka.games.core.util.Constants.*;
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_ID;
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_TICTACTOE_RANKING;
 import static com.tauhka.games.core.util.Constants.SYSTEM;
@@ -66,7 +66,7 @@ public class TableHandler {
 			user.setName(OLAV_COMPUTER);
 			user.setRankingTictactoe(OLAV_COMPUTER_TICTACTOE_RANKING);
 			user.setRankingConnectFour(OLAV_COMPUTER_CONNECT_FOUR_RANKING);
-			user.setRankingEightBall(null);
+			user.setRankingEightBall(OLAV_COMPUTER_EIGHT_BALL_RANKING);
 			user.setId(UUID.fromString(OLAV_COMPUTER_ID));
 			table.joinTableAsPlayer(user);
 			Message message_ = new Message();

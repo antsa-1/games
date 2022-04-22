@@ -54,8 +54,8 @@ public class PoolTableHandler {
 		updateMessage.setTitle(MessageTitle.POOL_UPDATE);
 		PoolMessage updateCueMessage = new PoolMessage();
 		updateCueMessage.setCue(message.getPoolMessage().getCue());
-		updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
-		updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
+		//updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
+		//updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
 		updateMessage.setPoolMessage(updateCueMessage);
 		return updateMessage;
 	}
