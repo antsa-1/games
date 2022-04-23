@@ -7,7 +7,7 @@ export interface IPoolComponent {
 }
 export interface IEightBallGame {
     canvas: HTMLCanvasElement,
-    ballsRemaining: Array<IBall>[],
+    balls: Array<IBall>[],
     resultSnapshot: any, //action
     cueBall: IBall,
     cue: ICue,

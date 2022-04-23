@@ -57,7 +57,7 @@ export default defineComponent({
 	data():IEightBallGame{
 		return{
 				canvas: undefined,	
-				ballsRemaining : [],
+				balls : [],
 				cueBall: undefined,
 				cue: undefined,
 				poolTable: undefined,
@@ -357,9 +357,9 @@ export default defineComponent({
 				let	ball:IBall= comparisonList.find((ball) => ball.number === serverBall.number)
 				this.updateBallPropertiesWithoutFriction(ball, serverBall.position)
 			})
-		//	this.ballsRemaining = this.ballsRemaining.filter(balla => !serverBalls.find(ball => ball.number === balla.number ))
-		//	 var temppi  = this.ballsRemaining.filter(balla => serverBalls.find(ball => ball.number === balla.number ))
-		//	 this.ballsRemaining = temppi
+		//	this.balls = this.balls.filter(balla => !serverBalls.find(ball => ball.number === balla.number ))
+		//	 var temppi  = this.balls.filter(balla => serverBalls.find(ball => ball.number === balla.number ))
+		//	 this.balls = temppi
 			
 		},
 		updateBallPropertiesWithoutFriction(ball:IBall, position:IVector2){
@@ -379,7 +379,7 @@ export default defineComponent({
 			for(let i = 0; i < ballsInPocket.length; i++){
 				let balla = ballsInPocket[i]
 				
-				let realBall:IBall = this.ballsRemaining.find(remainingBall => remainingBall.number === balla.number)
+				let realBall:IBall = this.balls.find(remainingBall => remainingBall.number === balla.number)
 				if(!realBall){
 					continue
 				}			
@@ -477,8 +477,8 @@ export default defineComponent({
 			//Table
 			this.repaintComponent(this.poolTable)
 			this.repaintComponent(this.cueBall)
-			for( let i = 0; i < this.ballsRemaining.length; i++){
-				this.repaintComponent(this.ballsRemaining[i])
+			for( let i = 0; i < this.balls.length; i++){
+				this.repaintComponent(this.balls[i])
 			}		
 			if(!this.isOngoingGame()){
 				this.repaintGameEnd()
@@ -511,7 +511,7 @@ export default defineComponent({
 		},
 		initTable() {
 			
-			this.ballsRemaining = []
+			this.balls = []
 			this.turnQueue = <ITurnQueue> {turns:[], blocked:false}	
 			let windowWidth = window.innerWidth
 			let height = window.innerHeight
@@ -603,9 +603,9 @@ export default defineComponent({
 			this.cue = <ICue> {position: cuePosition, image: cueImage, force: cueForce, angle:0}
 			for (let i = 1; i < 16; i++){
 				let ball =	this.createBall(i, this.cueBall.diameter)	
-				this.ballsRemaining.push(ball)
+				this.balls.push(ball)
 			}
-			this.ballsRemaining.push(this.cueBall)
+			this.balls.push(this.cueBall)
 			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true, useAnimation:true}
 			
 			//showAnimation = true
@@ -650,7 +650,7 @@ export default defineComponent({
 			this.playingTurn = false
 			this.updatePocketedBalls(table.playerABalls)
 			this.updatePocketedBalls(table.playerBBalls, false)
-			this.updateRemainingBallPositions(table.remainingBalls, this.ballsRemaining)	
+			this.updateRemainingBallPositions(table.remainingBalls, this.balls)	
 			this.cueBall.position = pool.cueBall.position
 			this.cueBall.velocity.x = 0
 			this.cueBall.velocity.y = 0	
@@ -810,8 +810,8 @@ export default defineComponent({
 				return false
 			}
 			//Balls
-			for (let i = 0; i < this.ballsRemaining.length; i++) {		
-				const ball:IBall = this.ballsRemaining[i]
+			for (let i = 0; i < this.balls.length; i++) {		
+				const ball:IBall = this.balls[i]
 				if(ball.number === 0){
 					continue
 				}
@@ -911,8 +911,8 @@ export default defineComponent({
 		},
 		updateBallProperties(){
 			
-			for(let i = 0;i <this.ballsRemaining.length; i++){
-				let ball:IBall = this.ballsRemaining[i]
+			for(let i = 0;i <this.balls.length; i++){
+				let ball:IBall = this.balls[i]
 			//	console.log("updateBallProperties ball:"+ball.number +" inPocket:"+ball.inPocket)
 				if(ball.inPocket){
 					ball.velocity = <IVector2> {x: 0, y: 0}
@@ -961,15 +961,15 @@ export default defineComponent({
 		},
 		
 		handleBallCollisions(){			
-			for (let i = 0; i < this.ballsRemaining.length; i++){
-				const ball:IBall = this.ballsRemaining[i]
+			for (let i = 0; i < this.balls.length; i++){
+				const ball:IBall = this.balls[i]
 				if(this.isMoving(ball) && !ball.inPocket){
 					
 					this.checkAndHandleTableCollision(ball)
 				}
-				for (let j = i + 1; j < this.ballsRemaining.length; j++){
-					const firstBall:IBall = this.ballsRemaining[j]
-					const secondBall:IBall = this.ballsRemaining[i]
+				for (let j = i + 1; j < this.balls.length; j++){
+					const firstBall:IBall = this.balls[j]
+					const secondBall:IBall = this.balls[i]
 					if(firstBall.inPocket || secondBall.inPocket){	
 					//	console.log("handleBallCollisions 33")							
 						continue
@@ -1151,8 +1151,8 @@ export default defineComponent({
 		},
 	
 		isAnyBallMoving(){
-			for (let i = 0; i< this.ballsRemaining.length; i++){				
-				let comp:IPoolComponent = this.ballsRemaining[i]
+			for (let i = 0; i< this.balls.length; i++){				
+				let comp:IPoolComponent = this.balls[i]
 				this.calculateVectorLength(comp)
 				if( comp.velocity.x !== 0 || comp.velocity.y !== 0){
 					return true
