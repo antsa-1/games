@@ -21,7 +21,7 @@ public class Tests {
 	@Test
 	public void gamePlayTest() {
 		User u = new User("test");
-		PoolTable p = new PoolTable(u, null, false);
+		PoolTable p = new PoolTable(u, null, false, false, 0);
 		User u2 = new User("best");
 		p.joinTableAsPlayer(u2);
 		PoolTurn turn = new PoolTurn();
@@ -38,15 +38,15 @@ public class Tests {
 		PoolTurn playedTurn = (PoolTurn) p.playTurn(u, poolTurn2);
 		assertSame(TurnResult.CHANGE_TURN, playedTurn.getTurnResult());
 		assertSame(16, p.getRemainingBalls().size());
-		
+
 		cue.setForce(50d);
-		cue.setAngle(-0.4011574892644093d);		
+		cue.setAngle(-0.4011574892644093d);
 		playedTurn = (PoolTurn) p.playTurn(u2, poolTurn2);
 		assertSame(TurnResult.CHANGE_TURN, playedTurn.getTurnResult());
 		assertSame(16, p.getRemainingBalls().size());
 		cue.setForce(70d);
 		cue.setAngle(-2.6109831892758124d);
 		playedTurn = (PoolTurn) p.playTurn(u, poolTurn2);
-		
+
 	}
 }

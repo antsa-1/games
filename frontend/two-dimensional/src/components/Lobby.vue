@@ -38,53 +38,50 @@
 				</div>
 				
 			</div>			
-			<div class="row">
-				
-				<table class="table" v-if="tablesExist" >
-				
-					
-						<thead>
-							<tr>							
-								<th scope="col">Type</th>
-								<th scope="col">Playing</th>
-								<th scope="col">Size</th>
-								<th scope="col">Action</th>
-							</tr>
-						</thead>
-						<tbody>						
-							<tr v-for="(table) in tables" :key="table.id" >						
-								<td v-if="table.gameMode.id<20" scope="row">
-									X.O 
-								</td>								
-								<td v-else-if="table.gameMode.id>=20 &&table.gameMode.id<30" scope="row">
-								 4x
-								</td>
-								<td v-else scope="row">
-									{{table.gameMode.name}} 
-								</td>
-								<td>
-									{{table.playerA.name}} - {{table.playerB?.name}}
-								</td>
-								<td v-if ="table.gameMode.gameNumber !== 3">
-									{{table.gameMode.x}} x {{table.gameMode.y}}
-								</td>
-								<td v-else>
-									-
-								</td>
-								<td>
-									<section v-if="!hasCreatedTable">
-										<button v-if="playButtonVisible(table)"  :disabled="!createTableButtonVisible" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
-											Play
-										</button>									
-										<button @click="watchTable(table)" v-if="table.playerA && table.playerB" type="button" class="btn btn-primary w-30 float-end">
-											Watch
-										</button>	
-									</section>
-								</td>
-							</tr>								
-						</tbody>
-					</table>
-				
+			<div class="row">				
+				<table class="table" v-if="tablesExist" >				
+					<thead>
+						<tr>
+							<th scope="col">Table</th>
+							<th scope="col">Board</th>
+							<th scope="col">Playing</th>
+							<th scope="col">Starter</th>
+							<th scope="col">Time</th>
+							<th scope="col">Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-for="(table) in tables" :key="table.id" >						
+							<td scope="row">
+								{{getTableGameShortDesc(table.gameMode.id)}}
+							</td>
+							<td>
+								{{getBoardDesc(table)}}									
+							</td>							
+							<td>
+								{{table.playerA.name}} - {{table.playerB?.name}}
+							</td>
+							<td>
+								{{table.randomizeStarter? "?": "fixed"}} 
+							</td>
+							<td>
+								{{this.getTimeControl(table)}}s
+							</td>						
+							<td>
+								<section v-if="!hasCreatedTable">
+									<button v-if="playButtonVisible(table)" :disabled="!createTableButtonVisible" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
+										Play
+									</button>
+																
+									<button @click="watchTable(table)" v-if="table.playerA && table.playerB" type="button" class="btn btn-primary w-30 float-end">
+										Watch
+									</button>
+									<span v-else-if="!this.authenticated && !playButtonVisible(table)">Requires login to play</span>
+								</section>
+							</td>
+						</tr>								
+					</tbody>
+				</table>				
 				<div v-else class="col fw-bold">
 					<span class="float-start"> 
 						No tables at the moment. 
@@ -101,41 +98,58 @@
 					<h5 class="modal-title" id="createTableModalLabel">Create table</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 				</div>
-				<div class="modal-body">
-						<form>
-							<div class="btn-group" role="group" aria-label="Select game" id="select-game">
-								<select v-model="selectedGame">
-									<option :value="0" :key="0" >
-										Select game
-									</option>
-									<option v-for="game in games" :value="game.gameId" :key="game.id">
-										{{game.name}}
-									</option>
-								</select>							
-								
-							</div>
-							<div class="mb-3" id="v-model-select-dynamic">						
-							<select v-model="selectedGameMode">
+				<div class="modal-body col-xs-12">
+					
+						<div class="" role="group" aria-label="Select game" id="select-game">
+							<select v-model="selectedGame" @change="onSelectedGameChange" >
 								<option :value="0" :key="0" >
-									Select mode
+									Select game
 								</option>
-								<option v-for="gameMode in gameModes" :value="gameMode.id" :key="gameMode.id">
-									{{gameMode.name}}
+								<option v-for="game in games" :value="game.gameId" :key="game.id">
+									{{game.name}}
 								</option>
-							</select>			
+							</select>
 						</div>
-						<div class="mb-3" id="computer_selection">
-							<input class="form-check-input mr-2" type="checkbox" id="computerSelection" @change="computerSelectionOnChanged" v-model="playAgainstComputerChecked">
-							<label class="form-check-label" for="computerSelection">Play against computer</label>							
+						<div class=" ">
+							<div v-if="selectedGame !=='0'" class="" id="v-model-select-dynamic">	
+								<select v-model="selectedGameMode" >
+									<option :value="'0'" :key="0">
+										Select variant
+									</option>
+									<option v-for="gameMode in gameModes" :value="gameMode.id" :key="gameMode.id">
+										{{gameMode.name}}
+									</option>
+								</select>
+							</div>
 						</div>
-						<div class="mb-3" id="random_starter">
-							<input class="form-check-input mr-2" type="checkbox" id="randomStarter" @change="randomStarterOnChanged" v-model="randomStarterChecked">
-							<label class="form-check-label" for="randomStarter">Random starter</label>
-						</div>
-					</form>
+							<div class="form-check " id="computer_selection">
+								<input class="" type="checkbox" id="computerSelection" @change="onComputerSelectionChange" v-model="playAgainstComputerChecked">
+								<label class="" for="computerSelection">Play against computer</label>
+							</div>
+							<div class="form-check " id="only_registered">
+								<input class="" type="checkbox" id="onlyRegistered" v-model="onlyRegistered">
+								<label class="" for="onlyRegistered">Play only against registered</label>
+							</div>
+							<div v-if="selectedGame === 3" class="form-check " id="random_starter">
+								<input class="" type="checkbox" id="randomStarter" v-model="randomStarterChecked">
+								<label class="" for="randomStarter">Random starter</label>
+							</div>
+							<div>
+							<div v-if="selectedGame === 3">
+								Time control
+								<div>				
+									<select  v-model="selectedTimeControl" @change="timeControl">
+										<option v-for="timeControl in getTimeControls()" :value="timeControl.id" :key="timeControl.id">
+											{{timeControl.seconds}} seconds
+										</option>
+									</select>
+								</div>
+							</div>
+							</div>
+						
 				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary float-start" data-bs-dismiss="modal">Close</button>
+				<div class="modal-footer justify-content-between">
+					<button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
 					<button :disabled="modalCreateTableDisabled" @click="createTable" type="button" data-bs-dismiss="modal" class="btn btn-primary">
 						Create table
 					</button>
@@ -169,9 +183,11 @@ export default defineComponent({
 			watchTableButtonDisabled:false,
 			removeTableButtonVisible:false,
 			selectedGame:"0",
-			selectedGameMode:"",
+			selectedGameMode:"0",
+			selectedTimeControl:0,
 			playAgainstComputerChecked:false,
 			randomStarterChecked:false,
+			onlyRegistered:false,
 			computerLevel:"0",
 		}
 	},
@@ -192,10 +208,12 @@ export default defineComponent({
 			}else if(this.selectedGame === 2){
 				return this.$store.getters.games.filter(game => game.gameId === 2)[0].gameModes
 			}else if(this.selectedGame === 3){
+				
 				return this.$store.getters.games.filter(game => game.gameId === 3)[0].gameModes
 			}
 		},
 		modalCreateTableDisabled(){
+			console.log("selectedGameMode="+this.selectedGameMode)
 			return this.selectedGameMode === "0"			
 		},
 		tablesExist(){
@@ -424,21 +442,50 @@ export default defineComponent({
 		},
 	
 		createTable(){
-		 	
-			const obj = { title: "CREATE_TABLE", message: this.selectedGameMode,"computer":this.playAgainstComputerChecked, randomStarter:this.randomStarterChecked}		
+			let obj = null
+			obj = {title: "CREATE_TABLE", message: this.selectedGameMode, computer:this.playAgainstComputerChecked, randomStarter:this.randomStarterChecked, onlyRegistered:this.onlyRegistered}
+		
+		 	if(this.selectedGameMode === 30){ //8-ball
+				let index = this.selectedTimeControl
+				if(!index)
+					index = 0
+				obj.timeControlIndex = index
+			}
 			this.user.webSocket.send(JSON.stringify(obj))
 			this.computerLevel = null
 			this.playAgainstComputerChecked = false
 			this.randomStarterChecked = false
+			this.selectedTimeControl = null
 		},
-		computerSelectionOnChanged(){
-			if(!this.playAgainstComputerChecked){
-				
+		getTableGameShortDesc(gameMode:number){
+			if(gameMode<20){
+				return "x.o"
+			}else if(gameMode <30){
+				return "4x"
+			}else{
+				return "Pool"
+			}
+			return "err"
+		},
+		getBoardDesc(table:ITable){
+			if(table.gameMode.gameNumber < 3){
+				return table.x +" x "+ table.y
+			}else if(table.gameMode.gameNumber === 3){
+				return "8-ball"
+			}
+			return "err"
+		},
+		onComputerSelectionChange(){
+			if(!this.playAgainstComputerChecked){				
 				this.computerLevel="0";
 			}
-		},				
-		changeSelectedGame(event){			
-			this.selectedGameMode="0"
+		},		
+		onSelectedGameChange(event){
+			if(event.target.selectedIndex === 3){ // pool			
+				this.selectedGameMode = 30///8-ball is the only choice
+				return
+			}
+			this.selectedGameMode = "0"
 		},
 		removeTable(){
 			
@@ -453,8 +500,11 @@ export default defineComponent({
 		playButtonVisible(table:ITable){
 			if(table.playerA && table.playerB){
 				return false				
-			}			
-			return true
+			}
+			if(table.registeredOnly && !this.authenticated)	{
+				return false
+			}
+			return true	
 		},
 		isOwnTable(table:ITable){
 			return	table?.playerA?.name === this.userName
@@ -467,6 +517,12 @@ export default defineComponent({
 			if(!selectedName.startsWith("Anonym")){
 				this.$router.push({ name: 'Profile', params: { selectedName: selectedName } })	
 			}
+		},
+		getTimeControls(){
+			return [{id:0, seconds:120}, {id:1, seconds:90}, {id:2, seconds:60}, {id:3, seconds:45}, {id:4, seconds:30}, {id:5, seconds:20}]
+		},
+		getTimeControl(table){
+			return this.getTimeControls()[table.timeControlIndex].seconds
 		}
 	}
 });

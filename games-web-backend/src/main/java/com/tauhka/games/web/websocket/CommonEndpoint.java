@@ -57,6 +57,7 @@ public class CommonEndpoint {
 		this.session = session;
 	}
 
+	// Factory here??
 	@OnMessage
 	public void onMessage(Message message, Session session) {
 		LOGGER.log(Level.INFO, "CommonEndpoint onMessage" + message);
@@ -74,8 +75,8 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.CREATE_TABLE) {
 				gameMessage = tableHandler.createTable(message, this);
 				sendCommonMessage(gameMessage);
-				Thread.sleep(2000);
 				if (gameMessage.getTable().isArtificialPlayerInTurn()) {
+					Thread.sleep(2000);
 					Message artMoveMessage = null;
 					if (gameMessage.getTable() instanceof PoolTable) {
 						playPoolAITurns(gameMessage);
@@ -157,7 +158,7 @@ public class CommonEndpoint {
 
 	private void playPoolAITurns(Message gameMessage) throws InterruptedException {
 		while (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
-			//Thread.sleep(20000); // 14 seconds is just a number, too long for somebody and too short for somebody.. TODO
+			// Thread.sleep(20000); // 14 seconds is just a number, too long for somebody and too short for somebody.. TODO
 			Message artMoveMessage = pooltableHandler.makeComputerMove(gameMessage.getTable());
 			sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 			if (TurnResult.isDecisive(artMoveMessage.getPoolMessage().getTurnResult())) {

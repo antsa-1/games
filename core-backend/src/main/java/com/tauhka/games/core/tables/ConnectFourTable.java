@@ -7,18 +7,23 @@ import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.Move;
 import com.tauhka.games.core.User;
 
+/**
+ * 
+ * @author antsa-1 from GitHub
+ *
+ */
 public class ConnectFourTable extends TicTacToeTable {
+	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(ConnectFourTable.class.getName());
 
-	public ConnectFourTable(User playerA, GameMode gameMode, boolean randomizeStarter) {
-		super(playerA, gameMode, randomizeStarter);
+	public ConnectFourTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex) {
+		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex);
 	}
 
 	@Override
 	public synchronized Move playTurn(User user, Object moveInObject) {
 		if (!user.equals(super.getPlayerInTurn())) {
 			throw new IllegalArgumentException("Player is not in turn in board:" + this);
-
 		}
 		Move moveIn = (Move) moveInObject;
 		GameToken[][] board = super.getBoard();

@@ -23,7 +23,7 @@ public class HorizontalEvaluations {
 		ArtificialUser b = new ArtificialUser();
 		a.setGameToken(GameToken.X);
 		GameMode mode = GameMode.getGameMode(4);
-		TicTacToeTable table = new TicTacToeTable(a, GameMode.getGameMode(4), false);
+		TicTacToeTable table = new TicTacToeTable(a, GameMode.getGameMode(4), false, false, 0);
 		table.joinTableAsPlayer(b);
 		GameToken[][] board = new GameToken[mode.getX()][mode.getY()];
 		board[4][0] = GameToken.X;
@@ -45,7 +45,7 @@ public class HorizontalEvaluations {
 		ArtificialUser b = new ArtificialUser();
 		a.setGameToken(GameToken.X);
 		GameMode mode = GameMode.getGameMode(4);
-		TicTacToeTable table = new TicTacToeTable(a, GameMode.getGameMode(4), false);
+		TicTacToeTable table = new TicTacToeTable(a, GameMode.getGameMode(4), false, false, 0);
 		table.joinTableAsPlayer(b);
 		GameToken[][] board = new GameToken[mode.getX()][mode.getY()];
 		board[4][4] = GameToken.X;

@@ -14,6 +14,7 @@ import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.AI;
 import com.tauhka.games.core.twodimen.GameResult;
+import com.tauhka.games.core.util.Constants;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
@@ -24,7 +25,7 @@ public abstract class Table implements Serializable {
 	private static final long serialVersionUID = 2422118498940197289L;
 
 	private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
-
+	private final int[] timeControls = { 120, 90, 60, 45, 30, 20 }; // serverside timer...??
 	@JsonbProperty("tableId")
 	private UUID tableId;
 	@JsonbProperty("playerA")
@@ -44,14 +45,20 @@ public abstract class Table implements Serializable {
 
 	@JsonbProperty("draws")
 	protected int draws = 0;
-	@JsonbTransient
+	@JsonbProperty("randomizeStarter")
 	protected boolean randomizeStarter;
+	@JsonbProperty("timeControlIndex")
+	protected int timeControlIndex;
+
+	@JsonbProperty("registeredOnly")
+	protected boolean registeredOnly;
+
 	@JsonbProperty("gameMode")
 	protected GameMode gameMode;
 	@JsonbProperty("gameStartedInstant")
 	protected Instant gameStartedInstant;
 
-	public Table(User playerA, GameMode gameMode, boolean randomizeStarter) {
+	public Table(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex) {
 		this.tableId = UUID.randomUUID();
 		this.playerA = playerA;
 		this.gameMode = gameMode;
@@ -59,6 +66,8 @@ public abstract class Table implements Serializable {
 		if (!randomizeStarter) {
 			this.playerInTurn = playerA;
 		}
+		this.registeredOnly = registeredOnly;
+		this.timeControlIndex = timeControlIndex;
 	}
 
 	public abstract GameResult checkWinAndDraw();
@@ -115,6 +124,14 @@ public abstract class Table implements Serializable {
 			return playerB;
 		}
 		return playerA;
+	}
+
+	public int getTimeControlIndex() {
+		return timeControlIndex;
+	}
+
+	public void setTimeControlIndex(int timeControlIndex) {
+		this.timeControlIndex = timeControlIndex;
 	}
 
 	public boolean isPlayer(User user) {
@@ -247,6 +264,10 @@ public abstract class Table implements Serializable {
 	}
 
 	public synchronized void joinTableAsPlayer(User playerB) {
+		if (this.registeredOnly && playerB.getName().startsWith(Constants.ANONYM_LOGIN_NAME_START)) {
+			// Also guest players can use this option atm..
+			throw new IllegalArgumentException("Only registered players allowed to join to play." + playerB.getName() + " table:" + this);
+		}
 		this.playerB = playerB;
 		this.gameStartedInstant = Instant.now();
 		if (this.randomizeStarter) {
@@ -275,6 +296,10 @@ public abstract class Table implements Serializable {
 
 	protected void resetRematchPlayer() {
 		rematchPlayer = null;
+	}
+
+	public boolean isRegisteredOnly() {
+		return registeredOnly;
 	}
 
 	public synchronized boolean suggestRematch(User user) {

@@ -35,6 +35,6 @@ export const utilsMixin = {
 		},
 		fixVal(val:number){
 			return val.toFixed()
-		}
+		},	
 	},
 };

@@ -3,7 +3,7 @@ import { IPoolTable } from "./pool";
 export interface IStoreState {
 	user: IUser,
 	games: IGame[],
-	tables: ITable[], 
+	tables: ITable[],
 	users: IUser[],
 	commonChat: IChat,
 	theTable: ITable, // this !!
@@ -94,6 +94,9 @@ export interface IBaseTable {
 	gameMode: IGameMode,
 	chat: IChat,
 	tableId: string,
+	timeControlIndex: number,
+	randomStarter: boolean,
+	registeredOnly: boolean
 }
 
 export interface IPlayer {
@@ -119,7 +122,7 @@ export interface ITopLists {
 	dateTime: string,
 	totalTictactoes: number,
 	totalConnectFours: number,
-	totalEightBalls:number
+	totalEightBalls: number
 }
 
 export interface IPlayerStats {

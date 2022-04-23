@@ -72,9 +72,8 @@ public class PoolTable extends Table implements PoolComponent {
 		/* else if (env.equalsIgnoreCase(Constants.ENVIRONMENT_DEVELOPMENT) && gui.equalsIgnoreCase("Server_ActivateGUI")) { SERVER_GUI = true; } else { SERVER_GUI = true; } */
 	}
 
-	public PoolTable(User playerA, GameMode gameMode, boolean randomizeStarter) {
-		// PoolPlayer p = new PoolPlayer() super(p,gameMode,randomizeStarte)
-		super(playerA, gameMode, randomizeStarter);
+	public PoolTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex) {
+		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex);
 		EightBallInitializer.init(this);
 		expectingHandBallUpdate = true;
 	}

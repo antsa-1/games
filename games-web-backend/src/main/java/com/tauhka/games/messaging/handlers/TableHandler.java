@@ -1,7 +1,8 @@
 package com.tauhka.games.messaging.handlers;
 
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER;
-import static com.tauhka.games.core.util.Constants.*;
+import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_CONNECT_FOUR_RANKING;
+import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_EIGHT_BALL_RANKING;
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_ID;
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_TICTACTOE_RANKING;
 import static com.tauhka.games.core.util.Constants.SYSTEM;
@@ -50,15 +51,13 @@ public class TableHandler {
 		Table table = null;
 
 		GameMode gameMode = GameMode.getGameMode(Integer.parseInt(message.getMessage()));
-
 		if (GameMode.CONNECT4 == gameMode.getGameNumber()) {
-			table = new ConnectFourTable(endpoint.getUser(), gameMode, false);
+			table = new ConnectFourTable(endpoint.getUser(), gameMode, false, message.getOnlyRegistered(), message.getTimeControlIndex()); // many times same parameters.. one object would be better, next version?
 		} else if (GameMode.POOL == gameMode.getGameNumber()) {
-			PoolTable p = new PoolTable(endpoint.getUser(), gameMode, message.getRandomStarter());
+			PoolTable p = new PoolTable(endpoint.getUser(), gameMode, message.getRandomStarter(), message.getOnlyRegistered(), message.getTimeControlIndex());
 			table = p;
-
 		} else {
-			table = new TicTacToeTable(endpoint.getUser(), gameMode, false);
+			table = new TicTacToeTable(endpoint.getUser(), gameMode, false, message.getOnlyRegistered(), message.getTimeControlIndex());
 		}
 		CommonEndpoint.TABLES.put(table.getTableId(), table);
 		if (message.getComputer()) {

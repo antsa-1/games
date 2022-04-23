@@ -23,6 +23,7 @@ import jakarta.json.bind.annotation.JsonbTypeAdapter;
  **/
 
 public class TicTacToeTable extends Table {
+	private static final long serialVersionUID = 1L;
 	@JsonbTypeAdapter(TwoDimensionalBoardAdapter.class)
 	private GameToken board[][];
 	@JsonbProperty("x")
@@ -32,8 +33,8 @@ public class TicTacToeTable extends Table {
 	@JsonbTransient
 	private int addedTokens;
 
-	public TicTacToeTable(User playerA, GameMode gameMode, boolean randomizeStarter) {
-		super(playerA, gameMode, randomizeStarter);
+	public TicTacToeTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex) {
+		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex);
 		playerA.setGameToken(GameToken.X);
 		super.setPlayerInTurn(playerA);
 		this.startingPlayer = playerA;

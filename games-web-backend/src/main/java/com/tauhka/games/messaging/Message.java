@@ -19,8 +19,8 @@ public class Message implements Serializable {
 	private MessageTitle title;
 	@JsonbProperty("message")
 	private String message;
-	@JsonbProperty("x")
-	private int x;
+	@JsonbProperty("x") // somewhere else
+	private int x; // somewhere else
 	@JsonbProperty("y")
 	private int y;
 	@JsonbProperty("who")
@@ -29,7 +29,7 @@ public class Message implements Serializable {
 	private String to;
 	@JsonbProperty("from")
 	private String from;
-	@JsonbProperty("token")
+	@JsonbProperty("token") // somewhere else ?
 	private String token;
 	@JsonbProperty("players")
 	private List<User> users;
@@ -45,6 +45,10 @@ public class Message implements Serializable {
 	private Boolean computer;
 	@JsonbProperty("randomStarter")
 	private Boolean randomStarter;
+	@JsonbProperty("onlyRegistered")
+	private Boolean onlyRegistered;
+	@JsonbProperty("timeControlIndex")
+	private int timeControlIndex;
 	@JsonbProperty("pool")
 	private PoolMessage poolMessage;
 
@@ -116,6 +120,14 @@ public class Message implements Serializable {
 		this.randomStarter = randomStarter;
 	}
 
+	public Boolean getOnlyRegistered() {
+		return onlyRegistered;
+	}
+
+	public void setOnlyRegistered(Boolean onlyRegistered) {
+		this.onlyRegistered = onlyRegistered;
+	}
+
 	public List<Game> getGames() {
 		return games;
 	}
@@ -178,6 +190,14 @@ public class Message implements Serializable {
 
 	public void setWho(User who) {
 		this.who = who;
+	}
+
+	public int getTimeControlIndex() {
+		return timeControlIndex;
+	}
+
+	public void setTimeControlIndex(int timeControlIndex) {
+		this.timeControlIndex = timeControlIndex;
 	}
 
 	@Override
