@@ -20,6 +20,6 @@ module tauhka.portal {
 	requires jakarta.transaction;
 	requires transitive java.sql;
 	requires transitive jakarta.ws.rs;
-	requires tauhka.core;
+	requires transitive tauhka.core;
 
 }

@@ -38,9 +38,11 @@ public class ProfileService {
 		}
 		User user = em.find(User.class, userId);
 		List<Game> tictactoes = fetchGames(userId, 0, 19, Integer.MIN_VALUE, Integer.MAX_VALUE); // 0-19 reserved for tictactoe types boardSize etc.
-		List<Game> connectFours = fetchGames(userId, 20, 30, Integer.MIN_VALUE, Integer.MAX_VALUE);// 20-30 reserved for connectfours types, boardSize etc.
+		List<Game> connectFours = fetchGames(userId, 20, 29, Integer.MIN_VALUE, Integer.MAX_VALUE);// 20-29 reserved for connectfours types, boardSize etc.
+		List<Game> eightBalls = fetchGames(userId, 30, 32, Integer.MIN_VALUE, Integer.MAX_VALUE);// 30 + reserved for pool types.
 		user.setTicatactoes(tictactoes);
 		user.setConnectFours(connectFours);
+		user.setEightBalls(eightBalls);
 		return new Profile(user);
 	}
 

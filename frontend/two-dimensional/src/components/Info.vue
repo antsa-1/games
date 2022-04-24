@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IChat } from "../interfaces";
+import { IChat } from "../interfaces/interfaces";
 export default defineComponent({
 	name: "Info",
 

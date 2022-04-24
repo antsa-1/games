@@ -2,7 +2,7 @@ package com.tauhka.games.messaging.handlers;
 
 import java.util.UUID;
 
-import com.tauhka.games.core.Table;
+import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.web.websocket.CommonEndpoint;

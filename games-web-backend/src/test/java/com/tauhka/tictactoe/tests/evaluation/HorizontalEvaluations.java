@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.GameToken;
 import com.tauhka.games.core.Move;
-import com.tauhka.games.core.Table;
-import com.tauhka.games.core.twodimen.ArtificialUser;
-import com.tauhka.games.core.twodimen.util.MoveEvaluator;
+import com.tauhka.games.core.ai.ArtificialUser;
+import com.tauhka.games.core.tables.TicTacToeTable;
+import com.tauhka.games.core.twodimen.ai.MoveEvaluator;
 import com.tauhka.games.core.twodimen.util.MoveHelper;
 
 //--add-exports org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED --add-exports org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
@@ -23,8 +23,8 @@ public class HorizontalEvaluations {
 		ArtificialUser b = new ArtificialUser();
 		a.setGameToken(GameToken.X);
 		GameMode mode = GameMode.getGameMode(4);
-		Table table = new Table(a, GameMode.getGameMode(4), false);
-		table.setPlayerB(b);
+		TicTacToeTable table = new TicTacToeTable(a, GameMode.getGameMode(4), false, false, 0);
+		table.joinTableAsPlayer(b);
 		GameToken[][] board = new GameToken[mode.getX()][mode.getY()];
 		board[4][0] = GameToken.X;
 		board[1][1] = GameToken.O;
@@ -45,8 +45,8 @@ public class HorizontalEvaluations {
 		ArtificialUser b = new ArtificialUser();
 		a.setGameToken(GameToken.X);
 		GameMode mode = GameMode.getGameMode(4);
-		Table table = new Table(a, GameMode.getGameMode(4), false);
-		table.setPlayerB(b);
+		TicTacToeTable table = new TicTacToeTable(a, GameMode.getGameMode(4), false, false, 0);
+		table.joinTableAsPlayer(b);
 		GameToken[][] board = new GameToken[mode.getX()][mode.getY()];
 		board[4][4] = GameToken.X;
 		board[1][1] = GameToken.O;
@@ -62,13 +62,8 @@ public class HorizontalEvaluations {
 	public void printBoard(GameToken board[][]) {
 		for (int x = 0; x < board.length; x++) {
 			for (int y = 0; y < board.length; y++) {
-				if (board[y][x] != null)
-					System.out.print(board[y][x] + " ");
-				else {
-					System.out.print(" _");
-				}
+
 				if (y == board.length - 1) {
-					System.out.println();
 				}
 			}
 		}

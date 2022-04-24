@@ -1,13 +1,10 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import { ITable, IUser, IPlayer, IStoreState, ISquare, IChatMessage, IChat, IGameResult, IWinMessage, IWin, } from "./interfaces";
-import { IGameMode } from "./interfaces";
+import { ITable, IGame, IUser, IPlayer, IStoreState, ISquare, IChatMessage, IChat, IGameResult, IWinMessage, IWin, } from "./interfaces/interfaces";
 import { createStore } from 'vuex';
 
 export const store = createStore<IStoreState>({
     state: {
         user: null,
-        gameModes: [],
+        games: [],
         tables: [],
         users: [],
         theTable: null,
@@ -47,8 +44,8 @@ export const store = createStore<IStoreState>({
         tables(state) {
             return state.tables
         },
-        gameModes(state) {
-            return state.gameModes
+        games(state) {
+            return state.games
         },
         theTable(state) {
             return state.theTable
@@ -67,33 +64,46 @@ export const store = createStore<IStoreState>({
         },
         loadingStatus(state) {
             return state.loadingStatus
+        },
+        playerInTurn(state){  
+            return state.theTable.playerInTurn
         }
     },
 
     mutations: {
         setUser(state, user: IUser) {
             if (user) {
-                
+
                 sessionStorage.setItem("userName", user.name)
                 sessionStorage.setItem("token", user.token)
                 state.user = user
 
             } else {
-                
+
                 sessionStorage.removeItem("userName")
                 sessionStorage.removeItem("token")
                 state.user = user
             }
         },
-        setGameModes(state, gameModes: IGameMode[]) {
-            state.gameModes = gameModes
+        setGames(state, games: IGame[]) {
+            state.games = games
         },
-        setTables(state, tables: ITable[]) {
+         setTables(state, tables: ITable[]) {
 
             state.tables = tables
         },
+        clearTable(state) {           
+            state.theTable = null           
+        },
         setUsers(state, players: IUser[]) {
             state.users = players
+        },
+        updateScore(state, winMessage: IWinMessage) {
+            if (state.theTable) {
+                state.theTable.playerA.wins = winMessage.winsA
+                state.theTable.playerB.wins = winMessage.winsB
+                state.theTable.playerInTurn = null
+            }
         },
         addTable(state, table: ITable) {
             if (table.playerA.name === state.user.name) {
@@ -109,7 +119,7 @@ export const store = createStore<IStoreState>({
                 return listUser.name !== user.name;
             })
 
-        },
+        },        
         removeTable(state, data: ITable) {
             state.tables = state.tables.filter((table) => {
 
@@ -121,7 +131,7 @@ export const store = createStore<IStoreState>({
             state.users.push(user)
         },
         startGame(state, table: ITable) {
-            const index = state.tables.findIndex(element => element.tableId === table.tableId);
+            const index = state.tables.findIndex(element => element.tableId === table.tableId)          
             state.tables.splice(index, 1, table)
         },
         selectTable(state, table: ITable) {
@@ -139,13 +149,10 @@ export const store = createStore<IStoreState>({
             }
         },
         move(state, square: ISquare) {
-
             state.theTable.board.push(square)
         },
-        changeTurn(state, playerInTurn: IPlayer) {
-           
+        changeTurn(state, playerInTurn: IPlayer) {            
             state.theTable = { ...state.theTable, playerInTurn: playerInTurn }
-
         },
         chat(state, message: IChatMessage) {
             if (state.theTable) {
@@ -153,10 +160,10 @@ export const store = createStore<IStoreState>({
             }
         },
         updateCommonChat(state, message: IChatMessage) {
-            
+
             state.commonChat.messages.unshift(message);
         },
-        updateScore(state, winMessage: IWinMessage) {
+        resign(state, winMessage: IWinMessage) {
 
             if (state.theTable) {
                 state.theTable.playerA.wins = winMessage.winsA
@@ -171,7 +178,7 @@ export const store = createStore<IStoreState>({
                 } else if (state.theTable.playerB.name === userName) {
                     state.theTable.playerInTurn = null
 
-                }
+                }               
                 let text = userName.concat(" left table")
                 const chatMessage: IChatMessage = { from: "System", text: text }
                 state.theTable.chat.messages.unshift(chatMessage)
@@ -182,18 +189,17 @@ export const store = createStore<IStoreState>({
             if (state.theTable && state.theTable.chat) {
                 chat = state.theTable.chat
             }
-            const board: ISquare[] = []
-            table.board = board
+          //  const board: ISquare[] = []
+           // table.board = board
             const rematchMessage: IChatMessage = { text: "Rematch started", from: "System" }
             chat.messages.unshift(rematchMessage)
             table.playerA.wins = table.playerA.wins
             table.playerB.wins = table.playerB.wins
             table.chat = chat
-
             state.theTable = table
         },
         updateWinner(state, win: IWin) {
-            
+
             if (this.state.theTable) {
                 state.theTable.playerInTurn = null
                 const chatMessage: IChatMessage = { text: win.winner.name.concat(" won"), from: "System" }
@@ -202,7 +208,7 @@ export const store = createStore<IStoreState>({
             }
         },
         setDraw(state, gameResult: IGameResult) {
-            
+
             if (this.state.theTable) {
                 if (state.theTable.playerA) {
                     state.theTable.playerA.draws = gameResult.table.playerA.draws
@@ -223,13 +229,31 @@ export const store = createStore<IStoreState>({
 
     },
     actions: {
+        poolUpdate(context, object) {
+            // PoolTable has subscribed to this action
+        },
+        poolPlayTurn(context, object) {
+            // PoolTable has subscribed to this action
+        },
+        poolSetHandBall(context,object){
+            // PoolTable has subscribed to this action
+        }, 
+        poolSelectPocket(context,object){
+            // PoolTable has subscribed to this action
+        }, 
+        poolSetHandBallFail(context,object){
+            // PoolTable has subscribed to this action
+        },        
+        poolGameEnded(context,object){
+            
+        } ,
         setUser(context, user: IUser) {
             context.commit('setUser', user)
-            
-        },
-        setGameModes(context, gamemodes: string[]) {
 
-            context.commit('setGameModes', gamemodes)
+        },
+        setGames(context, games: string[]) {
+
+            context.commit('setGames', games)
         },
         setTables(context, tables: ITable[]) {
 
@@ -280,30 +304,40 @@ export const store = createStore<IStoreState>({
         updateCommonChat(context, message: IChatMessage) {
             context.commit('updateCommonChat', message)
         },
+        resign(context, message: IWinMessage) {
+            context.commit('resign', message)
+        },
         updateScore(context, message: IWinMessage) {
             context.commit('updateScore', message)
         },
         rematch(context, table: ITable) {
             context.commit("rematch", table)
         },
-        leaveTable(context, table: ITable) {
-            context.commit("leaveTable", table)
+        clearTable(context) {
+            context.commit("clearTable")
+        },
+        leaveTable(context, data) {
+            if(!context.state.theTable || !data.table){               
+               return
+            }
+            if(context.state.theTable.tableId === data.table.tableId)
+                context.commit("leaveTable", data.who.name)
         },
         updateWinner(context, win: IWin) {
             context.commit("updateWinner", win)
         },
         setDraw(context, gameResult: IGameResult) {
-            
+
             context.commit("setDraw", gameResult)
         },
         logout(context, user: IUser) {
-            
+
             context.commit("setTables", [])
             context.commit("setUsers", [])
-            if(user && user.webSocket){
-                
+            if (user && user.webSocket) {
+
                 user.webSocket.close();
-                user.webSocket= null
+                user.webSocket = null
             }
             const requestOptions = {
                 method: "POST",
@@ -315,9 +349,9 @@ export const store = createStore<IStoreState>({
                     token: user?.token
                 })
             }
-            const apiURL=process.env.VUE_APP_API_BASE_URL+"/portal/api/user/logout"
+            const apiURL = process.env.VUE_APP_API_BASE_URL + "/portal/api/user/logout"
             context.commit('setUser', null)
-            fetch(apiURL, requestOptions).then(response => {             
+            fetch(apiURL, requestOptions).then(response => {
             })
         },
         setLoadingStatus(context, loading: boolean) {
@@ -325,3 +359,7 @@ export const store = createStore<IStoreState>({
         }
     }
 })
+
+/*
+ * 	@author antsa-1 from GitHub 
+*/

@@ -2,21 +2,24 @@
  * @author antsa-1 from GitHub
  */
 import { createApp } from 'vue'
-import TicTacToe from './TicTacToe.vue'
+import TicTacToe from './Games.vue'
 import Login from './components/Login.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
-import TableTicTacToe from './components/TableTicTacToe.vue'
+import TableTicTacToe from './components/tables/TableTicTacToe.vue'
+import { IGameToken, IPlayer, ITable } from "./interfaces/interfaces";
+
 import Profile from './components/Profile.vue'
-import TopLists from './components/TopLists.vue'
-import TableConnectFour from './components/TableConnectFour.vue'
+import TopLists from './components/highscores/TopLists.vue'
+import TableConnectFour from './components/tables/TableConnectFour.vue'
+import PoolTable from './components/tables/PoolTable.vue'
 import Info from './components/Info.vue'
 import Feedback from './components/Feedback.vue'
 import Registration from './components/Registration.vue'
 import Error from './components/Error.vue'
 import VueRouter, { RouteRecordRaw } from 'vue-router'
 import { store } from './store'
-import { IUser } from "./interfaces";
+import { IUser } from "./interfaces/interfaces";
 import { createWebHistory, createRouter } from "vue-router";
 
 const routes: RouteRecordRaw[] = [
@@ -94,8 +97,20 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/portal/connectfour/:watch?',
         component: TableConnectFour,
-        name: "TableConnectFour",
-        props: true,
+        name: "TableConnectFour",        
+        beforeEnter: (to, from, next) => {
+            if (!store.state.user || !store.state.theTable) {
+                next('/');
+            } else {
+                next()
+            }
+        }
+    },
+    {
+        path: '/portal/pool/:watch?',
+        component: PoolTable,
+        name: "PoolTable",
+        props: true,  
         beforeEnter: (to, from, next) => {
             if (!store.state.user || !store.state.theTable) {
                 next('/');
@@ -120,14 +135,12 @@ const routes: RouteRecordRaw[] = [
         component: Feedback,
         name: "Feedback",
     },
-
     {
         path: "/portal/:catchAll(.*)",
         component: Error,
         name: "Error",
         props: true,
     }
-
 ]
 
 const router = createRouter({

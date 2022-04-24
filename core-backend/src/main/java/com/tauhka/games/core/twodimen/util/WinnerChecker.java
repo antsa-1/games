@@ -1,13 +1,13 @@
 package com.tauhka.games.core.twodimen.util;
 
 import com.tauhka.games.core.GameToken;
-import com.tauhka.games.core.twodimen.GameResult;
+import com.tauhka.games.core.twodimen.GridGameResult;
 
 public class WinnerChecker {
 
-	public static GameResult checkWinner(GameToken[][] board, int requiredAmount) {
+	public static GridGameResult checkWinner(GameToken[][] board, int requiredAmount) {
 
-		GameResult result = checkHorizontals(board, requiredAmount);
+		GridGameResult result = checkHorizontals(board, requiredAmount);
 		if (result != null) {
 			return result;
 		}
@@ -28,10 +28,10 @@ public class WinnerChecker {
 
 	}
 
-	private static GameResult checkDiagonalsUpLeftToUpRight(GameToken[][] board, int requiredAmount) {
+	private static GridGameResult checkDiagonalsUpLeftToUpRight(GameToken[][] board, int requiredAmount) {
 		int counter = 0;
 		GameToken compToken = null;
-		GameResult win = new GameResult();
+		GridGameResult win = new GridGameResult();
 		for (int x = 0; x < board.length; x++) {
 			counter = 0;
 			compToken = null;
@@ -71,10 +71,10 @@ public class WinnerChecker {
 		return null;
 	}
 
-	private static GameResult checkDiagonalsUpRightToUpLeft(GameToken[][] board, int requiredAmount) {
+	private static GridGameResult checkDiagonalsUpRightToUpLeft(GameToken[][] board, int requiredAmount) {
 		int counter = 0;
 		GameToken compToken = null;
-		GameResult win = new GameResult();
+		GridGameResult win = new GridGameResult();
 		for (int x = board.length - 1; x >= 0; x--) {
 			counter = 0;
 			compToken = null;
@@ -114,10 +114,10 @@ public class WinnerChecker {
 		return null;
 	}
 
-	private static GameResult checkHorizontals(GameToken[][] board, int requiredAmount) {
+	private static GridGameResult checkHorizontals(GameToken[][] board, int requiredAmount) {
 		int counter = 0;
 		GameToken compToken = null;
-		GameResult win = new GameResult();
+		GridGameResult win = new GridGameResult();
 		for (int i = 0; i < board.length; i++) {
 			counter = 0;
 			compToken = null;
@@ -151,10 +151,10 @@ public class WinnerChecker {
 		return null;
 	}
 
-	private static GameResult checkVerticals(GameToken[][] board, int requiredAmount) {
+	private static GridGameResult checkVerticals(GameToken[][] board, int requiredAmount) {
 		int counter = 0;
 		GameToken compToken = null;
-		GameResult win = new GameResult();
+		GridGameResult win = new GridGameResult();
 		for (int i = 0; i < board.length; i++) {
 			counter = 0;
 			compToken = null;

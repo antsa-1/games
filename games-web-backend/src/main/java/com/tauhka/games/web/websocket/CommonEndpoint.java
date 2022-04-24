@@ -6,14 +6,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.tauhka.games.core.Table;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageDecoder;
 import com.tauhka.games.messaging.MessageEncoder;
 import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.messaging.handlers.PoolTableHandler;
 import com.tauhka.games.messaging.handlers.TableHandler;
 import com.tauhka.games.messaging.handlers.UserHandler;
+import com.tauhka.games.pool.PoolTable;
+import com.tauhka.games.pool.TurnResult;
 
 import jakarta.inject.Inject;
 import jakarta.websocket.CloseReason;
@@ -26,6 +29,8 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 
+/** @author antsa-1 from GitHub **/
+
 @ServerEndpoint(value = "/ws", decoders = { MessageDecoder.class }, encoders = { MessageEncoder.class }, configurator = CommonEndpointConfiguration.class)
 public class CommonEndpoint {
 	private static final Logger LOGGER = Logger.getLogger(CommonEndpoint.class.getName());
@@ -37,6 +42,8 @@ public class CommonEndpoint {
 
 	@Inject
 	private TableHandler tableHandler;
+	@Inject
+	private PoolTableHandler pooltableHandler;
 
 	private Session session;
 	private User user;
@@ -50,6 +57,7 @@ public class CommonEndpoint {
 		this.session = session;
 	}
 
+	// Factory here??
 	@OnMessage
 	public void onMessage(Message message, Session session) {
 		LOGGER.log(Level.INFO, "CommonEndpoint onMessage" + message);
@@ -67,13 +75,24 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.CREATE_TABLE) {
 				gameMessage = tableHandler.createTable(message, this);
 				sendCommonMessage(gameMessage);
-			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) { // Ei REMOVE_TABLE sisään
+				if (gameMessage.getTable().isArtificialPlayerInTurn()) {
+					Thread.sleep(3000);
+					Message artMoveMessage = null;
+					if (gameMessage.getTable() instanceof PoolTable) {
+						playPoolAITurns(gameMessage);
+					} else {
+						artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+					}
+					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
+				}
+
+			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) {
 				gameMessage = tableHandler.leaveTable(message, this);
 				if (gameMessage != null) {
 					sendMessageToTable(gameMessage.getTable(), gameMessage);
 					sendCommonMessage(tableHandler.createRemoveTableMessage(gameMessage.getTable(), this));
 				}
-			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) { // Ei REMOVE_TABLE sisään
+			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) {
 				gameMessage = tableHandler.joinTable(message, this);
 				sendCommonMessage(gameMessage);
 			} else if (message.getTitle() == MessageTitle.REMOVE_TABLE) {
@@ -99,10 +118,33 @@ public class CommonEndpoint {
 				if (gameMessage != null) {
 					sendMessageToTable(gameMessage.getTable(), gameMessage);
 					if (gameMessage.getTable().isArtificialPlayerInTurn()) {
-						Message artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+						Message artMoveMessage = null;
+						if (gameMessage.getTable() instanceof PoolTable) {
+							playPoolAITurns(gameMessage);
+						} else {
+							artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+						}
 						sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 					}
 				}
+			} else if (message.getTitle() == MessageTitle.POOL_UPDATE) {
+				gameMessage = pooltableHandler.updateCuePosition(this, message);
+				sendMessageToAllInTableExcept(gameMessage, user);
+			} else if (message.getTitle() == MessageTitle.POOL_PLAY_TURN) {
+				gameMessage = pooltableHandler.playTurn(this, message);
+				sendMessageToTable(gameMessage.getTable(), gameMessage);
+
+				playPoolAITurns(gameMessage);
+			} else if (message.getTitle() == MessageTitle.POOL_HANDBALL) {
+				gameMessage = pooltableHandler.updateHandBall(this, message);
+				if (gameMessage.getPoolMessage().getTurnResult().equals(TurnResult.HANDBALL_FAIL.toString())) {
+					sendPrivateMessage(gameMessage);
+				} else {
+					sendMessageToTable(gameMessage.getTable(), gameMessage);
+				}
+			} else if (message.getTitle() == MessageTitle.POOL_SELECT_POCKET) {
+				gameMessage = pooltableHandler.selectPocket(this, message);
+				sendMessageToTable(gameMessage.getTable(), gameMessage);
 			} else {
 				throw new CloseWebSocketException("unknown command:" + message);
 			}
@@ -111,6 +153,17 @@ public class CommonEndpoint {
 			this.onClose(session, null);
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "CommonEndpoint onMessagessa virhe", e);
+		}
+	}
+
+	private void playPoolAITurns(Message gameMessage) throws InterruptedException {
+		while (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
+			// Thread.sleep(20000); // 14 seconds is just a number, too long for somebody and too short for somebody.. TODO
+			Message artMoveMessage = pooltableHandler.makeComputerMove(gameMessage.getTable());
+			sendMessageToTable(gameMessage.getTable(), artMoveMessage);
+			if (TurnResult.isDecisive(artMoveMessage.getPoolMessage().getTurnResult())) {
+				break;
+			}
 		}
 	}
 
@@ -164,6 +217,27 @@ public class CommonEndpoint {
 			return;
 		}
 		for (User user : table.getUsers()) {
+			CommonEndpoint endpoint = ENDPOINTS.get(user);
+			if (endpoint != null && endpoint.getSession() != null && endpoint.getSession().isOpen()) {
+				try {
+					endpoint.getSession().getBasicRemote().sendObject(message);
+				} catch (IOException e) {
+					LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
+				} catch (EncodeException e) {
+					LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table encoding error", e);
+				}
+			}
+		}
+	}
+
+	public void sendMessageToAllInTableExcept(Message message, User exceptUser) {
+		if (message == null) {
+			return;
+		}
+		for (User user : message.getTable().getUsers()) {
+			if (user.equals(exceptUser)) {
+				continue;
+			}
 			CommonEndpoint endpoint = ENDPOINTS.get(user);
 			if (endpoint != null && endpoint.getSession() != null && endpoint.getSession().isOpen()) {
 				try {

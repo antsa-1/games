@@ -18,7 +18,10 @@ public class BoardToTextConverter implements AttributeConverter<String, Integer>
 
 	@Override
 	public String convertToEntityAttribute(Integer dbData) {
-		return GameMode.getBoardDescription(dbData);
+		if (dbData < 30) {
+			return GameMode.getBoardDescription(dbData);
+		}
+		return "Eight ball";
 	}
 
 }

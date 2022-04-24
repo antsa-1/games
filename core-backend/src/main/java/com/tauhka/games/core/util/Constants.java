@@ -15,13 +15,15 @@ public final class Constants {
 	public static final String OLAV_COMPUTER = "Olav_computer";
 	public static final double OLAV_COMPUTER_TICTACTOE_RANKING = 1200;
 	public static final double OLAV_COMPUTER_CONNECT_FOUR_RANKING = 1205;
+	public static final double OLAV_COMPUTER_EIGHT_BALL_RANKING = 1299;
 	public static final String OLAV_COMPUTER_ID = "123e4567-e89b-12d3-a456-426652340000";
 	public static final String ENVIRONMENT_PRODUCTION = "PRODUCTION";
+	public static final String ENVIRONMENT_DEVELOPMENT = "DEVELOPMENT";
 	public static final String WEBSOCKET_PRODUCTION_ORIGIN = "http://35.217.7.146"; // TODO replace with real prod. URL
 	public static final String WEBSOCKET_LOCALHOST_ORIGIN = "http://localhost:8080"; //
 	public static final String SYSTEM = "System";
 	public static final String NULL = "null";
-	public static final String LOG_PREFIX = "TICTACTOE_";
+	public static final String LOG_PREFIX = "TAUHKA_";
 	public static final String LOG_PREFIX_PORTAL = LOG_PREFIX + "PORTAL ";
 	public static final String LOG_PREFIX_GAMES = LOG_PREFIX + "GAMES ";
 

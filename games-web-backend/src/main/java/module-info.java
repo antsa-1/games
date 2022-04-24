@@ -1,5 +1,6 @@
 module tauhka.games {
-	exports com.tauhka.games.connectfour;
+	exports com.tauhka.games.messaging.util;
+
 	exports com.tauhka.games.ejb;
 	exports com.tauhka.games.messaging.handlers;
 	exports com.tauhka.games.web.filter;
@@ -13,8 +14,10 @@ module tauhka.games {
 	requires jakarta.json;
 	requires jakarta.json.bind;
 	requires jakarta.servlet;
-	requires transitive jakarta.websocket;
+	requires jakarta.websocket;
 	requires java.logging;
 	requires java.sql;
+	requires transitive java.desktop;
 	requires transitive tauhka.core;
+	requires transitive tauhka.pool;
 }

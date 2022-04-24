@@ -4,28 +4,20 @@ import java.time.Instant;
 import java.util.UUID;
 
 import com.tauhka.games.core.GameMode;
-import com.tauhka.games.core.GameToken;
+import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
 
 public class GameResult {
-	@JsonbProperty("fromX") // WinRow starts coordinates
-	private int fromX;
-	@JsonbProperty("fromY")
-	private int fromY;
-	@JsonbProperty("toX") // WinRow ends coordinates
-	private int toX;
-	@JsonbProperty("toY")
-	private int toY;
-	@JsonbProperty("token")
-	private GameToken token;
 
 	@JsonbProperty("winner") // Winner
 	private User winner;
+	@JsonbProperty("resigner") // Winner
+	private User resigner;
 
-	@JsonbProperty
+	@JsonbProperty("resultType")
 	private GameResultType resultType;
 	@JsonbTransient
 	private User playerA;
@@ -44,34 +36,6 @@ public class GameResult {
 		this.gameId = UUID.randomUUID();
 	}
 
-	public int getFromX() {
-		return fromX;
-	}
-
-	public int getFromY() {
-		return fromY;
-	}
-
-	public int getToX() {
-		return toX;
-	}
-
-	public int getToY() {
-		return toY;
-	}
-
-	public GameToken getToken() {
-		return token;
-	}
-
-	public void setFromX(int fromX) {
-		this.fromX = fromX;
-	}
-
-	public void setFromY(int fromY) {
-		this.fromY = fromY;
-	}
-
 	public UUID getGameId() {
 		return gameId;
 	}
@@ -86,18 +50,6 @@ public class GameResult {
 
 	public Instant getEndInstant() {
 		return endInstant;
-	}
-
-	public void setToX(int toX) {
-		this.toX = toX;
-	}
-
-	public void setToY(int toY) {
-		this.toY = toY;
-	}
-
-	public void setToken(GameToken token) {
-		this.token = token;
 	}
 
 	public User getPlayerA() {
@@ -140,11 +92,12 @@ public class GameResult {
 		this.winner = winner;
 	}
 
-	@Override
-	public String toString() {
-		return "GameResult [token=" + token + ", winner=" + winner + ", resultType=" + resultType + ", playerA=" + playerA + ", playerB=" + playerB + ", endInstant=" + endInstant + ", startInstant=" + startInstant + ", gameId=" + gameId
-				+ ", gameMode=" + gameMode + "]";
+	public User getResigner() {
+		return resigner;
 	}
 
+	public void setResigner(User resigner) {
+		this.resigner = resigner;
+	}
 
 }

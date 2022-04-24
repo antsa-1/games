@@ -23,16 +23,19 @@ public class UserEJBC {
 	private static final Logger LOGGER = Logger.getLogger(UserEJBC.class.getName());
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource gamesDataSource;
-	private static final String WEBSOCKET_AUTHENTICATION_QUEURY = "SELECT  a.player_id, b.name,b.id,b.ranking_tictactoe,b.ranking_connectfour FROM  login a,  user b WHERE a.id =? AND a.player_id= b.id";
+	private static final String WEBSOCKET_AUTHENTICATION_QUEURY = "SELECT  a.player_id, b.name,b.id,b.ranking_tictactoe,b.ranking_connectfour,b.ranking_eightball FROM  login a,  user b WHERE a.id =? AND a.player_id= b.id";
 
 	public User verifyWebsocketToken(String activeLoginToken) {
-		LOGGER.info("UserEJBA verifyWebsocketToken" + activeLoginToken);
+		LOGGER.info("UserEJBC verifyWebsocketToken" + activeLoginToken);
 		if (activeLoginToken == null) {
 			return null;
 		}
 		PreparedStatement stmt = null;
 		Connection con = null;
 		UUID token = UUID.fromString(activeLoginToken);
+		if (!activeLoginToken.equals(token.toString())) {
+			throw new IllegalArgumentException("User provided login input which is not UUID:" + activeLoginToken);
+		}
 		try {
 			con = gamesDataSource.getConnection();
 			stmt = con.prepareStatement(WEBSOCKET_AUTHENTICATION_QUEURY);
@@ -46,6 +49,7 @@ public class UserEJBC {
 				user.setId(id);
 				user.setRankingConnectFour(res.getDouble("ranking_connectfour"));
 				user.setRankingTictactoe(res.getDouble("ranking_tictactoe"));
+				user.setRankingEightBall(res.getDouble("ranking_eightball"));
 				return user;
 			}
 			// Note: ActiveLogin token is directly connected with error message in order

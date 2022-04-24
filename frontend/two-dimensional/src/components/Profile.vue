@@ -9,12 +9,15 @@
 			{{text}}
 		</div>	
 		<div class="row">
-			<div v-if="connectFours.length>0" class="col-xs-12 col-sm-6">
-				<GameHistory :games="connectFours" title="Connect fours" />
+			<div v-if="eightBalls.length > 0" class="col-xs-12 " :class="this.getClass">
+				<GameHistory :games="eightBalls" title="Eight ball" />
 			</div>
-			<div v-if="tictactoes.length>0" class="col-xs-12 col-sm-6">
-				<GameHistory :games="tictactoes" title="TicTacToes" />
+			<div v-if="connectFours.length > 0" class="col-xs-12" :class="this.getClass">
+				<GameHistory :games="connectFours" title="Connect four" />
 			</div>
+			<div v-if="tictactoes.length > 0" class="col-xs-12 " :class="this.getClass">
+				<GameHistory :games="tictactoes" title="TicTacToe" />
+			</div>			
 		</div>
 	</div>
 	<div v-if="status==204 || status>=400" class="row">
@@ -27,7 +30,7 @@
 import { defineComponent } from "vue";
 import { loginMixin } from "../mixins/mixins";
 import GameHistory from "./GameHistory.vue";
-import { IProfile, IUser,GameResult } from "../interfaces";
+import { IProfile, IUser, GameResult } from "../interfaces/interfaces";
 export default defineComponent({
 	name: "Profile",
 	mixins: [loginMixin],
@@ -45,11 +48,20 @@ export default defineComponent({
 			connectFours:[],
 			tictactoes:[],
 			status:-1,
-			fetchText:''
+			fetchText:'',
+			eightBalls:[]
 		}
 	},
 	computed: {
-	
+		getClass(){
+			const eightBalls = this.eightBalls > 0
+			const ticTacToes = this.ticTacToes > 0
+			const connectFours = this.connectFours > 0
+			if(eightBalls && ticTacToes && connectFours){
+				return "col-sm-4"
+			}
+			return "col-sm-6"
+		}
 	},
 
 	created() {
@@ -80,21 +92,21 @@ export default defineComponent({
 					return response.json();
 				}).then(
 					data => {
-						this.text=data.user.profileText
-						this.memberSince= new Date(data.user.memberSince).toLocaleDateString()
-						this.tictactoes=data.user.tictactoes
-						this.connectFours=data.user.connectFours						
+						this.text = data.user.profileText
+						this.memberSince = new Date(data.user.memberSince).toLocaleDateString()
+						this.tictactoes = data.user.tictactoes
+						this.connectFours = data.user.connectFours
+						this.eightBalls = data.user.eightBalls				
 					},
 					(err) => {
 						console.error("error in profile fetch")	
 					}
 				).finally(() => {				
 					this.$store.dispatch("setLoadingStatus", false)
-				});
+			});
 		},
 	
-		
-		},
+	},
 	
 });
 </script>

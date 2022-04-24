@@ -1,4 +1,4 @@
-import { IUser, GameResult } from "@/interfaces";
+import { IUser, GameResult } from "@/interfaces/interfaces";
 
 
 export const utilsMixin = {
@@ -35,6 +35,6 @@ export const utilsMixin = {
 		},
 		fixVal(val:number){
 			return val.toFixed()
-		}
+		},	
 	},
 };

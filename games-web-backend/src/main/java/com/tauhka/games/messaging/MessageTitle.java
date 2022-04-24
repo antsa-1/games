@@ -2,9 +2,9 @@ package com.tauhka.games.messaging;
 
 public enum MessageTitle {
 
-	LOGIN("LOGIN"), JOIN_TABLE("JOIN_TABLE"), CHAT("CHAT"), LOGOUT("LOGOUT"), START_GAME("START_GAME"), REMOVE_PLAYER("REMOVE_PLAYER"), WATCH("WATCH"), ADD_WATCHER("ADD_WATCHER"), WATCHER_LEFT("WATCHER_LEFT"),
-	LEAVE_TABLE("LEAVE_TABLE"), NEW_PLAYER("NEW_PLAYER"), CREATE_TABLE("CREATE_TABLE"), REMOVE_TABLE("REMOVE_TABLE"), CHALLENGE("CHALLENGE"), MOVE("MOVE"), GAME_END("GAME_END"), RESIGN("RESIGN"), WINNER("WINNER"),
-	REMATCH("REMATCH");
+	LOGIN("LOGIN"), JOIN_TABLE("JOIN_TABLE"), CHAT("CHAT"), LOGOUT("LOGOUT"), START_GAME("START_GAME"), REMOVE_PLAYER("REMOVE_PLAYER"), WATCH("WATCH"), ADD_WATCHER("ADD_WATCHER"), WATCHER_LEFT("WATCHER_LEFT"), LEAVE_TABLE("LEAVE_TABLE"),
+	NEW_PLAYER("NEW_PLAYER"), CREATE_TABLE("CREATE_TABLE"), REMOVE_TABLE("REMOVE_TABLE"), CHALLENGE("CHALLENGE"), MOVE("MOVE"), GAME_END("GAME_END"), RESIGN("RESIGN"), WINNER("WINNER"), REMATCH("REMATCH"), POOL_UPDATE("POOL_UPDATE"),
+	POOL_PLAY_TURN("POOL_PLAY_CONTINUE"), POOL_HANDBALL("POOL_HANDBALL"), POOL_PLAY_TURN_AND_WAIT("POOL_PLAY_WAIT"), POOL_SELECT_POCKET("POOL_SELECT_POCKET");
 
 	private String text;
 
@@ -14,6 +14,10 @@ public enum MessageTitle {
 
 	public String getAsText() {
 		return this.text;
+	}
+
+	public static boolean isPoolMessage(MessageTitle title) {
+		return title == POOL_UPDATE || title == POOL_PLAY_TURN || title == POOL_HANDBALL || title == POOL_PLAY_TURN_AND_WAIT || title == POOL_SELECT_POCKET;
 	}
 
 	public static MessageTitle get(String text) {
@@ -48,6 +52,14 @@ public enum MessageTitle {
 			return MOVE;
 		} else if (text.equals(ADD_WATCHER.getAsText())) {
 			return ADD_WATCHER;
+		} else if (text.equals(POOL_UPDATE.getAsText())) {
+			return POOL_UPDATE;
+		} else if (text.equals(POOL_PLAY_TURN.getAsText())) {
+			return POOL_PLAY_TURN;
+		} else if (text.equals(POOL_HANDBALL.getAsText())) {
+			return POOL_HANDBALL;
+		} else if (text.equals(POOL_PLAY_TURN_AND_WAIT.getAsText())) {
+			return POOL_PLAY_TURN_AND_WAIT;
 		}
 		throw new IllegalArgumentException("Not enumText" + text);
 	}

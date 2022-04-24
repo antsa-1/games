@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tauhka.games.core.GameMode;
-import com.tauhka.games.core.Table;
+import com.tauhka.games.core.Game;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.twodimen.GameResult;
 
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -19,8 +19,8 @@ public class Message implements Serializable {
 	private MessageTitle title;
 	@JsonbProperty("message")
 	private String message;
-	@JsonbProperty("x")
-	private int x;
+	@JsonbProperty("x") // somewhere else
+	private int x; // somewhere else
 	@JsonbProperty("y")
 	private int y;
 	@JsonbProperty("who")
@@ -29,7 +29,7 @@ public class Message implements Serializable {
 	private String to;
 	@JsonbProperty("from")
 	private String from;
-	@JsonbProperty("token")
+	@JsonbProperty("token") // somewhere else ?
 	private String token;
 	@JsonbProperty("players")
 	private List<User> users;
@@ -37,12 +37,20 @@ public class Message implements Serializable {
 	private Table table;
 	@JsonbProperty("tables")
 	private List<Table> tables = new ArrayList<Table>();
-	@JsonbProperty("gameModes")
-	private List<GameMode> gameModes;
-	@JsonbProperty("win")
-	private GameResult win;
+	@JsonbProperty("games")
+	private List<Game> games;
+	@JsonbProperty("gameResult")
+	private GameResult gameResult;
 	@JsonbProperty("computer")
 	private Boolean computer;
+	@JsonbProperty("randomStarter")
+	private Boolean randomStarter;
+	@JsonbProperty("onlyRegistered")
+	private Boolean onlyRegistered;
+	@JsonbProperty("timeControlIndex")
+	private int timeControlIndex;
+	@JsonbProperty("pool")
+	private PoolMessage poolMessage;
 
 	public MessageTitle getTitle() {
 		return title;
@@ -68,6 +76,14 @@ public class Message implements Serializable {
 		return computer;
 	}
 
+	public GameResult getGameResult() {
+		return gameResult;
+	}
+
+	public void setGameResult(GameResult gameResult) {
+		this.gameResult = gameResult;
+	}
+
 	public void setComputer(Boolean computer) {
 		this.computer = computer;
 	}
@@ -88,20 +104,36 @@ public class Message implements Serializable {
 		this.y = y;
 	}
 
-	public GameResult getWin() {
-		return win;
+	public PoolMessage getPoolMessage() {
+		return poolMessage;
 	}
 
-	public void setWin(GameResult win) {
-		this.win = win;
+	public void setPoolMessage(PoolMessage poolMessage) {
+		this.poolMessage = poolMessage;
 	}
 
-	public List<GameMode> getGameModes() {
-		return gameModes;
+	public Boolean getRandomStarter() {
+		return randomStarter;
 	}
 
-	public void setGameModes(List<GameMode> gameModes) {
-		this.gameModes = gameModes;
+	public void setRandomStarter(Boolean randomStarter) {
+		this.randomStarter = randomStarter;
+	}
+
+	public Boolean getOnlyRegistered() {
+		return onlyRegistered;
+	}
+
+	public void setOnlyRegistered(Boolean onlyRegistered) {
+		this.onlyRegistered = onlyRegistered;
+	}
+
+	public List<Game> getGames() {
+		return games;
+	}
+
+	public void setGames(List<Game> games) {
+		this.games = games;
 	}
 
 	public String getMessage() {
@@ -158,6 +190,14 @@ public class Message implements Serializable {
 
 	public void setWho(User who) {
 		this.who = who;
+	}
+
+	public int getTimeControlIndex() {
+		return timeControlIndex;
+	}
+
+	public void setTimeControlIndex(int timeControlIndex) {
+		this.timeControlIndex = timeControlIndex;
 	}
 
 	@Override
