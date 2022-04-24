@@ -14,6 +14,15 @@
 				</div>
 			</div>
 		</div>
+		<div class="row">
+			<div class="col">
+				Known issues for 8-ball game: <br>
+				1. On some occasions the ball to be collided with cue ball can go/move to an unexpected direction. <br>
+				2. A ball can be wobbly in the cases where it touches the pocket pathway. <br>
+				3. The table view can be distorted in some occasions where multiple balls (and cue ball) go into pocket at the same time.<br>
+				In these cases going to another browser window/tab and coming back refreshes the browser from latest server situation.<br>
+			</div>
+		</div>
 		<div v-if="showError" class="row d-inline-flex p-2 alert-danger">		
 				Error occured!
 		</div>		
