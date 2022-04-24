@@ -212,8 +212,7 @@ export default defineComponent({
 				return this.$store.getters.games.filter(game => game.gameId === 3)[0].gameModes
 			}
 		},
-		modalCreateTableDisabled(){
-			console.log("selectedGameMode="+this.selectedGameMode)
+		modalCreateTableDisabled(){			
 			return this.selectedGameMode === "0"			
 		},
 		tablesExist(){
@@ -303,18 +302,19 @@ export default defineComponent({
 						this.$store.dispatch("addPlayer", data.who)						
 						break;
 					case "START_GAME":						
-						this.$store.dispatch("startGame", data.table)
-						const tableC:ITable = data.table
-						if (tableC.playerA.name === this.userName || tableC.playerB.name === this.userName ){
-							tableC.playerA.wins = 0
-							tableC.playerB.wins = 0
-							this.createTableButtonVisible = false
-							this.removeTableButtonVisible = false
-							this.watchTableButtonVisible = false
-							this.$store.dispatch("selectTable", data.table).then(() => {
+						this.$store.dispatch("startGame", data.table).then(() => {							
+							const tableC:ITable = data.table
+							if (tableC.playerA.name === this.userName || tableC.playerB.name === this.userName ){
+								tableC.playerA.wins = 0
+								tableC.playerB.wins = 0
+								this.createTableButtonVisible = false
+								this.removeTableButtonVisible = false
+								this.watchTableButtonVisible = false
+								this.$store.dispatch("selectTable", data.table).then(() => {
 								this.openTable(data.table)
-							})							
-						}
+							})
+							}
+						})						
 						break
 					case "MOVE":
 						const square :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}					
@@ -378,7 +378,7 @@ export default defineComponent({
 					case "GAME_END":
 							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
 							if(data.table.gameMode.gameNumber !== 3 ){
-								console.log("Game END:"+JSON.stringify(data))
+								//console.log("Game END:"+JSON.stringify(data))
 								this.$store.dispatch("move", lastSquare)													
 								if(data.gameResult.resultType === "DRAW"){
 									const gameResult:IGameResult={table:data.table,win:data.win}								

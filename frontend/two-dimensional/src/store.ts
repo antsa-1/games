@@ -92,8 +92,8 @@ export const store = createStore<IStoreState>({
 
             state.tables = tables
         },
-        clearTable(state) {
-            state.theTable = null
+        clearTable(state) {           
+            state.theTable = null           
         },
         setUsers(state, players: IUser[]) {
             state.users = players
@@ -131,7 +131,7 @@ export const store = createStore<IStoreState>({
             state.users.push(user)
         },
         startGame(state, table: ITable) {
-            const index = state.tables.findIndex(element => element.tableId === table.tableId);
+            const index = state.tables.findIndex(element => element.tableId === table.tableId)          
             state.tables.splice(index, 1, table)
         },
         selectTable(state, table: ITable) {
@@ -178,7 +178,7 @@ export const store = createStore<IStoreState>({
                 } else if (state.theTable.playerB.name === userName) {
                     state.theTable.playerInTurn = null
 
-                }
+                }               
                 let text = userName.concat(" left table")
                 const chatMessage: IChatMessage = { from: "System", text: text }
                 state.theTable.chat.messages.unshift(chatMessage)
