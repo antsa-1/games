@@ -2,12 +2,12 @@
 	<div class="row mb-3 mt-2">
 		<div class="col ">
 			<span class="fw-bold">
-				<h3>Terms and conditions 14.02.2022</h3>
+				<h3>Terms and conditions 24.02.2022</h3>
 			</span>
 			<p class="">
 				<span class=" fw-bold">General</span>
 				<br>
-				 Site is under construction and can change/reset data without informing. At the moment you can play tic-tac-toe and connect4 games.
+				 Site is under construction and can change/reset data without informing. At the moment you can play eightball, tic-tac-toe and connect4 games.
 				 On some occasions IP-address of the client is logged.
 				 <br>
 			</p>
@@ -25,12 +25,16 @@
 				 <br>
 			</p>			
 			<p class="">
-				<span class=" fw-bold">Bugs</span>
+				<span class=" fw-bold">Bugs </span>
 				<br>
-				No bounties are available for bugs. But if you track them and find somethings please use the feedback form or contact using GitHub.
+				No bounties are available for bugs. But if you track them and find anything please use the feedback form for notifying.		
+			</p>
+			<p class="">
+				<span class=" fw-bold">Disclaimer</span>
 				<br>
-				Frontend and backend source codes are available from https://github.com/antsa-1/games 
-			</p>	
+				You use this site at your own risk.<br>
+				There is no guarantee for this website to work error free. The author of this site is not liable for any damage what could be caused by using this website.<br>
+			</p>
 		</div>
 	</div>		
 </template>
