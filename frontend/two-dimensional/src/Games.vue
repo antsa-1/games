@@ -1,7 +1,7 @@
 <template>
 	<div class="container">
 		<header>
-			<h2>Welcome!</h2>
+			<h2>Welcomes you!</h2>
 		</header>
 		<NavbarTop />
 
