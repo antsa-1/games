@@ -310,8 +310,12 @@ export const store = createStore<IStoreState>({
         rematch(context, table: ITable) {
             context.commit("rematch", table)
         },
-        leaveTable(context, table: ITable) {
-            context.commit("leaveTable", table)
+        leaveTable(context, data) {
+            if(!context.state.theTable){               
+               return
+            }
+            if(context.state.theTable.tableId === data.table.tableId)
+                context.commit("leaveTable", data.who.name)
         },
         updateWinner(context, win: IWin) {
             context.commit("updateWinner", win)

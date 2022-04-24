@@ -372,8 +372,8 @@ export default defineComponent({
 					
 						})
 						break
-					case "LEAVE_TABLE":	
-						this.$store.dispatch("leaveTable", data.who.name)
+					case "LEAVE_TABLE":						
+						this.$store.dispatch("leaveTable", data)
 						break
 					case "GAME_END":
 							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
