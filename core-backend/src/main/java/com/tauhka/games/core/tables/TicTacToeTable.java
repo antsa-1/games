@@ -76,6 +76,7 @@ public class TicTacToeTable extends Table {
 			// throw new CloseWebSocketExcepetion("Player is not in turn in board:" + this);
 		}
 		Move moveIn = (Move) moveInObject;
+		validateInputs(moveIn.getX(), moveIn.getY());
 		GameToken token = this.board[moveIn.getX()][moveIn.getY()];
 		if (token != null) {
 			throw new IllegalArgumentException("Board already has token x:" + x + "+ y:" + y + " _" + this);
@@ -87,6 +88,16 @@ public class TicTacToeTable extends Table {
 		Move move = new Move(moveIn.getX(), moveIn.getY());
 		move.setToken(token);
 		return move;
+	}
+
+	private void validateInputs(Integer x, Integer y) {
+		if (x < 0 || y < 0 || x > this.board.length - 1 || y > this.board.length - 1) {
+			throw new IllegalArgumentException("Board length fail, x:" + x + " y:" + y);
+		}
+		GameToken token = this.board[x][y];
+		if (token != null) {
+			throw new IllegalArgumentException("Board already has token x:" + x + "+ y:" + y + " _" + this);
+		}
 	}
 
 	public GameResult checkWinAndDraw() {

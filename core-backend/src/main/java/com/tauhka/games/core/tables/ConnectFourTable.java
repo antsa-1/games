@@ -27,6 +27,9 @@ public class ConnectFourTable extends TicTacToeTable {
 		}
 		Move moveIn = (Move) moveInObject;
 		GameToken[][] board = super.getBoard();
+		if (moveIn.getY() < 0 || moveIn.getY() > board.length - 1) {
+			throw new IllegalArgumentException("Board length fail:" + moveIn.getY());
+		}
 		GameMode gameMode = super.getGameMode();
 		int rows = gameMode.getY() - 1;
 		GameToken token = null;
