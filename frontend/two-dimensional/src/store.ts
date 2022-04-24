@@ -88,9 +88,12 @@ export const store = createStore<IStoreState>({
         setGames(state, games: IGame[]) {
             state.games = games
         },
-        setTables(state, tables: ITable[]) {
+         setTables(state, tables: ITable[]) {
 
             state.tables = tables
+        },
+        clearTable(state) {
+            state.theTable = null
         },
         setUsers(state, players: IUser[]) {
             state.users = players
@@ -310,8 +313,11 @@ export const store = createStore<IStoreState>({
         rematch(context, table: ITable) {
             context.commit("rematch", table)
         },
+        clearTable(context) {
+            context.commit("clearTable")
+        },
         leaveTable(context, data) {
-            if(!context.state.theTable){               
+            if(!context.state.theTable || !data.table){               
                return
             }
             if(context.state.theTable.tableId === data.table.tableId)

@@ -90,10 +90,9 @@ export const tablesMixin = {
 			this.user.webSocket.send(JSON.stringify(obj));	
 		},
 		leaveTable(){
-			const obj ={title:"LEAVE_TABLE", message:this.theTable.tableId}
-			this.theTable = null
-			this?.user?.webSocket?.send(JSON.stringify(obj));
-
+			const obj ={title:"LEAVE_TABLE", message:this.theTable.tableId}			
+			this?.user?.webSocket?.send(JSON.stringify(obj))
+			this.$store.dispatch("clearTable")
 		},
 		openTable(table:ITable){
 			this.$router.push({ name: this.getTableName(table.gameMode.gameNumber), id:table.tableId})
