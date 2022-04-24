@@ -9,9 +9,12 @@ import static com.tauhka.games.core.util.Constants.SYSTEM;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.tauhka.games.core.GameMode;
+import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.Move;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.AI;
@@ -36,7 +39,7 @@ import jakarta.inject.Inject;
 @Default
 @Dependent
 public class TableHandler {
-
+	private static final Logger LOGGER = Logger.getLogger(TableHandler.class.getName());
 	@Inject
 	private Event<GameStatisticsEvent> statisticsEvent;
 
@@ -90,6 +93,9 @@ public class TableHandler {
 		message.setTitle(MessageTitle.LEAVE_TABLE);
 		message.setTable(table);
 		User user = endpoint.getUser();
+		if (table.isPlayer(user)) {
+			handleLeavingPlayerStatistics(table, endpoint);
+		}
 		if (table.removePlayerIfExist(user)) {
 			message.setWho(endpoint.getUser());
 			CommonEndpoint.TABLES.remove(table.getTableId());
@@ -129,13 +135,14 @@ public class TableHandler {
 			GameResult result = tableOptional.get().checkWinAndDraw();
 			if (result != null) {
 				tokenMessage.setTitle(MessageTitle.GAME_END);
-				fireStatisticsEvent(table, result);
+				table.setGameOver(true);
+				fireStatisticsEventAsync(table, result);
 			} else {
 				tokenMessage.setTitle(MessageTitle.MOVE);
 			}
 			tokenMessage.setTable(tableOptional.get());
 			tokenMessage.setMessage(move.toString());
-			tokenMessage.setWin(result);
+			tokenMessage.setGameResult(result);
 			tokenMessage.setX(move.getX());
 			tokenMessage.setY(move.getY());
 			tokenMessage.setToken(move.getToken().getAsText());
@@ -144,11 +151,37 @@ public class TableHandler {
 		throw new IllegalArgumentException("No table to put token: for:" + user);
 	}
 
-	private void fireStatisticsEvent(Table table, GameResult result) {
+	private void handleLeavingPlayerStatistics(Table table, CommonEndpoint endpoint) {
+		if (table.isGameOver()) {
+			// Statistics go another route since game ended "normally"
+			return;
+		}
+		table.setGameOver(true); // stats only once per game/leaver
+		User user = table.getOpponent(endpoint.getUser());
+		GameResult result = new GameResult();
+		result.setPlayerA(table.getPlayerA());
+		result.setPlayerB(table.getPlayerB());
+		result.setResultType(GameResultType.LEFT_ONGOING_GAME);
+		result.setWinner(user);
+		result.setGameMode(table.getGameMode());
+		result.setStartInstant(table.getGameStartedInstant());
+		fireStatisticsEventSync(table, result);
+	}
+
+	private void fireStatisticsEventAsync(Table table, GameResult result) {
 		GameStatisticsEvent statsEvent = new GameStatisticsEvent();
 		statsEvent.setGameResult(result);
-
 		statisticsEvent.fireAsync(statsEvent);
+	}
+
+	private void fireStatisticsEventSync(Table table, GameResult result) {
+		try {
+			GameStatisticsEvent statsEvent = new GameStatisticsEvent();
+			statsEvent.setGameResult(result);
+			statisticsEvent.fire(statsEvent);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "Leaving player sync stats failed:", e);
+		}
 	}
 
 	public Message removeEndpointOwnTable(CommonEndpoint endpoint) {
@@ -210,26 +243,20 @@ public class TableHandler {
 		Optional<Table> tableOptional = stream.findFirst();
 		if (tableOptional.isEmpty()) {
 			throw new IllegalArgumentException("resign not possible, no table for:" + endpoint.getUser());
-
 		}
 		Table table = tableOptional.get();
 		GameResult gameResult = table.resign(endpoint.getUser());
-		if (gameResult != null && gameResult.getWinner() != null) {
-			// For Artificial player set Rematch-state ready
-			if (table.getOpponent(endpoint.getUser()) instanceof AI) {
-				table.suggestRematch(table.getOpponent(endpoint.getUser()));
-			}
-			Message winnerMessage = new Message();
-			winnerMessage.setFrom(SYSTEM);
-			// chatMessage.setTo(t);
-			winnerMessage.setMessage("R"); // R=resignition in UI
-			winnerMessage.setTable(table);
-			winnerMessage.setWho(gameResult.getWinner());
-			winnerMessage.setTitle(MessageTitle.WINNER);
-			return winnerMessage;
+		// For Artificial player set Rematch-state ready
+		if (table.getOpponent(endpoint.getUser()) instanceof AI) {
+			table.suggestRematch(table.getOpponent(endpoint.getUser()));
 		}
-
-		throw new IllegalArgumentException("resign not possible, is a player?. PlayerIn turn missing?" + endpoint.getUser());
+		Message winnerMessage = new Message();
+		winnerMessage.setFrom(SYSTEM);
+		winnerMessage.setMessage("R"); // R=resignition in UI
+		winnerMessage.setTable(table);
+		winnerMessage.setWho(gameResult.getWinner());
+		winnerMessage.setTitle(MessageTitle.RESIGN);
+		return winnerMessage;
 	}
 
 	public Message rematch(CommonEndpoint endpoint) {

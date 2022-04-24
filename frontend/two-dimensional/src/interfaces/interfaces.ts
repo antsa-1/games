@@ -95,6 +95,7 @@ export interface IBaseTable {
 	chat: IChat,
 	tableId: string,
 	timeControlIndex: number,
+	secondsLeft: number,
 	randomStarter: boolean,
 	registeredOnly: boolean
 }
@@ -172,5 +173,6 @@ export enum GameResult {
 	WIN_BY_TIME,
 	WIN_BY_RESIGNATION,
 	WIN_BY_DISCONNECT,
-	DRAW
+	DRAW,
+	LEFT_TABLE
 }

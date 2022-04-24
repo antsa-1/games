@@ -95,7 +95,7 @@ export default defineComponent({
 				this.removeMouseListener()
 				this.stopReducer()
 				this.drawWinningLine(win)
-			}else if(mutation.type === "setDraw"){
+			}else if(mutation.type === "setDraw" ||mutation.type === "resign" ){
 				this.stopReducer()
 				this.removeMouseListener()
 			}
@@ -166,6 +166,7 @@ export default defineComponent({
 	},
 	beforeUnmount() {
     	this.unsubscribe()
+		this.stopReducer()
 		this.leaveTable()
   	},
 	methods: {

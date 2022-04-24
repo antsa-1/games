@@ -39,8 +39,8 @@ public class Message implements Serializable {
 	private List<Table> tables = new ArrayList<Table>();
 	@JsonbProperty("games")
 	private List<Game> games;
-	@JsonbProperty("win")
-	private GameResult win;
+	@JsonbProperty("gameResult")
+	private GameResult gameResult;
 	@JsonbProperty("computer")
 	private Boolean computer;
 	@JsonbProperty("randomStarter")
@@ -76,6 +76,14 @@ public class Message implements Serializable {
 		return computer;
 	}
 
+	public GameResult getGameResult() {
+		return gameResult;
+	}
+
+	public void setGameResult(GameResult gameResult) {
+		this.gameResult = gameResult;
+	}
+
 	public void setComputer(Boolean computer) {
 		this.computer = computer;
 	}
@@ -96,20 +104,12 @@ public class Message implements Serializable {
 		this.y = y;
 	}
 
-	public GameResult getWin() {
-		return win;
-	}
-
 	public PoolMessage getPoolMessage() {
 		return poolMessage;
 	}
 
 	public void setPoolMessage(PoolMessage poolMessage) {
 		this.poolMessage = poolMessage;
-	}
-
-	public void setWin(GameResult win) {
-		this.win = win;
 	}
 
 	public Boolean getRandomStarter() {

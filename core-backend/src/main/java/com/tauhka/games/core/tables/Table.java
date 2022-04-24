@@ -57,6 +57,8 @@ public abstract class Table implements Serializable {
 	protected GameMode gameMode;
 	@JsonbProperty("gameStartedInstant")
 	protected Instant gameStartedInstant;
+	@JsonbTransient
+	protected boolean gameOver;
 
 	public Table(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex) {
 		this.tableId = UUID.randomUUID();
@@ -95,20 +97,30 @@ public abstract class Table implements Serializable {
 	public synchronized GameResult resign(User player) {
 		if (this.isPlayer(player) && this.playerInTurn != null) {
 			this.playerInTurn = null;
+			this.gameOver = true;
 			User opponent = getOpponent(player);
 			GameResult gameResult = new GameResult();
 			gameResult.setStartInstant(this.gameStartedInstant);
 			gameResult.setWinner(opponent);
 			gameResult.setPlayerA(this.playerA);
 			gameResult.setPlayerB(this.playerB);
+			gameResult.setResigner(player);
 			gameResult.setResultType(GameResultType.WIN_BY_RESIGNATION);
 			return gameResult;
 		}
-		return null;
+		throw new IllegalArgumentException("Resign not possible" + player);
 	}
 
 	public int getDraws() {
 		return draws;
+	}
+
+	public boolean isGameOver() {
+		return gameOver;
+	}
+
+	public void setGameOver(boolean gameOver) {
+		this.gameOver = gameOver;
 	}
 
 	public GameMode getGameMode() {
@@ -192,6 +204,8 @@ public abstract class Table implements Serializable {
 		users.addAll(watchers);
 		return users;
 	}
+	
+	
 
 	public boolean removePlayerIfExist(User user) {
 		if (playerA != null && playerA.equals(user)) {

@@ -62,8 +62,6 @@ public class PoolTable extends Table implements PoolComponent {
 	private UUID gameId;
 	@JsonbTransient
 	private boolean breaked;
-	@JsonbTransient
-	private boolean gameOver;
 
 	static {
 		String env = System.getProperty("Server_Environment");

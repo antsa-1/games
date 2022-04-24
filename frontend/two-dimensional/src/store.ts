@@ -95,6 +95,13 @@ export const store = createStore<IStoreState>({
         setUsers(state, players: IUser[]) {
             state.users = players
         },
+        updateScore(state, winMessage: IWinMessage) {
+            if (state.theTable) {
+                state.theTable.playerA.wins = winMessage.winsA
+                state.theTable.playerB.wins = winMessage.winsB
+                state.theTable.playerInTurn = null
+            }
+        },
         addTable(state, table: ITable) {
             if (table.playerA.name === state.user.name) {
                 state.tables.unshift(table)
@@ -139,13 +146,10 @@ export const store = createStore<IStoreState>({
             }
         },
         move(state, square: ISquare) {
-
             state.theTable.board.push(square)
         },
-        changeTurn(state, playerInTurn: IPlayer) {
-            console.log("STORE:turnChange "+playerInTurn.name)
+        changeTurn(state, playerInTurn: IPlayer) {            
             state.theTable = { ...state.theTable, playerInTurn: playerInTurn }
-
         },
         chat(state, message: IChatMessage) {
             if (state.theTable) {
@@ -156,7 +160,7 @@ export const store = createStore<IStoreState>({
 
             state.commonChat.messages.unshift(message);
         },
-        updateScore(state, winMessage: IWinMessage) {
+        resign(state, winMessage: IWinMessage) {
 
             if (state.theTable) {
                 state.theTable.playerA.wins = winMessage.winsA
@@ -182,14 +186,13 @@ export const store = createStore<IStoreState>({
             if (state.theTable && state.theTable.chat) {
                 chat = state.theTable.chat
             }
-            const board: ISquare[] = []
-            table.board = board
+          //  const board: ISquare[] = []
+           // table.board = board
             const rematchMessage: IChatMessage = { text: "Rematch started", from: "System" }
             chat.messages.unshift(rematchMessage)
             table.playerA.wins = table.playerA.wins
             table.playerB.wins = table.playerB.wins
             table.chat = chat
-
             state.theTable = table
         },
         updateWinner(state, win: IWin) {
@@ -297,6 +300,9 @@ export const store = createStore<IStoreState>({
         },
         updateCommonChat(context, message: IChatMessage) {
             context.commit('updateCommonChat', message)
+        },
+        resign(context, message: IWinMessage) {
+            context.commit('resign', message)
         },
         updateScore(context, message: IWinMessage) {
             context.commit('updateScore', message)

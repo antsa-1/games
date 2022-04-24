@@ -378,15 +378,16 @@ export default defineComponent({
 					case "GAME_END":
 							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
 							if(data.table.gameMode.gameNumber !== 3 ){
+								console.log("Game END:"+JSON.stringify(data))
 								this.$store.dispatch("move", lastSquare)													
-								if(data.win.resultType === "DRAW"){
+								if(data.gameResult.resultType === "DRAW"){
 									const gameResult:IGameResult={table:data.table,win:data.win}								
 									this.$store.dispatch("setDraw",gameResult);
 								}
 								else {
 									const updateScoreMessage:IWinMessage =
 									{
-										winner:data.win.winner.name,
+										winner:data.gameResult.winner.name,
 										reason: IWinTitle.GAME,
 										winsA:data.table.playerA.wins,
 										winsB:data.table.playerB.wins,
@@ -394,12 +395,12 @@ export default defineComponent({
 									}									
 									this.$store.dispatch("updateScore", updateScoreMessage);
 									const win:IWin = {
-										fromX:data.win.fromX,
-										fromY:data.win.fromY,
-										toX:data.win.toX,
-										toY:data.win.toY,
-										resultType:data.win.resultType,
-										winner:{name:data.win.winner.name},	
+										fromX:data.gameResult.fromX,
+										fromY:data.gameResult.fromY,
+										toX:data.gameResult.toX,
+										toY:data.gameResult.toY,
+										resultType:data.gameResult.resultType,
+										winner:{name:data.gameResult.winner.name},	
 									}							
 									this.$store.dispatch("updateWinner", win);
 								}
@@ -409,8 +410,8 @@ export default defineComponent({
 								this.$store.dispatch("poolPlayTurn", data)										
 								this.$store.dispatch("poolGameEnded", data)
 							}
-						break;
-					case "WINNER":
+						break
+					case "RESIGN":
 						const winMessage:IWinMessage={
 							winner:data.who.name,
 							reason:data.reason,
@@ -418,15 +419,15 @@ export default defineComponent({
 							winsB:data.table.playerB.wins,
 							from:data.from
 						}
-						this.$store.dispatch("updateScore", winMessage);
+						this.$store.dispatch("resign", winMessage);
 						const title: IWinTitle = data.message ==="R"?IWinTitle.RESIGNITION:IWinTitle.GAME
 						let chatText = data.who.name.concat( title===IWinTitle.RESIGNITION? " won by resignation": " won")
                			const chatMessag:IChatMessage = {
 							from:data.from,
 							text:chatText
 						}
-						this.$store.dispatch("chat", chatMessag);
-						break;
+						this.$store.dispatch("chat", chatMessag)
+						break
                 }
 			};
 			websocket.onerror = event => {
@@ -517,10 +518,7 @@ export default defineComponent({
 			if(!selectedName.startsWith("Anonym")){
 				this.$router.push({ name: 'Profile', params: { selectedName: selectedName } })	
 			}
-		},
-		getTimeControls(){
-			return [{id:0, seconds:120}, {id:1, seconds:90}, {id:2, seconds:60}, {id:3, seconds:45}, {id:4, seconds:30}, {id:5, seconds:20}]
-		},
+		},	
 		getTimeControl(table){
 			return this.getTimeControls()[table.timeControlIndex].seconds
 		}

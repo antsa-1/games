@@ -76,7 +76,7 @@ public class CommonEndpoint {
 				gameMessage = tableHandler.createTable(message, this);
 				sendCommonMessage(gameMessage);
 				if (gameMessage.getTable().isArtificialPlayerInTurn()) {
-					Thread.sleep(2000);
+					Thread.sleep(3000);
 					Message artMoveMessage = null;
 					if (gameMessage.getTable() instanceof PoolTable) {
 						playPoolAITurns(gameMessage);

@@ -3,6 +3,8 @@ package com.tauhka.games.core;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.tauhka.games.core.util.Constants;
+
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
 
@@ -40,6 +42,10 @@ public class User { // Combine with Portal User.java?
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public boolean isGuestPlayer() {
+		return this.name.startsWith(Constants.ANONYM_LOGIN_NAME_START);
 	}
 
 	public Double getRanking(GameMode gameMode) {

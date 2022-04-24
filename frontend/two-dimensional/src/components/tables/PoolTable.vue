@@ -5,7 +5,7 @@
 			
 			<button v-if="resignButtonVisible" :disabled ="resignButtonDisabled" @click="resign" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
 				Resign 
-			</button>			
+			</button>
 			<button v-if="rematchButtonEnabled" @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
 				Rematch
 			</button>
@@ -15,9 +15,9 @@
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
 			<span v-if="playingTurn" class="text-success">Playing turn</span>
-			<span v-else-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn {{userName}} </span>
-			<span v-else-if="theTable?.playerInTurn === null" class="text-success"> Game ended </span>	
-			<div v-else class="text-danger"> In turn: {{theTable.playerInTurn?.name}}</div>			
+			<span v-else-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn {{userName}} > time left:{{this.theTable.secondsLeft}}  </span>
+			<span v-else-if="theTable?.playerInTurn === null" class="text-success"> Game ended </span>
+			<div v-else class="text-danger"> In turn: {{theTable.playerInTurn?.name}}</div>
 		</div>
 	</div>
 	
@@ -43,11 +43,11 @@ const CUE_MAX_WIDTH = 900
 const CUE_MAX_HEIGHT = 12
 const BALL_DIAMETER = 34
 const FRICTION = 0.991
+const DELTA = 1/8
 
 let cueForceInterval = undefined
 let collisionCheckInterval = undefined
-const DELTA = 1/8
-
+let reducerInterval = undefined
 export default defineComponent({
 	components: { Chat },
 	name: "PoolTable",
@@ -79,35 +79,49 @@ export default defineComponent({
 				}
 			}
     	},
-  },
+		mouseEnabled:{
+			handler(newValue, oldVal) {				
+				if(newValue && !reducerInterval){					
+					this.restartReducer()
+				}else if(!newValue){						
+					this.stopReducer()
+					reducerInterval = null
+				}
+			}
+		},
+		timeRunOut:{
+			handler(newValue, oldVal) {					
+				if(newValue){
+					this.stopReducer()					
+					if(this.isOngoingGame() && this.isMyTurnInSnapshot()){
+						this.resign()
+					}
+				}
+			}
+		},
+  	},
 	created() {	
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
-			if (mutation.type === "rematch" ){
+			if (mutation.type === "rematch" ){				
+				this.resultSnapshot = null
 				this.initTable()
+			}
+			if (mutation.type === "resign" ){				
+				this.theTable.playerInTurn = null
+				this.clearTurnQueue()
+				this.draw()
 			}
     	})
 	},
-	computed: {
-			turnQueueLength(){				
-				return this.turnQueue.turns.length
-			},
-			mouseEnabled(){
-				const playerInTurn = this.$store.getters.playerInTurn
-				if(!playerInTurn){
-					console.log("mouse disabled no playerInTurn")
-					return false
-				}
-				return this.$store.getters.playerInTurn.name === this.userName && this.poolTable.mouseEnabled
-			},
-			cueVisible(){			
-				return this.mouseEnabled
-			},		
-	},
-	mounted() {	
+	mounted() {
 		this.initTable()
-		if(this.watch === "1"){	
-			this.clearTurnQueue()	
-			this.createTableFromSnapShot()
+		if(this.watch === "1"){
+			this.clearTurnQueue()
+			this.updatePocketedBalls(this.theTable.playerABalls)
+			this.updatePocketedBalls(this.theTable.playerBBalls, false)
+			this.updateRemainingBallPositions(this.theTable.remainingBalls, this.balls)		
+			let cueBall:IBall = this.theTable.remainingBalls[this.theTable.remainingBalls.length -1]
+			this.cue.position = cueBall.position
 			this.unblockQueue()
 			this.draw()
 		}
@@ -118,22 +132,51 @@ export default defineComponent({
 				this.draw()
 				return
 			}
+			
 			if(action.type !== "poolPlayTurn" && action.type !== "poolSetHandBall" && action.type !== "poolSelectPocket" 
 				&& action.type !== "poolSetHandBallFail" && action.type !== "poolGameEnded"){					
 				return
-			}
+			}					
 			this.resetInstanceVariables()
 			this.createTableSnapshot(action)
+			if(!this.isDocumentVisible() && this.isTimerRestartRequiredForAction(action) && this.isMe(action.payload.table.playerInTurn.name)){				
+			 	this.restartReducer()
+			}
 			if(!this.isDocumentVisible) {								
 				return
-			}				
+			}
 			this.produceTurns(action)
 			this.draw()		
 		})
 	},
+	computed: {
+			turnQueueLength(){				
+				return this.turnQueue.turns.length
+			},
+			mouseEnabled(){				
+				const playerInTurn = this.$store.getters.playerInTurn
+				if(!playerInTurn){				
+					this.draw()
+					return false
+				}
+				if(!this.poolTable){
+					return false
+				}
+				const retVal = this.$store.getters.playerInTurn.name === this.userName && this.poolTable.mouseEnabled				
+				return retVal
+			},
+			cueVisible(){			
+				return this.mouseEnabled
+			},
+			timeRunOut(){
+				return this.theTable.secondsLeft <= 0
+			}	
+	},
+
 	beforeUnmount() {
     	this.unsubscribe()
 		this.unsubscribeAction()
+		this.clearIntervals()
 		this.leaveTable()
   	},
 	methods: {
@@ -145,9 +188,18 @@ export default defineComponent({
 			this.cue.position = this.cueBall.position
 			this.resultSnapshot = null			
 		},
+		clearIntervals(){
+			clearInterval(cueForceInterval)
+			clearInterval(collisionCheckInterval)
+			clearInterval(reducerInterval)
+		},
+		isTimerRestartRequiredForAction(action){
+			const retVal= action.type == "poolPlayTurn" || action.type === "poolSetHandBall" || action.type === "poolSelectPocket"			
+			return retVal
+		},
 		consumeTurns(){
 			if(this.turnQueue.turns.length === 0 ){			
-				const enabled = this.isMyTurn() ? true: false
+				const enabled = this.isMyTurnInStore() ? true: false
 				this.poolTable.mouseEnabled = enabled
 				console.log("TurnQueue is empty, mouseEnabled "+this.poolTable.mouseEnabled)
 				return
@@ -160,21 +212,21 @@ export default defineComponent({
 			const turn:ITurn = this.turnQueue.turns.splice(0, 1)[0]			
 			console.log("Starting to consume turn "+JSON.stringify(turn))
 			if(turn.shootBall){
-				console.log("shoot ball")				
-				this.firstTurnPlayed = true
+				console.log("shootball")				
+				this.firstTurnPlayed = true				
 				this.shootBall(turn).then(() => {
-					console.log("shoot ball done")
+					console.log("shootball done")
 					this.selectedPocket = null
 					this.cue.force = 0
-					const timeout = this.isMyTurn()? 0 : 1500
+					const timeout = this.isMyTurnInStore()? 0 : 1500
 					this.unblockQueue(timeout)
-					this.playingTurn = false
+					this.playingTurn = false					
 				})
 			}
 			else if(turn.setHandBall){
 				
 				this.setHandBall(turn)
-				const timeout = this.isMyTurn()? 0 : 2000
+				const timeout = this.isMyTurnInStore()? 0 : 2000
 				this.unblockQueue(timeout)
 			} else if(turn.setSelectedPocket != null){
 				
@@ -192,6 +244,7 @@ export default defineComponent({
 				this.clearTurnQueue()
 				this.turnQueue.blocked = true
 				const message:IChatMessage = {from:"System",text:turn.winner + " won " + "( "+turn.winReason.toLowerCase() +" )"}
+				this.stopReducer()
 				this.$store.dispatch("chat", message)
 				this.draw()		
 			}
@@ -399,9 +452,9 @@ export default defineComponent({
 				return
 			}
 			this.renderingContext.translate(component.position.x, component.position.y)
-			if(image.canvasRotationAngle){				
+			if(image.canvasRotationAngle){
 				this.renderingContext.rotate(image.canvasRotationAngle)
-			}		
+			}
 			//void ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 			if(!image.canvasDestination){
 				image.canvasDestination = <IVector2> {x:0, y:0}
@@ -415,23 +468,23 @@ export default defineComponent({
 				this.renderingContext.beginPath()
 				this.renderingContext.moveTo(0, -200)
 				this.renderingContext.lineTo(0, 200)
-				this.renderingContext.stroke()				
-			}			
-			if(!this.isMyTurn() && component.hasOwnProperty('force')){
+				this.renderingContext.stroke()
+			}
+			if(!this.isMyTurnInStore() && component.hasOwnProperty('force')){
 				this.renderingContext.drawImage(image.image, 1430, 0, 100, 22,  image.canvasDestination.x+825, image.canvasDestination.y, 88, 10)
 			}else {
 			 	this.renderingContext.drawImage(image.image, 0, 0, image.realDimension.x, image.realDimension.y, image.canvasDestination.x, image.canvasDestination.y, image.canvasDimension.x, image.canvasDimension.y)			
 			}
 			this.renderingContext.resetTransform()
 		},
-		repaintAll(){		
+		repaintAll(){
 			this.renderingContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
 			//Table
 			this.repaintComponent(this.poolTable)
 			this.repaintComponent(this.cueBall)
 			for( let i = 0; i < this.balls.length; i++){
 				this.repaintComponent(this.balls[i])
-			}		
+			}
 			if(!this.isOngoingGame()){
 				this.repaintGameEnd()
 			}
@@ -439,11 +492,11 @@ export default defineComponent({
 			if(!this.handBall && !this.playingTurn){
 				this.repaintComponent(this.cue)
 			}
-			if(this.handBall && this.isMyTurn() ){
+			if(this.handBall && this.isMyTurnInStore() ){
 				this.renderingContext.font = "bolder 16px Arial"
 				this.renderingContext.fillText("Set handball position", 400, 35)
 			}
-			if(this.pocketSelection && this.isMyTurn()){
+			if(this.pocketSelection && this.isMyTurnInStore()){
 				const highLightPocket = this.selectedPocket === null ? 0: this.selectedPocket				
 				this.repaintPocketSelection(highLightPocket)
 				this.renderingContext.font = "bolder 16px Arial"
@@ -466,10 +519,9 @@ export default defineComponent({
 			this.turnQueue = <ITurnQueue> {turns:[], blocked:false}	
 			let windowWidth = window.innerWidth
 			let height = window.innerHeight			
-			const table: ITable = this.theTable;
 			this.canvas = document.getElementById("canvas");
 			this.renderingContext = this.canvas.getContext("2d",{ alpha: false });
-			let canvasWidth = windowWidth;
+			let canvasWidth = windowWidth
 			let canvasHeight = height
 			canvasWidth = CANVAS_MAX_WIDTH
 			canvasHeight = CANVAS_MAX_HEIGHT
@@ -485,7 +537,7 @@ export default defineComponent({
 												canvasRotationAngle: { x:0, y:0 },
 												visible: true										
 			}
-			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, mouseEnabled: true}
+			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, mouseEnabled: false}
 			
 			const topLeftPart :IBoundry = <IBoundry>{a:79, b:118, c:572}
 			const topRightPart :IBoundry = <IBoundry>{a:79, b:644, c:1090}
@@ -547,7 +599,9 @@ export default defineComponent({
 			}
 			if(this.isPlayerInTurn(this.userName)){
 				this.handBall = true
+				this.poolTable.mouseEnabled = true		
 			}
+		//	this.restartReducer()
 			let cuePosition = <IVector2> { x: this.cueBall.position.x, y: this.cueBall.position.y }	//5	
 			let cueForce = 0
 			this.cue = <ICue> {position: cuePosition, image: cueImage, force: cueForce, angle:0}
@@ -600,20 +654,20 @@ export default defineComponent({
 			this.cueBall.velocity.y = 0	
 			let playerInTurn:IPlayer = 	table.playerInTurn
 			this.changeTurnIfRequired(playerInTurn)
-			if(this.isMyTurn()){				
+			if(pool.winner){
+				console.log("winner from snapshot"+pool.winner.name)
+				this.theTable.playerInTurn = null
+				this.poolTable.mouseEnabled = false
+			}
+			else if(this.isMyTurnInStore()){
 				this.poolTable.mouseEnabled = true
-			}			
-			if(pool.turnResult === "HANDBALL" && this.isMyTurn()){				
+			}
+			if(pool.turnResult === "HANDBALL" && this.isMyTurnInStore()){				
 				this.handBall = true
-			}else if(pool.turnResult === "ASK_POCKET_SELECTION" && this.isMyTurn()){				
+			}else if(pool.turnResult === "ASK_POCKET_SELECTION" && this.isMyTurnInStore()){				
 				this.pocketSelection = true
 			}
-			else if(pool.turnResult === "EIGHT_BALL_IN_POCKET_OK" ){
-				this.theTable.playerInTurn = null						
-			}
-			else if(pool.turnResult === "EIGHT_BALL_IN_POCKET_FAIL" ){
-				this.theTable.playerInTurn = null							
-			}	
+			
 			requestAnimationFrame(this.repaintAll)
 		},
 
@@ -631,18 +685,18 @@ export default defineComponent({
 			return component.position.x >= this.poolTable.bottomLeftPart.b && component.position.x <=this.poolTable.bottomLeftPart.c && component.position.y +this.cueBall.radius >=this.poolTable.bottomLeftPart.a
 				|| component.position.x >= this.poolTable.bottomRightPart.b && component.position.x <=this.poolTable.bottomRightPart.c && component.position.y +this.cueBall.radius >=this.poolTable.bottomRightPart.a
 		},
-		startReducer(){			
-			if( this.redurcerInterval ){
-				this.stopReducer()
-			}
-			this.secondsLeft = 120;
-			this.redurcerInterval = setInterval(() => {
-				this.secondsLeft = this.secondsLeft -1
-				if(this.secondsLeft <= 0){
-					this.stopReducer()
-					this.resign()
-				}
+		restartReducer(always:boolean){
+			//This is just a friendly timer which can be bypassed in UI
+			if(reducerInterval){
+				clearInterval(reducerInterval)
+			}			
+			this.theTable.secondsLeft = this.getTimeControls()[this.theTable.timeControlIndex].seconds		
+			reducerInterval = setInterval(() => {
+				this.theTable.secondsLeft --					
 			}, 1000)
+		}, 
+		stopReducer(){
+			clearInterval(reducerInterval)
 		},
 		createBall(ballNumber:number, ballDiameter:number){
 			const dims: IVector2 = {x: ballDiameter, y: ballDiameter}
@@ -699,8 +753,8 @@ export default defineComponent({
 			if(!this.poolTable.mouseEnabled){
 				return
 			}			
-			this.poolTable.mouseEnabled = false
 			if(this.pocketSelection){				
+				this.poolTable.mouseEnabled = false
 				this.sendPocketSelection(this.selectedPocket)				
 				return
 			}
@@ -708,14 +762,20 @@ export default defineComponent({
 				this.cueBall.position.x = event.offsetX
 				this.cueBall.position.y = event.offsetY				
 				this.hb(event.offsetX, event.offsetY, this.canvas)
-			}			
+			}
 			if(!this.handBall){
+				this.poolTable.mouseEnabled = false
 				clearInterval(cueForceInterval)
+				clearInterval(reducerInterval)
 				this.sendTurn(this.cue, this.cueBall, this.canvas)
 			}
 		},
-		isMyTurn(){	
-			return this.theTable?.playerInTurn?.name === this.userName
+	
+		isMyTurnInSnapshot(){
+			if(!this.resultSnapshot){
+				return false
+			}
+			return this.resultSnapshot.payload.table.playerInTurn.name === this.userName
 		},
 		isHandBallPositionAllowed(){
 			//Starting position position need to be behind the line			
@@ -771,7 +831,7 @@ export default defineComponent({
 				this.cue.position.x = this.cueBall.position.x
 				this.cue.position.y = this.cueBall.position.y
 				this.mousePoint = <IVector2> {x: event.offsetX, y: event.offsetY }
-				if(this.isMyTurn()){
+				if(this.isMyTurnInStore()){
 					setTimeout(() => {
 						this.updateCueAngle(event)
 						this.draw()
@@ -781,7 +841,7 @@ export default defineComponent({
 		},
 		handleAfterAnimation(){			
 			return new Promise((resolve) => {
-				if(this.isMyTurn() && this.theTable.playerInTurn !== null){					
+				if(this.isMyTurnInStore() && this.theTable.playerInTurn !== null){					
 					this.cue.force = 0
 				}
 				this.draw()				
@@ -1088,6 +1148,7 @@ export default defineComponent({
 			this.draw()
 			if(this.cue.force >= 250){
 				clearInterval(cueForceInterval)
+				clearInterval(reducerInterval)				
 				this.poolTable.mouseEnabled = false
 				this.sendTurn(this.cue, this.cueBall, this.canvas)
 			}

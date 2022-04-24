@@ -14,8 +14,10 @@ public class GameResult {
 
 	@JsonbProperty("winner") // Winner
 	private User winner;
+	@JsonbProperty("resigner") // Winner
+	private User resigner;
 
-	@JsonbProperty
+	@JsonbProperty("resultType")
 	private GameResultType resultType;
 	@JsonbTransient
 	private User playerA;
@@ -88,6 +90,14 @@ public class GameResult {
 
 	public void setWinner(User winner) {
 		this.winner = winner;
+	}
+
+	public User getResigner() {
+		return resigner;
+	}
+
+	public void setResigner(User resigner) {
+		this.resigner = resigner;
 	}
 
 }

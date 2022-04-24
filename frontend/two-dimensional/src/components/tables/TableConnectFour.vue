@@ -52,12 +52,13 @@ import {IGameMode,IGameToken, ITable, IUser,ISquare, IWin} from "../../interface
 import { loginMixin } from "../../mixins/mixins";
 import { useRoute } from "vue-router";
 import Chat from "../Chat.vue";
+import { tablesMixin } from "@/mixins/tablesMixin";
 
 
 export default defineComponent({
   components: { Chat },
   name: "TableConnectFour",
-  mixins: [loginMixin],
+  mixins: [loginMixin,tablesMixin],
   props: ["watch"],
   data() {
     return {
@@ -92,15 +93,19 @@ export default defineComponent({
           this.stopReducer()
         }
       } else if (mutation.type === "rematch") {
-        this.initBoard();
+          this.removeMouseListeners()
+          this.initBoard()
+          if(this.isMyTurnInStore()){
+             this.startReducer()
+          }
       } else if (mutation.type === "updateWinner") {
-        const win: IWin = state.theTable.win;
-        this.stopReducer()
-        this.removeMouseListeners()
-        this.drawWinningLine(win)
-      }else if(mutation.type === "setDraw"){
-				this.stopReducer()
-        this.removeMouseListeners()
+          const win: IWin = state.theTable.win;
+          this.stopReducer()
+          this.removeMouseListeners()
+          this.drawWinningLine(win)
+      }else if(mutation.type === "setDraw" || mutation.type === "resign"){
+				  this.stopReducer()
+          this.removeMouseListeners()
 			}
     });
   },
@@ -154,17 +159,18 @@ export default defineComponent({
   },
   beforeUnmount() {
     this.unsubscribe()
+    this.stopReducer()
     this.leaveTable()
   },
   methods: {
-    startReducer() {
-      if (this.redurcerInterval) {
-        this.stopReducer()
+    startReducer() {      
+      if (this.redurcerInterval) {       
+          this.stopReducer()
       }
       this.secondsLeft = 120
       this.redurcerInterval = setInterval(() => {
-        this.secondsLeft = this.secondsLeft - 1
-        if (this.secondsLeft <= 0) {
+        this.secondsLeft --       
+        if (this.secondsLeft <= 0) {           
           this.stopReducer()
           this.resign()
         }
@@ -230,7 +236,6 @@ export default defineComponent({
     clearCircleIndicatorRow(){
       this.column = -1
       this.renderingContext.clearRect(0, 0, this.gameBoardWidth, this.arcDiameter - 3 )
-      console.log("Cleared")
     },
     drawWinningLine(win: IWin) {
       this.renderingContext.beginPath();

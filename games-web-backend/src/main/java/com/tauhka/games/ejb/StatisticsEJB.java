@@ -22,6 +22,7 @@ import com.tauhka.games.core.twodimen.GameResult;
 
 import jakarta.annotation.Resource;
 import jakarta.ejb.Stateless;
+import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.ObservesAsync;
 
 @Stateless
@@ -41,7 +42,11 @@ public class StatisticsEJB { // To core package?!?!?
 
 	public void observeGameResult(@ObservesAsync GameStatisticsEvent gameStats) {
 
-		LOGGER.info("StatisticsEJB should update now database with " + gameStats);
+		LOGGER.info("StatisticsEJB should async update now database with " + gameStats);
+		updateDatabase(gameStats);
+	}
+
+	private void updateDatabase(GameStatisticsEvent gameStats) {
 		if (gameStats == null || gameStats.getGameResult() == null) {
 			throw new IllegalArgumentException("No statistics for database:" + gameStats);// Tells which one was null
 		}
@@ -58,6 +63,11 @@ public class StatisticsEJB { // To core package?!?!?
 			LOGGER.info("StatisticsEJB No loggedInPlayers");
 			updateGameCount(gameStats);
 		}
+	}
+
+	public void observeGameResultSync(@Observes GameStatisticsEvent gameStats) {
+		LOGGER.info("StatisticsEJB should sync update now database with " + gameStats);
+		updateDatabase(gameStats);
 	}
 
 	// Updates User-table

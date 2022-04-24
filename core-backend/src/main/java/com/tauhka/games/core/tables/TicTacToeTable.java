@@ -47,12 +47,7 @@ public class TicTacToeTable extends Table {
 	@Override
 	protected Table startRematch() {
 		board = new GameToken[super.getGameMode().getX()][super.getGameMode().getY()];
-		super.rematchPlayer = null;
-		if (startingPlayer.equals(playerA)) {
-			startingPlayer = playerB;
-		} else {
-			startingPlayer = playerA;
-		}
+		super.resetRematchPlayer();
 		if (startingPlayer.equals(playerA)) {
 			playerA.setGameToken(GameToken.X);
 			playerB.setGameToken(GameToken.O);
@@ -60,8 +55,8 @@ public class TicTacToeTable extends Table {
 			playerA.setGameToken(GameToken.O);
 			playerB.setGameToken(GameToken.X);
 		}
-		this.playerInTurn = startingPlayer;
 		this.addedTokens = 0;
+		this.gameOver = false;
 		this.gameStartedInstant = Instant.now();
 		return this;
 	}

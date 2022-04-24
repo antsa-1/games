@@ -109,6 +109,9 @@ export const tablesMixin = {
 				return "PoolTable"
 			}
 		},
+		getTimeControls(){
+			return [{id:0, seconds:120}, {id:1, seconds:90}, {id:2, seconds:60}, {id:3, seconds:45}, {id:4, seconds:30}, {id:5, seconds:20}]
+		},
 		isPlayerInTurn(userName:string){
 			return this.theTable.playerInTurn.name === userName
 		},
@@ -141,7 +144,9 @@ export const tablesMixin = {
 		},
 		isMe(userName:string){
 			return this.userName === userName
-		}
-		
+		},
+		isMyTurnInStore(){	
+			return this.theTable?.playerInTurn?.name === this.userName
+		},
 	},
 };
