@@ -67,6 +67,9 @@ export const poolMixin = {
 			return data.pool.turnResult === "HANDBALL"
 		},
 		isOngoingGame(){
+			if(!this.theTable){
+				return false
+			}
 			if( this.theTable.playerInTurn){			
 				return true
 			}			
