@@ -55,7 +55,7 @@ export default defineComponent({
 	computed: {
 		getClass(){
 			const eightBalls = this.eightBalls > 0
-			const ticTacToes = this.ticTacToes > 0
+			const ticTacToes = this.tictactoes > 0
 			const connectFours = this.connectFours > 0
 			if(eightBalls && ticTacToes && connectFours){
 				return "col-sm-4"
