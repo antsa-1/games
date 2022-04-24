@@ -25,7 +25,7 @@ public abstract class Table implements Serializable {
 	private static final long serialVersionUID = 2422118498940197289L;
 
 	private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
-	private final int[] timeControls = { 120, 90, 60, 45, 30, 20 }; // serverside timer...??
+
 	@JsonbProperty("tableId")
 	private UUID tableId;
 	@JsonbProperty("playerA")
@@ -70,6 +70,7 @@ public abstract class Table implements Serializable {
 		}
 		this.registeredOnly = registeredOnly;
 		this.timeControlIndex = timeControlIndex;
+		System.out.println("Table created:" + this);
 	}
 
 	public abstract GameResult checkWinAndDraw();
@@ -204,8 +205,6 @@ public abstract class Table implements Serializable {
 		users.addAll(watchers);
 		return users;
 	}
-	
-	
 
 	public boolean removePlayerIfExist(User user) {
 		if (playerA != null && playerA.equals(user)) {
@@ -297,6 +296,7 @@ public abstract class Table implements Serializable {
 			this.startingPlayer = playerA;
 			playerInTurn = playerA;
 		}
+		System.out.println("JoinedTableAsPlayer:" + this);
 	}
 
 	public List<User> getWatchers() {
@@ -305,7 +305,8 @@ public abstract class Table implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Table [tableId=" + tableId + ", playerA=" + playerA + ", playerB=" + playerB + ", gameMode=" + gameMode + "]";
+		return "Table [tableId=" + tableId + ", playerA=" + playerA + ", playerB=" + playerB + ", playerInTurn=" + playerInTurn + ", rematchPlayer=" + rematchPlayer + ", startingPlayer=" + startingPlayer + ", randomizeStarter="
+				+ randomizeStarter + ", gameMode=" + gameMode + ", gameOver=" + gameOver + "]";
 	}
 
 	protected void resetRematchPlayer() {
