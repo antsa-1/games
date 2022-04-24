@@ -78,7 +78,7 @@ public class PoolTable extends Table implements PoolComponent {
 
 	@Override
 	public synchronized Object playTurn(User user, Object o) {
-		System.out.println("Playing turn:" + user.getName());
+		LOGGER.info("Playing turn:" + user.getName());
 		checkBasicGuards(user);
 		if (expectingPocketSelection) {
 			throw new IllegalArgumentException("Expecting pocket selection:" + this + " user:" + user.getName());
@@ -114,7 +114,7 @@ public class PoolTable extends Table implements PoolComponent {
 		playedTurn.setCue(turn.getCue());
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
-		System.out.println("PLAYED TURN turnResult = " + turnResult.toString() + " player:" + user.getName());
+		LOGGER.info("PLAYED TURN turnResult = " + turnResult.toString() + " player:" + user.getName());
 		return playedTurn;
 	}
 

@@ -7,6 +7,7 @@
   <modules>
   	<module>pool</module>
   	<module>games-web</module>
+  	<module>portal-web</module>
   </modules>
   
   <dependencies>
