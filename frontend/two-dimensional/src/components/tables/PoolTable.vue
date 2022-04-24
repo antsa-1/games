@@ -23,8 +23,20 @@
 	
 	<div class="col-xs-12 col-sm-8">
 			 <canvas id="canvas" width="400" height="400" style="border:1px solid" :class="{'bg-secondary':theTable.playerInTurn ==null}" ></canvas>
-    	</div>
+    </div>
 	<chat :id="theTable.id"> </chat>
+	<div class="row">
+		<div class="col-xs-12 col-sm-12">
+			Eight ball briefly:<br>
+			1. Starting player sets the handball on the left side of the line by clicking the position with mouse.<br>
+			2. At first the table is open => players choose either solids or stripes to play with.<br>
+			3. Move cue position with mouse. Holding mouse button down gives force to the cue, until maxed out.<br>
+			4. Last ball to put into a pocket is eight ball. A pocket selection must be done before pocketing.<br>
+			5. Player wins if eight ball is hit first and it goes to the selected pocket while cue ball stays on the table.<br>
+			5. Other than starting handball can be placed freely at the table unless it is overlapping other ball.
+			<br><br>
+		</div>
+	</div>
 </template>
 
 <script lang="ts">
