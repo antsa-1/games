@@ -70,7 +70,6 @@ public abstract class Table implements Serializable {
 		}
 		this.registeredOnly = registeredOnly;
 		this.timeControlIndex = timeControlIndex;
-		System.out.println("Table created:" + this);
 	}
 
 	public abstract GameResult checkWinAndDraw();

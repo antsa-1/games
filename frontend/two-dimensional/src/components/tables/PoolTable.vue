@@ -204,21 +204,21 @@ export default defineComponent({
 			if(this.turnQueue.turns.length === 0 ){			
 				const enabled = this.isMyTurnInStore() ? true: false
 				this.poolTable.mouseEnabled = enabled
-				console.log("TurnQueue is empty, mouseEnabled "+this.poolTable.mouseEnabled)
+				//console.log("TurnQueue is empty, mouseEnabled "+this.poolTable.mouseEnabled)
 				return
 			}
 			if(this.turnQueue.blocked){
-				console.log("TurnQueue is blocked, not consuming")
+			//	console.log("TurnQueue is blocked, not consuming")
 				return
 			}
 			this.turnQueue.blocked = true
 			const turn:ITurn = this.turnQueue.turns.splice(0, 1)[0]			
-			console.log("Starting to consume turn "+JSON.stringify(turn))
+		//	console.log("Starting to consume turn "+JSON.stringify(turn))
 			if(turn.shootBall){
-				console.log("shootball")				
+			//	console.log("shootball")				
 				this.firstTurnPlayed = true				
 				this.shootBall(turn).then(() => {
-					console.log("shootball done")
+			//		console.log("shootball done")
 					this.selectedPocket = null
 					this.cue.force = 0
 					const timeout = this.isMyTurnInStore()? 0 : 1500
@@ -640,7 +640,7 @@ export default defineComponent({
 			this.turnQueue.turns.splice(0, this.turnQueue.turns.length)
 		},
 		createTableFromSnapShot(){
-			console.log("create table from snapshot")
+		//	console.log("create table from snapshot")
 			if(!this.resultSnapshot)	{
 				//No events yet
 				return
@@ -657,7 +657,7 @@ export default defineComponent({
 			let playerInTurn:IPlayer = 	table.playerInTurn
 			this.changeTurnIfRequired(playerInTurn)
 			if(pool.winner){
-				console.log("winner from snapshot"+pool.winner.name)
+			//	console.log("winner from snapshot"+pool.winner.name)
 				this.theTable.playerInTurn = null
 				this.poolTable.mouseEnabled = false
 			}
