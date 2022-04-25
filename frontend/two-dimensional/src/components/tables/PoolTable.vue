@@ -93,10 +93,12 @@ export default defineComponent({
     	},
 		mouseEnabled:{
 			handler(newValue, oldVal) {				
-				if(newValue && !reducerInterval){					
-					this.restartReducer()
+				if(newValue && !reducerInterval){
+					console.log("watcher:restartReducerInterval")					
+					this.restartReducerInterval()
 				}else if(!newValue){						
-					this.stopReducer()
+					this.stopReducerInterval()
+					this.stopCueInterval()
 					reducerInterval = null
 				}
 			}
@@ -104,7 +106,8 @@ export default defineComponent({
 		timeRunOut:{
 			handler(newValue, oldVal) {					
 				if(newValue){
-					this.stopReducer()					
+					console.log("watcher:stopreducer")	
+					this.stopReducerInterval()					
 					if(this.isOngoingGame() && this.isMyTurnInSnapshot()){
 						this.resign()
 					}
@@ -120,6 +123,7 @@ export default defineComponent({
 			}
 			if (mutation.type === "resign" ){				
 				this.theTable.playerInTurn = null
+				this.handleGameEnd()
 				this.clearTurnQueue()
 				this.draw()
 			}
@@ -152,7 +156,7 @@ export default defineComponent({
 			this.resetInstanceVariables()
 			this.createTableSnapshot(action)
 			if(!this.isDocumentVisible() && this.isTimerRestartRequiredForAction(action) && this.isMe(action.payload.table.playerInTurn.name)){				
-			 	this.restartReducer()
+			 	this.restartReducerInterval()
 			}
 			if(!this.isDocumentVisible) {								
 				return
@@ -174,7 +178,8 @@ export default defineComponent({
 				if(!this.poolTable){
 					return false
 				}
-				const retVal = this.$store.getters.playerInTurn.name === this.userName && this.poolTable.mouseEnabled				
+				const retVal = this.$store.getters.playerInTurn.name === this.userName && this.poolTable.mouseEnabled
+				console.log("computed mouseEnabled:"+retVal)			
 				return retVal
 			},
 			cueVisible(){			
@@ -190,7 +195,7 @@ export default defineComponent({
 		this.unsubscribeAction()
 		this.clearIntervals()
 		this.removeMouseListeners()
-		window.removeEventListener("resize", this.resize)
+		//window.removeEventListener("resize", this.resize)
 		document.removeEventListener("visibilitychange", this.onVisibilityChange)
 		this.leaveTable()
   	},
@@ -204,7 +209,7 @@ export default defineComponent({
 			this.resultSnapshot = null			
 		},
 		clearIntervals(){
-			clearInterval(cueForceInterval)
+			this.stopCueInterval()
 			clearInterval(collisionCheckInterval)
 			clearInterval(reducerInterval)
 		},
@@ -216,21 +221,21 @@ export default defineComponent({
 			if(this.turnQueue.turns.length === 0 ){			
 				const enabled = this.isMyTurnInStore() ? true: false
 				this.poolTable.mouseEnabled = enabled
-				//console.log("TurnQueue is empty, mouseEnabled "+this.poolTable.mouseEnabled)
+				console.log("TurnQueue is empty, mouseEnabled "+this.poolTable.mouseEnabled)
 				return
 			}
 			if(this.turnQueue.blocked){
-			//	console.log("TurnQueue is blocked, not consuming")
+				console.log("TurnQueue is blocked, not consuming")
 				return
 			}
 			this.turnQueue.blocked = true
 			const turn:ITurn = this.turnQueue.turns.splice(0, 1)[0]			
-		//	console.log("Starting to consume turn "+JSON.stringify(turn))
+			console.log("Starting to consume turn "+JSON.stringify(turn))
 			if(turn.shootBall){
-			//	console.log("shootball")				
+				console.log("shootball")	
 				this.firstTurnPlayed = true				
 				this.shootBall(turn).then(() => {
-			//		console.log("shootball done")
+					console.log("shootball done")
 					this.selectedPocket = null
 					this.cue.force = 0
 					const timeout = this.isMyTurnInStore()? 0 : 1500
@@ -254,13 +259,7 @@ export default defineComponent({
 				this.cueBall.image.visible = true
 				this.unblockQueue(0)
 			}else if(turn.lastTurn){			
-				this.theTable.playerInTurn = null
-				this.clearTurnQueue()
-				this.turnQueue.blocked = true
-				const message:IChatMessage = {from:"System",text:turn.winner + " won " + "( "+turn.winReason.toLowerCase() +" )"}
-				this.stopReducer()
-				this.$store.dispatch("chat", message)
-				this.draw()		
+				this.handleGameEnd(turn)	
 			}
 			else if(turn.askPocketSelection){
 				
@@ -320,7 +319,7 @@ export default defineComponent({
 		createAskHandBallPositionTurn(action):ITurn{			
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askHandBallPosition:true, askPocketSelection:false, setSelectedPocket: null, setHandBall:false, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-			//console.log("produced: createAskHandBallPositionTurn"+this.turnQueue.turns.length)
+			console.log("produced: createAskHandBallPositionTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createAskPocketSelectionTurn(action):ITurn{			
@@ -328,14 +327,14 @@ export default defineComponent({
 			let nextTurnPlayer:IPlayer = action.payload.table.playerInTurn
 			let turn:ITurn = {changePlayer:false, turnResult:action.payload.pool.turnResult, askPocketSelection:true, setSelectedPocket: null, setHandBall:null,nextTurnPlayer:nextTurnPlayer, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-		//	console.log("produced: createAskPocketSelectionTurn"+this.turnQueue.turns.length)
+			console.log("produced: createAskPocketSelectionTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createSelectPocketTurn(action):ITurn{		
 			let selectedPocket = action.payload.pool.selectedPocket
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askPocketSelection:false, setSelectedPocket: selectedPocket, setHandBall:null, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-		//	console.log("produced: createSelectPocketTurn"+this.turnQueue.turns.length)
+			console.log("produced: createSelectPocketTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createLastTurn(action):ITurn{
@@ -343,14 +342,14 @@ export default defineComponent({
 			const winner = action.payload.pool.winner.name
 			let turn:ITurn = { askPocketSelection:false, setSelectedPocket: null, setHandBall:null, lastTurn:true,winner:winner, winReason:turnResult,whoPlayed:action.payload.pool.whoPlayed}			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)		
-		//	console.log("produced: createLastTurn"+this.turnQueue.turns.length)
+			console.log("produced: createLastTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createChangePlayerTurn(action):ITurn{
 			let player:IPlayer = action.payload.table.playerInTurn
 			let turn:ITurn = {changePlayer:true, nextTurnPlayer:player, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-		//	console.log("produced: createChangePlayerTurn"+this.turnQueue.turns.length)
+			console.log("produced: createChangePlayerTurn"+this.turnQueue.turns.length)
 			return turn
 		},
 		createShootBallTurn(action):ITurn{
@@ -359,7 +358,7 @@ export default defineComponent({
 			cue.angle = action.payload.pool.cue.angle
 			let turn:ITurn = {shootBall:true, cue:cue, turnResult:action.payload.pool.turnResult, lastTurn: false, whoPlayed:action.payload.pool.whoPlayed}			
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-		//	console.log("produced: createShootBallTurn"+this.turnQueue.turns.length)
+			console.log("produced: createShootBallTurn"+this.turnQueue.turns.length)
 			return turn	
 		},
 		createPoolSetHandBallTurn(action):ITurn{
@@ -372,11 +371,21 @@ export default defineComponent({
 			cueTemp.position = cueBallTemp.position		
 			let turn:ITurn = {cue:cueTemp,cueBall:cueBallTemp,turnResult:action.payload.pool.turnResult,setHandBall:true,nextTurnPlayer:action.payload.table.playerInTurn, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}
 			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-		//	console.log("produced: createPoolSetHandBallTurn"+this.turnQueue.turns.length)
+			console.log("produced: createPoolSetHandBallTurn"+this.turnQueue.turns.length)
 			return turn			
 		},
-		resize(){ 
-			// next version???
+		handleGameEnd(turn:ITurn){
+			this.theTable.playerInTurn = null
+			this.clearTurnQueue()
+			this.turnQueue.blocked = true
+			this.clearIntervals()
+			this.removeMouseListeners()
+			this.poolTable.mouseEnabled = false
+			if(turn){
+				const message:IChatMessage = {from:"System",text:turn.winner + " won " + "( "+turn.winReason.toLowerCase() +" )"}					
+				this.$store.dispatch("chat", message)
+			}
+			this.draw()	
 		},
 		setHandBall(turn:ITurn){
 			this.cueBall.position = turn.cueBall.position			
@@ -386,7 +395,8 @@ export default defineComponent({
 			this.cue.force = 0
 			this.cueBall.image.visible = true
 		},
-		createTableSnapshot(action){			
+		createTableSnapshot(action){
+			this.firstTurnPlayed = true	
 			this.resultSnapshot = action			
 		},
 		updateRemainingBallPositions(serverBalls:Array<IBall>, comparisonList:Array<IBall>){		
@@ -541,8 +551,8 @@ export default defineComponent({
 			canvasHeight = CANVAS_MAX_HEIGHT
 			this.canvas.height = canvasHeight
 			this.canvas.width = canvasWidth
-			window.addEventListener("resize", this.resize)
-			document.addEventListener("visibilitychange", this.onVisibilityChange);
+			//window.addEventListener("resize", this.resize)
+			document.addEventListener("visibilitychange", this.onVisibilityChange)
 			let dimsPoolTable: IVector2 = {x: CANVAS_MAX_WIDTH, y: CANVAS_MAX_HEIGHT}
 			let poolTableImage = <IGameImage> {
 												image: <HTMLImageElement>document.getElementById("tableImg"), 
@@ -615,7 +625,7 @@ export default defineComponent({
 				this.handBall = true
 				this.poolTable.mouseEnabled = true		
 			}
-		//	this.restartReducer()
+		//	this.restartReducerInterval()
 			let cuePosition = <IVector2> { x: this.cueBall.position.x, y: this.cueBall.position.y }	//5	
 			let cueForce = 0
 			this.cue = <ICue> {position: cuePosition, image: cueImage, force: cueForce, angle:0}
@@ -635,8 +645,9 @@ export default defineComponent({
 			return document.visibilityState === 'visible'
 		},
 		onVisibilityChange(){
-			if (this.isDocumentVisible()) {			
-				clearInterval(cueForceInterval)
+			if (this.isDocumentVisible()) {		
+			
+				this.stopCueInterval()
 				clearInterval(collisionCheckInterval)
 				this.createTableFromSnapShot()				
 				this.clearTurnQueue()
@@ -644,7 +655,7 @@ export default defineComponent({
 				this.draw()
 			} else {
 				this.turnQueue.blocked = true	
-				clearInterval(cueForceInterval)			
+				this.stopCueInterval()
 				clearInterval(collisionCheckInterval)
 			}			
 		},		
@@ -669,9 +680,8 @@ export default defineComponent({
 			let playerInTurn:IPlayer = 	table.playerInTurn
 			this.changeTurnIfRequired(playerInTurn)
 			if(pool.winner){
-			//	console.log("winner from snapshot"+pool.winner.name)
-				this.theTable.playerInTurn = null
-				this.poolTable.mouseEnabled = false
+				console.log("winner from snapshot"+pool.winner.name)
+				this.handleGameEnd()
 			}
 			else if(this.isMyTurnInStore()){
 				this.poolTable.mouseEnabled = true
@@ -699,18 +709,34 @@ export default defineComponent({
 			return component.position.x >= this.poolTable.bottomLeftPart.b && component.position.x <=this.poolTable.bottomLeftPart.c && component.position.y +this.cueBall.radius >=this.poolTable.bottomLeftPart.a
 				|| component.position.x >= this.poolTable.bottomRightPart.b && component.position.x <=this.poolTable.bottomRightPart.c && component.position.y +this.cueBall.radius >=this.poolTable.bottomRightPart.a
 		},
-		restartReducer(always:boolean){
+		restartReducerInterval(always:boolean){
 			//This is just a friendly timer which can be bypassed in UI
 			if(reducerInterval){
-				clearInterval(reducerInterval)
-			}			
+				this.stopReducerInterval()
+			}		
 			this.theTable.secondsLeft = this.getTimeControls()[this.theTable.timeControlIndex].seconds		
 			reducerInterval = setInterval(() => {
-				this.theTable.secondsLeft --					
+				this.theTable.secondsLeft --			
 			}, 1000)
 		}, 
-		stopReducer(){
-			clearInterval(reducerInterval)
+		startCueInterval(){
+			console.log("called startCueInterval")
+			if(cueForceInterval){
+				console.log("called startCueInterval stopping first")
+				this.stopInterval()
+			}
+			cueForceInterval = setInterval(this.updateCueForce, 50)
+			console.log("called startCueInterval startin really"+cueForceInterval)
+			
+		},
+		stopCueInterval(){
+			console.log("stopping cueForceInterval "+cueForceInterval)
+			cueForceInterval = clearInterval(cueForceInterval)		
+			console.log("stopped cueForceInterval" +cueForceInterval)			
+		},
+		stopReducerInterval(){
+			reducerInterval = clearInterval(reducerInterval)
+			console.log("stoppedReducerInterval"+reducerInterval)
 		},
 		createBall(ballNumber:number, ballDiameter:number){
 			const dims: IVector2 = {x: ballDiameter, y: ballDiameter}
@@ -740,13 +766,24 @@ export default defineComponent({
 			this.canvas.addEventListener("mousemove", this.handleMouseMove)
 			this.canvas.addEventListener("mousedown", this.handleMouseDown)
 			this.canvas.addEventListener("mouseup", this.handleMouseUp)
+			this.canvas.onpointerdown = this.handleMouseDown
+			this.canvas.onpointerup = this.handleMouseUp
+			this.canvas.onpointermove = this.handleMouseMove
+			this.canvas.addEventListener("pointerdown", this.handleMouseDown, false);
+  			this.canvas.addEventListener("pointerup", this.handleMouseUp, false);
+ 			//this.canvas.addEventListener("pointercancel", handleCancel, false);
+ 	 		this.canvas.addEventListener("pointermove", this.handleMouseMove, false);
 			this.canvas.addEventListener("contextmenu",(e)=> e.preventDefault())			
 		
 		},
 		removeMouseListeners(){
 			this.canvas.removeEventListener("mousemove", this.handleMouseMove)
 			this.canvas.removeEventListener("mousedown", this.handleMouseDown)
-			this.canvas.removeEventListener("mouseup", this.handleMouseUp)			
+			this.canvas.removeEventListener("mouseup", this.handleMouseUp)
+			this.canvas.removeEventListener("contextmenu",(e)=> e.preventDefault())
+			this.canvas.removeEventListener("pointerdown", this.handleMouseUp) 
+			this.canvas.removeEventListener("pointerup", this.handleMouseUp) 
+			this.canvas.removeEventListener("pointermove", this.handleMouseUp)
 		},
 		handleMouseDown(event:MouseEvent){
 			if(event.button === 2){				
@@ -759,11 +796,16 @@ export default defineComponent({
 				return
 			}
 			else if(this.poolTable.mouseEnabled && ! this.handBall){
-				this.cue.force = 0				
-				cueForceInterval = setInterval(this.updateCueForce, 50)			}
+				this.cue.force = 0
+				console.log("cueForce interval:"+cueForceInterval)
+				if(!cueForceInterval){
+					this.startCueInterval()
+				}
+			}
 		},	
 	
 		handleMouseUp(event:MouseEvent){
+			this.stopCueInterval()
 			if(!this.poolTable.mouseEnabled){
 				return
 			}			
@@ -778,9 +820,8 @@ export default defineComponent({
 				this.hb(event.offsetX, event.offsetY, this.canvas)
 			}
 			if(!this.handBall){
-				this.poolTable.mouseEnabled = false
-				clearInterval(cueForceInterval)
-				clearInterval(reducerInterval)
+				this.poolTable.mouseEnabled = false				
+				this.stopReducerInterval()				
 				this.sendTurn(this.cue, this.cueBall, this.canvas)
 			}
 		},
@@ -1160,9 +1201,10 @@ export default defineComponent({
 			this.cue.force += 10		
 			this.cue.image.canvasDestination.x  -= 5
 			this.draw()
+			console.log("updating cueForce:"+this.cue.force)
 			if(this.cue.force >= 250){
-				clearInterval(cueForceInterval)
-				clearInterval(reducerInterval)				
+				this.stopCueInterval()
+				this.stopReducerInterval()			
 				this.poolTable.mouseEnabled = false
 				this.sendTurn(this.cue, this.cueBall, this.canvas)
 			}
