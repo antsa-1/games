@@ -1,17 +1,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.tauhka</groupId>
-  <artifactId>games</artifactId>
-  <version>1.0.1</version>
-  <packaging>pom</packaging>
-  <modules>
-  	<module>pool</module>
-  	<module>games-web</module>
-  	<module>portal-web</module>
-  </modules>
-  
-  <dependencies>
-  	<dependency>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.tauhka</groupId>
+	<artifactId>games</artifactId>
+	<version>1.0.1</version>
+	<packaging>pom</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.release>12</maven.compiler.release>
+	</properties>
+	<modules>
+		<module>../core-backend</module>
+		<module>pool</module>
+		<module>../games-web-backend</module>
+		<module>../portal-web-backend</module>
+	</modules>
+
+	<dependencies>
+		<dependency>
 			<groupId>jakarta.json</groupId>
 			<artifactId>jakarta.json-api</artifactId>
 			<version>2.0.0</version>
@@ -21,10 +26,6 @@
 			<artifactId>jakarta.json.bind-api</artifactId>
 			<version>2.0.0</version>
 		</dependency>
-		<dependency>
-			<groupId>com.tauhka</groupId>
-			<artifactId>games-core</artifactId>
-			<version>1.1.2</version>
-		</dependency>
-  </dependencies>
+
+	</dependencies>
 </project>
