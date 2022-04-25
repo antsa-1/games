@@ -181,7 +181,7 @@ public class StatisticsEJB { // To core package?!?!?
 		User playerB = gameStats.getGameResult().getPlayerB();
 		boolean computerPlayer = playerB instanceof AI;
 		// Computer sits always on playerB position
-		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) || !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START) && !computerPlayer;
+		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) || !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START);
 	}
 
 	private void insertGameResultToDatabase(GameStatisticsEvent gameEvent) {
