@@ -681,7 +681,10 @@ export default defineComponent({
 			this.changeTurnIfRequired(playerInTurn)
 			if(pool.winner){
 				console.log("winner from snapshot"+pool.winner.name)
-				this.handleGameEnd()
+				const winner = pool.winner.name
+				const winReason = pool.turnResult
+				let turn:ITurn = {askPocketSelection:false, setSelectedPocket: null, setHandBall:null, lastTurn:true, winner:winner, winReason:winReason,whoPlayed:pool.whoPlayed}
+				this.handleGameEnd(turn)
 			}
 			else if(this.isMyTurnInStore()){
 				this.poolTable.mouseEnabled = true
@@ -805,10 +808,10 @@ export default defineComponent({
 		},	
 	
 		handleMouseUp(event:MouseEvent){
-			this.stopCueInterval()
 			if(!this.poolTable.mouseEnabled){
 				return
 			}			
+			this.stopCueInterval()
 			if(this.pocketSelection){				
 				this.poolTable.mouseEnabled = false
 				this.sendPocketSelection(this.selectedPocket)				
@@ -819,11 +822,12 @@ export default defineComponent({
 				this.cueBall.position.y = event.offsetY				
 				this.hb(event.offsetX, event.offsetY, this.canvas)
 			}
-			if(!this.handBall){
+			else if(!this.handBall){
 				this.poolTable.mouseEnabled = false				
 				this.stopReducerInterval()				
 				this.sendTurn(this.cue, this.cueBall, this.canvas)
 			}
+			this.poolTable.mouseEnabled = false
 		},
 	
 		isMyTurnInSnapshot(){
