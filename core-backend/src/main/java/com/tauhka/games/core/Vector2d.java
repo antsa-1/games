@@ -20,33 +20,31 @@ public class Vector2d {
 		this.x = x;
 		this.y = y;
 	}
-/*
-	public Double getX() {
-		return x;
-	}
 
-	public void setX(Double x) {
-		this.x = x;
-	}
+	/* public Double getX() { return x; }
+	 * 
+	 * public void setX(Double x) { this.x = x; }
+	 * 
+	 * public Double getY() { return y; }
+	 * 
+	 * public void setY(Double y) { this.y = y; }
+	 * 
+	 * public void add(Vector2d vec) { this.x += vec.getX().doubleValue(); this.y += vec.getY().doubleValue(); }
+	 * 
+	 * @Override public int hashCode() { return Objects.hash(x, y); } */
 
-	public Double getY() {
-		return y;
-	}
 
-	public void setY(Double y) {
-		this.y = y;
-	}
-
-	public void add(Vector2d vec) {
-		this.x += vec.getX().doubleValue();
-		this.y += vec.getY().doubleValue();
+	public boolean isZero() {
+		boolean retVal = this.x == 0.0d && this.y == 0.0d;
+	//	System.out.println("isZero:x" + " y:" + this.y + " =" + retVal);
+		return retVal;
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(x, y);
 	}
-*/
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -56,11 +54,7 @@ public class Vector2d {
 		if (getClass() != obj.getClass())
 			return false;
 		Vector2d other = (Vector2d) obj;
-		return Objects.equals(x, other.x) && Objects.equals(y, other.y);
-	}
-
-	public boolean isZero() {
-		return this.x == 0.0d && this.y == 0.0d;
+		return Double.doubleToLongBits(x) == Double.doubleToLongBits(other.x) && Double.doubleToLongBits(y) == Double.doubleToLongBits(other.y);
 	}
 
 	@Override

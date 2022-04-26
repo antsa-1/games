@@ -34,8 +34,8 @@ public class VectorUtil {
 	public static double calculateAndHandleVectorLength(Vector2d vector) {
 		double res = VectorUtil.calculateVectorLength(vector);
 		if (res < 5) {
-			vector.x = 0;
-			vector.y = 0;
+			vector.x = 0.0d;
+			vector.y = 0.0d;
 		}
 		return res;
 	}
