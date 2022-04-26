@@ -32,8 +32,13 @@
                 Feedback
               </router-link>
           </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
+          <li class="nav-item">              
+              <router-link  class="nav-link"  :to="{ name: 'Instructions' }">
+                Game instructions
+              </router-link>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
             <li class="nav-item dropdown ">          
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <i class="bi bi-person-fill"></i>

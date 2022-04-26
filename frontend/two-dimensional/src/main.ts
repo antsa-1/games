@@ -14,6 +14,7 @@ import TopLists from './components/highscores/TopLists.vue'
 import TableConnectFour from './components/tables/TableConnectFour.vue'
 import PoolTable from './components/tables/PoolTable.vue'
 import Info from './components/Info.vue'
+import Instructions from './components/Instructions.vue'
 import Feedback from './components/Feedback.vue'
 import Registration from './components/Registration.vue'
 import Error from './components/Error.vue'
@@ -43,6 +44,11 @@ const routes: RouteRecordRaw[] = [
         path: '/portal/home',
         component: Home,
         name: "Home",
+    },
+    {
+        path: '/portal/instructions',
+        component: Instructions,
+        name: "Instructions",
     },
 
     {

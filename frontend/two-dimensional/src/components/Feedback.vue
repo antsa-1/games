@@ -1,7 +1,7 @@
 <template>
 	<div v-if="!showThanks && !loadingData" class="row">
 		<div class="col fw-bold">     		
-			Have some feedback? Are games not working, got some improvement ideas?
+			Have some feedback? Are games not working? Have improvement ideas?			
     	</div>
 		<div class="row mt-4">
 			<div class="col ">			
@@ -17,9 +17,9 @@
 		<div class="row">
 			<div class="col">
 				Known issues for 8-ball game: <br>
-				1. On some occasions the ball to be collided with cue ball can go/move to an unexpected direction. <br>
-				2. A ball can be wobbly in the cases where it goes along the pocket pathway. <br>
-				3. The table view can be distorted in some occasions where multiple balls (and cue ball) go into pocket at the same time.<br>
+				1. On some occasions the ball which collides with cue ball can go/move to an unexpected or even opposite direction than what can be expected. <br>
+				2. A ball can be wobbly when it goes along the pocket pathway. <br>
+				<br>
 				In these cases going to another browser window/tab and coming back refreshes the browser to the latest server level.<br>
 			</div>
 		</div>
