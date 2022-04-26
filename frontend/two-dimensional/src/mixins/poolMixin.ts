@@ -3,15 +3,7 @@ import { IVector2,IBall, ICue, IPoolComponent } from "@/interfaces/pool";
 
 import { loginMixin, ANONYM } from "./mixins";
 import { tablesMixin } from "./tablesMixin";
-const anonym_hanballs=[{x:261,y:352},{x:537,y:231}]
-const olav_hanballs=[{x:401,y:301},{x:401,y:301}]
-const anonym_turns=[{x:250,y:-0.013960698528745145},{x:250,y:-2.1070766760375603},{x:250,y:-1.4909663410826592}]
-const olav_turns=[{x:225,y:0.44909863562584823},{x:225,y:0.44909863562584823}]
 
-let  anohand_counter = 0
-let  anoturn_counter = 0
-let  olav_hand_counter = 0
-let  olavturn_counter = 0
 export const poolMixin = {
     mixins: [loginMixin, tablesMixin],
     data() {
@@ -35,53 +27,30 @@ export const poolMixin = {
 			this.user.webSocket.send(JSON.stringify(obj))
 		},
 		hb(xc:number, yc:number, canvas){
-			let position=null
-			if(this.userName.startsWith("A")){
-				position = anonym_hanballs[anohand_counter]
-				anohand_counter++
-			}else{
-				position = olav_hanballs[olav_hand_counter]
-				olav_hand_counter++
-			}
-		
+			let position:IVector2 = {x:xc, y:yc}
 			let cueBalla :IBall = <IBall> {position}
 			const obj = { title:"POOL_HANDBALL", message: this.theTable.tableId, pool:{cueBall:cueBalla, canvas:{x:canvas.width, y:canvas.height}}}            
 			console.log("*** Sending handball to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
 		sendTurn(cue, cueBall, canvas){			
-			const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer2(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
+			const obj ={ title:"POOL_PLAY_TURN", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}            
 			console.log("*** Sending turn to server"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
         },
         sp(cue, cueBall, canvas){
-			//const obj ={ title:"POOL_UPDATE", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}
-			//this.user.webSocket.send(JSON.stringify(obj))
+			const obj ={ title:"POOL_UPDATE", message: this.theTable.tableId, pool:{ cue:this.prepareTransfer(cue), cueBall:this.prepareTransfer(cueBall), canvas:{x:canvas.width, y:canvas.height}}}
+			this.user.webSocket.send(JSON.stringify(obj))
         },
-
+		prepareHandBall(object){
+			const {image, color, ...object2} = object			
+			return object2
+		},
+		
 		prepareTransfer(object){
 			const {image, color, ...object2} = object
 		//	object2.angle= 0.0574905344833121;
 		//	object2.force =250
-		
-			return object2
-		},
-		
-		prepareTransfer2(object){
-			const {image, color, ...object2} = object
-		//	object2.angle= 0.0574905344833121;
-		//	object2.force =250
-		if(this.userName.startsWith("A")){
-			let objc = anonym_turns[anoturn_counter]
-			anoturn_counter++
-			object2.force =objc.x
-			object2.angle =objc.y
-		}else{
-			let objc = olav_turns[olavturn_counter]
-			olavturn_counter++
-			object2.force =objc.x
-			object2.angle =objc.y
-		}
 			return object2
 		},
 		t(p, m, cue, cueBall, canvas, i = false){			

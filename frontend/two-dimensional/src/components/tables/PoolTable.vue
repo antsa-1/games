@@ -1205,7 +1205,7 @@ export default defineComponent({
 			this.cue.force += 10		
 			this.cue.image.canvasDestination.x  -= 5
 			this.draw()
-			console.log("updating cueForce:"+this.cue.force)
+		
 			if(this.cue.force >= 250){
 				this.stopCueInterval()
 				this.stopReducerInterval()			
