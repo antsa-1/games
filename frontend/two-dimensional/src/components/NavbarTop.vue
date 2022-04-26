@@ -40,11 +40,11 @@
         </ul>
         <ul class="navbar-nav ms-auto">
             <li class="nav-item dropdown ">          
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"  role="button" @click="toggle = !toggle" data-bs-toggle="dropdown" aria-expanded="false">
                   <i class="bi bi-person-fill"></i>
                 User 
               </a>            
-              <ul class="dropdown-menu ms-auto" aria-labelledby="navbarDropdown">
+              <ul class="dropdown-menu ms-auto" :class="{ show: toggle }" aria-labelledby="navbarDropdown" @click="toggle = !toggle"> 
                   <li v-if="authenticated">                    
                       <router-link class="dropdown-item" :to="{ name: 'Profile',params: { selectedName: userName } }" >Show profile</router-link>                     
                   </li>
@@ -52,7 +52,7 @@
                       <router-link @click="logout" class="dropdown-item" :to="{ name: 'Login' }">Logout</router-link>
                   </li>
                     <li v-if="!authenticated">               
-                      <router-link class="dropdown-item" :to="{ name: 'Login' }">
+                      <router-link class="dropdown-item" :to="{ name: 'Login' }" >
                         Login
                       </router-link>
                   </li>                         
@@ -81,8 +81,8 @@ export default defineComponent({
 	},
   data() {
     return {
-
-    }
+      toggle: false,
+    };
 	},
   
 
@@ -95,7 +95,7 @@ export default defineComponent({
     }
 	},
 	methods: {
- 
+    
   }
 });
 </script>
