@@ -54,18 +54,9 @@ public class ServerGUI implements Runnable {
 			EventQueue.invokeAndWait(new Runnable() {
 				@Override
 				public void run() {
-					int componentCount = canvasPanel.getComponentCount();
-					for (int i = 0; i < componentCount - 1; i++) {
-						ServerGUIComponent ballPanel = (ServerGUIComponent) canvasPanel.getComponent(i);
-						Ball ball = (Ball) ballPanel.getPoolComponent();
-						if (ball.isInPocket()) {
-							ballPanel.setBounds((int) 40 + ball.getNumber() * 35, 15, 141, 141);
-						} else {
-							ballPanel.setBounds((int) ballPanel.getPoolComponent().getPosition().x - ball.getRadius().intValue(), (int) ballPanel.getPoolComponent().getPosition().y - ball.getRadius().intValue(), 141, 141);
-						}
-
-					}
+					updatePositions(canvasPanel);
 				}
+
 			});
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block
@@ -77,6 +68,22 @@ public class ServerGUI implements Runnable {
 
 	}
 
+	private void updatePositions(JPanel canvasPanel) {
+		int componentCount = canvasPanel.getComponentCount();
+		for (int i = 0; i < componentCount - 1; i++) {
+			ServerGUIComponent ballPanel = (ServerGUIComponent) canvasPanel.getComponent(i);
+			Ball ball = (Ball) ballPanel.getPoolComponent();
+			if (ball.isInPocket()) {
+				System.out.println("UI: ballInPocket" + ball.getNumber());
+				ballPanel.setBounds((int) 40 + ball.getNumber() * 35, 15, 141, 141);
+			} else {
+				System.out.println("ball:"+ball.getNumber()+" position:"+ball.getPosition());
+				ballPanel.setBounds((int) ballPanel.getPoolComponent().getPosition().x - ball.getRadius().intValue(), (int) ballPanel.getPoolComponent().getPosition().y - ball.getRadius().intValue(), 141, 141);
+			}
+
+		}
+	}
+
 	// Updates component positions every time thread wakes up.
 	@Override
 	public void run() {
@@ -86,11 +93,11 @@ public class ServerGUI implements Runnable {
 					LOGGER.info("ServerGui starts to wait");
 					poolTable.wait();
 					// LOGGER.info("ServerGui continues after waiting");
-					updateSwingComponentPositions();
 					// LOGGER.info("ServerGui updated component positions, now notifies");
 					canvasPanel.revalidate();
+					updateSwingComponentPositions();
 					canvasPanel.repaint();
-					Thread.sleep(20);
+					Thread.sleep(1000);
 					poolTable.notify();
 				}
 			}

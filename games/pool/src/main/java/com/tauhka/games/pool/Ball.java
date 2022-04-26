@@ -1,5 +1,7 @@
 package com.tauhka.games.pool;
 
+import java.util.Objects;
+
 import com.tauhka.games.core.Vector2d;
 
 /**
@@ -113,6 +115,23 @@ public class Ball implements PoolComponent {
 
 	public void setRadius(Double radius) {
 		this.radius = radius;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(number);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Ball other = (Ball) obj;
+		return number == other.number;
 	}
 
 	@Override

@@ -239,6 +239,9 @@ public class EightBallRuleBase {
 
 	/* Mathematics from -> ' JavaScript + HTML5 GameDev Tutorial: 8-Ball Pool Game (part 2) ' from 15:42 -> // https://www.youtube.com/watch?v=Am8rT9xICRs */
 	private void collide(PoolTable table, Ball firstBall, Ball secondBall) {
+		if (firstBall.isInPocket() || secondBall.isInPocket()) {
+			return;
+		}
 		Vector2d normalVector = VectorUtil.subtractVectors(firstBall.getPosition(), secondBall.getPosition());
 
 		double normalVectorLength = VectorUtil.calculateVectorLength(normalVector);
@@ -279,7 +282,6 @@ public class EightBallRuleBase {
 		firstBall.setVelocity(firstBallVelocity);
 		Vector2d secondBallVelocity = new Vector2d(v2nTag.x + v2tTag.x, v2nTag.y + v2tTag.y);
 		secondBall.setVelocity(secondBallVelocity);
-		// LOGGER.info("After collision A:" + firstBall + " B:" + secondBall);
 	}
 
 	private void checkAndHandleTableCollisions(PoolTable table, Ball ball) {

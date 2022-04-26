@@ -88,9 +88,8 @@ public class PoolTable extends Table implements PoolComponent {
 		}
 		PoolTurn turn = (PoolTurn) o;
 
-		TurnResult turnResult = null;
+		TurnResult turnResult = this.eightBallRuleBase.playTurn(this, turn);
 
-		turnResult = this.eightBallRuleBase.playTurn(this, turn);
 		PoolTurn playedTurn = new PoolTurn();
 		playedTurn.setPlayer(user.getName());
 		if (TurnResult.isDecisive(turnResult)) {
@@ -115,6 +114,13 @@ public class PoolTable extends Table implements PoolComponent {
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
 		LOGGER.info("PLAYED TURN turnResult = " + turnResult.toString() + " player:" + user.getName());
+		/*
+		for (Ball b : remainingBalls) {
+			System.out.println("B:" + b.getNumber() + " pos:" + b.getPosition() + " veloc:" + b.getVelocity());
+		}
+		*/
+		//new ServerGUI(this).updateSwingComponentPositions();
+		
 		return playedTurn;
 	}
 
@@ -143,9 +149,7 @@ public class PoolTable extends Table implements PoolComponent {
 	@Override
 	public synchronized void joinTableAsPlayer(User playerB) {
 		super.joinTableAsPlayer(playerB);
-		if (SERVER_GUI) {
-			new Thread(new ServerGUI(this)).start();
-		}
+
 	}
 
 	public void setBreaked(boolean breaked) {
@@ -157,7 +161,7 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public synchronized PoolTurn updateHandBall(User user, CueBall sample) {
-		LOGGER.fine("Updatehandball by:" + user.getName());
+		LOGGER.info("Updatehandball by:" + user.getName());
 		checkBasicGuards(user);
 		if (expectingPocketSelection) {
 			throw new IllegalArgumentException("HandBall update is not expected:" + this);
@@ -171,8 +175,8 @@ public class PoolTable extends Table implements PoolComponent {
 			// Different canvas sizes .. TODO
 			Vector2d position = sample.getPosition();
 			this.cueBall.setPosition(position);
-
 			turn.setCueBall(this.cueBall);
+			this.cueBall.setInPocket(false);
 			expectingHandBallUpdate = false;
 			if (getPlayerInTurnBalls().size() == 7) {
 				this.expectingPocketSelection = true;
@@ -271,11 +275,13 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public void putBallInPocket(Ball ballToPocket, Pocket pocket) {
-		System.out.println("InComing:" + ballToPocket.getNumber() + " pocket:" + pocket.getCenter() + " player:" + this.playerInTurn.getName());
+		LOGGER.info("InComing:" + ballToPocket.getNumber() + " pocket:" + pocket.getCenter() + " player:" + this.playerInTurn.getName());
 		if (ballToPocket.getNumber() == 0) {
+			ballToPocket.setInPocket(true);
 			return;
 		}
 		if (ballToPocket.getNumber() == 8) {
+			ballToPocket.setInPocket(true);
 			pocket.setContainsEightBall(true);
 		}
 		ballToPocket.setInPocket(true);
