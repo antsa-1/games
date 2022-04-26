@@ -1,8 +1,7 @@
 
 <template>
 	<div class="row">
-		<div class="col">
-			
+		<div class="col">			
 			<button v-if="resignButtonVisible" :disabled ="resignButtonDisabled" @click="resign" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
 				Resign 
 			</button>
@@ -11,6 +10,19 @@
 			</button>
 		</div>
 	</div>
+
+	<div class="row">
+		<div class="col-xs-12 col-sm-4">
+			<label class="selectora" for="notificationSound" data-bs-toggle="tooltip" data-bs-placement="top" title="Beeps last 14 seconds in turn if checked">
+				<i class="bi bi-music-note"></i>
+			</label>
+			<input  type="checkbox" id="notificationSound" v-model= "gameOptions.soundOn">		
+			<span class="ps-4">
+				<input class=""  type="checkbox" id="pointerLine" v-model= "gameOptions.pointerLine">
+				<label class="" for="pointerLine">Bridge</label>
+			</span>
+		</div>
+	</div>	
 
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
@@ -25,29 +37,19 @@
 			 <canvas id="canvas" width="400" height="400" style="border:1px solid" :class="{'bg-secondary':theTable.playerInTurn ==null}" ></canvas>
     </div>
 	<chat :id="theTable.id"> </chat>
-	<div class="row">
-		<div class="col-xs-12 col-sm-12">
-			Eight ball briefly:<br>
-			1. Starting player sets the handball on the left side of the line by clicking the position with mouse.<br>
-			2. At first the table is open => players choose either solids or stripes to play with.<br>
-			3. Move cue position with mouse. Holding mouse button down gives force to the cue, until maxed out.<br>
-			4. Last ball to put into a pocket is eight ball. A pocket selection must be done before pocketing.<br>
-			5. Player wins if eight ball is hit first and it goes to the selected pocket while cue ball stays on the table.<br>
-			5. Other than starting handball can be placed freely at the table unless it is overlapping other ball.
-			<br><br>
-		</div>
-	</div>
+	
 </template>
 
 <script lang="ts">
-import { defineComponent,isProxy,toRaw } from "vue";
+import { defineComponent,isProxy,toRaw } from "vue"
 
-import {IPlayer,IChatMessage,ITable} from "../../interfaces/interfaces";
-import {IPoolTable, ICue, IBall, IPocket, IEightBallGame, IVector2, IGameImage, IPoolComponent,ITurn, IEightBallGameOptions, IBoundry, IPathWayBorder, ITurnQueue} from "../../interfaces/pool";
-import { loginMixin, } from "../../mixins/mixins";
-import { tablesMixin} from "../../mixins/tablesMixin";
-import { poolMixin} from "../../mixins/poolMixin";
-import Chat from "../Chat.vue";
+import {IPlayer,IChatMessage,ITable} from "../../interfaces/interfaces"
+import {IPoolTable, ICue, IBall, IPocket, IEightBallGame, IVector2, IGameImage, IPoolComponent,ITurn, IEightBallGameOptions, IBoundry, IPathWayBorder, ITurnQueue} from "../../interfaces/pool"
+import { loginMixin, } from "../../mixins/mixins"
+import { tablesMixin} from "../../mixins/tablesMixin"
+import { poolMixin} from "../../mixins/poolMixin"
+import Chat from "../Chat.vue"
+import { Tooltip } from 'bootstrap/dist/js/bootstrap.esm.min.js'
 
 const CANVAS_MAX_WIDTH = 1200
 const CANVAS_MAX_HEIGHT = 677
@@ -73,7 +75,7 @@ export default defineComponent({
 				cueBall: undefined,
 				cue: undefined,
 				poolTable: undefined,
-				gameOptions: undefined,
+				gameOptions: { pointerLine: false, notificationSound:true},
 				mouseCoordsTemp: undefined,
 				handBall:false,
 				playingTurn: false,
@@ -108,7 +110,7 @@ export default defineComponent({
 				if(newValue){
 					console.log("watcher:stopreducer")	
 					this.stopReducerInterval()					
-					if(this.isOngoingGame() && this.isMyTurnInSnapshot()){
+					if(this.isOngoingGame() && this.isMyTurnInSnapshot() || this.firstTurnPlayed === false || this.firstTurnPlayed === undefined){
 						this.resign()
 					}
 				}
@@ -164,7 +166,8 @@ export default defineComponent({
 			this.produceTurns(action)
 			this.draw()		
 		})
-	},
+			new Tooltip(document.getElementsByClassName("selectora")[0])
+		},
 	computed: {
 			turnQueueLength(){				
 				return this.turnQueue.turns.length
@@ -483,7 +486,7 @@ export default defineComponent({
 			if(!image.canvasDestination){
 				image.canvasDestination = <IVector2> {x:0, y:0}
 			}
-			if(false && this.gameOptions && this.gameOptions.helperOrigo && component.hasOwnProperty('force')){
+			if(this.gameOptions && this.gameOptions.pointerLine && component.hasOwnProperty('force')){
 				this.renderingContext.beginPath()
 				this.renderingContext.moveTo(-200, 0)
 				this.renderingContext.lineTo(200, 0)
@@ -634,7 +637,6 @@ export default defineComponent({
 				this.balls.push(ball)
 			}
 			this.balls.push(this.cueBall)
-			this.gameOptions = <IEightBallGameOptions> { helperOrigo: true, useAnimation:true}
 			if(!(this.watch === "1")){
 				this.removeMouseListeners()
 				this.addMouseListeners()
@@ -719,7 +721,10 @@ export default defineComponent({
 			}		
 			this.theTable.secondsLeft = this.getTimeControls()[this.theTable.timeControlIndex].seconds		
 			reducerInterval = setInterval(() => {
-				this.theTable.secondsLeft --			
+				this.theTable.secondsLeft --
+				if(this.gameOptions.soundOn && this.theTable.secondsLeft < 15){
+					this.playNotificationSound()
+				}
 			}, 1000)
 		}, 
 		startCueInterval(){

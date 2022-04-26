@@ -34,7 +34,7 @@ export interface ITurn {
     askHandBallPosition?: boolean,
     askPocketSelection?: boolean,
     nextTurnPlayer?: IPlayer,
-    changePlayer?:boolean,
+    changePlayer?: boolean,
     shootBall?: boolean,
     lastTurn: boolean,
     winner?: string,
@@ -104,7 +104,6 @@ export interface IVector2 {
 }
 
 export interface IEightBallGameOptions {
-    helperOrigo: boolean,
-    helperLine: boolean,
-    useAnimation: boolean
+    pointerLine: boolean,
+    notificationSound: boolean
 }
