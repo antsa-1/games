@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>com.tauhka</groupId>
 		<artifactId>games</artifactId>
-		<version>1.0.2</version>
+		<version>1.0.3</version>
 		<relativePath>../games</relativePath>
 	</parent>
 	<properties>
@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>com.tauhka</groupId>
 			<artifactId>pool</artifactId>
-			<version>1.0.5</version>
+			<version>1.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
