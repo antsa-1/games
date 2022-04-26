@@ -14,7 +14,8 @@ Images are from https://opengameart.org/content/8-ball-pool-assets with minor ch
 <br>
 Also big help from https://www.youtube.com/watch?v=aXwCrtAo4Wc (part1 and 2)
 <br>
-
+<br>
+Architechture image:
 ![tictactoe](./workspace-setup/architecture_.png)
 <br>
 ### 04.03.2022
