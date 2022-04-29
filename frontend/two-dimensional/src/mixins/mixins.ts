@@ -10,7 +10,8 @@ export const loginMixin = {
 	computed: {
 		authenticated() {
 			let user: IUser = this.$store.getters.user 
-			if(user && user.token && !user.token.startsWith("null") &&!user.token.startsWith(GUEST)){
+			if(user && user.token && !user.token.startsWith("null") &&!user.token.startsWith("Guest:")){
+				console.log("user.token"+user.token)
 				return true;
 			}
 			return false;
