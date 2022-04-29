@@ -62,8 +62,7 @@ public class PoolTable extends Table implements PoolComponent {
 	private UUID gameId;
 	@JsonbTransient
 	private boolean breaked;
-	@JsonbTransient
-	ServerGUI s;
+	
 	static {
 		String env = System.getProperty("Server_Environment");
 		String ui = System.getProperty("Server_ShowUI");
@@ -75,7 +74,7 @@ public class PoolTable extends Table implements PoolComponent {
 		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex);
 		EightBallInitializer.init(this);
 		expectingHandBallUpdate = true;
-		s=new ServerGUI(this);
+	//	s=new ServerGUI(this);
 	}
 
 	@Override
@@ -119,9 +118,9 @@ public class PoolTable extends Table implements PoolComponent {
 		/*
 		for (Ball b : remainingBalls) {
 			System.out.println("B:" + b.getNumber() + " pos:" + b.getPosition() + " veloc:" + b.getVelocity());
+		s.updateSwingComponentPositions();
 		}
 		*/
-		s.updateSwingComponentPositions();
 		
 		return playedTurn;
 	}
