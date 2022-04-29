@@ -705,7 +705,9 @@ export default defineComponent({
 				|| component.position.x >= this.poolTable.topRightPart.b &&  component.position.x <=this.poolTable.topRightPart.c && component.position.y -this.cueBall.radius <=this.poolTable.topRightPart.a
 		},
 		isTableLeftBoundry(component:IPoolComponent){
-			return component.position.x <= this.poolTable.leftPart.a+this.cueBall.radius &&  component.position.y >=this.poolTable.leftPart.b && component.position.y  <=this.poolTable.leftPart.c
+			let res= component.position.x <= this.poolTable.leftPart.a+this.cueBall.radius &&  component.position.y >=this.poolTable.leftPart.b && component.position.y  <=this.poolTable.leftPart.c
+			
+			return res
 		},
 		isTableRightBoundry(component:IPoolComponent){
 			return component.position.x >= this.poolTable.rightPart.a - this.cueBall.radius &&  component.position.y >=this.poolTable.rightPart.b && component.position.y <= this.poolTable.rightPart.c
@@ -1059,22 +1061,9 @@ export default defineComponent({
 			return false
 			return component.velocity.x !== 0 || component.velocity.y !==0
 		},
-		checkAndHandleTableCollision(ball:IBall){		
-			if(this.isBallInMiddleArea(ball)){			
-				return
-			}else if(this.isTableTopBoundry(ball) ){				
-				ball.velocity.y = Math.abs(ball.velocity.y)
-			}else if(this.isTableBottomBoundry(ball)){			
-				ball.velocity.y = -Math.abs(ball.velocity.y)
-			}else if(this.isTableLeftBoundry(ball) ){				
-				ball.velocity.x = Math.abs(ball.velocity.x)
-			}else if(this.isTableRightBoundry(ball) ){			
-				ball.velocity.x = -Math.abs(ball.velocity.x)
-			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){			
-			
-			}else{
-				const pocket:IPocket = this.checkIfGoesToPocket(ball)
-				if(pocket){
+		checkAndHandleTableCollision(ball:IBall){
+			const pocket:IPocket = this.checkIfGoesToPocket(ball)
+			if(pocket){
 					this.putBallInMiddleOfPocket(ball, pocket)
 					setTimeout(() => {
 						this.movePocketedBallToEdgeOfTable(ball)
@@ -1082,7 +1071,19 @@ export default defineComponent({
 					}, 1500)
 					
 					return 
-				}
+			}
+			if(this.isBallInMiddleArea(ball)){			
+				return
+			}else if(this.isTableTopBoundry(ball) ){				
+				ball.velocity.y = Math.abs(ball.velocity.y)				
+			}else if(this.isTableBottomBoundry(ball)){			
+				ball.velocity.y = -Math.abs(ball.velocity.y)				
+			}else if(this.isTableLeftBoundry(ball) ){				
+				ball.velocity.x = Math.abs(ball.velocity.x)				
+			}else if(this.isTableRightBoundry(ball) ){			
+				ball.velocity.x = -Math.abs(ball.velocity.x)				
+			}else if(this.checkAndHandlePocketPathwayCollisions(ball)){			
+			
 			}
 		},
 		updatePositionAndVelocity(ball:IBall){

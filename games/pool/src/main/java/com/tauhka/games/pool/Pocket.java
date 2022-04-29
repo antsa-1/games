@@ -47,4 +47,9 @@ public final class Pocket {
 		this.containsEightBall = containsEightBall;
 	}
 
+	@Override
+	public String toString() {
+		return "Pocket [center=" + center + ", radius=" + radius + ", pathWayRight=" + pathWayRight + ", pathwayLeft=" + pathwayLeft + ", containsEightBall=" + containsEightBall + "]";
+	}
+
 }

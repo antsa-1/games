@@ -172,7 +172,6 @@ public class EightBallRuleBase {
 			ball.setPosition(VectorUtil.addVectors(changeInPosition, currentPosition));
 			Vector2d newVelocity = VectorUtil.multiply(ball.getVelocity(), FRICTION);
 			ball.setVelocity(newVelocity);
-
 		}
 	}
 
@@ -261,7 +260,6 @@ public class EightBallRuleBase {
 			}
 			iterationCount++;
 		}
-
 		Vector2d mtd = VectorUtil.multiply(normalVector, (firstBall.getDiameter() - normalVectorLength) / normalVectorLength);
 		firstBall.getPosition().x += mtd.x * 0.5;
 		firstBall.getPosition().y += mtd.y * 0.5;
@@ -285,19 +283,19 @@ public class EightBallRuleBase {
 	}
 
 	private void checkAndHandleTableCollisions(PoolTable table, Ball ball) {
+		if (checkAndHandlePockets(table, ball) == true) {
+			// Ball is now put in middle of pocket
+			return;
+		}
 		if (isInMiddleArea(table, ball)) {
 			return;
 		}
-
 		if (checkAndHandleTableBoundriesCollisions(table, ball)) {
 			if (ball.getNumber() == 11) {
 			}
 			return;
 		}
 		if (checkAndHandlePocketPathwayCollisions(table, ball)) {
-			return;
-		}
-		if (checkAndHandlePockets(table, ball) != null) {
 			return;
 		}
 
@@ -313,8 +311,8 @@ public class EightBallRuleBase {
 		}
 	}
 
-	private TurnResult checkAndHandlePockets(PoolTable table, Ball balla) {
-
+	private boolean checkAndHandlePockets(PoolTable table, Ball balla) {
+		boolean ballPutInPocket = false;
 		for (Pocket pocket : table.getPockets()) {
 			if (!isBallInPocket(table, balla, pocket)) {
 				continue;
@@ -327,6 +325,7 @@ public class EightBallRuleBase {
 			int ownBalls = table.getPlayerInTurnBalls().size();
 			int opponentBalls = table.getPlayerNotInTurnBalls().size();
 			table.putBallInPocket(balla, pocket);
+			ballPutInPocket = true;
 			if (balla.getNumber() == 8) {
 				eightBallInPocket = true;
 				// This should check the order of balls going in pocket if several balls at the same time goes
@@ -350,7 +349,7 @@ public class EightBallRuleBase {
 			removeFromNextTurn(balla);
 			break;
 		}
-		return this.turnResult;
+		return ballPutInPocket;
 
 	}
 
