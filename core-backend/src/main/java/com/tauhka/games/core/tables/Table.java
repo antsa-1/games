@@ -295,7 +295,6 @@ public abstract class Table implements Serializable {
 			this.startingPlayer = playerA;
 			playerInTurn = playerA;
 		}
-		System.out.println("JoinedTableAsPlayer:" + this);
 	}
 
 	public List<User> getWatchers() {

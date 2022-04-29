@@ -113,7 +113,6 @@ public class UserEJB {
 			throw new IllegalArgumentException("Registration nickname is forbidden:" + nickName);
 		}
 		Optional<String> forbiddenWordOptional = FORBIDDEN_WORD_PARTS.stream().filter(forbidden -> nickName.contains(forbidden)).findAny();
-		System.out.println("GG");
 		if (forbiddenWordOptional.isPresent()) {
 			throw new IllegalArgumentException("Registration nickname contains forbidden word:" + forbiddenWordOptional.get() + " :" + nickName);
 		}
