@@ -5,7 +5,7 @@
 				Players
 			</span>		
 			<ul class="list-group ">						
-				<li v-for="(user, index) in users" :key="user.name" @click="openProfile(user.name)" class="list-group-item bg-success p-2 text-dark" :class="[index%2==0?'bg-opacity-25':' bg-opacity-10', user.name.startsWith('Anonym')?'':'games-profile-link' ] ">					
+				<li v-for="(user, index) in users" :key="user.name" @click="openProfile(user.name)" class="list-group-item bg-success p-2 text-dark" :class="[index%2==0?'bg-opacity-25':' bg-opacity-10', user.name.startsWith(GUEST)?'':'games-profile-link' ] ">					
 					<div class="float-start" >
 						{{user.name}}						
 						<svg v-if="user.name===userName" xmlns="http://www.w3.org/2000/svg" width="23" height="23" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
@@ -164,7 +164,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare, IChatMessage, IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces/interfaces";
-import { loginMixin } from "../mixins/mixins";
+import { loginMixin,GUEST } from "../mixins/mixins";
 import { utilsMixin } from "../mixins/utilsmixin";
 import { useRoute } from "vue-router";
 import { Tooltip } from 'bootstrap/dist/js/bootstrap.esm.min.js'
@@ -515,7 +515,7 @@ export default defineComponent({
 			this.user.webSocket.send(JSON.stringify(obj));
 		},
 		openProfile(selectedName:string){
-			if(!selectedName.startsWith("Anonym")){
+			if(!selectedName.startsWith(GUEST)){
 				this.$router.push({ name: 'Profile', params: { selectedName: selectedName } })	
 			}
 		},	

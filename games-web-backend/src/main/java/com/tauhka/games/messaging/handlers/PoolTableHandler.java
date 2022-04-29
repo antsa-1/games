@@ -42,7 +42,7 @@ public class PoolTableHandler {
 	private Event<GameStatisticsEvent> statisticsEvent;
 
 	public Message updateCuePosition(CommonEndpoint endpoint, Message message) {
-		Table table = findUserTable(endpoint);
+		Table table = findUserTable(endpoint); // this can become
 
 		if (!table.isPlayerInTurn(endpoint.getUser())) {
 			// throw new IllegalArgumentException("pool, not updating cue, player is not in turn");

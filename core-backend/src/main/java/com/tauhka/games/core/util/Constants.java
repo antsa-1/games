@@ -10,8 +10,8 @@ public final class Constants {
 	public static final int PASSWORD_MAX_LENGTH = 150;
 	public static final int CHAT_MESSAGE_MAX_LENGTH = 75;
 	public static final int CHAT_MESSAGE_MIN_LENGTH = 1;
-	public static final String ANONYM_LOGIN_NAME_START = "Anonym_";
-	public static final String ANONYM_LOGIN_TOKEN_START = "Anom:";
+	public static final String GUEST_LOGIN_NAME = "Guest_";
+	public static final String GUEST_LOGIN_TOKEN_START = "Guest:";
 	public static final String OLAV_COMPUTER = "Olav_computer";
 	public static final double OLAV_COMPUTER_TICTACTOE_RANKING = 1200;
 	public static final double OLAV_COMPUTER_CONNECT_FOUR_RANKING = 1205;
@@ -27,7 +27,7 @@ public final class Constants {
 	public static final String LOG_PREFIX_PORTAL = LOG_PREFIX + "PORTAL ";
 	public static final String LOG_PREFIX_GAMES = LOG_PREFIX + "GAMES ";
 
-	private static final List<String> FORBIDDEN_WORD_PARTS = new ArrayList<String>();
+	public static final List<String> FORBIDDEN_WORD_PARTS = new ArrayList<String>();
 	static {
 		FORBIDDEN_WORD_PARTS.add("http");
 		FORBIDDEN_WORD_PARTS.add("@");
@@ -35,8 +35,8 @@ public final class Constants {
 		FORBIDDEN_WORD_PARTS.add("www");
 		FORBIDDEN_WORD_PARTS.add("system");
 		FORBIDDEN_WORD_PARTS.add("System");
-		FORBIDDEN_WORD_PARTS.add("Anonym");
-		FORBIDDEN_WORD_PARTS.add("Anom:");
+		FORBIDDEN_WORD_PARTS.add(Constants.GUEST_LOGIN_NAME);
+		FORBIDDEN_WORD_PARTS.add(Constants.GUEST_LOGIN_TOKEN_START);
 		FORBIDDEN_WORD_PARTS.add(OLAV_COMPUTER);
 		FORBIDDEN_WORD_PARTS.add("null");
 		FORBIDDEN_WORD_PARTS.add(".com");

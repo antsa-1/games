@@ -1,6 +1,6 @@
 package com.tauhka.portal.ejb;
 
-import static com.tauhka.portal.util.Constants.LOG_PREFIX_PORTAL;
+import static com.tauhka.games.core.util.Constants.LOG_PREFIX_PORTAL;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -14,8 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.tauhka.portal.util.Constants;
 
 import jakarta.ejb.Stateless;
 
@@ -32,7 +30,7 @@ public class FeedbackEJB {
 	public void writeFeedBack(String feedback) throws Exception {
 		LOGGER.entering(FeedbackEJB.class.getName(), "writeFeedBack");
 		Path path = null;
-		if (ENVIRONMENT.equalsIgnoreCase(Constants.ENVIRONMENT_PRODUCTION)) {
+		if (ENVIRONMENT.equalsIgnoreCase(com.tauhka.games.core.util.Constants.ENVIRONMENT_PRODUCTION)) {
 			path = Paths.get(fileNameProd);
 		} else {
 			path = Paths.get(fileNameLocal);

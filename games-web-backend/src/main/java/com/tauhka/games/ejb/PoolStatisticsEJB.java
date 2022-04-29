@@ -9,11 +9,8 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.stats.PoolGameStatisticsEvent;
-import com.tauhka.games.core.stats.RankingCalculator;
 import com.tauhka.games.core.twodimen.PoolTurnStats;
-import com.tauhka.games.messaging.util.GamesUtils;
 
 import jakarta.annotation.Resource;
 import jakarta.ejb.Stateless;

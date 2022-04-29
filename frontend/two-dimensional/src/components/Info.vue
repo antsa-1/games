@@ -2,7 +2,7 @@
 	<div class="row mb-3 mt-2">
 		<div class="col ">
 			<span class="fw-bold">
-				<h3>Terms and conditions 24.02.2022</h3>
+				<h3>Terms and conditions 24.04.2022</h3>
 			</span>
 			<p class="">
 				<span class=" fw-bold">General</span>
@@ -74,6 +74,7 @@ export default defineComponent({
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+<!-- @author antsa-1 from GitHub  -->
 <style scoped>
 
 </style>

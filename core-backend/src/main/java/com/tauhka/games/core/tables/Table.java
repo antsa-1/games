@@ -276,7 +276,7 @@ public abstract class Table implements Serializable {
 	}
 
 	public synchronized void joinTableAsPlayer(User playerB) {
-		if (this.registeredOnly && playerB.getName().startsWith(Constants.ANONYM_LOGIN_NAME_START)) {
+		if (this.registeredOnly && playerB.getName().startsWith(Constants.GUEST_LOGIN_NAME)) {
 			// Also guest players can use this option atm..
 			throw new IllegalArgumentException("Only registered players allowed to join to play." + playerB.getName() + " table:" + this);
 		}

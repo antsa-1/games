@@ -1,7 +1,6 @@
 package com.tauhka.games.ejb;
 
-import static com.tauhka.games.core.util.Constants.ANONYM_LOGIN_NAME_START;
-import static com.tauhka.games.core.util.Constants.LOG_PREFIX_GAMES;
+import static com.tauhka.games.core.util.Constants.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -135,7 +134,7 @@ public class StatisticsEJB { // To core package?!?!?
 			stmt = con.prepareStatement(getGameCountSQL(gameStats.getGameResult().getGameMode()));
 			int dbRes = stmt.executeUpdate();
 			if (dbRes > 0) {
-				LOGGER.info(LOG_PREFIX_GAMES + "StatisticsEJB updated gameAmounts for anonymous players game" + gameNumber);
+				LOGGER.info(LOG_PREFIX_GAMES + "StatisticsEJB updated gameAmounts for guest players game" + gameNumber);
 				return;
 			}
 
@@ -173,7 +172,7 @@ public class StatisticsEJB { // To core package?!?!?
 		User playerB = gameStats.getGameResult().getPlayerB();
 		boolean computerPlayer = playerB instanceof ArtificialUser;
 		// Computer sits always on playerB position
-		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) && !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START) && !computerPlayer;
+		return !playerA.getName().startsWith(GUEST_LOGIN_NAME) && !playerB.getName().startsWith(GUEST_LOGIN_NAME) && !computerPlayer;
 	}
 
 	private boolean isOneRegisteredPlayer(GameStatisticsEvent gameStats) {
@@ -181,7 +180,7 @@ public class StatisticsEJB { // To core package?!?!?
 		User playerB = gameStats.getGameResult().getPlayerB();
 		boolean computerPlayer = playerB instanceof AI;
 		// Computer sits always on playerB position
-		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) || !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START);
+		return !playerA.getName().startsWith(GUEST_LOGIN_NAME) || !playerB.getName().startsWith(GUEST_LOGIN_NAME);
 	}
 
 	private void insertGameResultToDatabase(GameStatisticsEvent gameEvent) {

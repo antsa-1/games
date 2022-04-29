@@ -1,6 +1,6 @@
 package com.tauhka.portal.web.resources;
 
-import static com.tauhka.portal.util.Constants.LOG_PREFIX_PORTAL;
+import static com.tauhka.games.core.util.Constants.LOG_PREFIX_PORTAL;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -1,8 +1,6 @@
 package com.tauhka.games.messaging.handlers;
 
-import static com.tauhka.games.core.util.Constants.ANONYM_LOGIN_NAME_START;
-import static com.tauhka.games.core.util.Constants.ANONYM_LOGIN_TOKEN_START;
-import static com.tauhka.games.core.util.Constants.NULL;
+import static com.tauhka.games.core.util.Constants.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +28,7 @@ import jakarta.websocket.Session;
 public class UserHandler {
 	private static final Logger LOGGER = Logger.getLogger(UserHandler.class.getName());
 
-	private static int anonymCount = 0;
+	private static int guestCount = 0;
 	@Inject
 	private UserEJBC userEJB;
 
@@ -41,9 +39,9 @@ public class UserHandler {
 		Message loginMessage = new Message();
 		try {
 			if (isAnonymLogin(message)) {
-				name = ANONYM_LOGIN_NAME_START + updateAnonymCount();
+				name = GUEST_LOGIN_NAME + updateAnonymCount();
 				user = new User(name);
-				loginMessage.setToken(ANONYM_LOGIN_TOKEN_START + UUID.randomUUID().toString());
+				loginMessage.setToken(GUEST_LOGIN_TOKEN_START + UUID.randomUUID().toString());
 			} else {
 				UUID activeLoginToken = UUID.fromString(message.getMessage());
 				user = userEJB.verifyWebsocketToken(activeLoginToken.toString());
@@ -76,7 +74,7 @@ public class UserHandler {
 	}
 
 	private boolean isAnonymLogin(Message message) {
-		return message.getMessage() == null || message.getMessage().equals(NULL) || message.getMessage().trim().length() < 1 || message.getMessage().startsWith(ANONYM_LOGIN_TOKEN_START);
+		return message.getMessage() == null || message.getMessage().equals(NULL) || message.getMessage().trim().length() < 1 || message.getMessage().startsWith(GUEST_LOGIN_TOKEN_START);
 	}
 
 	private void cleanUpGhostTables() {
@@ -90,8 +88,8 @@ public class UserHandler {
 	}
 
 	private static synchronized int updateAnonymCount() {
-		anonymCount++;
-		return anonymCount;
+		guestCount++;
+		return guestCount;
 	}
 
 	public Message createNewPlayerMessage(User user) {

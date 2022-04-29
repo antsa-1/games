@@ -1,6 +1,6 @@
 import { IUser } from "@/interfaces/interfaces";
 
-export const ANONYM = "Anom:"
+export const GUEST = "Guest_"
 export const loginMixin = {
 	data() {
 		return {
@@ -10,7 +10,7 @@ export const loginMixin = {
 	computed: {
 		authenticated() {
 			let user: IUser = this.$store.getters.user 
-			if(user && user.token && !user.token.startsWith("null") &&!user.token.startsWith("Anom:")){
+			if(user && user.token && !user.token.startsWith("null") &&!user.token.startsWith(GUEST)){
 				return true;
 			}
 			return false;

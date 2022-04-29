@@ -45,7 +45,7 @@ public class User { // Combine with Portal User.java?
 	}
 
 	public boolean isGuestPlayer() {
-		return this.name.startsWith(Constants.ANONYM_LOGIN_NAME_START);
+		return this.name.startsWith(Constants.GUEST_LOGIN_NAME);
 	}
 
 	public Double getRanking(GameMode gameMode) {

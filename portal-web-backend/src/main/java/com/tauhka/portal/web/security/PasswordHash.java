@@ -1,6 +1,6 @@
 package com.tauhka.portal.web.security;
 
-import static com.tauhka.portal.util.Constants.LOG_PREFIX_PORTAL;
+import static com.tauhka.games.core.util.Constants.LOG_PREFIX_PORTAL;
 
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
@@ -14,7 +14,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import com.tauhka.portal.exeptions.PasswordNotValidException;
-import com.tauhka.portal.util.Constants;
 
 // Partly read/used/combined from https://www.baeldung.com/java-password-hashing
 public class PasswordHash {
@@ -25,7 +24,7 @@ public class PasswordHash {
 	public void generateHashes(String password) {
 		this.reset();
 		LOGGER.entering(LOG_PREFIX_PORTAL + PasswordHash.class.getName(), "generateHashes");
-		if (password == null || password.length() < Constants.PASSWORD_MIN_LENGTH || password.length() > Constants.PASSWORD_MAX_LENGTH) {
+		if (password == null || password.length() < com.tauhka.games.core.util.Constants.PASSWORD_MIN_LENGTH || password.length() > com.tauhka.games.core.util.Constants.PASSWORD_MAX_LENGTH) {
 			throw new PasswordNotValidException("password do not match criteria");
 		}
 		SecureRandom random = new SecureRandom();

@@ -3,13 +3,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.tauhka</groupId>
 	<artifactId>portal-web</artifactId>
-	<version>1.0.18</version>
+	<version>1.0.19</version>
 	<packaging>war</packaging>
-
 	<name>portal</name>
-
+	<parent>
+		<groupId>com.tauhka</groupId>
+		<artifactId>games</artifactId>
+		<version>1.0.3</version>
+		<relativePath>../games</relativePath>
+	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>12</maven.compiler.release>
@@ -19,7 +22,7 @@
 		<dependency>
 			<groupId>com.tauhka</groupId>
 			<artifactId>games-core</artifactId>
-			<version>1.1.5</version>
+			<version>1.1.6</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>

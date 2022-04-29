@@ -1,14 +1,5 @@
 package com.tauhka.portal.ejb;
-
-import static com.tauhka.portal.util.Constants.ANONYM_LOGIN_TOKEN_START;
-import static com.tauhka.portal.util.Constants.FORBIDDEN_WORD_PARTS;
-import static com.tauhka.portal.util.Constants.LOG_PREFIX_PORTAL;
-import static com.tauhka.portal.util.Constants.NULL;
-import static com.tauhka.portal.util.Constants.PASSWORD_MAX_LENGTH;
-import static com.tauhka.portal.util.Constants.PASSWORD_MIN_LENGTH;
-import static com.tauhka.portal.util.Constants.USER_NAME_MAX_LENGTH;
-import static com.tauhka.portal.util.Constants.USER_NAME_MIN_LENGTH;
-
+import static com.tauhka.games.core.util.Constants.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,6 +12,7 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import com.tauhka.games.core.util.Constants;
 import com.tauhka.portal.highscore.TopLists;
 import com.tauhka.portal.highscore.TopPlayer;
 import com.tauhka.portal.login.LoginOutput;
@@ -49,8 +41,8 @@ public class UserEJB {
 	public LoginOutput login(String name, String password) {
 		LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB login:");
 
-		if (name == null) {
-			throw new IllegalArgumentException("Login no name in ");
+		if (name == null || password == null) {
+			throw new IllegalArgumentException("Login no name or pw");
 		}
 		if (name.length() > USER_NAME_MAX_LENGTH || password.length() > PASSWORD_MAX_LENGTH) {
 			throw new IllegalArgumentException("Login name or password too long");
@@ -116,11 +108,12 @@ public class UserEJB {
 
 	public LoginOutput register(String nickName, String password, String email) throws DuplicateKeyException {
 
-		boolean isForbidden = FORBIDDEN_WORD_PARTS.stream().anyMatch(nickName::equalsIgnoreCase);
+		boolean isForbidden = com.tauhka.games.core.util.Constants.FORBIDDEN_WORD_PARTS.stream().anyMatch(nickName::equalsIgnoreCase);
 		if (isForbidden) {
 			throw new IllegalArgumentException("Registration nickname is forbidden:" + nickName);
 		}
 		Optional<String> forbiddenWordOptional = FORBIDDEN_WORD_PARTS.stream().filter(forbidden -> nickName.contains(forbidden)).findAny();
+		System.out.println("GG");
 		if (forbiddenWordOptional.isPresent()) {
 			throw new IllegalArgumentException("Registration nickname contains forbidden word:" + forbiddenWordOptional.get() + " :" + nickName);
 		}
@@ -249,7 +242,7 @@ public class UserEJB {
 		LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB logout:" + activeLoginToken);
 		PreparedStatement stmt = null;
 		Connection con = null;
-		if (activeLoginToken == null || activeLoginToken.startsWith(ANONYM_LOGIN_TOKEN_START) || activeLoginToken.startsWith(NULL) || activeLoginToken.equals("")) {
+		if (activeLoginToken == null || activeLoginToken.startsWith(Constants.GUEST_LOGIN_TOKEN_START) || activeLoginToken.startsWith(NULL) || activeLoginToken.equals("")) {
 			LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB logout has no token or anonymous logout ");
 			return false;
 		}

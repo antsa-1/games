@@ -1,6 +1,6 @@
 package com.tauhka.games.messaging.util;
 
-import static com.tauhka.games.core.util.Constants.ANONYM_LOGIN_NAME_START;
+import static com.tauhka.games.core.util.Constants.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +44,7 @@ public class GamesUtils {
 		User playerB = gameStats.getGameResult().getPlayerB();
 		boolean computerPlayer = playerB instanceof ArtificialUser;
 		// Computer sits always on playerB position
-		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) && !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START) && !computerPlayer;
+		return !playerA.getName().startsWith(GUEST_LOGIN_NAME) && !playerB.getName().startsWith(GUEST_LOGIN_NAME) && !computerPlayer;
 	}
 
 	public static boolean isOneRegisteredPlayer(GameStatisticsEvent gameStats) {
@@ -52,7 +52,7 @@ public class GamesUtils {
 		User playerB = gameStats.getGameResult().getPlayerB();
 		boolean computerPlayer = playerB instanceof ArtificialUser;
 		// Computer sits always on playerB position
-		return !playerA.getName().startsWith(ANONYM_LOGIN_NAME_START) || !playerB.getName().startsWith(ANONYM_LOGIN_NAME_START) && !computerPlayer;
+		return !playerA.getName().startsWith(GUEST_LOGIN_NAME) || !playerB.getName().startsWith(GUEST_LOGIN_NAME) && !computerPlayer;
 	}
 
 }

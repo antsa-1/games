@@ -1,7 +1,7 @@
 import { IUser } from "@/interfaces/interfaces";
 import { IVector2,IBall, ICue, IPoolComponent } from "@/interfaces/pool";
 
-import { loginMixin, ANONYM } from "./mixins";
+import { loginMixin, GUEST } from "./mixins";
 import { tablesMixin } from "./tablesMixin";
 
 export const poolMixin = {
