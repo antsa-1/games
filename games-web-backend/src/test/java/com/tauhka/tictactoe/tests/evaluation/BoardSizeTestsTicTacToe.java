@@ -22,7 +22,7 @@ public class BoardSizeTestsTicTacToe {
 
 		IllegalArgumentException illegalArgEx = assertThrows(IllegalArgumentException.class, () -> {
 			Move move = new Move(0, -15);
-			c.playTurn(playerB, move);
+			c.playTurn(playerA, move);
 		});
 		String expectedMessage = "Board length fail, x:0 y:-15";
 		String actualMessage = illegalArgEx.getMessage();
@@ -40,7 +40,7 @@ public class BoardSizeTestsTicTacToe {
 
 		IllegalArgumentException illegalArgEx = assertThrows(IllegalArgumentException.class, () -> {
 			Move move = new Move(0, 1155);
-			c.playTurn(playerB, move);
+			c.playTurn(playerA, move);
 		});
 		String expectedMessage = "Board length fail, x:0 y:115";
 		String actualMessage = illegalArgEx.getMessage();
