@@ -1,11 +1,15 @@
 
 Site is currently running @ http://35.217.7.146/portal/index.html with three games, 8-ball (under test), tic-tac-toe and connect four.
-<br><br>
+<br>
+
+### Overall architechture image:
+![tictactoe](./workspace-setup/architecture_.png)
+\br|
 ### 26.04.2022
 New game, eight ball is now available for testing. Play against computer or human, or watch others play.
 
 ![tictactoe](./workspace-setup/eight_ball_game.png)
-<br>
+<br><br>
 Some known bugs (or features) exist. UI and backend have own calculations of the table situation. If these calculations do not match then user(s) play against obsolete table. Server calculations are sent as snapshots.They are loaded in case user re-activates the gaming tab (comes back from another tab browser tab/window).
 <br>
 UI creates turns from the data it receives from the server and then consumes these turns when queue is not blocking.
@@ -14,9 +18,7 @@ Images are from https://opengameart.org/content/8-ball-pool-assets with minor ch
 <br>
 Also big help from https://www.youtube.com/watch?v=aXwCrtAo4Wc (part1 and 2)
 <br>
-<br>
-Architechture image:
-![tictactoe](./workspace-setup/architecture_.png)
+
 <br>
 ### 04.03.2022
 New deployment: with read player profile page containing game history. Tag "prod-rel-1.0.3" .
