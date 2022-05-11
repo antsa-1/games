@@ -65,7 +65,7 @@
 								{{table.randomizeStarter? "?": "fixed"}} 
 							</td>
 							<td>
-								{{this.getTimeControl(table)}}s
+								{{getTimeControl(table)}}s
 							</td>						
 							<td>
 								<section v-if="!hasCreatedTable">
@@ -76,7 +76,7 @@
 									<button @click="watchTable(table)" v-if="table.playerA && table.playerB" type="button" class="btn btn-primary w-30 float-end">
 										Watch
 									</button>
-									<span v-else-if="!this.authenticated && !playButtonVisible(table)">Requires login to play</span>
+									<span v-else-if="!authenticated && !playButtonVisible(table)">Requires login to play</span>
 								</section>
 							</td>
 						</tr>								
@@ -111,7 +111,7 @@
 							</select>
 						</div>
 						<div class=" ">
-							<div v-if="selectedGame !=='0'" class="" id="v-model-select-dynamic">	
+							<div v-if="selectedGame !== 0" class="" id="v-model-select-dynamic">	
 								<select v-model="selectedGameMode" >
 									<option :value="'0'" :key="0">
 										Select variant
@@ -129,7 +129,7 @@
 							<div class="form-check " id="only_registered">
 								<input class="" type="checkbox" id="onlyRegistered" v-model="onlyRegistered">
 								<label class="" for="onlyRegistered">Play only against registered</label>
-							</div>
+							</div>                          
 							<div v-if="selectedGame === 3" class="form-check " id="random_starter">
 								<input class="" type="checkbox" id="randomStarter" v-model="randomStarterChecked">
 								<label class="" for="randomStarter">Random starter</label>
@@ -138,7 +138,7 @@
 							<div v-if="selectedGame === 3">
 								Time control
 								<div>				
-									<select  v-model="selectedTimeControl" @change="timeControl">
+									<select  v-model="selectedTimeControl" >
 										<option v-for="timeControl in getTimeControls()" :value="timeControl.id" :key="timeControl.id">
 											{{timeControl.seconds}} seconds
 										</option>
@@ -182,7 +182,7 @@ export default defineComponent({
 			createTableButtonVisible:true,
 			watchTableButtonDisabled:false,
 			removeTableButtonVisible:false,
-			selectedGame:"0",
+			selectedGame:0,
 			selectedGameMode:"0",
 			selectedTimeControl:0,
 			playAgainstComputerChecked:false,
