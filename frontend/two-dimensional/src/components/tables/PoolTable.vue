@@ -16,7 +16,7 @@
 			<label class="selectora" for="notificationSound" data-bs-toggle="tooltip" data-bs-placement="top" title="Beeps last 14 seconds in turn if checked">
 				<i class="bi bi-music-note"></i>
 			</label>
-			<input  type="checkbox" id="notificationSound" v-model= "gameOptions.soundOn">		
+			<input  type="checkbox" id="notificationSound" v-model= "gameOptions.notificationSound">		
 			<span class="ps-4">
 				<input class=""  type="checkbox" id="pointerLine" v-model= "gameOptions.pointerLine">
 				<label class="" for="pointerLine">Bridge</label>
@@ -27,7 +27,7 @@
 	<div class="row">
 		<div class="col-xs-12 col-sm-4">
 			<span v-if="playingTurn" class="text-success">Playing turn</span>
-			<span v-else-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn {{userName}} > time left:{{this.theTable.secondsLeft}}  </span>
+			<span v-else-if="theTable.playerInTurn?.name === userName" class="text-success"> It's your turn {{userName}} > time left:{{theTable.secondsLeft}}  </span>
 			<span v-else-if="theTable?.playerInTurn === null" class="text-success"> Game ended </span>
 			<div v-else class="text-danger"> In turn: {{theTable.playerInTurn?.name}}</div>
 		</div>
@@ -36,7 +36,7 @@
 	<div class="col-xs-12 col-sm-8">
 			 <canvas id="canvas" width="400" height="400" style="border:1px solid" :class="{'bg-secondary':theTable.playerInTurn ==null}" ></canvas>
     </div>
-	<chat :id="theTable.id"> </chat>
+	<chat :id="theTable.tableId"> </chat>
 	
 </template>
 
@@ -75,7 +75,7 @@ export default defineComponent({
 				cueBall: undefined,
 				cue: undefined,
 				poolTable: undefined,
-				gameOptions: { pointerLine: false, notificationSound:true},
+				gameOptions: { pointerLine: false, notificationSound:false},
 				mouseCoordsTemp: undefined,
 				handBall:false,
 				playingTurn: false,
@@ -723,8 +723,8 @@ export default defineComponent({
 			}		
 			this.theTable.secondsLeft = this.getTimeControls()[this.theTable.timeControlIndex].seconds		
 			reducerInterval = setInterval(() => {
-				this.theTable.secondsLeft --
-				if(this.gameOptions.soundOn && this.theTable.secondsLeft < 15){
+				this.theTable.secondsLeft --               
+				if(this.gameOptions.notificationSound && this.theTable.secondsLeft < 15){
 					this.playNotificationSound()
 				}
 			}, 1000)

@@ -149,8 +149,9 @@ export const tablesMixin = {
 		isMyTurnInStore(){	
 			return this.theTable?.playerInTurn?.name === this.userName
 		},
-		playNotificationSound() {		
-			const audioCtx = new window.AudioContext()
+		playNotificationSound() {
+
+			const audioCtx =  new window.AudioContext()
 			const oscillator = audioCtx.createOscillator()
 		    oscillator.type = "sine";
 			oscillator.frequency.setValueAtTime(446, audioCtx.currentTime); // value in hertz
@@ -158,7 +159,7 @@ export const tablesMixin = {
 			oscillator.start()
 			setTimeout(() => {
 				oscillator.stop()
-			}, 0)
+			}, 500)
 		  },
 		},
 	};
