@@ -292,4 +292,5 @@ public class TableHandler {
 		return handleNewToken(message, artificialUser);
 
 	}
+
 }

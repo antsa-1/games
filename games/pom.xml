@@ -13,6 +13,7 @@
 		<module>pool</module>
 		<module>../games-web-backend</module>
 		<module>../portal-web-backend</module>
+		<module>yatzy</module>
 	</modules>
 
 	<dependencies>

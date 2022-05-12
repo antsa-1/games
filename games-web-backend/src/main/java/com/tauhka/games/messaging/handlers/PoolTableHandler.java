@@ -2,11 +2,9 @@ package com.tauhka.games.messaging.handlers;
 
 import static com.tauhka.games.core.util.Constants.SYSTEM;
 
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
@@ -34,7 +32,7 @@ import jakarta.inject.Inject;
 
 @Default
 @Dependent
-public class PoolTableHandler {
+public class PoolTableHandler extends CommonHandler {
 	private static final Logger LOGGER = Logger.getLogger(PoolTableHandler.class.getName());
 	@Inject
 	private Event<PoolGameStatisticsEvent> poolStatsEvent;
@@ -226,14 +224,6 @@ public class PoolTableHandler {
 		poolStatsEvent.fireAsync(statsEvent);
 	}
 
-	public Table findUserTable(CommonEndpoint endpoint) {
-		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
-		stream = stream.filter(table -> table.isPlayer(endpoint.getUser()));
-		Optional<Table> tableOptional = stream.findFirst();
-		if (tableOptional.isEmpty()) {
-			throw new IllegalArgumentException("no table for:" + endpoint.getUser());
-		}
-		return tableOptional.get();
-	}
+
 
 }

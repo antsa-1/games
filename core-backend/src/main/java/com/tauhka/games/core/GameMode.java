@@ -17,6 +17,7 @@ public final class GameMode {
 	public static final Integer TIC_TAC_TOE = 1;
 	public static final Integer CONNECT4 = 2;
 	public static final Integer POOL = 3;
+	public static final Integer YATZY = 4;
 	static {
 		// Constructor tells number meanings
 		GAMEMODES = new ArrayList<GameMode>();
@@ -31,6 +32,7 @@ public final class GameMode {
 		GameMode gm20 = new GameMode(CONNECT4, 20, 7, 7, 4);// ConnectFour 7x7 board
 		GameMode gm21 = new GameMode(CONNECT4, 21, 10, 10, 4);// ConnectFour 10x10 board
 		GameMode gm22 = new GameMode(POOL, 30, "8-ball");// 8-ball
+		GameMode gm40 = new GameMode(YATZY, 40, "Yatzy");// Yatzy
 
 		GAMEMODES.add(gm);
 		GAMEMODES.add(gm2);
@@ -43,6 +45,7 @@ public final class GameMode {
 		GAMEMODES.add(gm20);
 		GAMEMODES.add(gm21);
 		GAMEMODES.add(gm22);
+		GAMEMODES.add(gm40);
 	}
 
 	public GameMode(int gameNumber, int gameMode, String name) {
@@ -85,8 +88,13 @@ public final class GameMode {
 		return this.gameNumber == 3;
 	}
 
+	@JsonbTransient
+	public boolean isYatzy() {
+		return this.gameNumber == 4;
+	}
+
 	public static String getBoardDescription(int gameMode) {
-	
+
 		GameMode mode = GameMode.getGameMode(gameMode);
 
 		return mode.getX() + "x" + mode.getY() + " /" + mode.getRequiredConnections();
