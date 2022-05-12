@@ -124,7 +124,7 @@ export default defineComponent({
 					
 				})
 			}
-			const apiURL=import.meta.env.VUE_APP_API_BASE_URL+"/portal/api/user/register"
+			const apiURL=import.meta.env.VITE_APP_API_BASE_URL+"/portal/api/user/register"
 			this.$store.dispatch("setLoadingStatus", true)
 			fetch(apiURL, requestOptions)
 				.then(response => {

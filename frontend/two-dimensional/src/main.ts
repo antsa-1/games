@@ -2,7 +2,7 @@
  * @author antsa-1 from GitHub
  */
 import { createApp } from 'vue'
-import TicTacToe from './Games.vue'
+import Games from './Games.vue'
 import Login from './components/Login.vue'
 import Lobby from './components/Lobby.vue'
 import Home from './components/Home.vue'
@@ -34,6 +34,10 @@ const routes: RouteRecordRaw[] = [
     },
     {
         path: '/',
+        redirect: { name: 'Home' }
+    },
+    {
+        path: '',
         redirect: { name: 'Home' }
     },
     {
@@ -142,6 +146,11 @@ const routes: RouteRecordRaw[] = [
         name: "Feedback",
     },
     {
+        path: "/portal/:pathMatch(.*)*",
+        component: Home,
+        name: "Home",
+    },
+    {
         path: "/portal/:catchAll(.*)",
         component: Error,
         name: "Error",
@@ -153,6 +162,6 @@ const router = createRouter({
     history: createWebHistory(),
     routes,
 });
-const app = createApp(TicTacToe)
+const app = createApp(Games)
 
 app.use(router).use(store).mount("#app");
