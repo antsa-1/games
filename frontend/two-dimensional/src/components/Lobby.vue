@@ -244,7 +244,7 @@ export default defineComponent({
 	},
 	methods: {
 		connect(token: string): void {		
-			let websocket = new WebSocket(process.env.VUE_APP_WS_URL);
+			let websocket = new WebSocket(import.meta.env.VITE_APP_WS_URL);
 
 			websocket.onopen = event => {
 				const title2 = "LOGIN";

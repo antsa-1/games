@@ -14,11 +14,10 @@
     "strictNullChecks":false,
     "allowSyntheticDefaultImports": true,
     "sourceMap": false,
+    "types": ["vite/client"],
     
     "baseUrl": ".",
-    "types": [
-      "webpack-env"
-    ],
+ 
     "paths": {
       "@/*": [
         "src/*"

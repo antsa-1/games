@@ -91,7 +91,7 @@ export default defineComponent({
 						password: this.usrPwTemp
 					})
 				}
-				const apiURL=process.env.VUE_APP_API_BASE_URL+"/portal/api/user/login"
+				const apiURL = import.meta.env.VITE_APP_API_BASE_URL+"/portal/api/user/login"
 				this.$store.dispatch("setLoadingStatus", true)
 				fetch(apiURL, requestOptions)
 					.then(response => {

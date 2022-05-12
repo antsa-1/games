@@ -66,8 +66,8 @@ export default defineComponent({
 	},
 	methods: {
 		send(){
-			console.log(process.env.VUE_APP_API_BASE_URL)
-			const apiURL=process.env.VUE_APP_API_BASE_URL+"/portal/api/feedback"
+			
+			const apiURL=import.meta.env.VITE_APP_API_BASE_URL+"/portal/api/feedback"
 			 const requestOptions = {
                 method: "POST",
                 headers: {

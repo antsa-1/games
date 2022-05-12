@@ -349,7 +349,7 @@ export const store = createStore<IStoreState>({
                     token: user?.token
                 })
             }
-            const apiURL = process.env.VUE_APP_API_BASE_URL + "/portal/api/user/logout"
+            const apiURL = import.meta.env.VITE_APP_API_BASE_URL + "/portal/api/user/logout"
             context.commit('setUser', null)
             fetch(apiURL, requestOptions).then(response => {
             })

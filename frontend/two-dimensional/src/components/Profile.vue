@@ -81,7 +81,7 @@ export default defineComponent({
 				},
 			
 			}
-			const apiURL=process.env.VUE_APP_API_BASE_URL+"/portal/api/profile/"+this.selectedName
+			const apiURL = import.meta.env.VUE_APP_API_BASE_URL+"/portal/api/profile/"+this.selectedName
 			this.$store.dispatch("setLoadingStatus", true)
 			fetch(apiURL, requestOptions)
 				.then(response => {	
