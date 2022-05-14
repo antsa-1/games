@@ -15,9 +15,10 @@ import com.tauhka.games.core.twodimen.GameResult;
 
 public class YatzyTable extends MultiplayerTable {
 	private Timer timer;
+	private YatzyGame yatzyGame;
 
-	public YatzyTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int players) {
-		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex, players);
+	public YatzyTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
+		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex, playerAmount);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -43,8 +44,11 @@ public class YatzyTable extends MultiplayerTable {
 		return null;
 	}
 
-	public synchronized void joinTableAsPlayer(User player) {
-		//super.joinTableAsPlayer(playerB);
-
+	public synchronized boolean joinTableAsPlayer(User player) {
+		if (super.joinTableAsPlayer(player)) {
+			// Start game
+			// return true
+		}
+		return false;
 	}
 }

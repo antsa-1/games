@@ -20,8 +20,8 @@ import jakarta.json.bind.annotation.JsonbTransient;
  * @author antsa-1 from GitHub 12 May 2022
  **/
 
-public abstract class MultiplayerTable {
-
+public abstract class MultiplayerTable // extends Table
+{
 	@JsonbProperty("tableId")
 	private UUID tableId;
 	@JsonbProperty("players")
@@ -51,17 +51,18 @@ public abstract class MultiplayerTable {
 	@JsonbTransient
 	protected boolean gameOver;
 
-	public MultiplayerTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int players) {
+	public MultiplayerTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		this.tableId = UUID.randomUUID();
-		if (players < 2 || players > 4) {
-			throw new IllegalArgumentException("incorrect amount of players" + players);
+		if (playerAmount < 2 || playerAmount > 4) {
+			throw new IllegalArgumentException("incorrect amount of players" + playerAmount);
 		}
-		this.players = new ArrayList<User>(players);
+		this.players = new ArrayList<User>(playerAmount);
 		this.gameMode = gameMode;
 		this.randomizeStarter = randomizeStarter;
 		if (!randomizeStarter) {
 			this.playerInTurn = playerA;
 		}
+		this.players.add(playerA);
 		this.registeredOnly = registeredOnly;
 		this.timeControlIndex = timeControlIndex;
 	}
@@ -112,14 +113,7 @@ public abstract class MultiplayerTable {
 		this.timeControlIndex = timeControlIndex;
 	}
 
-	/*
-	public boolean isPlayer(User user) {
-		if (user == null) {
-			return false;
-		}
-		return user.equals(playerA) || user.equals(playerB);
-	}
-*/
+	/* public boolean isPlayer(User user) { if (user == null) { return false; } return user.equals(playerA) || user.equals(playerB); } */
 	public boolean isWatcher(User user) {
 		return this.watchers.contains(user);
 	}
@@ -132,14 +126,9 @@ public abstract class MultiplayerTable {
 		}
 		return false;
 	}
-/*
-	public void initRematchForArtificialPlayer() {
-		// PlayerA can't be Artificial player since it does not create tables
-		if (this.players.get(1) != null && this.players.get(1) instanceof AI) {
-			this.suggestRematch(this.players.get(1));
-		}
-	}
-*/
+
+	/* public void initRematchForArtificialPlayer() { // PlayerA can't be Artificial player since it does not create tables if (this.players.get(1) != null && this.players.get(1) instanceof AI) { this.suggestRematch(this.players.get(1)); }
+	 * } */
 	public int getTimer() {
 		return timer;
 	}
@@ -151,30 +140,13 @@ public abstract class MultiplayerTable {
 	@JsonbTransient
 	public List<User> getUsers() {
 		List<User> users = new ArrayList<User>();
-		/*if (playerA != null) {
-			users.add(playerA);
-		}
-		if (playerB != null) {
-			users.add(playerB);
-		}
-*/
+		/* if (playerA != null) { users.add(playerA); } if (playerB != null) { users.add(playerB); } */
 		users.addAll(watchers);
 		return users;
 	}
-/*
-	public boolean removePlayerIfExist(User user) {
-		if (playerA != null && playerA.equals(user)) {
-			playerA = null;
-			this.playerInTurn = null;
-			return true;
-		} else if (playerB != null && playerB.equals(user)) {
-			playerB = null;
-			this.playerInTurn = null;
-			return true;
-		}
-		return false;
-	}
-*/
+
+	/* public boolean removePlayerIfExist(User user) { if (playerA != null && playerA.equals(user)) { playerA = null; this.playerInTurn = null; return true; } else if (playerB != null && playerB.equals(user)) { playerB = null;
+	 * this.playerInTurn = null; return true; } return false; } */
 	public void setPlayerInTurn(User player) {
 		playerInTurn = player;
 	}
@@ -184,17 +156,13 @@ public abstract class MultiplayerTable {
 		return Objects.hash(tableId);
 	}
 
-	
-
 	public boolean removeWatcherIfExist(User user) {
 		return watchers.remove(user);
 	}
 
-	
 	public UUID getTableId() {
 		return tableId;
 	}
-
 
 	public boolean isRandomizeStarter() {
 		return randomizeStarter;
@@ -209,62 +177,41 @@ public abstract class MultiplayerTable {
 	}
 
 	public void changePlayerInTurn() {
-		
+
 	}
-	/*
-	public synchronized void joinTableAsPlayer(User joiningPlayer) {
+
+	public synchronized boolean joinTableAsPlayer(User joiningPlayer) {
 		if (this.registeredOnly && joiningPlayer.getName().startsWith(Constants.GUEST_LOGIN_NAME)) {
 			// Also guest players can use this option atm..
-			throw new IllegalArgumentException("Only registered players allowed to join to play." + playerB.getName() + " table:" + this);
+			throw new IllegalArgumentException("Only registered players allowed to join to play." + joiningPlayer.getName() + " table:" + this);
 		}
-		this.playerB = playerB;
+		this.players.add(joiningPlayer);
+		if (players.get(players.size() - 1) == null) {
+			return false;
+		}
+		// Table full
 		this.gameStartedInstant = Instant.now();
 		if (this.randomizeStarter) {
-			int i = ThreadLocalRandom.current().nextInt(1, 1001);
-			if (i > 500) {
-				this.startingPlayer = playerA;
-				playerInTurn = playerA;
-			} else {
-				this.startingPlayer = playerB;
-				playerInTurn = playerB;
-			}
+			int i = ThreadLocalRandom.current().nextInt(1, players.size());
+			this.startingPlayer = players.get(i - 1);
+			playerInTurn = this.startingPlayer;
+
 		} else {
-			this.startingPlayer = playerA;
-			playerInTurn = playerA;
+			this.startingPlayer = players.get(0);
+			playerInTurn = players.get(0);
 		}
+		return true;
 	}
-	 */
 
 	public List<User> getWatchers() {
 		return watchers;
 	}
 
-
 	public boolean isRegisteredOnly() {
 		return registeredOnly;
 	}
-/*
-	public synchronized boolean suggestRematch(User user) {
-	if (!isPlayer(user)) {
-			throw new IllegalArgumentException("Rematchplayer is not a player in the table:" + user);
-		}
-		if (this.rematchPlayer == null) {
-			this.rematchPlayer = user;
-			return false;
-		}
-		if (this.rematchPlayer.equals(user)) {
-			return false;
-		}
-		if (this.startingPlayer.equals(playerA)) {
-			this.startingPlayer = playerB;
-			this.playerInTurn = playerB;
-		} else {
-			this.startingPlayer = playerA;
-			this.playerInTurn = playerA;
-		}
-		startRematch();
-		return true;
-	}
-	 */
+	/* public synchronized boolean suggestRematch(User user) { if (!isPlayer(user)) { throw new IllegalArgumentException("Rematchplayer is not a player in the table:" + user); } if (this.rematchPlayer == null) { this.rematchPlayer = user;
+	 * return false; } if (this.rematchPlayer.equals(user)) { return false; } if (this.startingPlayer.equals(playerA)) { this.startingPlayer = playerB; this.playerInTurn = playerB; } else { this.startingPlayer = playerA; this.playerInTurn =
+	 * playerA; } startRematch(); return true; } */
 
 }
