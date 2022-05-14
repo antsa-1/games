@@ -1,6 +1,6 @@
 package com.tauhka.games.messaging.util;
 
-import static com.tauhka.games.core.util.Constants.*;
+import static com.tauhka.games.core.util.Constants.GUEST_LOGIN_NAME;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ import com.tauhka.games.core.stats.GameStatisticsEvent;
  **/
 
 public class GamesUtils {
-// Collects possible game into a list once per application restart
+// Collects game into a list once per application restart
 	public static final List<Game> games;
 	static {
 		games = new ArrayList<Game>();
@@ -34,9 +34,15 @@ public class GamesUtils {
 		pool.setGameId(GameMode.POOL);
 		pool.setName("Pool");
 		pool.setGameModes(GameMode.getGamemodes(GameMode.POOL));
+
+		Game yatzy = new Game();
+		pool.setGameId(GameMode.YATZY);
+		pool.setName("Yatzy");
+		pool.setGameModes(GameMode.getGamemodes(GameMode.POOL));
 		games.add(tictactoe);
 		games.add(connectFour);
 		games.add(pool);
+		games.add(yatzy);
 	}
 
 	public static boolean isBothPlayersLoggedIn(GameStatisticsEvent gameStats) {

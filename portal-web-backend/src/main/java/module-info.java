@@ -6,7 +6,7 @@ module tauhka.portal {
 	exports com.tauhka.portal.cache;
 	exports com.tauhka.portal.web.filter;
 	exports com.tauhka.portal.login;
-	exports com.tauhka.portal.exeptions;
+	exports com.tauhka.portal.exceptions;
 	exports com.tauhka.portal.highscore;
 	exports com.tauhka.portal.web.resources;
 

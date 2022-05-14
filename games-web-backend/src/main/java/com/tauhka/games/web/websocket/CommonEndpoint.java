@@ -15,6 +15,7 @@ import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.handlers.PoolTableHandler;
 import com.tauhka.games.messaging.handlers.TableHandler;
 import com.tauhka.games.messaging.handlers.UserHandler;
+import com.tauhka.games.messaging.handlers.YatzyTableHandler;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.pool.TurnResult;
 
@@ -44,7 +45,8 @@ public class CommonEndpoint {
 	private TableHandler tableHandler;
 	@Inject
 	private PoolTableHandler pooltableHandler;
-
+	@Inject
+	private YatzyTableHandler yatzyTableHandler;
 	private Session session;
 	private User user;
 
@@ -144,6 +146,9 @@ public class CommonEndpoint {
 				}
 			} else if (message.getTitle() == MessageTitle.POOL_SELECT_POCKET) {
 				gameMessage = pooltableHandler.selectPocket(this, message);
+				sendMessageToTable(gameMessage.getTable(), gameMessage);
+			} else if (MessageTitle.isYatzyMessage(message.getTitle())) {
+				gameMessage = yatzyTableHandler.handleYatzyMessage(this, message);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
 			} else {
 				throw new CloseWebSocketException("unknown command:" + message);

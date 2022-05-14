@@ -1,4 +1,4 @@
-package com.tauhka.portal.exeptions;
+package com.tauhka.portal.exceptions;
 
 public class UsernameReservedException extends RuntimeException {
 
