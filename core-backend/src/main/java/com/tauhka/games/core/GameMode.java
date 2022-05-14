@@ -31,7 +31,7 @@ public final class GameMode {
 		GameMode gm8 = new GameMode(TIC_TAC_TOE, 8, 40, 40, 5);// TicTacToes
 		GameMode gm20 = new GameMode(CONNECT4, 20, 7, 7, 4);// ConnectFour 7x7 board
 		GameMode gm21 = new GameMode(CONNECT4, 21, 10, 10, 4);// ConnectFour 10x10 board
-		GameMode gm22 = new GameMode(POOL, 30, "8-ball");// 8-ball
+		GameMode gm30 = new GameMode(POOL, 30, "8-ball");// 8-ball
 		GameMode gm40 = new GameMode(YATZY, 40, "Yatzy");// Yatzy
 
 		GAMEMODES.add(gm);
@@ -44,7 +44,7 @@ public final class GameMode {
 		GAMEMODES.add(gm8);
 		GAMEMODES.add(gm20);
 		GAMEMODES.add(gm21);
-		GAMEMODES.add(gm22);
+		GAMEMODES.add(gm30);
 		GAMEMODES.add(gm40);
 	}
 

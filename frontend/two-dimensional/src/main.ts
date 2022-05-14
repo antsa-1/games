@@ -13,6 +13,7 @@ import Profile from './components/Profile.vue'
 import TopLists from './components/highscores/TopLists.vue'
 import TableConnectFour from './components/tables/TableConnectFour.vue'
 import PoolTable from './components/tables/PoolTable.vue'
+import YatzyTable from './components/tables/YatzyTable.vue'
 import Info from './components/Info.vue'
 import Instructions from './components/Instructions.vue'
 import Feedback from './components/Feedback.vue'
@@ -128,6 +129,21 @@ const routes: RouteRecordRaw[] = [
                 next()
             }
         }
+    },
+    {
+        path: '/portal/yatzy/:watch?',
+        component: YatzyTable,
+        name: "YatzyTable",
+        props: true, 
+        /*
+        beforeEnter: (to, from, next) => {
+            if (!store.state.user || !store.state.theTable) {
+                next('/');
+            } else {
+                next()
+            }
+        }
+        */
     },
     {
         path: '/portal/user/:selectedName/profile',

@@ -36,9 +36,9 @@ public class GamesUtils {
 		pool.setGameModes(GameMode.getGamemodes(GameMode.POOL));
 
 		Game yatzy = new Game();
-		pool.setGameId(GameMode.YATZY);
-		pool.setName("Yatzy");
-		pool.setGameModes(GameMode.getGamemodes(GameMode.POOL));
+		yatzy.setGameId(GameMode.YATZY);
+		yatzy.setName("Yatzy");
+		yatzy.setGameModes(GameMode.getGamemodes(GameMode.POOL));
 		games.add(tictactoe);
 		games.add(connectFour);
 		games.add(pool);

@@ -111,7 +111,7 @@
 							</select>
 						</div>
 						<div class=" ">
-							<div v-if="selectedGame !== 0" class="" id="v-model-select-dynamic">	
+							<div v-if="hasVariants" class="" id="v-model-select-dynamic">	
 								<select v-model="selectedGameMode" >
 									<option :value="'0'" :key="0">
 										Select variant
@@ -212,6 +212,9 @@ export default defineComponent({
 				return this.$store.getters.games.filter(game => game.gameId === 3)[0].gameModes
 			}
 		},
+        hasVariants(){
+            return this.selectedGame !== 0 && this.selectedGame !== 4
+        },
 		modalCreateTableDisabled(){			
 			return this.selectedGameMode === "0"			
 		},

@@ -17,7 +17,7 @@ export default defineConfig(({ command, mode }) => {
             minify: true,
             pages: [
                 {
-                    entry: 'src/main.ts',
+                    entry: '/src/main.ts',
                     filename: 'index.html',
                     template: 'index.html',
                     injectOptions: {
@@ -26,7 +26,7 @@ export default defineConfig(({ command, mode }) => {
                             baseURL: env.VITE_APP_BASE_URL,
                             bootstrapIcons: env.VITE_APP_BOOTSTRAP_ICONS_CSS,
                             bootstrapBundle: env.VITE_APP_BOOTSTRAP_BUNDLE,
-                            bootstrapCss: env.VITE_APP_BOOSTRAP_CSS,
+                            bootstrapCss: env.VITE_APP_BOOTSTRAP_CSS,
                             injectScript: `<script src="./inject.js"></script>`,
                         },
                     },
