@@ -81,7 +81,7 @@ export default defineComponent({
 				},
 			
 			}
-			const apiURL = import.meta.env.VITE_APP_BASE_URL+"/portal/api/profile/"+this.selectedName
+			const apiURL = import.meta.env.VITE_APP_API_BASE_URL+"/portal/api/profile/"+this.selectedName
 			this.$store.dispatch("setLoadingStatus", true)
 			fetch(apiURL, requestOptions)
 				.then(response => {	
@@ -99,7 +99,7 @@ export default defineComponent({
 						this.eightBalls = data.user.eightBalls				
 					},
 					(err) => {
-						console.error("error in profile fetch")	
+						console.error("error in profile fetch "+err)	
 					}
 				).finally(() => {				
 					this.$store.dispatch("setLoadingStatus", false)

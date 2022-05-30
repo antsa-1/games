@@ -54,7 +54,7 @@ export default defineComponent({
 				},
 			
 			}
-			const apiURL = import.meta.env.VITE_APP_BASE_URL+"/portal/api/toplists"
+			const apiURL = import.meta.env.VITE_APP_API_BASE_URL+"/portal/api/toplists"
 			this.$store.dispatch("setLoadingStatus", true)
 			fetch(apiURL, requestOptions)
 				.then(response => {					
