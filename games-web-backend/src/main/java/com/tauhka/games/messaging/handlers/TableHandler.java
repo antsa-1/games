@@ -1,10 +1,5 @@
 package com.tauhka.games.messaging.handlers;
 
-import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER;
-import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_CONNECT_FOUR_RANKING;
-import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_EIGHT_BALL_RANKING;
-import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_ID;
-import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_TICTACTOE_RANKING;
 import static com.tauhka.games.core.util.Constants.SYSTEM;
 
 import java.util.Optional;
@@ -26,7 +21,6 @@ import com.tauhka.games.core.tables.TicTacToeTable;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
-import com.tauhka.games.pool.PoolAI;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
@@ -42,6 +36,9 @@ public class TableHandler {
 	private static final Logger LOGGER = Logger.getLogger(TableHandler.class.getName());
 	@Inject
 	private Event<GameStatisticsEvent> statisticsEvent;
+
+	@Inject
+	private AIHandler aiHandler;
 
 	public Message createTable(Message message, CommonEndpoint endpoint) {
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
@@ -64,12 +61,7 @@ public class TableHandler {
 		}
 		CommonEndpoint.TABLES.put(table.getTableId(), table);
 		if (message.getComputer()) {
-			User user = gameMode.getGameNumber() == GameMode.POOL ? new PoolAI() : new ArtificialUser();
-			user.setName(OLAV_COMPUTER);
-			user.setRankingTictactoe(OLAV_COMPUTER_TICTACTOE_RANKING);
-			user.setRankingConnectFour(OLAV_COMPUTER_CONNECT_FOUR_RANKING);
-			user.setRankingEightBall(OLAV_COMPUTER_EIGHT_BALL_RANKING);
-			user.setId(UUID.fromString(OLAV_COMPUTER_ID));
+			User user = aiHandler.createAIPlayer(gameMode);
 			table.joinTableAsPlayer(user);
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.START_GAME);
