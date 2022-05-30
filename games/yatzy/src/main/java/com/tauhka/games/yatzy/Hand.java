@@ -42,4 +42,8 @@ public class Hand {
 		return 1;
 	}
 
+	public HandType getHandType() {
+		return handType;
+	}
+
 }

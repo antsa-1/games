@@ -1,5 +1,6 @@
 package com.tauhka.games.yatzy;
 
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -7,15 +8,28 @@ import java.util.concurrent.ThreadLocalRandom;
  **/
 
 public class Dice {
-	private int number; // short
+	private final UUID diceId = UUID.randomUUID();
+	private int value; // short
+	private boolean locked;
 
 	public int roll() {
-		number = ThreadLocalRandom.current().nextInt(1, 6);
-		return number;
+		value = ThreadLocalRandom.current().nextInt(1, 6);
+		return value;
 	}
 
 	public int getNumber() {
-		return number;
+		return value;
 	}
 
+	public UUID getDiceId() {
+		return diceId;
+	}
+
+	public boolean isLocked() {
+		return locked;
+	}
+
+	public void lock() {
+		this.locked = true;
+	}
 }

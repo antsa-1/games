@@ -29,4 +29,7 @@ public class ScoreCard {
 		hands = new HashMap<HandType, Hand>();
 	}
 
+	public void setHand(HandType handType, Hand hand) {
+		hands.put(handType, hand);
+	}
 }
