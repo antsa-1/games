@@ -12,6 +12,8 @@ import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageDecoder;
 import com.tauhka.games.messaging.MessageEncoder;
 import com.tauhka.games.messaging.MessageTitle;
+import com.tauhka.games.messaging.handlers.AIHandler;
+import com.tauhka.games.messaging.handlers.GridTableHandler;
 import com.tauhka.games.messaging.handlers.PoolTableHandler;
 import com.tauhka.games.messaging.handlers.TableHandler;
 import com.tauhka.games.messaging.handlers.UserHandler;
@@ -40,13 +42,16 @@ public class CommonEndpoint {
 
 	@Inject
 	private UserHandler userHandler;
-
+	@Inject
+	private GridTableHandler gridTableHandler;
 	@Inject
 	private TableHandler tableHandler;
 	@Inject
 	private PoolTableHandler pooltableHandler;
 	@Inject
 	private YatzyTableHandler yatzyTableHandler;
+	@Inject
+	private AIHandler aiHandler;
 	private Session session;
 	private User user;
 
@@ -83,7 +88,7 @@ public class CommonEndpoint {
 					if (gameMessage.getTable() instanceof PoolTable) {
 						playPoolAITurns(gameMessage);
 					} else {
-						artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+						artMoveMessage = aiHandler.makeComputerMove(gameMessage.getTable());
 					}
 					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 				}
@@ -101,10 +106,10 @@ public class CommonEndpoint {
 				gameMessage = tableHandler.removeEndpointOwnTable(this);
 				sendCommonMessage(gameMessage);
 			} else if (message.getTitle() == MessageTitle.MOVE) {
-				gameMessage = tableHandler.handleNewToken(message, this.getUser());
+				gameMessage = gridTableHandler.handleNewToken(message, this.getUser());
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
 				if (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
-					Message artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+					Message artMoveMessage = aiHandler.makeComputerMove(gameMessage.getTable());
 					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 				}
 			} else if (message.getTitle() == MessageTitle.WATCH) {
@@ -124,7 +129,7 @@ public class CommonEndpoint {
 						if (gameMessage.getTable() instanceof PoolTable) {
 							playPoolAITurns(gameMessage);
 						} else {
-							artMoveMessage = tableHandler.makeComputerMove(gameMessage.getTable());
+							artMoveMessage = aiHandler.makeComputerMove(gameMessage.getTable());
 						}
 						sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 					}

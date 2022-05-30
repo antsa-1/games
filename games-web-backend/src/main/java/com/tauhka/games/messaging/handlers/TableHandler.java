@@ -4,17 +4,12 @@ import static com.tauhka.games.core.util.Constants.SYSTEM;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.tauhka.games.core.GameMode;
-import com.tauhka.games.core.GameResultType;
-import com.tauhka.games.core.Move;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.AI;
-import com.tauhka.games.core.ai.ArtificialUser;
-import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.tables.ConnectFourTable;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TicTacToeTable;
@@ -26,16 +21,13 @@ import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.ejb.ConcurrentAccessException;
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
 @Default
 @Dependent
-public class TableHandler {
+public class TableHandler extends CommonHandler {
 	private static final Logger LOGGER = Logger.getLogger(TableHandler.class.getName());
-	@Inject
-	private Event<GameStatisticsEvent> statisticsEvent;
 
 	@Inject
 	private AIHandler aiHandler;
@@ -110,70 +102,6 @@ public class TableHandler {
 			return message;
 		}
 		return null;
-	}
-
-	public Message handleNewToken(Message message, User user) {
-		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
-		stream = stream.filter(table -> table.isPlayer(user));
-
-		Optional<Table> tableOptional = stream.findFirst(); // Crash if user has earlier table, find wrong one.
-		Message tokenMessage = new Message();
-		if (tableOptional.isPresent()) {
-			int x = message.getX();
-			int y = message.getY();
-			Table table = tableOptional.get();
-			Move moveIn = new Move(x, y);
-			Move move = (Move) table.playTurn(user, moveIn);
-			GameResult result = tableOptional.get().checkWinAndDraw();
-			if (result != null) {
-				tokenMessage.setTitle(MessageTitle.GAME_END);
-				table.setGameOver(true);
-				fireStatisticsEventAsync(table, result);
-			} else {
-				tokenMessage.setTitle(MessageTitle.MOVE);
-			}
-			tokenMessage.setTable(tableOptional.get());
-			tokenMessage.setMessage(move.toString());
-			tokenMessage.setGameResult(result);
-			tokenMessage.setX(move.getX());
-			tokenMessage.setY(move.getY());
-			tokenMessage.setToken(move.getToken().getAsText());
-			return tokenMessage;
-		}
-		throw new IllegalArgumentException("No table to put token: for:" + user);
-	}
-
-	private void handleLeavingPlayerStatistics(Table table, CommonEndpoint endpoint) {
-		if (table.isGameOver()) {
-			// Statistics go another route since game ended "normally"
-			return;
-		}
-		table.setGameOver(true); // stats only once per game/leaver
-		User user = table.getOpponent(endpoint.getUser());
-		GameResult result = new GameResult();
-		result.setPlayerA(table.getPlayerA());
-		result.setPlayerB(table.getPlayerB());
-		result.setResultType(GameResultType.LEFT_ONGOING_GAME);
-		result.setWinner(user);
-		result.setGameMode(table.getGameMode());
-		result.setStartInstant(table.getGameStartedInstant());
-		fireStatisticsEventSync(table, result);
-	}
-
-	private void fireStatisticsEventAsync(Table table, GameResult result) {
-		GameStatisticsEvent statsEvent = new GameStatisticsEvent();
-		statsEvent.setGameResult(result);
-		statisticsEvent.fireAsync(statsEvent);
-	}
-
-	private void fireStatisticsEventSync(Table table, GameResult result) {
-		try {
-			GameStatisticsEvent statsEvent = new GameStatisticsEvent();
-			statsEvent.setGameResult(result);
-			statisticsEvent.fire(statsEvent);
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Leaving player sync stats failed:", e);
-		}
 	}
 
 	public Message removeEndpointOwnTable(CommonEndpoint endpoint) {
@@ -271,18 +199,6 @@ public class TableHandler {
 			return rematchMessage;
 		}
 		return null;
-	}
-
-	public Message makeComputerMove(Table table) {
-		ArtificialUser artificialUser = (ArtificialUser) table.getPlayerInTurn();
-		Move move = artificialUser.calculateBestMove((TicTacToeTable) table);
-		Message message = new Message();
-		message.setTable(table);
-		message.setTitle(MessageTitle.MOVE);
-		message.setX(move.getX());
-		message.setY(move.getY());
-		return handleNewToken(message, artificialUser);
-
 	}
 
 }
