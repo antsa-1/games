@@ -4,7 +4,7 @@ Site is currently running @ http://35.217.7.146/portal/index.html with three gam
 
 ### Overall architechture image:
 ![tictactoe](./workspace-setup/architecture_.png)
-\br|
+<br>
 ### 26.04.2022
 New game, eight ball is now available for testing. Play against computer or human, or watch others play.
 
@@ -19,7 +19,6 @@ Images are from https://opengameart.org/content/8-ball-pool-assets with minor ch
 Also big help from https://www.youtube.com/watch?v=aXwCrtAo4Wc (part1 and 2)
 <br>
 
-<br>
 ### 04.03.2022
 New deployment: with read player profile page containing game history. Tag "prod-rel-1.0.3" .
 
