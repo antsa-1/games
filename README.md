@@ -12,7 +12,7 @@ Site is currently running @ http://35.217.7.146/portal/index.html with three gam
  * Eclipse Version: 2022-03 (4.23.0) (Backend-dev) integrated Maven commands with Mouse right click -> Run as..  <br>
    Sometimes is required to run "Maven -> Update project.." two times as part of 'normal' acrobatics.
  * MariaDB 10.6.3 Community Edition ( 10.7.3 is ok, 10.8.3 not tested yet) <br> 
- * HeidiSQL 11.3, sql-script to create db is  <br>
+ * HeidiSQL 11.3, sql-script to create db is in workspace-setup folder  <br>
  * Visual Studio code (frontend dev) <br>
  
 ### 26.04.2022
