@@ -23,7 +23,8 @@ import jakarta.json.bind.annotation.JsonbTransient;
 
 public abstract class Table implements Serializable {
 	private static final long serialVersionUID = 2422118498940197289L;
-
+	protected final boolean gameShouldStartNow = true;
+	protected static final int TWO_PLAYER_GAME = 2;
 	private static final Logger LOGGER = Logger.getLogger(Table.class.getName());
 
 	@JsonbProperty("tableId")
@@ -32,12 +33,15 @@ public abstract class Table implements Serializable {
 	protected User playerA;
 	@JsonbProperty("playerB")
 	protected User playerB;
+
 	@JsonbProperty("playerInTurn")
 	protected User playerInTurn;
 	@JsonbTransient
 	protected User rematchPlayer;
 	@JsonbTransient
 	protected User startingPlayer;
+	@JsonbProperty("playerAmount")
+	protected int playerAmount;
 	@JsonbProperty("timer")
 	protected int timer = 180;
 	@JsonbProperty("watchers")
@@ -60,7 +64,11 @@ public abstract class Table implements Serializable {
 	@JsonbTransient
 	protected boolean gameOver;
 
-	public Table(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex) {
+	public Table() {
+		// Empty constr. for deserializing
+	}
+
+	public Table(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		this.tableId = UUID.randomUUID();
 		this.playerA = playerA;
 		this.gameMode = gameMode;
@@ -68,6 +76,7 @@ public abstract class Table implements Serializable {
 		if (!randomizeStarter) {
 			this.playerInTurn = playerA;
 		}
+		this.playerAmount = playerAmount;
 		this.registeredOnly = registeredOnly;
 		this.timeControlIndex = timeControlIndex;
 	}
@@ -155,6 +164,14 @@ public abstract class Table implements Serializable {
 
 	public boolean isWatcher(User user) {
 		return this.watchers.contains(user);
+	}
+
+	public int getPlayerAmount() {
+		return playerAmount;
+	}
+
+	public void setPlayerAmount(int playerAmount) {
+		this.playerAmount = playerAmount;
 	}
 
 	public boolean addWatcher(User watcher) {
@@ -275,7 +292,12 @@ public abstract class Table implements Serializable {
 		this.playerInTurn = playerA;
 	}
 
-	public synchronized void joinTableAsPlayer(User playerB) {
+	/**
+	 * 
+	 * @param playerB
+	 * @return true or false depending on should the game start
+	 */
+	public synchronized boolean joinTableAsPlayer(User playerB) {
 		if (this.registeredOnly && playerB.getName().startsWith(Constants.GUEST_LOGIN_NAME)) {
 			// Also guest players can use this option atm..
 			throw new IllegalArgumentException("Only registered players allowed to join to play." + playerB.getName() + " table:" + this);
@@ -295,6 +317,8 @@ public abstract class Table implements Serializable {
 			this.startingPlayer = playerA;
 			playerInTurn = playerA;
 		}
+		return gameShouldStartNow;
+
 	}
 
 	public List<User> getWatchers() {

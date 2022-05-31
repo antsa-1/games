@@ -18,6 +18,7 @@ import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.web.websocket.CommonEndpoint;
+import com.tauhka.games.yatzy.YatzyTable;
 
 import jakarta.ejb.ConcurrentAccessException;
 import jakarta.enterprise.context.Dependent;
@@ -48,23 +49,27 @@ public class TableHandler extends CommonHandler {
 		} else if (GameMode.POOL == gameMode.getGameNumber()) {
 			PoolTable p = new PoolTable(endpoint.getUser(), gameMode, message.getRandomStarter(), message.getOnlyRegistered(), message.getTimeControlIndex());
 			table = p;
+		} else if (GameMode.YATZY == gameMode.getGameNumber()) {
+			YatzyTable y = new YatzyTable(endpoint.getUser(), gameMode, message.getRandomStarter(), message.getOnlyRegistered(), message.getTimeControlIndex(), message.getPlayerAmount());
+			table = y;
 		} else {
 			table = new TicTacToeTable(endpoint.getUser(), gameMode, false, message.getOnlyRegistered(), message.getTimeControlIndex());
 		}
 		CommonEndpoint.TABLES.put(table.getTableId(), table);
+		Message message_ = null;
 		if (message.getComputer()) {
 			User user = aiHandler.createAIPlayer(gameMode);
-			table.joinTableAsPlayer(user);
-			Message message_ = new Message();
-			message_.setTitle(MessageTitle.START_GAME);
-			message_.setTable(table);
-			return message_;
+			if (table.joinTableAsPlayer(user)) {
+				message_ = new Message();
+				message_.setTitle(MessageTitle.START_GAME);
+				message_.setTable(table);
+			}
 		} else {
-			Message message_ = new Message();
+			message_ = new Message();
 			message_.setTitle(MessageTitle.CREATE_TABLE);
 			message_.setTable(table);
-			return message_;
 		}
+		return message_;
 	}
 
 	public Message leaveTable(Message mes, CommonEndpoint endpoint) {
@@ -122,14 +127,17 @@ public class TableHandler extends CommonHandler {
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
 		if (!table.isWaitingOpponent()) {
-			throw new ConcurrentAccessException("Table is not waiting player " + table + " trying user:" + endpoint.getUser()); // something else than concurrentaccess since synchronized, todo
+			throw new IllegalArgumentException("Table is not waiting player " + table + " trying user:" + endpoint.getUser()); // something else than concurrentaccess since synchronized, todo
 		}
 		if (table.getPlayerA().equals(endpoint.getUser())) {
 			throw new IllegalArgumentException("Same players to table not possible..");
 		}
-		table.joinTableAsPlayer(endpoint.getUser());
 		Message message_ = new Message();
-		message_.setTitle(MessageTitle.START_GAME);
+		if (table.joinTableAsPlayer(endpoint.getUser())) {
+			message_.setTitle(MessageTitle.START_GAME);
+		} else {
+			message_.setTitle(MessageTitle.JOIN_TABLE);
+		}
 		message_.setTable(table);
 		return message_;
 	}

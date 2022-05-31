@@ -51,6 +51,8 @@ public class Message implements Serializable {
 	private int timeControlIndex;
 	@JsonbProperty("pool")
 	private PoolMessage poolMessage;
+	@JsonbProperty("playerAmount")
+	private Integer playerAmount;
 
 	public MessageTitle getTitle() {
 		return title;
@@ -122,6 +124,14 @@ public class Message implements Serializable {
 
 	public Boolean getOnlyRegistered() {
 		return onlyRegistered;
+	}
+
+	public Integer getPlayerAmount() {
+		return playerAmount;
+	}
+
+	public void setPlayerAmount(Integer playerAmount) {
+		this.playerAmount = playerAmount;
 	}
 
 	public void setOnlyRegistered(Boolean onlyRegistered) {

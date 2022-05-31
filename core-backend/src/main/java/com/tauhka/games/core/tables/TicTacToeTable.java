@@ -34,7 +34,7 @@ public class TicTacToeTable extends Table {
 	private int addedTokens;
 
 	public TicTacToeTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex) {
-		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex);
+		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex, TWO_PLAYER_GAME);
 		playerA.setGameToken(GameToken.X);
 		super.setPlayerInTurn(playerA);
 		this.startingPlayer = playerA;
@@ -140,10 +140,11 @@ public class TicTacToeTable extends Table {
 	}
 
 	@Override
-	public void joinTableAsPlayer(User playerB) {
+	public boolean joinTableAsPlayer(User playerB) {
 		this.playerB = playerB;
 		this.gameStartedInstant = Instant.now();
 		playerB.setGameToken(GameToken.O);
+		return gameShouldStartNow;
 	}
 
 	public GameToken[][] getBoard() {

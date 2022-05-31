@@ -21,5 +21,6 @@ module tauhka.games {
 	requires java.sql;
 	requires transitive tauhka.core;
 	requires tauhka.pool;
+	requires tauhka.yatzy;
 	// requires org.junit.jupiter.api; TODO next time
 }

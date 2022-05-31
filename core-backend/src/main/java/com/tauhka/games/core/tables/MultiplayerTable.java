@@ -3,8 +3,6 @@ package com.tauhka.games.core.tables;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.tauhka.games.core.GameMode;
@@ -20,39 +18,16 @@ import jakarta.json.bind.annotation.JsonbTransient;
  * @author antsa-1 from GitHub 12 May 2022
  **/
 
-public abstract class MultiplayerTable // extends Table
+public abstract class MultiplayerTable extends Table // extends Table
 {
-	@JsonbProperty("tableId")
-	private UUID tableId;
+	private static final long serialVersionUID = 1L;
+
 	@JsonbProperty("players")
 	private List<User> players;
 
-	@JsonbProperty("playerInTurn")
-	protected User playerInTurn;
-	@JsonbTransient
-	protected User startingPlayer;
-	@JsonbProperty("timer")
-	protected int timer = 180;
-	@JsonbProperty("watchers")
-	protected List<User> watchers = new ArrayList<User>();
-
-	@JsonbProperty("randomizeStarter")
-	protected boolean randomizeStarter;
-	@JsonbProperty("timeControlIndex")
-	protected int timeControlIndex;
-
-	@JsonbProperty("registeredOnly")
-	protected boolean registeredOnly;
-
-	@JsonbProperty("gameMode")
-	protected GameMode gameMode;
-	@JsonbProperty("gameStartedInstant")
-	protected Instant gameStartedInstant;
-	@JsonbTransient
-	protected boolean gameOver;
-
 	public MultiplayerTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
-		this.tableId = UUID.randomUUID();
+		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex, playerAmount);
+		// this.tableId = UUID.randomUUID();
 		if (playerAmount < 2 || playerAmount > 4) {
 			throw new IllegalArgumentException("incorrect amount of players" + playerAmount);
 		}
@@ -64,7 +39,7 @@ public abstract class MultiplayerTable // extends Table
 		}
 		this.players.add(playerA);
 		this.registeredOnly = registeredOnly;
-		this.timeControlIndex = timeControlIndex;
+//		this.timeControlIndex = timeControlIndex;
 	}
 
 	public abstract GameResult checkWinAndDraw();
@@ -78,8 +53,9 @@ public abstract class MultiplayerTable // extends Table
 		return this.playerInTurn != null && this.playerInTurn instanceof AI;
 	}
 
+	@JsonbTransient
 	public boolean isWaitingOpponent() {
-		return this.players.get(this.players.size()) == null;
+		return this.players.size() < playerAmount;
 	}
 
 	public boolean isPlayerInTurn(User u) {
@@ -151,17 +127,8 @@ public abstract class MultiplayerTable // extends Table
 		playerInTurn = player;
 	}
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(tableId);
-	}
-
 	public boolean removeWatcherIfExist(User user) {
 		return watchers.remove(user);
-	}
-
-	public UUID getTableId() {
-		return tableId;
 	}
 
 	public boolean isRandomizeStarter() {
@@ -180,13 +147,14 @@ public abstract class MultiplayerTable // extends Table
 
 	}
 
+	@Override
 	public synchronized boolean joinTableAsPlayer(User joiningPlayer) {
 		if (this.registeredOnly && joiningPlayer.getName().startsWith(Constants.GUEST_LOGIN_NAME)) {
 			// Also guest players can use this option atm..
 			throw new IllegalArgumentException("Only registered players allowed to join to play." + joiningPlayer.getName() + " table:" + this);
 		}
 		this.players.add(joiningPlayer);
-		if (players.get(players.size() - 1) == null) {
+		if (players.size() != playerAmount) {
 			return false;
 		}
 		// Table full
@@ -200,7 +168,7 @@ public abstract class MultiplayerTable // extends Table
 			this.startingPlayer = players.get(0);
 			playerInTurn = players.get(0);
 		}
-		return true;
+		return gameShouldStartNow;
 	}
 
 	public List<User> getWatchers() {

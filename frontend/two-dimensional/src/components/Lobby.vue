@@ -53,7 +53,7 @@
 					<tbody>
 						<tr v-for="(table) in tables" :key="table.id" >						
 							<td scope="row">
-								{{getTableGameShortDesc(table.gameMode.id)}}
+								{{getTableShortDesc(table.gameMode.id)}}
 							</td>
 							<td>
 								{{getBoardDesc(table)}}									
@@ -130,23 +130,31 @@
 								<input class="" type="checkbox" id="onlyRegistered" v-model="onlyRegistered">
 								<label class="" for="onlyRegistered">Play only against registered</label>
 							</div>                          
-							<div v-if="selectedGame === 3" class="form-check " id="random_starter">
+							<div v-if="canRandomizeStarter" class="form-check " id="random_starter">
 								<input class="" type="checkbox" id="randomStarter" v-model="randomStarterChecked">
 								<label class="" for="randomStarter">Random starter</label>
 							</div>
-							<div>
-							<div v-if="selectedGame === 3">
+						
+							<div v-if="isTimeControlledGame">
 								Time control
 								<div>				
-									<select  v-model="selectedTimeControl" >
+									<select v-model="selectedTimeControl" >
 										<option v-for="timeControl in getTimeControls()" :value="timeControl.id" :key="timeControl.id">
 											{{timeControl.seconds}} seconds
 										</option>
 									</select>
 								</div>
 							</div>
+                            <div v-if="canSelectPlayerAmount">
+								Players
+								<div>				
+									<select v-model="selectedPlayerAmount" >
+										<option v-for="count in getAllowedPlayerAmounts()" :value="count" :key="count">
+											{{count}} players
+										</option>
+									</select>
+								</div>
 							</div>
-						
 				</div>
 				<div class="modal-footer justify-content-between">
 					<button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
@@ -185,10 +193,12 @@ export default defineComponent({
 			selectedGame:0,
 			selectedGameMode:"0",
 			selectedTimeControl:0,
+            selectedPlayerAmount:2,
 			playAgainstComputerChecked:false,
 			randomStarterChecked:false,
 			onlyRegistered:false,
 			computerLevel:"0",
+            GUEST:GUEST
 		}
 	},
 	computed:{
@@ -216,7 +226,7 @@ export default defineComponent({
             return this.selectedGame !== 0 && this.selectedGame !== 4
         },
 		modalCreateTableDisabled(){			
-			return this.selectedGameMode === "0"			
+			return this.selectedGameMode === "0" && this.selectedGame !== 4	
 		},
 		tablesExist(){
 			return this.$store.getters.tables.length > 0
@@ -228,6 +238,16 @@ export default defineComponent({
 			}
 			return false
 		},
+        canRandomizeStarter(){
+            return this.selectedGame === 3 || this.selectedGame === 4
+        },
+        isTimeControlledGame(){
+            //Pool = 3, Yatzy = 4
+            return this.selectedGame === 3 || this.selectedGame === 4
+        },
+        canSelectPlayerAmount(){
+            return this.selectedGame === 4
+        },
 		isRemoveTableButtonVisible(){
 			const firstTable:ITable = this.$store.getters.tables[0]
 			if(firstTable && firstTable.playerA){
@@ -348,6 +368,9 @@ export default defineComponent({
 							//this.$router.push({ name: 'Table', id:data.table.id})
 						})
 						break
+                    case "JOIN_TABLE":
+                        console.log("Player joined to table but not starting yet "+JSON.stringify(data))
+                        break;
 					case "POOL_UPDATE":					
 						this.$store.dispatch("poolUpdate", data)
 						break
@@ -447,35 +470,45 @@ export default defineComponent({
 	
 		createTable(){
 			let obj = null
-			obj = {title: "CREATE_TABLE", message: this.selectedGameMode, computer:this.playAgainstComputerChecked, randomStarter:this.randomStarterChecked, onlyRegistered:this.onlyRegistered}
+            const selectedGameMode = this.selectedGame === 4? 40: this.selectedGameMode
+			obj = {title: "CREATE_TABLE", message: selectedGameMode , computer:this.playAgainstComputerChecked, randomStarter:this.randomStarterChecked, onlyRegistered:this.onlyRegistered}
 		
-		 	if(this.selectedGameMode === 30){ //8-ball
+		 	if(this.isTimeControlledGame){ 
 				let index = this.selectedTimeControl
 				if(!index)
 					index = 0
 				obj.timeControlIndex = index
 			}
+            if(this.canSelectPlayerAmount){
+				obj.playerAmount = this.selectedPlayerAmount
+			}
+            console.log("DATA:"+JSON.stringify(obj))
 			this.user.webSocket.send(JSON.stringify(obj))
 			this.computerLevel = null
 			this.playAgainstComputerChecked = false
 			this.randomStarterChecked = false
 			this.selectedTimeControl = null
 		},
-		getTableGameShortDesc(gameMode:number){
-			if(gameMode<20){
+		getTableShortDesc(gameMode:number){
+			if(gameMode < 20){
 				return "x.o"
-			}else if(gameMode <30){
+			}else if(gameMode < 30){
 				return "4x"
-			}else{
+			}
+            else if(gameMode < 40){
 				return "Pool"
 			}
-			return "err"
+            return "Yatzy"
 		},
+      
 		getBoardDesc(table:ITable){
 			if(table.gameMode.gameNumber < 3){
 				return table.x +" x "+ table.y
 			}else if(table.gameMode.gameNumber === 3){
 				return "8-ball"
+			}
+            else if(table.gameMode.gameNumber === 4){
+				return table.playerAmount +"p"
 			}
 			return "err"
 		},
@@ -522,8 +555,11 @@ export default defineComponent({
 				this.$router.push({ name: 'Profile', params: { selectedName: selectedName } })	
 			}
 		},	
-		getTimeControl(table){
+		getTimeControl(table:ITable){
 			return this.getTimeControls()[table.timeControlIndex].seconds
+		},
+        getAllowedPlayerAmounts(){
+			return [2, 3, 4]
 		}
 	}
 });

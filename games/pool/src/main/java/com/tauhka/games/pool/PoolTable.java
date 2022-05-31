@@ -62,7 +62,7 @@ public class PoolTable extends Table implements PoolComponent {
 	private UUID gameId;
 	@JsonbTransient
 	private boolean breaked;
-	
+
 	static {
 		String env = System.getProperty("Server_Environment");
 		String ui = System.getProperty("Server_ShowUI");
@@ -71,10 +71,10 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	public PoolTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex) {
-		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex);
+		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex, 2);
 		EightBallInitializer.init(this);
 		expectingHandBallUpdate = true;
-	//	s=new ServerGUI(this);
+		// s=new ServerGUI(this);
 	}
 
 	@Override
@@ -115,13 +115,8 @@ public class PoolTable extends Table implements PoolComponent {
 		playedTurn.setCueBall(cueBall);
 		this.selectedPocket = null;
 		LOGGER.info("PLAYED TURN turnResult = " + turnResult.toString() + " player:" + user.getName());
-		/*
-		for (Ball b : remainingBalls) {
-			System.out.println("B:" + b.getNumber() + " pos:" + b.getPosition() + " veloc:" + b.getVelocity());
-		s.updateSwingComponentPositions();
-		}
-		*/
-		
+		/* for (Ball b : remainingBalls) { System.out.println("B:" + b.getNumber() + " pos:" + b.getPosition() + " veloc:" + b.getVelocity()); s.updateSwingComponentPositions(); } */
+
 		return playedTurn;
 	}
 
@@ -148,8 +143,8 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	@Override
-	public synchronized void joinTableAsPlayer(User playerB) {
-		super.joinTableAsPlayer(playerB);
+	public synchronized boolean joinTableAsPlayer(User playerB) {
+		return super.joinTableAsPlayer(playerB);
 
 	}
 
@@ -277,16 +272,14 @@ public class PoolTable extends Table implements PoolComponent {
 
 	public void putBallInPocket(Ball ballToPocket, Pocket pocket) {
 		LOGGER.info("InComing:" + ballToPocket.getNumber() + " pocket:" + pocket.getCenter() + " player:" + this.playerInTurn.getName());
+		ballToPocket.setInPocket(true);
+		ballToPocket.setVelocity(new Vector2d(0d, 0d));
 		if (ballToPocket.getNumber() == 0) {
-			ballToPocket.setInPocket(true);
 			return;
 		}
 		if (ballToPocket.getNumber() == 8) {
-			ballToPocket.setInPocket(true);
 			pocket.setContainsEightBall(true);
 		}
-		ballToPocket.setInPocket(true);
-		ballToPocket.setVelocity(new Vector2d(0d, 0d));
 		Ball ballInPocket = this.playerABalls.isEmpty() ? null : this.playerABalls.get(0);
 		if (ballInPocket != null) {
 			if (ballInPocket.isSimilar(ballToPocket)) {
