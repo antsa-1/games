@@ -5,6 +5,16 @@ Site is currently running @ http://35.217.7.146/portal/index.html with three gam
 ### Overall architechture image:
 ![tictactoe](./workspace-setup/architecture_.png)
 <br>
+### Technical dev setup 31.05.2022
+ * Tomee_plume 9.0.0-M7 <br>
+ * Node 16.15.0 <br>
+ * OpenJDK 18.0.1 with the classpath exception, compiler compliance level Java 12 <br>
+ * Eclipse Version: 2022-03 (4.23.0) (Backend-dev) integrated Maven commands with Mouse right click -> Run as..  <br>
+   Sometimes is required to run "Maven -> Update project.." two times as part of 'normal' acrobatics.
+ * MariaDB 10.6.3 Community Edition ( 10.7.3 is ok, 10.8.3 not tested yet) <br> 
+ * HeidiSQL 11.3, sql-script to create db is  <br>
+ * Visual Studio code (frontend dev) <br>
+ 
 ### 26.04.2022
 New game, eight ball is now available for testing. Play against computer or human, or watch others play.
 
