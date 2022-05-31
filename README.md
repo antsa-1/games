@@ -14,6 +14,7 @@ Site is currently running @ http://35.217.7.146/portal/index.html with three gam
  * MariaDB 10.6.3 Community Edition ( 10.7.3 is ok, 10.8.3 not tested yet) <br> 
  * HeidiSQL 11.3, sql-script to create db is in workspace-setup folder  <br>
  * Visual Studio code (frontend dev) <br>
+ * Current dev branch is /yatzy
  
 ### 26.04.2022
 New game, eight ball is now available for testing. Play against computer or human, or watch others play.
