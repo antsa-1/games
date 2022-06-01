@@ -1,20 +1,18 @@
-import { ITable, IPlayer,  } from "@/interfaces/interfaces"
-import { IVector2, IGameCanvas,IBaseTable } from "@/interfaces/commonTypes"
+import { ITable, IPlayer, } from "@/interfaces/interfaces"
+import { IVector2, IGameCanvas, IBaseTable } from "@/interfaces/commonTypes"
 
 export interface IYatzyGame {
     snapshot: any, //action
 }
 
-export interface IYatzyTable extends IBaseTable{
+export interface IYatzyTable extends IBaseTable {
     players: Array<IYatzyPlayer>,
     canvas: IGameCanvas,
 }
 
 export interface IYatzyPlayer extends IPlayer {
-    dices: Array<IDice>[],
+    dices: Array<IDice>,
     scoreCard: IScoreCard,
-    subTotal: number,
-    total: number
 }
 
 export interface IDice {
@@ -23,7 +21,10 @@ export interface IDice {
 }
 
 export interface IScoreCard {
-    hands: IHand
+    hands: IHand,
+    subTotal: number,
+    total: number,
+    bonus: number
 }
 export interface IHand {
     handType: HandType,
@@ -32,3 +33,4 @@ export interface IHand {
 
 export enum HandType {
     PAIR = 1, TWO_PAIR, TRIPS, QUADS, YATZY, SMALL_STRAIGHT, LARGE_STRAIGHT, ONES, TWOS, THREES, FOURS, FIVES, SIXES, FULL_HOUSE, CHANCE
+}

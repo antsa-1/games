@@ -6,7 +6,7 @@ import { IYatzyTable } from "./yatzy";
 export interface IStoreState {
     user: IUser,
     games: IGame[],
-    tables: ITable[],
+    tables: IBaseTable[],
     users: IUser[],
     commonChat: IChat,
     theTable: ITable | IPoolTable | IYatzyTable, 

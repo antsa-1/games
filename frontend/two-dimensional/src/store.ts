@@ -1,7 +1,8 @@
 import { ITable, IGame, IUser, IPlayer, IStoreState, ISquare, IGameResult, IWinMessage, IWin, } from "./interfaces/interfaces";
-import {  IChatMessage, IChat, } from './interfaces/commontypes';
+import {  IChatMessage, IChat,IBaseTable } from './interfaces/commontypes';
 
 import { createStore } from 'vuex';
+import { IYatzyTable } from "./interfaces/yatzy";
 
 export const store = createStore<IStoreState>({
     state: {
@@ -88,6 +89,11 @@ export const store = createStore<IStoreState>({
         setGames(state, games: IGame[]) {
             state.games = games
         },
+        joinYatzyTable(state, yatzyTable:IYatzyTable){
+            console.log("tables:"+JSON.stringify(state.tables,null,2)+" yatzyTable:"+JSON.stringify(yatzyTable,null,2))
+           let ytable:IYatzyTable = <IYatzyTable> state.tables.find(table => table.tableId === yatzyTable.tableId )  
+           ytable.players = yatzyTable.players
+        },
          setTables(state, tables: ITable[]) {
 
             state.tables = tables
@@ -130,7 +136,7 @@ export const store = createStore<IStoreState>({
 
             state.users.push(user)
         },
-        startGame(state, table: ITable) {
+        startGame(state, table: IBaseTable) {
             const index = state.tables.findIndex(element => element.tableId === table.tableId)          
             state.tables.splice(index, 1, table)
         },
@@ -283,7 +289,7 @@ export const store = createStore<IStoreState>({
             context.commit('addPlayer', user)
 
         },
-        startGame(context, table: ITable) {
+        startGame(context, table: IBaseTable) {
 
             context.commit('startGame', table)
 
@@ -331,6 +337,9 @@ export const store = createStore<IStoreState>({
         setDraw(context, gameResult: IGameResult) {
 
             context.commit("setDraw", gameResult)
+        },
+        joinYatzyTable(context, table:IYatzyTable){
+            context.commit("joinYatzyTable", table)   
         },
         logout(context, user: IUser) {
 

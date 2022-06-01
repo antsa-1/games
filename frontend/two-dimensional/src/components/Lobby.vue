@@ -370,6 +370,7 @@ export default defineComponent({
 						break
                     case "JOIN_TABLE":
                         console.log("Player joined to table but not starting yet "+JSON.stringify(data))
+                        this.$store.dispatch("joinYatzyTable", data)
                         break;
 					case "POOL_UPDATE":					
 						this.$store.dispatch("poolUpdate", data)
