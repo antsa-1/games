@@ -1,8 +1,10 @@
-import { IBaseTable, ITable, IPlayer } from "@/interfaces/interfaces"
+import { ITable, IPlayer } from "@/interfaces/interfaces"
+import { IVector2, Image, ITurnQueue, IGameOptions } from "@/interfaces/commonTypes"
+import { ITurn as ICommonTurn } from "@/interfaces/commonTypes"
 
 export interface IPoolComponent {
     position: IVector2,
-    image: IGameImage,
+    image: Image,
     velocity: IVector2,
 }
 export interface IEightBallGame {
@@ -21,38 +23,20 @@ export interface IEightBallGame {
     playingTurn: boolean,
 
 }
-export interface ITurnQueue {
-    turns: Array<ITurn>[],
-    blocked: boolean
-}
-export interface ITurn {
+
+export interface ITurn extends ICommonTurn {
     cue?: ICue,
     cueBall?: IBall,
     setSelectedPocket?: number,
     setHandBall?: boolean,
-    turnResult?: string,
     askHandBallPosition?: boolean,
     askPocketSelection?: boolean,
-    nextTurnPlayer?: IPlayer,
-    changePlayer?: boolean,
     shootBall?: boolean,
-    lastTurn: boolean,
     winner?: string,
     winReason?: string,
     whoPlayed: string
 }
-export interface ITurnResult {
-    text: string
-}
 
-export interface IGameImage {
-    image: HTMLImageElement,
-    canvasDimension: IVector2,
-    canvasDestination: IVector2,
-    canvasRotationAngle: IVector2,
-    realDimension: IVector2,
-    visible: boolean
-}
 // extending ITable is dubious -> inherits properties which are not related to this pooltable. But helps to keep only one table and avoiding type checks
 export interface IPoolTable extends IPoolComponent, ITable {
     pointerLine: IPointerLine,
@@ -98,12 +82,7 @@ export interface IPointerLine {
     startPosition: IVector2,
     endPosition: IVector2,
 }
-export interface IVector2 {
-    x: number,
-    y: number,
-}
 
-export interface IEightBallGameOptions {
+export interface IEightBallGameOptions extends IGameOptions {
     pointerLine: boolean,
-    notificationSound: boolean
 }

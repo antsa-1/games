@@ -1,6 +1,6 @@
 import { IUser } from "@/interfaces/interfaces";
-import { IVector2,IBall, ICue, IPoolComponent } from "@/interfaces/pool";
-
+import { IBall, ICue, IPoolComponent } from "@/interfaces/pool";
+import { IVector2} from "@/interfaces/commonTypes";
 import { loginMixin, GUEST } from "./mixins";
 import { tablesMixin } from "./tablesMixin";
 
