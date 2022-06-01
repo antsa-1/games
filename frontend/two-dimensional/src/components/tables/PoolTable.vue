@@ -44,7 +44,8 @@
 import { defineComponent,isProxy,toRaw } from "vue"
 
 import {IPlayer,IChatMessage,ITable} from "../../interfaces/interfaces"
-import {IPoolTable, ICue, IBall, IPocket, IEightBallGame, IVector2, IGameImage, IPoolComponent,ITurn, IEightBallGameOptions, IBoundry, IPathWayBorder, ITurnQueue} from "../../interfaces/pool"
+import {IPoolTable, ICue, IBall, IPocket, IEightBallGame,  IPoolComponent,ITurn, IBoundry, IPathWayBorder} from "../../interfaces/pool"
+import {IVector2, Image, ITurnQueue} from  "../../interfaces/commonTypings"
 import { loginMixin, } from "../../mixins/mixins"
 import { tablesMixin} from "../../mixins/tablesMixin"
 import { poolMixin} from "../../mixins/poolMixin"
@@ -557,7 +558,7 @@ export default defineComponent({
 			//window.addEventListener("resize", this.resize)
 			document.addEventListener("visibilitychange", this.onVisibilityChange)
 			let dimsPoolTable: IVector2 = {x: CANVAS_MAX_WIDTH, y: CANVAS_MAX_HEIGHT}
-			let poolTableImage = <IGameImage> {
+			let poolTableImage = <Image> {
 												image: <HTMLImageElement>document.getElementById("tableImg"), 
 												canvasDimension: dimsPoolTable,
 												realDimension: {x:4551 ,y: 2570},
@@ -598,7 +599,7 @@ export default defineComponent({
 			this.poolTable.bottomLeftPocket = bottomLeftPocket
 
 			const dimsCueBall: IVector2 = {x: BALL_DIAMETER, y: BALL_DIAMETER}
-			let cueBallImage = <IGameImage> {
+			let cueBallImage = <Image> {
 												image: <HTMLImageElement>document.getElementById("0"),
 												canvasDimension: dimsCueBall,
 												realDimension: {x: 141, y: 141},
@@ -616,7 +617,7 @@ export default defineComponent({
 												velocity:<IVector2>{ x:0, y:0},												
 			}
 			let dimsCue: IVector2 ={x: CUE_MAX_WIDTH, y: CUE_MAX_HEIGHT}
-			let cueImage = <IGameImage> {
+			let cueImage = <Image> {
 												image: <HTMLImageElement>document.getElementById("cue3Img"),
 												canvasDimension: dimsCue,
 												realDimension:{ x: 1508, y: 22},
@@ -754,7 +755,7 @@ export default defineComponent({
 										x: this.canvas.width * 0.65 +(ballDiameter * 0.90 * this.calculateRackColumn(ballNumber)),
 										y: this.canvas.height /2 +(ballDiameter * 0.5 * this.calculateRackRow(ballNumber)),
 			}
-			let ballImage = <IGameImage> {
+			let ballImage = <Image> {
 							image: <HTMLImageElement>document.getElementById(ballNumber.toString()),
 							canvasDimension: dims,
 							realDimension: {x: 141, y: 141},
