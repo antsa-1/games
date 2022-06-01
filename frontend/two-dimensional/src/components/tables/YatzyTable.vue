@@ -20,16 +20,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeMount, onUpdated, watch } from 'vue'
-    import { useRouter} from 'vue-router'
-  
+import { ref, computed, onMounted, onBeforeMount, onUpdated, watch, } from 'vue'
+import { useRouter} from 'vue-router'
+import { useStore} from 'vuex'  
 
-    // @ts-ignore
- 
     const router = useRouter()
-    const abc = ref("")
-
-    
+    const store = useStore()
+    const abc = ref("")    
     
     const doSmth = (() => {
         console.log("smth")
@@ -40,6 +37,9 @@ import { ref, computed, onMounted, onBeforeMount, onUpdated, watch } from 'vue'
     })
 </script>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
+<!--
+ * 	@author antsa-1 from GitHub 
+ -->
 <style scoped>
 .hidden{
 	visibility:hidden

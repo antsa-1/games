@@ -123,20 +123,9 @@ public abstract class MultiplayerTable extends Table // extends Table
 
 	/* public boolean removePlayerIfExist(User user) { if (playerA != null && playerA.equals(user)) { playerA = null; this.playerInTurn = null; return true; } else if (playerB != null && playerB.equals(user)) { playerB = null;
 	 * this.playerInTurn = null; return true; } return false; } */
-	public void setPlayerInTurn(User player) {
-		playerInTurn = player;
-	}
 
 	public boolean removeWatcherIfExist(User user) {
 		return watchers.remove(user);
-	}
-
-	public boolean isRandomizeStarter() {
-		return randomizeStarter;
-	}
-
-	public void setRandomizeStarter(boolean randomizeStarter) {
-		this.randomizeStarter = randomizeStarter;
 	}
 
 	public User getPlayerInTurn() {
@@ -181,5 +170,13 @@ public abstract class MultiplayerTable extends Table // extends Table
 	/* public synchronized boolean suggestRematch(User user) { if (!isPlayer(user)) { throw new IllegalArgumentException("Rematchplayer is not a player in the table:" + user); } if (this.rematchPlayer == null) { this.rematchPlayer = user;
 	 * return false; } if (this.rematchPlayer.equals(user)) { return false; } if (this.startingPlayer.equals(playerA)) { this.startingPlayer = playerB; this.playerInTurn = playerB; } else { this.startingPlayer = playerA; this.playerInTurn =
 	 * playerA; } startRematch(); return true; } */
+
+	public List<User> getPlayers() {
+		return players;
+	}
+
+	public void setPlayers(List<User> players) {
+		this.players = players;
+	}
 
 }

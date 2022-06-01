@@ -1,6 +1,34 @@
 import { IPlayer } from "./interfaces"
-
 //no game specific typings here
+export interface IBaseTable {
+    playerA: IPlayer,
+    playerB: IPlayer,
+    playerInTurn: IPlayer,
+    chat: IChat,
+    tableId: string,
+    timeControlIndex: number,
+    secondsLeft: number,
+    randomStarter: boolean,
+    registeredOnly: boolean,
+    playerAmount: number,
+    gameMode: IGameMode,
+}
+
+export interface IChat {
+    messages: IChatMessage[];
+    message: IChatMessage;
+}
+export interface IGameMode {
+    gameId: number,
+    gameNumber: number,
+    id: number,
+    name: string,
+}
+export interface IChatMessage {
+    from?: string;
+    text: string;
+}
+
 export interface IVector2 {
     x: number,
     y: number,
@@ -43,4 +71,3 @@ export interface ITurnResult {
     text: string,
     draw?: boolean
 }
-No newline at end of file

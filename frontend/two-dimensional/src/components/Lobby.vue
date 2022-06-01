@@ -171,7 +171,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare, IChatMessage, IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces/interfaces";
+import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare,  IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces/interfaces";
+import { IBaseTable, IChatMessage } from "../interfaces/commontypes";
 import { loginMixin,GUEST } from "../mixins/mixins";
 import { utilsMixin } from "../mixins/utilsmixin";
 import { useRoute } from "vue-router";
@@ -181,6 +182,7 @@ import { Tooltip } from 'bootstrap/dist/js/bootstrap.esm.min.js'
 import Chat from "./Chat.vue";
 import { tablesMixin } from "@/mixins/tablesMixin";
 import { poolMixin } from "@/mixins/poolMixin";
+import { IYatzyTable } from "@/interfaces/yatzy";
 export default defineComponent({
 	
 	name: "Lobby",
@@ -327,15 +329,13 @@ export default defineComponent({
 					case "START_GAME":						
 						this.$store.dispatch("startGame", data.table).then(() => {							
 							const tableC:ITable = data.table
-							if (tableC.playerA.name === this.userName || tableC.playerB.name === this.userName ){
-								tableC.playerA.wins = 0
-								tableC.playerB.wins = 0
+							if (this.isPlayingInTable(data.table)){								
 								this.createTableButtonVisible = false
 								this.removeTableButtonVisible = false
 								this.watchTableButtonVisible = false
 								this.$store.dispatch("selectTable", data.table).then(() => {
-								this.openTable(data.table)
-							})
+								    this.openTable(data.table)
+							    })
 							}
 						})						
 						break
@@ -494,14 +494,14 @@ export default defineComponent({
 				return "x.o"
 			}else if(gameMode < 30){
 				return "4x"
-			}
+                }
             else if(gameMode < 40){
 				return "Pool"
 			}
             return "Yatzy"
 		},
       
-		getBoardDesc(table:ITable){
+		getBoardDesc(table:any){
 			if(table.gameMode.gameNumber < 3){
 				return table.x +" x "+ table.y
 			}else if(table.gameMode.gameNumber === 3){

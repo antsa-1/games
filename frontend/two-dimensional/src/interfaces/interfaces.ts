@@ -1,4 +1,7 @@
+import { IBaseTable,IChat } from "./commontypes";
+import { IGameMode as ICommonGameMode } from "./commontypes";
 import { IPoolTable } from "./pool";
+import { IYatzyTable } from "./yatzy";
 
 export interface IStoreState {
     user: IUser,
@@ -6,7 +9,7 @@ export interface IStoreState {
     tables: ITable[],
     users: IUser[],
     commonChat: IChat,
-    theTable: ITable, // this !!
+    theTable: ITable | IPoolTable | IYatzyTable, 
     loadingStatus?: boolean
 }
 
@@ -53,23 +56,9 @@ export interface IGame {
     name: string
     gameModes: IGameMode[]
 }
-export interface IGameMode {
-    gameId: number,
-    id: number,
-    name: string,
+export interface IGameMode extends ICommonGameMode  {
     requiredConnections: number,
-    gameNumber: number,
 }
-export interface IChat {
-    users?: IUser;
-    messages: IChatMessage[];
-    message: IChatMessage;
-}
-export interface IChatMessage {
-    from?: string;
-    text: string;
-}
-
 export interface LoginData {
     userName: string;
     password: string;
@@ -86,20 +75,9 @@ export interface ITable extends IBaseTable {
     win?: IWin,
     x: number,
     y: number,
-    playerAmount: number
-}
-export interface IBaseTable {
-    playerA: IPlayer,
-    playerB: IPlayer,
-    playerInTurn: IPlayer,
     gameMode: IGameMode,
-    chat: IChat,
-    tableId: string,
-    timeControlIndex: number,
-    secondsLeft: number,
-    randomStarter: boolean,
-    registeredOnly: boolean
 }
+
 
 export interface IPlayer {
     name: string,

@@ -43,7 +43,7 @@
     	</div>
 		
 	</div>
-	<chat :id="theTable.id"> </chat>
+	<chat :id="theTable.tableId"> </chat>
 </template>
 
 <script lang="ts">

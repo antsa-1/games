@@ -1,4 +1,6 @@
-import { ITable, IGame, IUser, IPlayer, IStoreState, ISquare, IChatMessage, IChat, IGameResult, IWinMessage, IWin, } from "./interfaces/interfaces";
+import { ITable, IGame, IUser, IPlayer, IStoreState, ISquare, IGameResult, IWinMessage, IWin, } from "./interfaces/interfaces";
+import {  IChatMessage, IChat, } from './interfaces/commontypes';
+
 import { createStore } from 'vuex';
 
 export const store = createStore<IStoreState>({
@@ -59,9 +61,7 @@ export const store = createStore<IStoreState>({
         commonChatMessages(state) {
             return state.commonChat.messages
         },
-        gameBoard(state) {
-            return state.theTable.board
-        },
+       
         loadingStatus(state) {
             return state.loadingStatus
         },
@@ -148,8 +148,9 @@ export const store = createStore<IStoreState>({
                 state.theTable.chat.messages.unshift(chatMessage)
             }
         },
-        move(state, square: ISquare) {
-            state.theTable.board.push(square)
+        move(state, square: ISquare) {            
+          let table:ITable = <ITable> state.theTable
+          table.board.push(square)
         },
         changeTurn(state, playerInTurn: IPlayer) {            
             state.theTable = { ...state.theTable, playerInTurn: playerInTurn }
@@ -203,8 +204,9 @@ export const store = createStore<IStoreState>({
             if (this.state.theTable) {
                 state.theTable.playerInTurn = null
                 const chatMessage: IChatMessage = { text: win.winner.name.concat(" won"), from: "System" }
-                state.theTable.chat.messages.unshift(chatMessage);
-                state.theTable.win = win
+                state.theTable.chat.messages.unshift(chatMessage)
+                let table:ITable = <ITable> state.theTable
+                table.win = win               
             }
         },
         setDraw(state, gameResult: IGameResult) {

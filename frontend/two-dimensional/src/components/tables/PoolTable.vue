@@ -43,9 +43,9 @@
 <script lang="ts">
 import { defineComponent,isProxy,toRaw } from "vue"
 
-import {IPlayer,IChatMessage,ITable} from "../../interfaces/interfaces"
+import {IPlayer,ITable} from "../../interfaces/interfaces"
 import {IPoolTable, ICue, IBall, IPocket, IEightBallGame,  IPoolComponent,ITurn, IBoundry, IPathWayBorder} from "../../interfaces/pool"
-import {IVector2, Image, ITurnQueue} from  "../../interfaces/commonTypings"
+import {IVector2, Image, ITurnQueue,IChatMessage} from  "../../interfaces/commonTypes"
 import { loginMixin, } from "../../mixins/mixins"
 import { tablesMixin} from "../../mixins/tablesMixin"
 import { poolMixin} from "../../mixins/poolMixin"
