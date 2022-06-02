@@ -287,7 +287,7 @@ public class CommonEndpoint {
 				Table table = null;
 				if (tableId != null) {
 					table = TABLES.get(tableId);
-					tableHandler.removeTableIfRequired(table, null);
+					sendCommonMessage(tableHandler.removeTableIfRequired(table, null));
 				}
 				Message disconnectMessage = userHandler.getUserDisconnectedMessage(this, table);
 				sendCommonMessage(disconnectMessage);

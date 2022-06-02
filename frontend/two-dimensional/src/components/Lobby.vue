@@ -76,7 +76,7 @@
 							</td>						
 							<td>
 								<section v-if="!hasCreatedTable">
-									<button v-if="playButtonVisible(table)" :disabled="!createTableButtonVisible" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
+									<button v-if="playButtonVisible(table)" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
 										Play
 									</button>
                                     <button v-else-if="leaveButtonVisible(table)" @click="leave(table)" type="button" class="btn btn-primary w-30 float-start">
@@ -198,9 +198,7 @@ export default defineComponent({
 	mixins: [loginMixin, utilsMixin, tablesMixin, poolMixin],
 	data() {
 		return {		
-			createTableButtonVisible:true,
-			watchTableButtonDisabled:false,
-			removeTableButtonVisible:false,
+			
 			selectedGame:0,
 			selectedGameMode:"0",
 			selectedTimeControl:0,
@@ -311,11 +309,7 @@ export default defineComponent({
 					case "CREATE_TABLE":
 						
 						this.$store.dispatch("addTable", data.table)						
-						if (data.table.playerA.name===this.userName){							
-							this.createTableButtonVisible = false;
-							this.removeTableButtonVisible = true
-							
-						}
+					
 						break;
 
 					case "REMOVE_PLAYER":
@@ -328,10 +322,9 @@ export default defineComponent({
 					case "REMOVE_TABLE":							
 						this.$store.dispatch("removeTable", data.table)
 						const tablesb:ITable=data.table
-						if (tablesb.playerA && tablesb.playerA.name===this.userName){
-							this.createTableButtonVisible=true;
-							this.removeTableButtonVisible =false
-						}
+						if(this.user.tableId === data.table.tableId){
+                            this.user.tableId = null
+                        }
 						break;
 					case "NEW_PLAYER":
 						
@@ -340,10 +333,8 @@ export default defineComponent({
 					case "START_GAME":						
 						this.$store.dispatch("startGame", data.table).then(() => {							
 							const tableC:ITable = data.table
-							if (this.isPlayingInTable(data.table)){								
-								this.createTableButtonVisible = false
-								this.removeTableButtonVisible = false
-								this.watchTableButtonVisible = false
+							if (this.isOnTable(data.table)){				
+								
 								this.$store.dispatch("selectTable", data.table).then(() => {
 								    this.openTable(data.table)
 							    })
