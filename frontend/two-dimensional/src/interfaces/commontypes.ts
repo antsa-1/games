@@ -12,6 +12,11 @@ export interface IBaseTable {
     registeredOnly: boolean,
     playerAmount: number,
     gameMode: IGameMode,
+    tableType: string,
+    started: boolean
+}
+export interface IMultiplayerTable extends IBaseTable {
+    players: Array<IPlayer>
 }
 
 export interface IChat {

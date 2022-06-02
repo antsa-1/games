@@ -1,11 +1,11 @@
 import { ITable, IPlayer, } from "@/interfaces/interfaces"
-import { IVector2, IGameCanvas, IBaseTable } from "@/interfaces/commonTypes"
+import { IVector2, IGameCanvas, IBaseTable, IMultiplayerTable } from "@/interfaces/commonTypes"
 
 export interface IYatzyGame {
     snapshot: any, //action
 }
 
-export interface IYatzyTable extends IBaseTable {
+export interface IYatzyTable extends IMultiplayerTable {
     players: Array<IYatzyPlayer>,
     canvas: IGameCanvas,
 }

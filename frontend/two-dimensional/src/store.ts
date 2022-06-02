@@ -1,5 +1,5 @@
 import { ITable, IGame, IUser, IPlayer, IStoreState, ISquare, IGameResult, IWinMessage, IWin, } from "./interfaces/interfaces";
-import {  IChatMessage, IChat,IBaseTable } from './interfaces/commontypes';
+import {  IChatMessage, IChat,IBaseTable,IMultiplayerTable } from './interfaces/commontypes';
 
 import { createStore } from 'vuex';
 import { IYatzyTable } from "./interfaces/yatzy";
@@ -86,13 +86,15 @@ export const store = createStore<IStoreState>({
                 state.user = user
             }
         },
+        updateUserTableId(state, tableId:string){
+            state.user.tableId = tableId
+        },
         setGames(state, games: IGame[]) {
             state.games = games
         },
-        joinYatzyTable(state, yatzyTable:IYatzyTable){
-            console.log("tables:"+JSON.stringify(state.tables,null,2)+" yatzyTable:"+JSON.stringify(yatzyTable,null,2))
-           let ytable:IYatzyTable = <IYatzyTable> state.tables.find(table => table.tableId === yatzyTable.tableId )  
-           ytable.players = yatzyTable.players
+        joinMultiplayerTable(state, multitable:IMultiplayerTable){           
+           let ytable:IMultiplayerTable = <IMultiplayerTable> state.tables.find(table => table.tableId === multitable.tableId )  
+           ytable.players = multitable.players
         },
          setTables(state, tables: ITable[]) {
 
@@ -178,7 +180,7 @@ export const store = createStore<IStoreState>({
                 state.theTable.playerInTurn = null
             }
         },
-        leaveTable(state, userName: string) {
+        leaveStartedTable(state, userName: string) {
             if (state.theTable) {
                 if (state.theTable.playerA.name === userName) {
                     state.theTable.playerInTurn = null
@@ -189,6 +191,15 @@ export const store = createStore<IStoreState>({
                 let text = userName.concat(" left table")
                 const chatMessage: IChatMessage = { from: "System", text: text }
                 state.theTable.chat.messages.unshift(chatMessage)
+            }
+        },
+        leaveStartingTable(state, data:any) {            
+            let tableFrom:IMultiplayerTable = data.table
+            let userName:string = data.who.name
+            let table:IMultiplayerTable = <IMultiplayerTable>state.tables.find(table => table.tableId == tableFrom.tableId)
+            if(table && table.players){
+                let index:number = table.players.findIndex(player => player.name === userName)
+                table.players.splice(index, 1)
             }
         },
         rematch(state, table: ITable) {
@@ -324,12 +335,15 @@ export const store = createStore<IStoreState>({
         clearTable(context) {
             context.commit("clearTable")
         },
-        leaveTable(context, data) {
-            if(!context.state.theTable || !data.table){               
+        leaveTable(context, data) {         
+            if(!data?.table?.started){
+                context.commit("leaveStartingTable", data)
+            }
+            else if(!context.state.theTable){               
                return
             }
-            if(context.state.theTable.tableId === data.table.tableId)
-                context.commit("leaveTable", data.who.name)
+            else if(context.state.theTable.tableId === data.table.tableId)
+                context.commit("leaveStartedTable", data.who.name)
         },
         updateWinner(context, win: IWin) {
             context.commit("updateWinner", win)
@@ -338,8 +352,12 @@ export const store = createStore<IStoreState>({
 
             context.commit("setDraw", gameResult)
         },
-        joinYatzyTable(context, table:IYatzyTable){
-            context.commit("joinYatzyTable", table)   
+        joinMultiplayerTable(context, table:IMultiplayerTable){
+            context.commit("joinMultiplayerTable", table) 
+        },
+        updateUserTableId(context, tableId:string){
+          
+            context.commit("updateUserTableId", tableId)  
         },
         logout(context, user: IUser) {
 

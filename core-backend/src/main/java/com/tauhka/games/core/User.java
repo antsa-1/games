@@ -3,6 +3,7 @@ package com.tauhka.games.core;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.util.Constants;
 
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -23,6 +24,8 @@ public class User { // Combine with Portal User.java?
 	private UUID id;
 	@JsonbTransient
 	private Double initialCalculationsRank = -1d;
+	@JsonbTransient
+	private Table table = null;
 
 	public String getName() {
 		return name;
@@ -30,6 +33,14 @@ public class User { // Combine with Portal User.java?
 
 	public User() {
 		super();
+	}
+
+	public Table getTable() {
+		return table;
+	}
+
+	public void setTable(Table table) {
+		this.table = table;
 	}
 
 	public UUID getId() {

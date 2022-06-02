@@ -95,10 +95,15 @@ public class CommonEndpoint {
 
 			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) {
 				gameMessage = tableHandler.leaveTable(message, this);
-				if (gameMessage != null) {
-					sendMessageToTable(gameMessage.getTable(), gameMessage);
-					sendCommonMessage(tableHandler.createRemoveTableMessage(gameMessage.getTable(), this));
+				if (gameMessage == null) {
+					return;
 				}
+				if (gameMessage.getTable().isStarted()) {
+					sendMessageToTable(gameMessage.getTable(), gameMessage);
+				} else {
+					sendCommonMessage(gameMessage);
+				}
+				sendCommonMessage(tableHandler.removeTableIfRequired(gameMessage.getTable(), this));
 			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) {
 				gameMessage = tableHandler.joinTable(message, this);
 				sendCommonMessage(gameMessage);
@@ -278,27 +283,11 @@ public class CommonEndpoint {
 					CommonEndpoint.ENDPOINTS.remove(this.user);
 				}
 				session.close();
-				UUID owningUser = null;
-				for (Table table : TABLES.values()) {
-					boolean isPlayer = table.removePlayerIfExist(this.user);
-					if (isPlayer) {
-						owningUser = table.getTableId();
-						break;
-					} else {
-						boolean isWatcher = table.removeWatcherIfExist(this.user);
-						if (isWatcher) {
-							Message removeWatcher = new Message();
-							removeWatcher.setTitle(MessageTitle.WATCHER_LEFT);
-							removeWatcher.setWho(this.user);
-							// removeWatcher.setMessage(table.getId());
-							sendMessageToTable(table, removeWatcher);
-							break;
-						}
-					}
-				}
+				UUID tableId = removePlayerFromTable();
 				Table table = null;
-				if (owningUser != null) {
-					table = TABLES.remove(owningUser); // Not always playerA, table will be null if playerB. It is ok
+				if (tableId != null) {
+					table = TABLES.get(tableId);
+					tableHandler.removeTableIfRequired(table, null);
 				}
 				Message disconnectMessage = userHandler.getUserDisconnectedMessage(this, table);
 				sendCommonMessage(disconnectMessage);
@@ -306,6 +295,26 @@ public class CommonEndpoint {
 				LOGGER.log(Level.SEVERE, "CommonEndpoint onClose virhe", e);
 			}
 		}
+	}
+
+	private UUID removePlayerFromTable() {
+		for (Table table : TABLES.values()) {
+			boolean isPlayer = table.removePlayerIfExist(this.user);
+			if (isPlayer) {
+				return table.getTableId();
+			} else {
+				boolean isWatcher = table.removeWatcherIfExist(this.user);
+				if (isWatcher) {
+					Message removeWatcher = new Message();
+					removeWatcher.setTitle(MessageTitle.WATCHER_LEFT);
+					removeWatcher.setWho(this.user);
+					// removeWatcher.setMessage(table.getId());
+					sendMessageToTable(table, removeWatcher);
+					break;
+				}
+			}
+		}
+		return null;
 	}
 
 	public User getUser() {

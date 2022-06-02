@@ -63,7 +63,7 @@ public class CommonHandler {
 		result.setResultType(GameResultType.LEFT_ONGOING_GAME);
 		result.setWinner(user);
 		result.setGameMode(table.getGameMode());
-		result.setStartInstant(table.getGameStartedInstant());
+		result.setStartInstant(table.getStartTime());
 		fireStatisticsEventSync(table, result);
 	}
 }

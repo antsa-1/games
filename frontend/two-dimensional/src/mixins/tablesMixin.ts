@@ -1,4 +1,4 @@
-import { IBaseTable } from "@/interfaces/commontypes";
+import { IBaseTable, IMultiplayerTable } from "@/interfaces/commontypes";
 import { ITable, IPlayer } from "@/interfaces/interfaces";
 import { IYatzyTable } from "@/interfaces/yatzy";
 
@@ -25,11 +25,18 @@ export const tablesMixin = {
             return false
         },
         rematchButtonEnabled() {
-            const table = this.$store.getters.theTable;
+            const table = this.$store.getters.theTable
+            if(!table){
+                return false
+            }
             return !this.watch && table.playerInTurn === null
         },
         resignButtonVisible() {
-            return this.userName === this.theTable?.playerA?.name || this.userName === this.theTable?.playerB?.name
+            const table = this.$store.getters.theTable
+            if(!table){
+                return false
+            }
+            return this.userName === table.playerA?.name || this.userName === table.playerB?.name
         },
         theTable(): ITable {
             return this.$store.getters.theTable;
@@ -154,13 +161,13 @@ export const tablesMixin = {
         isMyTurnInStore() {
             return this.theTable?.playerInTurn?.name === this.userName
         },
-        isPlayingInTable(table: IBaseTable) {
-            if (table.gameMode.gameNumber < 4) {              
+        isOnTable(table: IBaseTable) {
+            if (table.gameMode.gameNumber < 4) {
                 return table.playerA.name === this.userName || table.playerB.name === this.userName
             }
-            const yatzyTable:IYatzyTable = <IYatzyTable> table
-            return yatzyTable.players.filter(player => player.name === this.userName).length > 0
-        },
+            const multiTable:IMultiplayerTable = <IMultiplayerTable> table
+            return multiTable.players.filter(player => player.name === this.userName).length > 0
+        },   
         playNotificationSound() {
 
             const audioCtx = new window.AudioContext()

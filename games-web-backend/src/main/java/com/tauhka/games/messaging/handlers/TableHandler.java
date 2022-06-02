@@ -20,7 +20,6 @@ import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 import com.tauhka.games.yatzy.YatzyTable;
 
-import jakarta.ejb.ConcurrentAccessException;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
@@ -35,7 +34,7 @@ public class TableHandler extends CommonHandler {
 
 	public Message createTable(Message message, CommonEndpoint endpoint) {
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
-		stream = stream.filter(table -> table.isPlayer(endpoint.getUser()));
+		stream = stream.filter(table -> table.isInTable(endpoint.getUser()));
 		Optional<Table> tableOptional = stream.findFirst();
 		if (tableOptional.isPresent()) {
 			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser() + " table:" + tableOptional.get());
@@ -55,6 +54,7 @@ public class TableHandler extends CommonHandler {
 		} else {
 			table = new TicTacToeTable(endpoint.getUser(), gameMode, false, message.getOnlyRegistered(), message.getTimeControlIndex());
 		}
+		endpoint.getUser().setTable(table);
 		CommonEndpoint.TABLES.put(table.getTableId(), table);
 		Message message_ = null;
 		if (message.getComputer()) {
@@ -78,29 +78,29 @@ public class TableHandler extends CommonHandler {
 		if (table == null) {
 			return null;
 		}
+		User user = endpoint.getUser();
+		user.setTable(null);
+		if (table.isPlayer(user) && table.getStartTime() != null) {
+			handleLeavingPlayerStatistics(table, endpoint);
+		}
 		Message message = new Message();
 		message.setTitle(MessageTitle.LEAVE_TABLE);
 		message.setTable(table);
-		User user = endpoint.getUser();
-		if (table.isPlayer(user)) {
-			handleLeavingPlayerStatistics(table, endpoint);
-		}
-		if (table.removePlayerIfExist(user)) {
-			message.setWho(endpoint.getUser());
-			CommonEndpoint.TABLES.remove(table.getTableId());
-			return message;
-		} else if (table.removeWatcherIfExist(user)) {
+		if (table.removePlayerIfExist(user) || table.removeWatcherIfExist(user)) {
 			message.setWho(endpoint.getUser());
 			return message;
 		}
 		return null;
 	}
 
-	public Message createRemoveTableMessage(Table table, CommonEndpoint endpoint) {
+	public Message removeTableIfRequired(Table table, CommonEndpoint endpoint) {
 		if (table == null) {
 			return null;
 		}
-		if (table.getPlayerInTurn() == null) {
+
+		if (table.isStarted() && !table.isSomebodyInTurn() || !table.isStarted() && table.getPlayerA() == null) {
+			CommonEndpoint.TABLES.remove(table.getTableId());
+			table.detachPlayers();
 			Message message = new Message();
 			message.setTitle(MessageTitle.REMOVE_TABLE);
 			message.setTable(table);
@@ -111,9 +111,11 @@ public class TableHandler extends CommonHandler {
 
 	public Message removeEndpointOwnTable(CommonEndpoint endpoint) {
 		// Using params would be faster...
-		Optional<Table> table = CommonEndpoint.TABLES.values().stream().filter(taabel -> taabel.getPlayerA() != null).filter(taabel -> taabel.getPlayerA().equals(endpoint.getUser())).findFirst();
-		if (table.isPresent()) {
-			Table removedTable = CommonEndpoint.TABLES.remove(table.get().getTableId());
+		Optional<Table> tableOptional = CommonEndpoint.TABLES.values().stream().filter(taabel -> taabel.getPlayerA() != null).filter(taabel -> taabel.getPlayerA().equals(endpoint.getUser())).findFirst();
+		if (tableOptional.isPresent()) {
+			tableOptional.get().detachPlayers();
+			endpoint.getUser().setTable(null);
+			Table removedTable = CommonEndpoint.TABLES.remove(tableOptional.get().getTableId());
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.REMOVE_TABLE);
 			message_.setTable(removedTable);
@@ -123,7 +125,10 @@ public class TableHandler extends CommonHandler {
 	}
 
 	public synchronized Message joinTable(Message message, CommonEndpoint endpoint) {
-		// Using params would be faster...
+		if (endpoint.getUser().getTable() != null) {
+			LOGGER.severe("User is already in table:" + endpoint.getUser());
+			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser());
+		}
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
 		if (!table.isWaitingOpponent()) {
@@ -132,8 +137,11 @@ public class TableHandler extends CommonHandler {
 		if (table.getPlayerA().equals(endpoint.getUser())) {
 			throw new IllegalArgumentException("Same players to table not possible..");
 		}
+		User user = endpoint.getUser();
+		user.setTable(table);
 		Message message_ = new Message();
-		if (table.joinTableAsPlayer(endpoint.getUser())) {
+		message_.setWho(endpoint.getUser());
+		if (table.joinTableAsPlayer(user)) {
 			message_.setTitle(MessageTitle.START_GAME);
 		} else {
 			message_.setTitle(MessageTitle.JOIN_TABLE);

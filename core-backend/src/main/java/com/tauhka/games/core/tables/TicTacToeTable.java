@@ -57,7 +57,7 @@ public class TicTacToeTable extends Table {
 		}
 		this.addedTokens = 0;
 		this.gameOver = false;
-		this.gameStartedInstant = Instant.now();
+		this.startTime = Instant.now();
 		return this;
 	}
 
@@ -108,7 +108,7 @@ public class TicTacToeTable extends Table {
 			if (isDraw()) {
 				result = new GridGameResult();
 				result.setResultType(GameResultType.DRAW);
-				result.setStartInstant(this.gameStartedInstant);
+				result.setStartInstant(this.startTime);
 				result.setGameMode(this.gameMode);
 
 				// this.playerInTurn = null;
@@ -121,7 +121,7 @@ public class TicTacToeTable extends Table {
 		addPlayersToResult(result);
 		result.setResultType(GameResultType.WIN_BY_PLAY);
 		result.setGameMode(this.gameMode);
-		result.setStartInstant(this.gameStartedInstant);
+		result.setStartInstant(this.startTime);
 
 		if (playerA.getGameToken() == result.getToken()) {
 			result.setWinner(playerA);
@@ -142,7 +142,7 @@ public class TicTacToeTable extends Table {
 	@Override
 	public boolean joinTableAsPlayer(User playerB) {
 		this.playerB = playerB;
-		this.gameStartedInstant = Instant.now();
+		this.startTime = Instant.now();
 		playerB.setGameToken(GameToken.O);
 		return gameShouldStartNow;
 	}

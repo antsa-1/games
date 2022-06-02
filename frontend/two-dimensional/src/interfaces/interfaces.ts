@@ -1,4 +1,4 @@
-import { IBaseTable,IChat } from "./commontypes";
+import { IBaseTable, IChat } from "./commontypes";
 import { IGameMode as ICommonGameMode } from "./commontypes";
 import { IPoolTable } from "./pool";
 import { IYatzyTable } from "./yatzy";
@@ -9,7 +9,7 @@ export interface IStoreState {
     tables: IBaseTable[],
     users: IUser[],
     commonChat: IChat,
-    theTable: ITable | IPoolTable | IYatzyTable, 
+    theTable: ITable | IPoolTable | IYatzyTable,
     loadingStatus?: boolean
 }
 
@@ -56,7 +56,7 @@ export interface IGame {
     name: string
     gameModes: IGameMode[]
 }
-export interface IGameMode extends ICommonGameMode  {
+export interface IGameMode extends ICommonGameMode {
     requiredConnections: number,
 }
 export interface LoginData {
@@ -88,10 +88,9 @@ export interface IPlayer {
 
 export interface IUser {
     webSocket?: WebSocket;
-    game?: ITable;
-    name: string;
-    token?: string;
-    email?: string;
+    name: string,
+    token?: string
+    tableId?: string,
 }
 
 export interface ITopLists {

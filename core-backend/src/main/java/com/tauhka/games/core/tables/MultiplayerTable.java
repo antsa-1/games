@@ -25,6 +25,12 @@ public abstract class MultiplayerTable extends Table // extends Table
 	@JsonbProperty("players")
 	private List<User> players;
 
+	@Override
+	@JsonbProperty(value = "tableType")
+	public TableType getTableType() {
+		return TableType.MULTIPLAYER;
+	}
+
 	public MultiplayerTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		super(playerA, gameMode, randomizeStarter, registeredOnly, timeControlIndex, playerAmount);
 		// this.tableId = UUID.randomUUID();
@@ -65,10 +71,6 @@ public abstract class MultiplayerTable extends Table // extends Table
 		return this.playerInTurn.equals(u);
 	}
 
-	/* public synchronized GameResult resign(User player) { if (this.isPlayer(player) && this.playerInTurn != null) { this.playerInTurn = null; this.gameOver = true; User opponent = getOpponent(player); GameResult gameResult = new
-	 * GameResult(); gameResult.setStartInstant(this.gameStartedInstant); gameResult.setWinner(opponent); gameResult.setPlayerA(this.playerA); gameResult.setPlayerB(this.playerB); gameResult.setResigner(player);
-	 * gameResult.setResultType(GameResultType.WIN_BY_RESIGNATION); return gameResult; } throw new IllegalArgumentException("Resign not possible" + player); } */
-
 	public boolean isGameOver() {
 		return gameOver;
 	}
@@ -79,6 +81,27 @@ public abstract class MultiplayerTable extends Table // extends Table
 
 	public GameMode getGameMode() {
 		return gameMode;
+	}
+
+	@Override
+	public void detachPlayers() {
+		super.detachPlayers();
+		for (User u : this.getPlayers()) {
+			u.setTable(null);
+		}
+	}
+
+	@Override
+	public boolean isInTable(User user) {
+		if (isPlayer(user)) {
+			return true;
+		}
+		return super.isWatcher(user);
+	}
+
+	@Override
+	public boolean isPlayer(User user) {
+		return this.players.indexOf(user) != -1;
 	}
 
 	public int getTimeControlIndex() {
@@ -147,7 +170,7 @@ public abstract class MultiplayerTable extends Table // extends Table
 			return false;
 		}
 		// Table full
-		this.gameStartedInstant = Instant.now();
+		this.startTime = Instant.now();
 		if (this.randomizeStarter) {
 			int i = ThreadLocalRandom.current().nextInt(1, players.size());
 			this.startingPlayer = players.get(i - 1);
@@ -158,6 +181,12 @@ public abstract class MultiplayerTable extends Table // extends Table
 			playerInTurn = players.get(0);
 		}
 		return gameShouldStartNow;
+	}
+
+	@Override
+	public boolean removePlayerIfExist(User user) {
+		super.removePlayerIfExist(user);
+		return this.players.remove(user);
 	}
 
 	public List<User> getWatchers() {

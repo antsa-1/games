@@ -28,7 +28,7 @@
 						Tables
 					</span>
 					<span class="float-end">
-						<button v-if="!hasCreatedTable" type="button" class="btn btn-primary w-30 float-start" data-bs-toggle="modal" data-bs-target="#createTableModal">
+						<button v-if="isMainCreateTableButtonVisible" type="button" class="btn btn-primary w-30 float-start" data-bs-toggle="modal" data-bs-target="#createTableModal">
 							Create table
 						</button>
 						<button v-if="isRemoveTableButtonVisible" @click="removeTable()" type="button" class="btn btn-primary bg-danger w-30 float-start" >
@@ -51,15 +51,22 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(table) in tables" :key="table.id" >						
+						<tr v-for="(table) in tables" :key="table.tableId" >						
 							<td scope="row">
 								{{getTableShortDesc(table.gameMode.id)}}
 							</td>
 							<td>
 								{{getBoardDesc(table)}}									
 							</td>							
-							<td>
+							<td v-if="table.gameMode.gameNumber !==4">
 								{{table.playerA.name}} - {{table.playerB?.name}}
+							</td>
+                            <td v-if="table.gameMode.gameNumber === 4">
+								<ul>
+                                    <li v-for="player in table.players" :key="table.id">
+                                        {{player.name}}
+                                    </li>
+                                </ul>
 							</td>
 							<td>
 								{{table.randomizeStarter? "?": "fixed"}} 
@@ -72,11 +79,13 @@
 									<button v-if="playButtonVisible(table)" :disabled="!createTableButtonVisible" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
 										Play
 									</button>
-																
-									<button @click="watchTable(table)" v-if="table.playerA && table.playerB" type="button" class="btn btn-primary w-30 float-end">
+                                    <button v-else-if="leaveButtonVisible(table)" @click="leave(table)" type="button" class="btn btn-primary w-30 float-start">
+										Leave
+									</button>																
+									<button v-else-if="watchButtonVisible(table)" @click="watchTable(table)"  type="button" class="btn btn-primary w-30 float-end">
 										Watch
 									</button>
-									<span v-else-if="!authenticated && !playButtonVisible(table)">Requires login to play</span>
+									<span v-else-if="requiresLoginTextVisible(table)">Requires login</span>
 								</section>
 							</td>
 						</tr>								
@@ -172,7 +181,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare,  IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces/interfaces";
-import { IBaseTable, IChatMessage } from "../interfaces/commontypes";
+import { IBaseTable, IChatMessage, IMultiplayerTable } from "../interfaces/commontypes";
 import { loginMixin,GUEST } from "../mixins/mixins";
 import { utilsMixin } from "../mixins/utilsmixin";
 import { useRoute } from "vue-router";
@@ -224,6 +233,10 @@ export default defineComponent({
 				return this.$store.getters.games.filter(game => game.gameId === 3)[0].gameModes
 			}
 		},
+        isMainCreateTableButtonVisible(){
+            //TODO, can only this.userName.tableId be used -> check createTable, does it set value effect also then in removeTable
+           return  !this.hasCreatedTable  && !this.user.tableId 
+        },
         hasVariants(){
             return this.selectedGame !== 0 && this.selectedGame !== 4
         },
@@ -306,11 +319,9 @@ export default defineComponent({
 						break;
 
 					case "REMOVE_PLAYER":
-						this.$store.dispatch("leaveTable", data.who.name).then(()=>{
+						this.$store.dispatch("leaveTable", data).then(()=>{
 							this.$store.dispatch("removePlayer", data.who)
-							if(data.table){
-							this.$store.dispatch("removeTable", data.table)
-						}
+							
 						})
 					
 						break;
@@ -368,9 +379,11 @@ export default defineComponent({
 							//this.$router.push({ name: 'Table', id:data.table.id})
 						})
 						break
-                    case "JOIN_TABLE":
-                        console.log("Player joined to table but not starting yet "+JSON.stringify(data))
-                        this.$store.dispatch("joinYatzyTable", data)
+                    case "JOIN_TABLE":                       
+                        this.$store.dispatch("joinMultiplayerTable", data.table)
+                        if(data.who.name === this.userName){
+                            this.$store.dispatch("updateUserTableId", data.table.tableId) 
+                        }                                  
                         break;
 					case "POOL_UPDATE":					
 						this.$store.dispatch("poolUpdate", data)
@@ -401,6 +414,9 @@ export default defineComponent({
 						break
 					case "LEAVE_TABLE":						
 						this.$store.dispatch("leaveTable", data)
+                        if(data.who.name === this.userName){
+                            this.$store.dispatch("updateUserTableId", null) 
+                        }  
 						break
 					case "GAME_END":
 							const lastSquare :ISquare = {x: data.x, y: data.y, coordinates: data.x.toString().concat(data.y.toString()), token:data.token}
@@ -530,20 +546,37 @@ export default defineComponent({
 			const obj = { title: "REMOVE_TABLE",message:""};
 			this.user.webSocket.send(JSON.stringify(obj));
 		},
-		play(table:ITable){
-			
+		play(table:ITable){			
 			const obj = { title: "JOIN_TABLE", message:table.tableId};
 			this.user.webSocket.send(JSON.stringify(obj));
 		},
-		playButtonVisible(table:ITable){
-			if(table.playerA && table.playerB){
-				return false				
-			}
-			if(table.registeredOnly && !this.authenticated)	{
-				return false
-			}
-			return true	
+        leave(table:ITable){
+            const obj = { title: "LEAVE_TABLE", message:table.tableId};
+			this.user.webSocket.send(JSON.stringify(obj));
+        },
+         
+		playButtonVisible(table:IBaseTable){
+            if(table.registeredOnly && !this.authenticated)	{
+                return false
+            }			
+            if(this.user.tableId){
+                return false
+            }
+            if(table.tableType === "BASE") {
+                return !table.started
+            }
+            return true
 		},
+        leaveButtonVisible(table:IBaseTable){
+            console.log("L="+table.tableId+" ___ "+this.user.tableId)
+            return this.user.tableId === table.tableId
+        },
+        watchButtonVisible(table:IBaseTable){
+            return table.started? true: false
+        },
+        requiresLoginTextVisible(table:IBaseTable){
+            return !this.authenticated && !this.user.tableId && table.registeredOnly
+        },
 		isOwnTable(table:ITable){
 			return	table?.playerA?.name === this.userName
 		},

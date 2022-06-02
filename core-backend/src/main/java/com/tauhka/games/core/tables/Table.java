@@ -59,10 +59,15 @@ public abstract class Table implements Serializable {
 
 	@JsonbProperty("gameMode")
 	protected GameMode gameMode;
-	@JsonbProperty("gameStartedInstant")
-	protected Instant gameStartedInstant;
+	@JsonbProperty("startTime")
+	protected Instant startTime;
 	@JsonbTransient
 	protected boolean gameOver;
+
+	@JsonbProperty(value = "tableType")
+	public TableType getTableType() {
+		return TableType.BASE;
+	}
 
 	public Table() {
 		// Empty constr. for deserializing
@@ -109,7 +114,7 @@ public abstract class Table implements Serializable {
 			this.gameOver = true;
 			User opponent = getOpponent(player);
 			GameResult gameResult = new GameResult();
-			gameResult.setStartInstant(this.gameStartedInstant);
+			gameResult.setStartInstant(this.startTime);
 			gameResult.setWinner(opponent);
 			gameResult.setPlayerA(this.playerA);
 			gameResult.setPlayerB(this.playerB);
@@ -118,6 +123,19 @@ public abstract class Table implements Serializable {
 			return gameResult;
 		}
 		throw new IllegalArgumentException("Resign not possible" + player);
+	}
+
+	public void detachPlayers() {
+		detachPlayer(playerA);
+		detachPlayer(playerB);
+		for (User u : watchers) {
+			detachPlayer(u);
+		}
+	}
+
+	protected void detachPlayer(User user) {
+		if (user != null)
+			user.setTable(null);
 	}
 
 	public int getDraws() {
@@ -153,6 +171,13 @@ public abstract class Table implements Serializable {
 
 	public void setTimeControlIndex(int timeControlIndex) {
 		this.timeControlIndex = timeControlIndex;
+	}
+
+	public boolean isInTable(User user) {
+		if (isPlayer(user)) {
+			return true;
+		}
+		return isWatcher(user);
 	}
 
 	public boolean isPlayer(User user) {
@@ -222,12 +247,18 @@ public abstract class Table implements Serializable {
 		return users;
 	}
 
+	public boolean isTableCreator(User user) {
+		return playerA != null ? user.equals(playerA) : false;
+	}
+
 	public boolean removePlayerIfExist(User user) {
 		if (playerA != null && playerA.equals(user)) {
+			detachPlayer(playerA);
 			playerA = null;
 			this.playerInTurn = null;
 			return true;
 		} else if (playerB != null && playerB.equals(user)) {
+			detachPlayer(playerB);
 			playerB = null;
 			this.playerInTurn = null;
 			return true;
@@ -257,6 +288,7 @@ public abstract class Table implements Serializable {
 	}
 
 	public boolean removeWatcherIfExist(User user) {
+		detachPlayer(user);
 		return watchers.remove(user);
 	}
 
@@ -284,6 +316,14 @@ public abstract class Table implements Serializable {
 		return playerInTurn;
 	}
 
+	public boolean isSomebodyInTurn() {
+		return this.playerInTurn != null;
+	}
+
+	public boolean isStarted() {
+		return this.startTime != null;
+	}
+
 	public void changePlayerInTurn() {
 		if (this.playerInTurn.equals(playerA)) {
 			this.playerInTurn = playerB;
@@ -303,7 +343,7 @@ public abstract class Table implements Serializable {
 			throw new IllegalArgumentException("Only registered players allowed to join to play." + playerB.getName() + " table:" + this);
 		}
 		this.playerB = playerB;
-		this.gameStartedInstant = Instant.now();
+		this.startTime = Instant.now();
 		if (this.randomizeStarter) {
 			int i = ThreadLocalRandom.current().nextInt(1, 1001);
 			if (i > 500) {
@@ -365,8 +405,8 @@ public abstract class Table implements Serializable {
 		this.playerA = playerA;
 	}
 
-	public Instant getGameStartedInstant() {
-		return gameStartedInstant;
+	public Instant getStartTime() {
+		return startTime;
 	}
 
 }

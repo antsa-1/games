@@ -186,7 +186,7 @@ public class PoolTableHandler extends CommonHandler {
 	private void addGameToDataBase(PoolTable table, PoolTurn resultingTurn, GameResultType gameResultType) {
 		GameResult gameResult = new GameResult();
 		gameResult.setGameMode(table.getGameMode());
-		gameResult.setStartInstant(table.getGameStartedInstant());
+		gameResult.setStartInstant(table.getStartTime());
 		gameResult.setPlayerA(table.getPlayerA());
 		gameResult.setPlayerB(table.getPlayerB());
 		gameResult.setWinner(resultingTurn.getWinner());
