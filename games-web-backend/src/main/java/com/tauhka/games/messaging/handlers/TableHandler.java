@@ -124,30 +124,33 @@ public class TableHandler extends CommonHandler {
 		throw new IllegalArgumentException("No playerA found in tables:" + endpoint.getUser());
 	}
 
-	public synchronized Message joinTable(Message message, CommonEndpoint endpoint) {
+	public Message joinTable(Message message, CommonEndpoint endpoint) {
 		if (endpoint.getUser().getTable() != null) {
 			LOGGER.severe("User is already in table:" + endpoint.getUser());
 			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser());
 		}
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
-		if (!table.isWaitingOpponent()) {
-			throw new IllegalArgumentException("Table is not waiting player " + table + " trying user:" + endpoint.getUser()); // something else than concurrentaccess since synchronized, todo
+		synchronized (table) {
+			if (!table.isWaitingOpponent()) {
+				throw new IllegalArgumentException("Table is not waiting player " + table + " trying user:" + endpoint.getUser());
+			}
+			if (table.isInTable(endpoint.getUser())) {
+				throw new IllegalArgumentException("Same players to table not possible..");
+			}
+			User user = endpoint.getUser();
+			user.setTable(table);
+			Message message_ = new Message();
+			message_.setWho(endpoint.getUser());
+			if (table.joinTableAsPlayer(user)) {
+				message_.setTitle(MessageTitle.START_GAME);
+			} else {
+				message_.setTitle(MessageTitle.JOIN_TABLE);
+			}
+			message_.setTable(table);
+			return message_;
 		}
-		if (table.getPlayerA().equals(endpoint.getUser())) {
-			throw new IllegalArgumentException("Same players to table not possible..");
-		}
-		User user = endpoint.getUser();
-		user.setTable(table);
-		Message message_ = new Message();
-		message_.setWho(endpoint.getUser());
-		if (table.joinTableAsPlayer(user)) {
-			message_.setTitle(MessageTitle.START_GAME);
-		} else {
-			message_.setTitle(MessageTitle.JOIN_TABLE);
-		}
-		message_.setTable(table);
-		return message_;
+
 	}
 
 	public Message watch(Message message, CommonEndpoint CommonEndpoint) {
