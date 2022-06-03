@@ -6,7 +6,7 @@
 			<ul class="list-group ">						
 				<li v-for="(topPlayer, index) in games" :key="topPlayer" class="list-group-item" :class="[index%2==0?'bg-success p-2 text-dark bg-opacity-25':'bg-success p-2 text-dark bg-opacity-10']">					
 					 <router-link :to="{ name: 'Profile', params:{selectedName:topPlayer.nickname}}" class="games-profile-link float-start">{{index+1}}.{{topPlayer.nickname}} </router-link>
-					<span class="float-end"> {{this.getRanking(topPlayer)}}</span>
+					<span class="float-end"> {{getRanking(topPlayer)}}</span>
 				</li>
 			</ul>
 			Games {{totalGames}}
