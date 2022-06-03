@@ -6,12 +6,12 @@ export interface IYatzyGame {
 }
 
 export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
-    players: Array<IYatzyPlayer>,
+    players: IYatzyPlayer[],
     canvas: IGameCanvas,
 }
 
 export interface IYatzyPlayer extends IPlayer {
-    dices: Array<IDice>,
+    dices: IDice[],
     scoreCard: IScoreCard,
 }
 

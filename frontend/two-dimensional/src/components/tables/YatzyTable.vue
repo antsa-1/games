@@ -19,11 +19,12 @@
 		</div>
 	</div>	
     	<div class="row">
-		{{yatzyTable}}
-	</div>
-    <div class="row">
+            {{yatzyTable}}
 		<div class="col-xs-12 col-sm-4">
-			
+			<span v-if="yatzyTable.mouseEnabled" class="text-success">Playing turn {{yatzyTable.mouseEnabled}}</span>
+			<span v-else-if="yatzyTable.playerInTurn?.name === userName" class="text-success"> It's your turn {{userName}} > time left:{{yatzyTable.secondsLeft}}  </span>
+			<span v-else-if="yatzyTable?.playerInTurn === null" class="text-success"> Game ended </span>
+			<div v-else class="text-danger"> In turn: {{yatzyTable.playerInTurn?.name}}</div>
 		</div>
 	</div>
 
@@ -43,10 +44,11 @@ import { useStore} from 'vuex'
 import {IGameOptions, Image, IVector2, IGameCanvas} from "../../interfaces/commontypes"  
 import {IYatzyPlayer,IHand} from "../../interfaces/yatzy"  
 import Chat from "../Chat.vue"
-    const yatzyTable = ref<IYatzyTable>(null)
     onMounted(() => {
         console.log("OnMounted")   
-        yatzyTable.value = initTable()
+        let canvasElement = <HTMLCanvasElement> document.getElementById("canvas")      
+        yatzyTable.value.canvas = <IGameCanvas>{element:canvasElement, animating:false, renderingContext:canvasElement.getContext("2d") }
+        console.log("Canvas:"+yatzyTable.value.canvas)
         repaintAll()
     })
     const router = useRouter()
@@ -56,7 +58,7 @@ import Chat from "../Chat.vue"
         let tablee:IYatzyTable = <IYatzyTable> store.getters.theTable
         const size: IVector2 = {x: 1200, y: 600}        
         const tableImage = <Image> {
-								image: <HTMLImageElement>document.getElementById("yatzybg"), 
+            image: <HTMLImageElement>document.getElementById("yatzybg"), 
 								canvasDimension: size,
 								realDimension: {x:1024 ,y: 1024},
 								canvasRotationAngle: { x:0, y:0 },
@@ -70,11 +72,11 @@ import Chat from "../Chat.vue"
        
         tablee.image = tableImage
         tablee.players = players
-        const canvasElement = <HTMLCanvasElement> document.getElementById("canvas")      
-        tablee.canvas = {element:canvasElement, animating:false, renderingContext:canvasElement.getContext("2d") }
+        
         tablee.position = <IVector2> {x:0, y:0}
         return tablee
     }
+    let yatzyTable = ref<IYatzyTable>(initTable())
     const userName = computed<string>(() => store.getters.user?.name)
     const unsubscribe = store.subscribe((mutation, state) => {
 	    if (mutation.type === "rematch" ){				
