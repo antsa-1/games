@@ -10,7 +10,7 @@ export const tablesMixin = {
     },
     computed: {
         resignButtonDisabled() {
-            const table = this.$store.getters.theTable;
+            const table = this.$store.getters?.theTable;
             if (this.watch) {
 
                 return true
