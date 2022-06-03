@@ -502,7 +502,7 @@ export default defineComponent({
 				return "x.o"
 			}else if(gameMode < 30){
 				return "4x"
-                }
+            }
             else if(gameMode < 40){
 				return "Pool"
 			}
@@ -553,13 +553,12 @@ export default defineComponent({
             if(this.user.tableId){
                 return false
             }
-            if(table.tableType === "BASE") {
-                return !table.started
+            if(table.started) {
+                return false
             }
             return true
 		},
-        leaveButtonVisible(table:IBaseTable){
-            console.log("L="+table.tableId+" ___ "+this.user.tableId)
+        leaveButtonVisible(table:IBaseTable){           
             return this.user.tableId === table.tableId
         },
         watchButtonVisible(table:IBaseTable){
