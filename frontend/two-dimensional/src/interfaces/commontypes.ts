@@ -1,4 +1,5 @@
 import { IPlayer } from "./interfaces"
+
 //no game specific typings here
 export interface IBaseTable {
     playerA: IPlayer,
@@ -13,11 +14,11 @@ export interface IBaseTable {
     playerAmount: number,
     gameMode: IGameMode,
     tableType: string,
-    started: boolean
+    started: boolean,
 }
 export interface IMultiplayerTable extends IBaseTable {
     players: Array<IPlayer>
-    mouseEnabled: boolean
+    canvasEnabled: boolean
 }
 
 export interface IChat {
@@ -77,4 +78,14 @@ export interface ITurnResult {
     winner?: IPlayer,
     text: string,
     draw?: boolean
+}
+
+export enum FONT_SIZE {
+    DEFAULT = "15px",
+    LARGER = "16px",
+    LARGEST = "18px"
+}
+
+export enum FONT {
+    DEFAULT = "Arial"
 }

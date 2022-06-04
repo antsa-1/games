@@ -25,7 +25,7 @@ export interface IDice extends IYatzyComponent {
     position: IVector2
 }
 
-export interface IScoreCard extends IYatzyComponent  {
+export interface IScoreCard extends IYatzyComponent {
     hands: IHand[],
     subTotal: number,
     total: number,
