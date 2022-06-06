@@ -1,5 +1,6 @@
 package com.tauhka.games.yatzy;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -32,4 +33,27 @@ public class Dice {
 	public void lock() {
 		this.locked = true;
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(diceId);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Dice other = (Dice) obj;
+		return Objects.equals(diceId, other.diceId);
+	}
+
+	@Override
+	public String toString() {
+		return "Dice [diceId=" + diceId + ", value=" + value + ", locked=" + locked + "]";
+	}
+
 }

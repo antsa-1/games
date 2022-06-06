@@ -73,6 +73,18 @@ public abstract class Table implements Serializable {
 		// Empty constr. for deserializing
 	}
 
+	public Table(GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
+		this.tableId = UUID.randomUUID();
+		this.gameMode = gameMode;
+		this.randomizeStarter = randomizeStarter;
+		if (!randomizeStarter) {
+			this.playerInTurn = playerA;
+		}
+		this.playerAmount = playerAmount;
+		this.registeredOnly = registeredOnly;
+		this.timeControlIndex = timeControlIndex;
+	}
+
 	public Table(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		this.tableId = UUID.randomUUID();
 		this.playerA = playerA;
@@ -316,6 +328,7 @@ public abstract class Table implements Serializable {
 		return playerInTurn;
 	}
 
+	@JsonbTransient
 	public boolean isSomebodyInTurn() {
 		return this.playerInTurn != null;
 	}

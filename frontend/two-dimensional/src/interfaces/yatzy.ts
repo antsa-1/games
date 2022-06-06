@@ -8,10 +8,21 @@ export interface IYatzyGame {
 export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
     players: IYatzyPlayer[],
     canvas: IGameCanvas,
+    dices: IDice[],
+    playButton: IButton
+}
+
+export interface IButton extends IYatzyComponent {
+    image: Image,
+    text?: string
+}
+
+export interface ISection {
+    start: IVector2,
+    end: IVector2
 }
 
 export interface IYatzyPlayer extends IPlayer {
-    dices: IDice[],
     scoreCard: IScoreCard,
 }
 
@@ -20,9 +31,10 @@ export interface IYatzyComponent {
     image?: Image,
 }
 export interface IDice extends IYatzyComponent {
-    face: number,
+    number: number,
     locked: boolean,
-    position: IVector2
+    position: IVector2,
+    highlighted: boolean
 }
 
 export interface IScoreCard extends IYatzyComponent {

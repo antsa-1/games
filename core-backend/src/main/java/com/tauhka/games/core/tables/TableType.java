@@ -5,5 +5,5 @@ package com.tauhka.games.core.tables;
  **/
 
 public enum TableType {
-	BASE, MULTIPLAYER
+	BASE, MULTI
 }
