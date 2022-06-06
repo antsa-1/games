@@ -1,16 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>games-web</artifactId>
 	<version>1.1.5</version>
 	<packaging>war</packaging>
 	<name>GamesWeb</name>
+	<groupId>com.tauhka</groupId>
 	<description>GamesWeb</description>
-	<parent>
-		<groupId>com.tauhka</groupId>
-		<artifactId>games</artifactId>
-		<version>1.0.3</version>
-		<relativePath>../games</relativePath>
-	</parent>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>12</maven.compiler.release>
@@ -31,6 +29,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.tauhka</groupId>
+			<artifactId>games-core</artifactId>
+			<version>1.1.10</version>
+		</dependency>
+		<dependency>
+			<groupId>com.tauhka</groupId>
 			<artifactId>pool</artifactId>
 			<version>1.0.6</version>
 		</dependency>
@@ -39,11 +42,7 @@
 			<artifactId>yatzy</artifactId>
 			<version>0.0.2</version>
 		</dependency>
-			<dependency>
-			<groupId>com.tauhka</groupId>
-			<artifactId>games-core</artifactId>
-			<version>1.1.9</version>
-		</dependency>
+
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
@@ -107,7 +106,7 @@
 		<dependency>
 			<groupId>jakarta.json.bind</groupId>
 			<artifactId>jakarta.json.bind-api</artifactId>
-			<version>2.0.0</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse</groupId>

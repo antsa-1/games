@@ -1,6 +1,7 @@
-module yatzy {
+module tauhka.yatzy {
 	exports com.tauhka.games.yatzy;
 
-	requires tauhka.core;
+	requires transitive tauhka.core;
+	requires jakarta.json.bind;
 }
 
