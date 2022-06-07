@@ -34,7 +34,8 @@ export interface IDice extends IYatzyComponent {
     number: number,
     locked: boolean,
     position: IVector2,
-    highlighted: boolean
+    highlighted: boolean,
+    diceId: string
 }
 
 export interface IScoreCard extends IYatzyComponent {

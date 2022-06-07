@@ -42,7 +42,7 @@
 <script setup lang="ts">
 
 import { IYatzyComponent, IYatzyTable } from '@/interfaces/yatzy';
-import { ref, computed, onMounted, onBeforeMount, onUpdated, watch, } from 'vue'
+import { ref, computed, onMounted, onBeforeMount, onUnmounted, watch, } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { IGameOptions, Image, IVector2, IGameCanvas, FONT_SIZE, FONT } from "../../interfaces/commontypes"
@@ -57,6 +57,19 @@ onMounted(() => {
     yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, renderingContext: canvasElement.getContext("2d") }
     attachListeners()
     repaintYatzyTable()
+})
+
+onUnmounted(() => {
+    console.log("onUnmounted")
+    //unsubscribe()
+	//unsubscribeAction()
+	//learIntervals()
+	//removeMouseListeners()
+		//window.removeEventListener("resize", this.resize)
+	//document.removeEventListener("visibilitychange", this.onVisibilityChange)
+	const obj = { title: "LEAVE_TABLE", message: tablee.tableId }
+    store.getters.user.webSocket?.send(JSON.stringify(obj))
+    store.dispatch("clearTable")
 })
 const router = useRouter()
 const store = useStore()
@@ -90,21 +103,40 @@ const attachListeners = () => {
     canvas.addEventListener('pointerover', (event) => {
         console.log('Pointer moved in')
     })
+    canvas.addEventListener('pointerdown', (event) => {
+        const cursorPoint = {x:event.offsetX, y: event.offsetY}
+        console.log('Pointer down event');
+        if(!isPointInDicesSection){
+            return
+        }
+        const diceArr:IDice[] = getDice(cursorPoint)
+        if(diceArr.length > 0){
+            const dice:IDice = diceArr[0]
+            if(dice.locked){
+                dice.locked = false
+                return
+            }
+            dice.locked = true
+            repaintYatzyTable()
+        }
+    })
     canvas.addEventListener('pointermove', (event) => {
         const cursorPoint = {x:event.offsetX, y: event.offsetY}
-        if(isPointInDicesSection(cursorPoint)){
-            const diceArr:IDice[] = isCursorOnDice(cursorPoint)
-            if(diceArr.length > 0 && !diceArr[0].highlighted){
-                const dice:IDice = diceArr[0]
-                console.log("IS ON DICE, TRUE"+ JSON.stringify(dice))
-                dice.highlighted = true
-
-                dice.position.y = 567
-                dice.image.canvasDestination.y = 567
-                dice.image.visible = false
+        document.body.style.cursor = "pointer"
+        if(isPointInDicesSection(cursorPoint) ){
+            document.body.style.cursor = "pointer"
+            const diceArr:IDice[] = getDice(cursorPoint)
+            if(diceArr.length > 0){
+                const dice:IDice = diceArr[0]               
+                highlightDice(dice)
+                repaintYatzyTable()         
+            }
+        }else {
+            if(removeHighlightFromDice()){
                 repaintYatzyTable()
             }
-        }        
+        }
+                    
     })
    // canvas.addEventListener("pointerdown", this.handleMouseDown, false)
   //	canvas.addEventListener("pointerup", this.handleMouseUp, false)
@@ -112,7 +144,7 @@ const attachListeners = () => {
 	canvas.addEventListener("contextmenu",(e)=> e.preventDefault())
 }
 
-const isCursorOnDice = (cursorPoint:IVector2) => {
+const getDice = (cursorPoint:IVector2) => {
    return yatzyTable.value.dices.filter(dice => filter(dice, cursorPoint ))
 }
 
@@ -145,10 +177,10 @@ const isPointInDicesSection = (point:IVector2) =>{
     }
     return true
 }
-
+let tablee: IYatzyTable = <IYatzyTable>store.getters.theTable
 const initTable = (): IYatzyTable => {
     console.log("initTable:")
-    let tablee: IYatzyTable = <IYatzyTable>store.getters.theTable
+    
     const bgSize: IVector2 = { x: 1200, y: 1200 }
     const tableImage = <Image>{
         image: <HTMLImageElement>document.getElementById("yatzybg"),
@@ -161,8 +193,9 @@ const initTable = (): IYatzyTable => {
     tablee.players.forEach(player => {    
         player.scoreCard = { subTotal: 0, total: 0, bonus: 0, hands: [], position: { x: 0, y: 0 } }
     })
-    tablee.dices = []  
-    for( let i = 1; i < 7; i++){
+
+    //console.log("tablee:"+JSON.stringify(tablee.dices))
+    for( let i = 1; i < 6; i++){
         const diceImage = <Image>{
             image: <HTMLImageElement>document.getElementById("dice" +i),
             canvasDimension: { x: 80, y: 80 },
@@ -170,7 +203,11 @@ const initTable = (): IYatzyTable => {
             canvasRotationAngle: { x: 0, y: 0 },
             visible: true
         }
-        let dice:IDice = {number:i, locked:false, image:diceImage, position:{x:600, y:200}, highlighted:false}
+        
+       
+        let dice:IDice = tablee.dices[i-1]
+        dice.image = diceImage 
+        console.log("DICE:"+JSON.stringify(dice))
         tablee.dices.push(dice)
     }
     tablee.image = tableImage
@@ -239,12 +276,39 @@ const startTurnButtonVisible = () => {
 }
 const repaintDices = () => {
     const diceSection = dicesSection()
-    for( let i = 0; i < 6; i++){       
-        const dice = yatzyTable.value.dices[i]        
-        dice.position = {x: diceSection.start.x + i * diceSize().x, y:diceSection.start.y}
+
+    for( let i = 0; i < 5; i++){       
+        const dice = yatzyTable.value.dices[i]     
+        if(dice.locked){
+            dice.position = {x: diceSection.start.x + i * diceSize().x, y:diceSection.start.y +diceSize().y}
+        } 
+       else if(dice.diceId === highlightedDice?.diceId){
+            dice.position = {x: diceSection.start.x + i * diceSize().x, y:diceSection.start.y +20}
+        }  
+        else{
+            dice.position = {x: diceSection.start.x + i * diceSize().x, y:diceSection.start.y}
+        }
         dice.image.canvasDestination = dice.position
         repaintComponent(dice)
     }
+}
+let highlightedDice:IDice = null
+
+const removeHighlightFromDice = ():boolean => {
+    if(highlightDice){
+        highlightedDice = null
+        return true
+    }
+    return false
+}
+const highlightDice = (dice:IDice) => {
+    if(highlightedDice && highlightedDice.diceId === dice.diceId){
+        console.log("highlight does not change")
+        return false
+    }
+    console.log("highlight changes")
+    highlightedDice = dice
+    return true
 }
 
 const repaintButtons = () => {
@@ -303,7 +367,7 @@ const repaintYatzyTable = () => {
     ctx.clearRect(0, 0, canvas.element.width, canvas.element.height)
     repaintComponent(yatzyTable.value)
     repaintScoreCard()
-    repaintDices( <IYatzyPlayer> yatzyTable.value.di)
+    repaintDices()
     repaintButtons()
 }
 

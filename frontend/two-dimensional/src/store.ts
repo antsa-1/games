@@ -18,7 +18,7 @@ export const store = createStore<IStoreState>({
         loadingStatus: false
     },
     getters: {
-        user(state) {
+        user(state):IUser {
             if (state.user) {
                 return state.user
             }
