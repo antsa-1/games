@@ -1,8 +1,11 @@
 package com.tauhka.games.yatzy;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 /**
  * @author antsa-1 from GitHub 28 May 2022
@@ -12,22 +15,24 @@ public class YatzyRuleBase {
 	private static final int ALL_DICES_COUNT = 5;
 	private static final Logger LOGGER = Logger.getLogger(YatzyRuleBase.class.getName());
 
-	public void startGame(YatzyPlayer playerInTurn) {
-		playerInTurn.removeDices();
+	public void startGame(YatzyTable yatzyTable) {
+		if (yatzyTable.getDices() == null) {
+			yatzyTable.setDices(new ArrayList<Dice>(5));
+		}
 		for (int i = 0; i < ALL_DICES_COUNT; i++) {
 			Dice dice = new Dice();
 			dice.roll();
-			playerInTurn.addDice(dice);
+			yatzyTable.getDices().add(dice);
 		}
 	}
 
 	public YatzyTable playTurn(YatzyTable table, YatzyTurn turn) {
 		if (turn.getYatzyAction() == YatzyAction.LOCK_DICES) {
 			validateDices(table, turn.getDiceIds());
-			lockDices(table.getPlayerInTurn(), turn.getDiceIds());
+			lockDices(table, turn.getDiceIds());
 			return table;
 		} else if (turn.getYatzyAction() == YatzyAction.ROLL_DICES) {
-			rollUnlockDices(table.getPlayerInTurn());
+			rollUnlockedDices(table);
 			return table;
 		} else if (turn.getYatzyAction() == YatzyAction.SELECT_HAND) {
 			return table;
@@ -51,22 +56,41 @@ public class YatzyRuleBase {
 			if (!id.equals(uuid.toString())) {
 				throw new IllegalArgumentException("dice id fail");
 			}
-			int index = table.getPlayerInTurn().getDices().indexOf(uuid);
+			@SuppressWarnings("unlikely-arg-type")
+			int index = table.getDices().indexOf(uuid);
 			if (index == -1) {
 				throw new IllegalArgumentException("No such dice " + id);
 			}
 		}
 	}
 
-	private List<Dice> rollUnlockDices(YatzyPlayer playerInTurn) {
-		playerInTurn.rollUnlockedDices();
-		return playerInTurn.getDices();
+	public void rollUnlockedDices(YatzyTable table) {
+		if (table.getPlayerInTurn().getRollsLeft() <= 0) {
+			LOGGER.severe("User has no rolls left:" + this);
+			throw new IllegalArgumentException("No rolls left");
+		}
+		for (int i = 0; i < ALL_DICES_COUNT; i++) {
+			Dice dice = table.getDices().get(i);
+			if (!dice.isLocked()) {
+				dice.roll();
+			}
+		}
+		int rollsLeft = table.getPlayerInTurn().getRollsLeft() - 1;
+		table.getPlayerInTurn().setRollsLeft(rollsLeft);
 	}
 
-	private List<Dice> lockDices(YatzyPlayer playerInTurn, List<String> diceIds) {
-		playerInTurn.lockDices(diceIds);
-		return playerInTurn.getDices();
+	public void lockDices(YatzyTable table, List<String> diceIds) {
+		for (String diceIdString : diceIds) {
+			UUID diceId = UUID.fromString(diceIdString);
+			Stream<Dice> stream = table.getUnlockedDices().stream();
+			Optional<Dice> optional = stream.filter(unlockedDice -> unlockedDice.getDiceId().equals(diceId)).findFirst();
+			Dice dice = optional.get();
+			dice.lock();
+		}
 	}
+
+
+
 
 	private ScoreCard selectHand(YatzyPlayer playerInTurn, Hand hand) {
 		ScoreCard card = playerInTurn.getScoreCard();

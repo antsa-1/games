@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
@@ -14,6 +15,7 @@ import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.util.Constants;
 
 import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 /**
  * @author antsa-1 from GitHub 12 May 2022
@@ -25,6 +27,8 @@ public class YatzyTable extends Table {
 	private YatzyRuleBase yatzyRuleBase;
 	@JsonbProperty("players")
 	private List<YatzyPlayer> players;
+	@JsonbProperty("dices")
+	private List<Dice> dices;
 
 	public YatzyTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		super(gameMode, randomizeStarter, registeredOnly, timeControlIndex, playerAmount);
@@ -56,10 +60,23 @@ public class YatzyTable extends Table {
 		return players;
 	}
 
+	public List<Dice> getDices() {
+		return dices;
+	}
+
+	public void setDices(List<Dice> dices) {
+		this.dices = dices;
+	}
+
 	@Override
 	public GameResult checkWinAndDraw() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@JsonbTransient
+	public List<Dice> getUnlockedDices() {
+		return dices.stream().filter(dice -> !dice.isLocked()).collect(Collectors.toList());
 	}
 
 	@Override
@@ -104,8 +121,7 @@ public class YatzyTable extends Table {
 			playerInTurn = players.get(0);
 		}
 		yatzyRuleBase = new YatzyRuleBase();
-		YatzyPlayer yPlayer = (YatzyPlayer) super.getPlayerInTurn();
-		yatzyRuleBase.startGame(yPlayer);
+		yatzyRuleBase.startGame(this);
 		return gameShouldStartNow;
 	}
 
