@@ -104,7 +104,7 @@ public class User { // Combine with Portal User.java?
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name);
+		return Objects.hash(id, name);
 	}
 
 	@Override
@@ -113,10 +113,20 @@ public class User { // Combine with Portal User.java?
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+
 		User other = (User) obj;
-		return Objects.equals(name, other.name);
+		if (this.id != null && other.getId() == null)
+			return false;
+		if (this.id == null && other.getId() != null)
+			return false;
+		if (this.id != null && other.getId() != null)
+			return this.id.equals(other.getId());
+
+		if (this.name != null && other.name == null)
+			return false;
+		if (this.name == null && other.name != null)
+			return false;
+		return this.name.equals(other.name);
 	}
 
 	public GameToken getGameToken() {

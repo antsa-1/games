@@ -12,20 +12,14 @@ import jakarta.json.bind.annotation.JsonbProperty;
 public class YatzyTurn implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	@JsonbProperty(value ="yatzyAction")
-	private YatzyAction yatzyAction;
-	@JsonbProperty(value ="diceIds")
-	private List<String> diceIds;
-	@JsonbProperty(value ="handType")
+
+	@JsonbProperty(value = "diceIds")
+	private List<String> diceIds; // Input
+	@JsonbProperty(value = "handType")
 	private HandType handType;
 
-	public YatzyAction getYatzyAction() {
-		return yatzyAction;
-	}
-
-	public void setYatzyAction(YatzyAction yatzyAction) {
-		this.yatzyAction = yatzyAction;
-	}
+	@JsonbProperty(value = "dices")
+	private List<Dice> dices; // Output with changed values
 
 	public List<String> getDiceIds() {
 		return diceIds;
@@ -33,6 +27,14 @@ public class YatzyTurn implements Serializable {
 
 	public void setDiceIds(List<String> diceIds) {
 		this.diceIds = diceIds;
+	}
+
+	public List<Dice> getDices() {
+		return dices;
+	}
+
+	public void setDices(List<Dice> dices) {
+		this.dices = dices;
 	}
 
 	public HandType getHandType() {

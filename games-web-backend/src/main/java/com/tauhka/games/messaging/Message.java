@@ -51,6 +51,9 @@ public class Message implements Serializable {
 	private int timeControlIndex;
 	@JsonbProperty("pool")
 	private PoolMessage poolMessage;
+	@JsonbProperty("yatzy")
+	private YatzyMessage yatzyMessage;
+	
 	@JsonbProperty("playerAmount")
 	private Integer playerAmount;
 
@@ -76,6 +79,14 @@ public class Message implements Serializable {
 
 	public Boolean getComputer() {
 		return computer;
+	}
+
+	public YatzyMessage getYatzyMessage() {
+		return yatzyMessage;
+	}
+
+	public void setYatzyMessage(YatzyMessage yatzyMessage) {
+		this.yatzyMessage = yatzyMessage;
 	}
 
 	public GameResult getGameResult() {

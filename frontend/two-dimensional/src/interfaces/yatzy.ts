@@ -33,6 +33,7 @@ export interface IYatzyComponent {
 export interface IDice extends IYatzyComponent {
     number: number,
     locked: boolean,
+    selected: boolean,
     position: IVector2,
     highlighted: boolean,
     diceId: string

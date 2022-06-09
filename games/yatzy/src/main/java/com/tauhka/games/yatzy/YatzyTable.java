@@ -132,11 +132,13 @@ public class YatzyTable extends Table {
 
 	@Override
 	public Object playTurn(User user, Object yatzyTurn) {
-		if (playerInTurn.equals(user)) {
-			throw new IllegalArgumentException("Player is not inTurn " + user);
-		}
-		YatzyTurn turn = (YatzyTurn) yatzyTurn;
-		return yatzyRuleBase.playTurn(this, turn);
+
+		YatzyTurn incomingTurn = (YatzyTurn) yatzyTurn;
+		return yatzyRuleBase.playTurn(this, incomingTurn);
+	}
+
+	public List<Dice> rollDices(User user, List<Dice> dices) {
+		return yatzyRuleBase.rollUnlockedDices(this, dices, user);
 	}
 
 	@Override

@@ -41,6 +41,7 @@
 
 <script setup lang="ts">
 
+import { IUser } from '@/interfaces/interfaces';
 import { IYatzyComponent, IYatzyTable } from '@/interfaces/yatzy';
 import { ref, computed, onMounted, onBeforeMount, onUnmounted, watch, } from 'vue'
 import { useRouter } from 'vue-router'
@@ -54,7 +55,8 @@ const CANVAS_ROWS = 22
 onMounted(() => {
     console.log("OnMounted")
     let canvasElement = <HTMLCanvasElement>document.getElementById("canvas")
-    yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, renderingContext: canvasElement.getContext("2d") }
+    yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, ctx: canvasElement.getContext("2d") }
+    yatzyTable.value.canvas.ctx.imageSmoothingEnabled = true
     attachListeners()
     repaintYatzyTable()
 })
@@ -89,11 +91,27 @@ const resizeDocument = () => {
         yatzyTable.value.image.canvasDimension.x = screen.width *0.9
         yatzyTable.value.image.canvasDimension.y = screen.height
     }
-     else {
-        console.log("Minimum screen... orientation change?")
+    else if (screen.width >= 600) {
+        yatzyTable.value.canvas.element.width = 600
+        yatzyTable.value.canvas.element.height = 800
+        yatzyTable.value.image.canvasDimension.x = 600
+        yatzyTable.value.image.canvasDimension.y = 800
     }
     
     repaintYatzyTable()
+}
+
+const playTurn = () => {
+    let rollDices  =[]
+    console.log("DIces:"+JSON.stringify(tablee.dices))
+    debugger
+    for (let i = 0; i < tablee.dices.length; i++){
+        const {diceId,locked} = tablee.dices[i];
+        rollDices.push({diceId:diceId,locked:locked})
+    }
+    const obj = { title:"YATZY_ROLL_DICES", message: tablee.tableId, yatzy:{dices:rollDices}}
+	console.log("*** Sending dices "+JSON.stringify(obj))
+	user.value.webSocket.send(JSON.stringify(obj))
 }
 
 const attachListeners = () => {
@@ -105,35 +123,28 @@ const attachListeners = () => {
     })
     canvas.addEventListener('pointerdown', (event) => {
         const cursorPoint = {x:event.offsetX, y: event.offsetY}
-        console.log('Pointer down event');
-        if(!isPointInDicesSection){
-            return
+        console.log('Pointer down event')
+        const dice:IDice = getDice(cursorPoint)
+        if(dice && !dice.locked){
+            dice.selected? dice.selected = false : dice.selected = true
+        }else if(isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)){
+            playTurn()  
         }
-        const diceArr:IDice[] = getDice(cursorPoint)
-        if(diceArr.length > 0){
-            const dice:IDice = diceArr[0]
-            if(dice.locked){
-                dice.locked = false
-                return
-            }
-            dice.locked = true
-            repaintYatzyTable()
-        }
+        repaintYatzyTable()
     })
     canvas.addEventListener('pointermove', (event) => {
         const cursorPoint = {x:event.offsetX, y: event.offsetY}
-        document.body.style.cursor = "pointer"
-        if(isPointInDicesSection(cursorPoint) ){
-            document.body.style.cursor = "pointer"
-            const diceArr:IDice[] = getDice(cursorPoint)
-            if(diceArr.length > 0){
-                const dice:IDice = diceArr[0]               
-                highlightDice(dice)
+        document.body.style.cursor = "default"
+        if(isPointOnSection(cursorPoint, diceSection()) ){
+            const dice:IDice = getDice(cursorPoint)
+            if(dice){
+                document.body.style.cursor = "pointer"               
                 repaintYatzyTable()         
             }
-        }else {
-            if(removeHighlightFromDice()){
-                repaintYatzyTable()
+        }else if(isPointOnSection(cursorPoint, buttonSection())){
+            if(isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)){
+                document.body.style.cursor = "pointer"               
+                repaintYatzyTable() 
             }
         }
                     
@@ -145,15 +156,16 @@ const attachListeners = () => {
 }
 
 const getDice = (cursorPoint:IVector2) => {
-   return yatzyTable.value.dices.filter(dice => filter(dice, cursorPoint ))
+   return yatzyTable.value.dices.filter(dice => filter(dice, cursorPoint ))[0]
 }
 
 const filter = (dice:IDice , cursorPoint:IVector2) => {
+    const size = diceSize ()
     if(cursorPoint.x < dice.position.x ){
       //  console.log("failed1")
         return false
     }
-    if(cursorPoint.x > dice.position.x + diceSize ().x){
+    if(cursorPoint.x > dice.position.x + size.x){
       //  console.log("failed22")
         return false
     }
@@ -161,22 +173,37 @@ const filter = (dice:IDice , cursorPoint:IVector2) => {
       //  console.log("failed3")
         return false
     }
-    if(cursorPoint.y > dice.position.y+ diceSize().y){
+    if(cursorPoint.y > dice.position.y+ size.y){
         return false
     }  
     return true
 }
-const isPointInDicesSection = (point:IVector2) =>{
-    const section = dicesSection() 
-    console.log("DiceSection:"+JSON.stringify(section)+ " pointIn:"+JSON.stringify(point))
-    if(point.x < section.start.x || point.x > section.end.x ){     
-        return false;
+
+const isPointOnImage = (point:IVector2, image:Image) => {
+   
+    if(point.x < image.canvasDestination.x || point.x > image.canvasDestination.x + image.canvasDimension.x ){
+        return false
     }
-    if(point.y < section.start.y || point.y > section.end.y ){   
-        return false;
+    if(point.y < image.canvasDestination.y || point.y > image.canvasDestination.y + image.canvasDimension.y ){
+        return false
     }
     return true
 }
+
+const isPointOnSection = (point:IVector2, section:ISection) => {  
+  
+    if(point.x < section.start.x || point.x > section.end.x ){    
+        
+        return false;
+    }
+    if(point.y < section.start.y || point.y > section.end.y ){   
+       
+        return false;
+    }
+   
+    return true
+}
+
 let tablee: IYatzyTable = <IYatzyTable>store.getters.theTable
 const initTable = (): IYatzyTable => {
     console.log("initTable:")
@@ -185,39 +212,43 @@ const initTable = (): IYatzyTable => {
     const tableImage = <Image>{
         image: <HTMLImageElement>document.getElementById("yatzybg"),
         canvasDimension: bgSize,
+        canvasDestination:<IVector2>{x:0, y:0},
         realDimension: { x: 1024, y: 1024 },
-        canvasRotationAngle: { x: 0, y: 0 },
+        canvasRotationAngle: 0,
         visible: true
     }
     const players: IYatzyPlayer[] = tablee.players
     tablee.players.forEach(player => {    
         player.scoreCard = { subTotal: 0, total: 0, bonus: 0, hands: [], position: { x: 0, y: 0 } }
     })
-
+   
     //console.log("tablee:"+JSON.stringify(tablee.dices))
     for( let i = 1; i < 6; i++){
         const diceImage = <Image>{
             image: <HTMLImageElement>document.getElementById("dice" +i),
             canvasDimension: { x: 80, y: 80 },
             realDimension: { x: 1024, y: 1024 },
-            canvasRotationAngle: { x: 0, y: 0 },
+            canvasRotationAngle: 0,
+            canvasDestination:<IVector2>{x:0, y:0},
             visible: true
         }
         
        
         let dice:IDice = tablee.dices[i-1]
         dice.image = diceImage 
-        console.log("DICE:"+JSON.stringify(dice))
-        tablee.dices.push(dice)
+        
+       // tablee.dices.push(dice)
     }
+    console.log("dices:"+tablee.dices)
     tablee.image = tableImage
     tablee.players = players
 
     const playButtonImage =  <Image>{
             image: <HTMLImageElement>document.getElementById("playButton"),
             canvasDimension: {x:100, y:50},
-            realDimension: { x: 488, y: 150 },
-            canvasRotationAngle: { x: 0, y: 0 },
+            realDimension: { x: 570, y: 279 },
+            canvasRotationAngle: 0,
+            canvasDestination:<IVector2>{x:0, y:0},
             visible: true
     }
    
@@ -230,6 +261,7 @@ const initTable = (): IYatzyTable => {
 
 let yatzyTable = ref<IYatzyTable>(initTable())
 const userName = computed<string>(() => store.getters.user?.name)
+const user = computed<IUser>(() => store.getters.user)
 const selectedTextSize = () => {
 
 }
@@ -251,7 +283,7 @@ const repaintComponent = (component: IYatzyComponent) => {
     if (!component) {
         return
     }
-    const ctx = yatzyTable.value.canvas.renderingContext
+    const ctx = yatzyTable.value.canvas.ctx
     if (!component.image.visible) {
         return
     }
@@ -263,11 +295,13 @@ const repaintComponent = (component: IYatzyComponent) => {
     if (!component.image.canvasDestination) {
         component.image.canvasDestination = <IVector2>{ x: 0, y: 0 }
     }
+  
     ctx.drawImage(component.image.image, 0, 0, component.image.realDimension.x, component.image.realDimension.y, component.image.canvasDestination.x, component.image.canvasDestination.y, component.image.canvasDimension.x, component.image.canvasDimension.y)
     //	ctx.resetTransform()
 }
 
-const repaintPlayerInTurn = (player: IYatzyPlayer) => {
+const repaintPlayerInTurn = () => {
+    let table:IYatzyPlayer = <IYatzyPlayer> yatzyTable.value.playerInTurn
 
 }
 
@@ -275,20 +309,26 @@ const startTurnButtonVisible = () => {
     return userName.value === yatzyTable.value.playerInTurn.name
 }
 const repaintDices = () => {
-    const diceSection = dicesSection()
+    const section = diceSection ()
 
     for( let i = 0; i < 5; i++){       
-        const dice = yatzyTable.value.dices[i]     
-        if(dice.locked){
-            dice.position = {x: diceSection.start.x + i * diceSize().x, y:diceSection.start.y +diceSize().y}
+        const dice = yatzyTable.value.dices[i]
+        const size:IVector2 = diceSize()
+        if(dice.selected){
+            //position down size of one dice
+            dice.position = {x: section.start.x + i * size.x + +60, y:section.start.y +size.y}
         } 
-       else if(dice.diceId === highlightedDice?.diceId){
-            dice.position = {x: diceSection.start.x + i * diceSize().x, y:diceSection.start.y +20}
+        else if(dice.locked){
+            //locked dice position down of two two dice
+            dice.position = {x: section.start.x + i * size.x+ 60, y:section.start.y + 2* size.y}
         }  
-        else{
-            dice.position = {x: diceSection.start.x + i * diceSize().x, y:diceSection.start.y}
+        else {
+            //basic position
+            dice.position = {x: section.start.x + i * size.x + 60, y:section.start.y}
         }
         dice.image.canvasDestination = dice.position
+        dice.image.canvasDimension.x = size.x
+        dice.image.canvasDimension.x = size.y
         repaintComponent(dice)
     }
 }
@@ -313,20 +353,21 @@ const highlightDice = (dice:IDice) => {
 
 const repaintButtons = () => {
     const button = yatzyTable.value.playButton
-    button.position = buttonSection()
+    const section:ISection = buttonSection()
+    button.position.x = section.end.x - button.image.canvasDimension.x
+    button.position.y = section.end.y - button.image.canvasDimension.y
     button.image.canvasDestination = button.position
-    repaintComponent(yatzyTable.value.playButton)
+    if(userName.value === tablee.playerInTurn.name){
+        repaintComponent(yatzyTable.value.playButton)
+    }
 }
 
-
-
-const dicesSection = ():ISection => {
+const gameSection = ():ISection => {
     const canvasWidth = yatzyTable.value.canvas.element.width
-    console.log("dicesSection canvasWidth:"+canvasWidth)
-    const size:IVector2 = diceSize()
+    const size = diceSize()
     if(canvasWidth >= 1200){
         const y = yatzyTable.value.canvas.element.height / 10   
-        return {start: {x: 700, y:y}, end: {x:700+ 6 * size.x, y:y + size.y}}
+        return {start: {x: 700, y:y}, end: {x:700+ 6 * size.x, y:y + (size.y * 2)}}
     }
     if(canvasWidth >= 768){
         const x = canvasWidth/2
@@ -344,26 +385,57 @@ const dicesSection = ():ISection => {
     return {start: {x:x, y:y}, end:{x:x+ 6 * size.x, y:y + size.y}}
 }
 
-const buttonSection = ():IVector2 => {
+const diceSection = ():ISection => {
     const canvasWidth = yatzyTable.value.canvas.element.width
+    console.log("diceSection canvasWidth:"+canvasWidth)
+    const size:IVector2 = diceSize()
     if(canvasWidth >= 1200){
-        return {x:920, y:300}
+        const y = yatzyTable.value.canvas.element.height / 10   
+        return {start: {x: 700, y:y}, end: {x:700+ 6 * size.x, y:y + (size.y * 2)}}
     }
+    if(canvasWidth >= 768){
+        const x = canvasWidth/2
+        const y = 300
+           console.log("bbb")
+        return {start: {x:x, y:y},end:{x:x + 6 * size.x, y:y + size.y}}
+    }
+    const x = 220
+    const y = 500
     if(canvasWidth > 600){
-        return {x:220, y:500}
+           console.log("ccc")
+        return  {start: {x:x, y:y}, end:{x:x + 6 * size.x, y:y + size.y}}
     }
-    //TODO 
-    return {x:220, y:500}
+       console.log("ddd")
+    return {start: {x:x, y:y}, end:{x:x+ 6 * size.x, y:y + size.y}}
 }
 
-const diceSize = ():IVector2 =>{
-    return {x:80, y:80}
+const buttonSection = ():ISection => {
+    //button section comes under dice section
+    const dices:ISection = diceSection()
+    const dSize = diceSize()
+  
+    
+    const buttonSectionStart:IVector2 = {x: dices.start.x, y:dSize.y *2 }
+    const buttonSectionEnd:IVector2 = {x: dices.end.x, y:dSize.y *3.5}
+    return  {start:buttonSectionStart, end:buttonSectionEnd}
+}
+
+const diceSize = ():IVector2 => {
+    const canvasWidth = yatzyTable.value.canvas.element.width
+    if(canvasWidth > 1000){
+        return {x:80, y:80}
+    }
+    if(canvasWidth >= 768){
+
+        return {x:60, y:60}
+    }
+    return {x:40, y:40}
 }
 
 const repaintYatzyTable = () => {
     console.log("RepaintAll")
     const canvas = yatzyTable.value.canvas
-    const ctx = canvas.renderingContext   
+    const ctx = canvas.ctx   
     ctx.clearRect(0, 0, canvas.element.width, canvas.element.height)
     repaintComponent(yatzyTable.value)
     repaintScoreCard()
@@ -373,23 +445,27 @@ const repaintYatzyTable = () => {
 
 const repaintScoreCard = () => {
     const canvas = yatzyTable.value.canvas
-    const rowHeight = canvas.element.height * 0.9 / CANVAS_ROWS
+    let rowHeight = canvas.element.height * 0.9 / CANVAS_ROWS
+   
     const width = canvas.element.width
-    const ctx = canvas.renderingContext
+    const ctx = canvas.ctx
     ctx.font = "bolder " + FONT_SIZE.LARGEST + " Arial"
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.fillText("Scorecards", 150, 35)
     const scorecardRowStart = 25
     const scoreCardTextEnd = 200
 
     const lineXStart = scorecardRowStart
     const lineXEnd = scoreCardTextEnd + yatzyTable.value.players.length * 100
-
+    ctx.font = "bold " + FONT_SIZE.DEFAULT + " Arial"
+    if(canvas.element.width < 768){
+        rowHeight = canvas.element.height * 0.5 / CANVAS_ROWS
+        ctx.font = FONT_SIZE.DEFAULT + " Arial"
+    }
     const lineY = rowHeight
     const gapAfterRow = 6
-    ctx.lineWidth = 1;
-    ctx.beginPath();
 
-    ctx.fillText("Scorecards", 150, 35)
-    ctx.font = "bold " + FONT_SIZE.DEFAULT + " Arial"
     ctx.fillText("Ones [5]", scorecardRowStart, rowHeight * 4)
     ctx.moveTo(lineXStart, lineY * 4 + gapAfterRow)
     ctx.lineTo(lineXEnd, lineY * 4 + gapAfterRow)

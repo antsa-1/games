@@ -44,7 +44,7 @@ export interface IVector2 {
 export interface IGameCanvas {
     element: HTMLCanvasElement
     animating: boolean,
-    renderingContext: any
+    ctx: CanvasRenderingContext2D
 }
 
 export interface IGameOptions {
@@ -55,7 +55,7 @@ export interface Image {
     image: HTMLImageElement,
     canvasDimension: IVector2,
     canvasDestination: IVector2,
-    canvasRotationAngle: IVector2,
+    canvasRotationAngle: number,
     realDimension: IVector2,
     visible: boolean, 
 }
