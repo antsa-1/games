@@ -60,21 +60,21 @@ export interface Image {
     visible: boolean, 
 }
 
-export interface ITurn {
-    turnResult?: ITurnResult,
+export interface IAction {
+    turnResult?: IActionResult,
     nextTurnPlayer?: IPlayer,
     changePlayer?: boolean,
     lastTurn?: boolean,
-    result?: ITurnResult,
+    result?: IActionResult,
     player?: IPlayer, // string
 }
 
-export interface ITurnQueue {
-    turns: Array<ITurn>[],
+export interface IActionQueue {
+    turns: Array<IAction>[],
     blocked: boolean
 }
 
-export interface ITurnResult {
+export interface IActionResult {
     winner?: IPlayer,
     text: string,
     draw?: boolean
