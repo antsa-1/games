@@ -562,7 +562,8 @@ export default defineComponent({
 												image: <HTMLImageElement>document.getElementById("tableImg"), 
 												canvasDimension: dimsPoolTable,
 												realDimension: {x:4551 ,y: 2570},
-												canvasRotationAngle: { x:0, y:0 },
+												canvasRotationAngle: 0,
+                                                canvasDestination:{x:0, y:0},
 												visible: true										
 			}
 			this.poolTable = <IPoolTable> {image: poolTableImage, position: <IVector2> {x:0, y:0}, mouseEnabled: false}
@@ -603,7 +604,7 @@ export default defineComponent({
 												image: <HTMLImageElement>document.getElementById("0"),
 												canvasDimension: dimsCueBall,
 												realDimension: {x: 141, y: 141},
-												canvasRotationAngle: { x:0, y:0 },
+												canvasRotationAngle: 0,
 												canvasDestination:{x:- BALL_DIAMETER/2, y: -BALL_DIAMETER/2},
 												visible: true
 			}
@@ -622,7 +623,7 @@ export default defineComponent({
 												canvasDimension: dimsCue,
 												realDimension:{ x: 1508, y: 22},
 												canvasDestination:{x: (-dimsCue.x-BALL_DIAMETER), y: -dimsCue.y/2},
-												canvasRotationAngle: { x:0, y:0 },
+												canvasRotationAngle: 0,
 												visible: true
 			}
 			if(this.isPlayerInTurn(this.userName)){
@@ -759,7 +760,7 @@ export default defineComponent({
 							image: <HTMLImageElement>document.getElementById(ballNumber.toString()),
 							canvasDimension: dims,
 							realDimension: {x: 141, y: 141},
-							canvasRotationAngle: { x:0, y:0 },
+							canvasRotationAngle: 0,                            
 							canvasDestination:{x:- ballDiameter/2, y: -ballDiameter/2},
 							visible: true
 			}
