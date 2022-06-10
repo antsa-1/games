@@ -398,10 +398,12 @@ export default defineComponent({
 						}
 						break
 					case "POOL_PLAY_TURN":
-							
-						this.$store.dispatch("poolPlayTurn", data).then(() => {
-					
+					    this.$store.dispatch("poolPlayTurn", data).then(() => {
+                            
 						})
+						break
+                    case "YATZY_ROLL_DICES":                       	
+						this.$store.dispatch("yatzyRollDices", data)
 						break
 					case "LEAVE_TABLE":						
 						this.$store.dispatch("leaveTable", data)

@@ -4,6 +4,14 @@ import { Image, IGameCanvas, IBaseTable, IMultiplayerTable, IVector2 } from "@/i
 export interface IYatzyGame {
     snapshot: any, //action
 }
+export interface IYatzySnapshot {
+    table: IYatzyTable,
+    yatzy: IYatzyDices
+}
+
+export interface IYatzyDices {
+    dices: IDice[]
+}
 
 export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
     players: IYatzyPlayer[],
@@ -24,6 +32,7 @@ export interface ISection {
 
 export interface IYatzyPlayer extends IPlayer {
     scoreCard: IScoreCard,
+    rollsLeft: number
 }
 
 export interface IYatzyComponent {
@@ -32,10 +41,8 @@ export interface IYatzyComponent {
 }
 export interface IDice extends IYatzyComponent {
     number: number,
-    locked: boolean,
     selected: boolean,
     position: IVector2,
-    highlighted: boolean,
     diceId: string
 }
 

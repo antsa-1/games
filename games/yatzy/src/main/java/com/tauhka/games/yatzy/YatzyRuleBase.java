@@ -23,23 +23,27 @@ public class YatzyRuleBase {
 		}
 		for (int i = 0; i < ALL_DICES_COUNT; i++) {
 			Dice dice = new Dice();
+			dice.setDiceId(UUID.randomUUID());
 			dice.roll();
 			yatzyTable.getDices().add(dice);
 		}
 	}
 
-	public List<Dice> rollUnlockedDices(YatzyTable table, List<Dice> diceIds, User user) {
-		validate(table, diceIds, user);
+	public List<Dice> rollUnlockedDices(YatzyTable table, List<Dice> incomingDices, User user) {
+		validate(table, incomingDices, user);
 		List<Dice> dicesRolled = new ArrayList<Dice>(5);
-		for (int i = 0; i < ALL_DICES_COUNT; i++) {
-			Dice dice = table.getDices().get(i);
-			if (!dice.isLocked()) {
-				dice.roll();
-				dicesRolled.add(dice);
-			} else {
-				throw new IllegalArgumentException("Input contains dice which is already locked" + dice);
+		for (int i = 0; i < incomingDices.size(); i++) {
+			Stream<Dice> stream = table.getDices().stream();
+			final int index = i;
+			Optional<Dice> diceOptional = stream.filter(dice -> dice.equals(incomingDices.get(index)) && !dice.isSelected()).findFirst();
+			if (!diceOptional.isPresent()) {
+				throw new IllegalArgumentException("Something went wrong, no dice found:" + table);
 			}
+			Dice d = diceOptional.get();
+			d.roll();
+			dicesRolled.add(d);
 		}
+
 		int rollsLeft = table.getPlayerInTurn().getRollsLeft() - 1;
 		table.getPlayerInTurn().setRollsLeft(rollsLeft);
 		return dicesRolled;
@@ -47,7 +51,7 @@ public class YatzyRuleBase {
 
 	private void validate(YatzyTable table, List<Dice> diceIds, User user) {
 		validatePlayer(table, user);
-		validateDices(table, diceIds);
+		validateIncomingDices(table, diceIds);
 		validateRollsCount(table);
 	}
 
@@ -69,27 +73,22 @@ public class YatzyRuleBase {
 		return table;
 	}
 
-	private void validateDices(YatzyTable table, List<Dice> diceIds) {
-		List<Dice> dices = diceIds;
-		if (dices == null) {
+	private void validateIncomingDices(YatzyTable table, List<Dice> incomingDices) {
+		if (incomingDices == null) {
 			throw new IllegalArgumentException("Dices are missing");
 		}
-		if (dices.size() == 0) {
+		if (incomingDices.size() == 0) {
 			throw new IllegalArgumentException("Dices are missing2");
 		}
-		if (dices.size() > 5) {
+		if (incomingDices.size() > 5) {
 			throw new IllegalArgumentException("Too many dices");
 		}
-		for (int i = 0; i < dices.size(); i++) {
-			String id = dices.get(i).getDiceId().toString();
-			UUID uuid = UUID.fromString(id);
-			if (!id.equals(uuid.toString())) {
-				throw new IllegalArgumentException("dice id fail");
-			}
-			@SuppressWarnings("unlikely-arg-type")
-			int index = table.getDices().indexOf(uuid); //TODO..
+		for (int i = 0; i < incomingDices.size(); i++) {
+			Dice incomingDice = incomingDices.get(i);
+
+			int index = table.getDices().indexOf(incomingDice);
 			if (index == -1) {
-				throw new IllegalArgumentException("No such dice " + id);
+				throw new IllegalArgumentException("No such dice " + incomingDice);
 			}
 		}
 	}

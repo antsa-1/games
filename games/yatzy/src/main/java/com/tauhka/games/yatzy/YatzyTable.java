@@ -56,6 +56,20 @@ public class YatzyTable extends Table {
 
 	}
 
+	@Override
+	public Object playTurn(User user, Object yatzyTurn) {
+
+		YatzyTurn incomingTurn = (YatzyTurn) yatzyTurn;
+		return yatzyRuleBase.playTurn(this, incomingTurn);
+	}
+
+	public List<Dice> rollDices(User user, List<Dice> dices) {
+		if (getPlayerInTurn().getRollsLeft() <= 0) {
+			throw new IllegalArgumentException("No rolls left for player:" + user);
+		}
+		return yatzyRuleBase.rollUnlockedDices(this, dices, user);
+	}
+
 	public List<YatzyPlayer> getPlayers() {
 		return players;
 	}
@@ -95,6 +109,15 @@ public class YatzyTable extends Table {
 		return super.isWatcher(user);
 	}
 
+	@JsonbTransient
+	@Override
+	public List<User> getUsers() {
+		List<User> users = new ArrayList<User>();
+		users.addAll(players);
+		users.addAll(watchers);
+		return users;
+	}
+
 	@Override
 	public boolean joinTableAsPlayer(User user) {
 
@@ -128,17 +151,6 @@ public class YatzyTable extends Table {
 	@Override
 	public YatzyPlayer getPlayerInTurn() {
 		return (YatzyPlayer) playerInTurn;
-	}
-
-	@Override
-	public Object playTurn(User user, Object yatzyTurn) {
-
-		YatzyTurn incomingTurn = (YatzyTurn) yatzyTurn;
-		return yatzyRuleBase.playTurn(this, incomingTurn);
-	}
-
-	public List<Dice> rollDices(User user, List<Dice> dices) {
-		return yatzyRuleBase.rollUnlockedDices(this, dices, user);
 	}
 
 	@Override

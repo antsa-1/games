@@ -9,9 +9,14 @@ import java.util.concurrent.ThreadLocalRandom;
  **/
 
 public class Dice {
-	private final UUID diceId = UUID.randomUUID();
+	public UUID diceId;
 	private int value; // short
 	private boolean locked;
+	private boolean selected;
+
+	public Dice() {
+		// diceId = UUID.randomUUID();
+	}
 
 	public int roll() {
 		value = ThreadLocalRandom.current().nextInt(1, 6);
@@ -26,8 +31,32 @@ public class Dice {
 		return diceId;
 	}
 
+	public void setDiceId(UUID diceId) {
+		this.diceId = diceId;
+	}
+
 	public boolean isLocked() {
 		return locked;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
+
+	public void setLocked(boolean locked) {
+		this.locked = locked;
 	}
 
 	public void lock() {

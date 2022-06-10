@@ -36,18 +36,20 @@ public class YatzyTableHandler extends CommonHandler {
 		if (!table.isPlayerInTurn(endpoint.getUser())) {
 			throw new IllegalArgumentException("Player is not in turn" + endpoint.getUser());
 		}
+		if (incomingMessage.getYatzyMessage() == null) {
+			throw new IllegalArgumentException("No yatzyMessage");
+		}
+		YatzyMessage playedTurnMessage = null;
+		if (incomingMessage.getTitle() == MessageTitle.YATZY_ROLL_DICES) {
+			List<Dice> rolledDices = table.rollDices(endpoint.getUser(), incomingMessage.getYatzyMessage().dices);
+			playedTurnMessage = new YatzyMessage();
+			playedTurnMessage.setDices(rolledDices);
+		}
 		Message updateMessage = new Message();
 		updateMessage.setFrom(SYSTEM);
 		updateMessage.setTable(table);
 		updateMessage.setTitle(MessageTitle.YATZY_ROLL_DICES);
-		if (incomingMessage.getYatzyMessage() == null) {
-			throw new IllegalArgumentException("No yatzyMessage");
-		}
-		if (incomingMessage.getTitle() == MessageTitle.YATZY_ROLL_DICES) {
-			List<Dice> rolledDices = table.rollDices(endpoint.getUser(), incomingMessage.getYatzyMessage().dices);
-			YatzyMessage playedTurnMessage = new YatzyMessage();
-			playedTurnMessage.setDices(rolledDices);
-		}
+		updateMessage.setYatzyMessage(playedTurnMessage);
 		return updateMessage;
 	}
 }

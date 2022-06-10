@@ -263,9 +263,12 @@ export const store = createStore<IStoreState>({
         poolSetHandBallFail(context,object){
             // PoolTable has subscribed to this action
         },        
-        poolGameEnded(context,object){
+        poolGameEnded(context, object){
             
         } ,
+        yatzyRollDices(context, object) {
+           
+        },
         setUser(context, user: IUser) {
             context.commit('setUser', user)
 
@@ -329,6 +332,7 @@ export const store = createStore<IStoreState>({
         updateScore(context, message: IWinMessage) {
             context.commit('updateScore', message)
         },
+       
         rematch(context, table: ITable) {
             context.commit("rematch", table)
         },
