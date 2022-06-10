@@ -45,7 +45,7 @@ import { defineComponent,isProxy,toRaw } from "vue"
 
 import {IPlayer,ITable} from "../../interfaces/interfaces"
 import {IPoolTable, ICue, IBall, IPocket, IEightBallGame,  IPoolComponent,ITurn, IBoundry, IPathWayBorder} from "../../interfaces/pool"
-import {IVector2, Image, ITurnQueue,IChatMessage} from  "../../interfaces/commonTypes"
+import {IVector2, Image, IActionQueue,IChatMessage} from  "../../interfaces/commonTypes"
 import { loginMixin, } from "../../mixins/mixins"
 import { tablesMixin} from "../../mixins/tablesMixin"
 import { poolMixin} from "../../mixins/poolMixin"
@@ -544,7 +544,7 @@ export default defineComponent({
 		},
 		initTable() {			
 			this.balls = []
-			this.turnQueue = <ITurnQueue> {turns:[], blocked:false}	
+			this.turnQueue = <IActionQueue> {turns:[], blocked:false}	
 			let windowWidth = window.innerWidth
 			let height = window.innerHeight			
 			this.canvas = document.getElementById("canvas");

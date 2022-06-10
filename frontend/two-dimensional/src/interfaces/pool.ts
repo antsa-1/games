@@ -1,6 +1,6 @@
 import { ITable, IPlayer } from "@/interfaces/interfaces"
-import { IVector2, Image, ITurnQueue, IGameOptions } from "@/interfaces/commonTypes"
-import { ITurn as ICommonTurn } from "@/interfaces/commonTypes"
+import { IVector2, Image, IActionResult, IGameOptions } from "@/interfaces/commonTypes"
+import { IAction as ICommonTurn } from "@/interfaces/commonTypes"
 
 export interface IPoolComponent {
     position: IVector2,
