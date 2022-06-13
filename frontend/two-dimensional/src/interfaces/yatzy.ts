@@ -1,16 +1,39 @@
 import { ITable, IPlayer, } from "@/interfaces/interfaces"
-import { Image, IGameCanvas, IBaseTable, IMultiplayerTable, IVector2 } from "@/interfaces/commonTypes"
+import { Image, IGameCanvas, IBaseTable, IMultiplayerTable, IVector2, IAction, IActionResult } from "@/interfaces/commonTypes"
 
 export interface IYatzyGame {
     snapshot: any, //action
 }
 export interface IYatzySnapshot {
     table: IYatzyTable,
-    yatzy: IYatzyDices
+    yatzy: IYatzyMessage
 }
 
-export interface IYatzyDices {
-    dices: IDice[]
+export interface IYatzyMessage {
+    dices: IDice[],
+    whoPlayed: string
+}
+
+export interface IYatzyAction {
+    turnResult?: IActionResult,
+    nextTurnPlayer?: IPlayer,
+    changePlayer?: boolean,
+    lastTurn?: boolean,
+    result?: IActionResult,
+    player?: IPlayer, // string
+}
+
+export interface IYatzyActionQueue {
+    actions: IYatzyAction[],
+    blocked: boolean
+}
+
+export interface IYatzyAction {
+    actionName: string,
+    rollsLeft?: number,
+    rollResult?: IDice[],
+    options?: IOption[],
+    whoPlayed?: string
 }
 
 export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
@@ -56,7 +79,11 @@ export interface IHand {
     handType: HandType,
     value: number
 }
+export enum IOption {
+    ROLL_DICES,
+    SELECT_HAND,
 
+}
 export enum HandType {
     PAIR = 1, TWO_PAIR, TRIPS, QUADS, YATZY, SMALL_STRAIGHT, LARGE_STRAIGHT, ONES, TWOS, THREES, FOURS, FIVES, SIXES, FULL_HOUSE, CHANCE
 }

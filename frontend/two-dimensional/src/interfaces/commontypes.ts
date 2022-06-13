@@ -70,7 +70,7 @@ export interface IAction {
 }
 
 export interface IActionQueue {
-    turns: Array<IAction>[],
+    actions: Array<IAction>[],
     blocked: boolean
 }
 

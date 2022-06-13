@@ -29,13 +29,13 @@ public class YatzyRuleBase {
 		}
 	}
 
-	public List<Dice> rollUnlockedDices(YatzyTable table, List<Dice> incomingDices, User user) {
-		validate(table, incomingDices, user);
+	public List<Dice> rollDices(YatzyTable table, List<Dice> dicesToBeRolled, User user) {
+		validate(table, dicesToBeRolled, user);
 		List<Dice> dicesRolled = new ArrayList<Dice>(5);
-		for (int i = 0; i < incomingDices.size(); i++) {
+		for (int i = 0; i < dicesToBeRolled.size(); i++) {
 			Stream<Dice> stream = table.getDices().stream();
 			final int index = i;
-			Optional<Dice> diceOptional = stream.filter(dice -> dice.equals(incomingDices.get(index)) && !dice.isSelected()).findFirst();
+			Optional<Dice> diceOptional = stream.filter(dice -> dice.equals(dicesToBeRolled.get(index)) && !dice.isSelected()).findFirst();
 			if (!diceOptional.isPresent()) {
 				throw new IllegalArgumentException("Something went wrong, no dice found:" + table);
 			}
@@ -59,7 +59,6 @@ public class YatzyRuleBase {
 		if (!table.getPlayerInTurn().equals(user)) {
 			throw new IllegalArgumentException("User is not in turn:" + user);
 		}
-
 	}
 
 	private void validateRollsCount(YatzyTable table) {
@@ -90,16 +89,6 @@ public class YatzyRuleBase {
 			if (index == -1) {
 				throw new IllegalArgumentException("No such dice " + incomingDice);
 			}
-		}
-	}
-
-	public void lockDices(YatzyTable table, List<String> diceIds) {
-		for (String diceIdString : diceIds) {
-			UUID diceId = UUID.fromString(diceIdString);
-			Stream<Dice> stream = table.getUnlockedDices().stream();
-			Optional<Dice> optional = stream.filter(unlockedDice -> unlockedDice.getDiceId().equals(diceId)).findFirst();
-			Dice dice = optional.get();
-			dice.lock();
 		}
 	}
 

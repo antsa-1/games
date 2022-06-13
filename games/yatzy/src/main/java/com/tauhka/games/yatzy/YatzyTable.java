@@ -67,7 +67,7 @@ public class YatzyTable extends Table {
 		if (getPlayerInTurn().getRollsLeft() <= 0) {
 			throw new IllegalArgumentException("No rolls left for player:" + user);
 		}
-		return yatzyRuleBase.rollUnlockedDices(this, dices, user);
+		return yatzyRuleBase.rollDices(this, dices, user);
 	}
 
 	public List<YatzyPlayer> getPlayers() {
@@ -86,11 +86,6 @@ public class YatzyTable extends Table {
 	public GameResult checkWinAndDraw() {
 		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@JsonbTransient
-	public List<Dice> getUnlockedDices() {
-		return dices.stream().filter(dice -> !dice.isLocked()).collect(Collectors.toList());
 	}
 
 	@Override

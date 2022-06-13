@@ -83,7 +83,7 @@ export default defineComponent({
 				resultSnapshot:undefined,
 				pocketSelection:false,
 				selectedPocket:null,
-				turnQueue: {turns:[], blocked:false}	
+				turnQueue: {actions:[], blocked:false}	
 			}
 	},
 	watch: {
@@ -544,7 +544,7 @@ export default defineComponent({
 		},
 		initTable() {			
 			this.balls = []
-			this.turnQueue = <IActionQueue> {turns:[], blocked:false}	
+			this.turnQueue = <IActionQueue> {actions:[], blocked:false}	
 			let windowWidth = window.innerWidth
 			let height = window.innerHeight			
 			this.canvas = document.getElementById("canvas");

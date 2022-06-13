@@ -2,7 +2,7 @@ import { ITable, IGame, IUser, IPlayer, IStoreState, ISquare, IGameResult, IWinM
 import {  IChatMessage, IChat,IBaseTable,IMultiplayerTable } from './interfaces/commontypes';
 
 import { createStore } from 'vuex';
-import { IYatzyTable } from "./interfaces/yatzy";
+import { IYatzyTable, IYatzyPlayer } from "./interfaces/yatzy";
 
 export const store = createStore<IStoreState>({
     state: {
@@ -85,6 +85,10 @@ export const store = createStore<IStoreState>({
                 sessionStorage.removeItem("token")
                 state.user = user
             }
+        },
+        updateRollCount(state, count:number){
+            let player:IYatzyPlayer = <IYatzyPlayer> state.theTable.playerInTurn
+            player.rollsLeft = count
         },
         updateUserTableId(state, tableId:string){
             state.user.tableId = tableId

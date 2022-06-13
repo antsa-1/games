@@ -4,27 +4,27 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import jakarta.json.bind.annotation.JsonbProperty;
+
 /**
  * @author antsa-1 from GitHub 12 May 2022
  **/
 
 public class Dice {
+	@JsonbProperty(value = "diceId")
 	public UUID diceId;
-	private int value; // short
-	private boolean locked;
+	@JsonbProperty(value = "number")
+	private int number;
+	@JsonbProperty(value = "selected")
 	private boolean selected;
 
 	public Dice() {
-		// diceId = UUID.randomUUID();
+		// empty constr. serializing purposes
 	}
 
 	public int roll() {
-		value = ThreadLocalRandom.current().nextInt(1, 6);
-		return value;
-	}
-
-	public int getNumber() {
-		return value;
+		number = ThreadLocalRandom.current().nextInt(1, 6);
+		return number;
 	}
 
 	public UUID getDiceId() {
@@ -35,32 +35,12 @@ public class Dice {
 		this.diceId = diceId;
 	}
 
-	public boolean isLocked() {
-		return locked;
-	}
-
-	public int getValue() {
-		return value;
-	}
-
-	public void setValue(int value) {
-		this.value = value;
-	}
-
 	public boolean isSelected() {
 		return selected;
 	}
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
-	}
-
-	public void setLocked(boolean locked) {
-		this.locked = locked;
-	}
-
-	public void lock() {
-		this.locked = true;
 	}
 
 	@Override
@@ -80,9 +60,12 @@ public class Dice {
 		return Objects.equals(diceId, other.diceId);
 	}
 
-	@Override
-	public String toString() {
-		return "Dice [diceId=" + diceId + ", value=" + value + ", locked=" + locked + "]";
+	public int getNumber() {
+		return number;
+	}
+
+	public void setNumber(int number) {
+		this.number = number;
 	}
 
 }

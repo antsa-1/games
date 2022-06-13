@@ -44,6 +44,7 @@ public class YatzyTableHandler extends CommonHandler {
 			List<Dice> rolledDices = table.rollDices(endpoint.getUser(), incomingMessage.getYatzyMessage().dices);
 			playedTurnMessage = new YatzyMessage();
 			playedTurnMessage.setDices(rolledDices);
+			playedTurnMessage.setWhoPlayed(endpoint.getUser().getName());
 		}
 		Message updateMessage = new Message();
 		updateMessage.setFrom(SYSTEM);
