@@ -57,22 +57,30 @@ onMounted(() => {
     let canvasElement = <HTMLCanvasElement>document.getElementById("canvas")
     yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, ctx: canvasElement.getContext("2d") }
     yatzyTable.value.canvas.ctx.imageSmoothingEnabled = true
-
+    if(isMyTurn){
+        yatzyTable.value.canvas.enabled = true
+    }
     attachListeners()
     repaintYatzyTable()
 })
 
 const actionQueue = ref<IYatzyActionQueue> ({actions:[], blocked:false})
+const userName = computed<string>(() => store.getters.user?.name)
+const user = computed<IUser>(() => store.getters.user)
 const queueLength = computed<number>(() => actionQueue.value.actions.length)
 const playerInTurn = computed<IYatzyPlayer>(() => <IYatzyPlayer> tablee.playerInTurn)
-const playButtonVisible: ComputedRef<boolean> = computed<boolean>(() => 
-    playerInTurn.value.name === userName.value && playerInTurn.value.rollsLeft > 0 && tablee.canvas.animating === false
+const isPlayButtonVisible: ComputedRef<boolean> = computed<boolean>(() => 
+    isMyTurn.value && playerInTurn.value.rollsLeft > 0 && !isCanvasAnimating.value
+)
+const isCanvasAnimating = computed<boolean>(() => tablee.canvas.animating === true)
+const isMyTurn = computed<boolean>(() => playerInTurn.value.name === userName.value)
+const isMouseEnabled = computed<boolean>(() => 
+    tablee.canvas.enabled && isMyTurn.value
 )
 
 watch(() => queueLength, (newVal) => {
-    if(newVal.value >0){
+    if(newVal.value > 0){
         consumeActions()
-
     }
  },{ deep: true });
 
@@ -85,7 +93,9 @@ const consumeActions = async () => {
     console.log("Action queue consuming"+actionQueue.value+" "+JSON.stringify(actionQueue.value))
 	const action:IYatzyAction = actionQueue.value.actions.splice(0, 1)[0]	
     if(action.actionName === "yatzyRollDices"){
-      await animateDices(tablee.dices, action.rollResult)
+        animateDices(tablee.dices, action.rollResult)
+        const player = <IYatzyPlayer>tablee.playerInTurn
+        player.rollsLeft = action.rollsLeftAfterAction
     }else if(action.actionName === "options"){
         console.log("Actions to choose from")
     }
@@ -113,7 +123,7 @@ onUnmounted(() => {
 })
 
 const router = useRouter()
-let snapshot: IYatzySnapshot = undefined
+let tableSnapshot: IYatzySnapshot = undefined
 const store = useStore()
 const gameOptions = ref<IGameOptions>({ notificationSound: false })
 
@@ -161,6 +171,9 @@ const attachListeners = () => {
         console.log('Pointer moved in')
     })
     canvas.addEventListener('pointerdown', (event) => {
+        if(!isMouseEnabled.value){
+            return
+        }
         const cursorPoint:IVector2 = { x: event.offsetX, y: event.offsetY }
         console.log('Pointer down event')
         const dice: IDice = getDice(cursorPoint)
@@ -173,6 +186,9 @@ const attachListeners = () => {
         repaintYatzyTable()
     })
     canvas.addEventListener('pointermove', (event) => {
+        if(!isMouseEnabled.value){
+            return
+        }
         const cursorPoint = { x: event.offsetX, y: event.offsetY }
         document.body.style.cursor = "default"
         if (isPointOnSection(cursorPoint, diceSection())) {
@@ -182,7 +198,7 @@ const attachListeners = () => {
                 repaintYatzyTable()
             }
         } else if (isPointOnSection(cursorPoint, buttonSection())) {
-            if (playButtonVisible.value && isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)) {
+            if (isPlayButtonVisible.value && isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)) {
                 document.body.style.cursor = "pointer"
                 repaintYatzyTable()
             }
@@ -290,15 +306,16 @@ const initTable = (): IYatzyTable => {
         visible: true
     }
 
-    tablee.playButton = { image: playButtonImage, position: { x: 650, y: 300 } }
+    tablee.playButton = { image: playButtonImage, position: { x: 650, y: 300 } }   
     tablee.position = <IVector2>{ x: 0, y: 0 }
+  
     return tablee
 }
 
 let yatzyTable = ref<IYatzyTable>(initTable())
 
-const userName = computed<string>(() => store.getters.user?.name)
-const user = computed<IUser>(() => store.getters.user)
+
+
 const selectedTextSize = () => {
 
 }
@@ -312,31 +329,21 @@ const unsubscribe = store.subscribe((mutation, state) => {
 })
 
 const unsubscribeAction = store.subscribeAction((action, state) => {
-    console.log("action sub ")
-    if (action.type === "yatzyRollDices") {
-        console.log("yatzyRollDices" + JSON.stringify(action.payload.yatzy))
-        snapshot = action.payload
-        let player = <IYatzyPlayer>yatzyTable.value.playerInTurn
-        let snapshotPlayer = <IYatzyPlayer>snapshot.table.playerInTurn
-        player.rollsLeft = snapshotPlayer.rollsLeft
-        store.commit('updateRollCount', snapshotPlayer.rollsLeft)
-        const yatzyMessage:IYatzyMessage = snapshot.yatzy
-        const yatzyAction:IYatzyAction = {actionName:"yatzyRollDices", rollResult:snapshot.yatzy.dices, whoPlayed:yatzyMessage.whoPlayed}
-        actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, yatzyAction)
-        console.log("JONO:"+actionQueue.value.actions.length)
-        let resultOptions : IOption[] = []
-        if(snapshot.table.playerInTurn.name === userName.value){
-            resultOptions.push(IOption.SELECT_HAND)
-            if(player.rollsLeft > 0){
-                resultOptions.push(IOption.ROLL_DICES)
-            }
-            const yatzyAction:IYatzyAction = {actionName:"options", options:resultOptions}
-            actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, yatzyAction) 
-        }
-        console.log("JONO2:"+actionQueue.value.actions.length)
-    }
+    tableSnapshot = action.payload
+    const createdAction:IYatzyAction = createAction(action)
+    actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, createdAction)
+    console.log("Added new action to quueue "+JSON.stringify(actionQueue.value))
 })
 
+const createAction = (action):IYatzyAction => {   
+     if (action.type === "yatzyRollDices") {        
+        return {actionName:"yatzyRollDices", rollsLeftAfterAction:action.payload.table.playerInTurn.rollsLeft,
+                    rollResult:action.payload.yatzy.dices, whoPlayed:action.payload.yatzy.whoPlayed, nextTurnPlayer:action.payload.table.playerInTurn.name}
+    }else if(action.type === "selectHand"){
+        console.log("hand selected ")
+    }
+    return
+}
 const repaintComponent = (component: IYatzyComponent) => {
 
     if (!component) {
@@ -408,8 +415,9 @@ const highlightDice = (dice: IDice) => {
 }
 
 const repaintButtons = () => {
-  
-    if (playButtonVisible.value) {
+
+  console.log("turn:"+isMyTurn.value+" m:"+playerInTurn.value.rollsLeft+"  a:"+tablee.canvas.animating+ " a::"+isPlayButtonVisible.value)
+    if (isPlayButtonVisible.value) {
        
         const button = yatzyTable.value.playButton
         const section: ISection = buttonSection()
@@ -494,14 +502,14 @@ const diceSize = (): IVector2 => {
 let waitTimeMillis = 50
 let animationRun = 0
 
+
 const animateDices = (dices: IDice[], resultDices:IDice[]) => {
     console.log("rolling..")
     tablee.canvas.animating = true
     dices.forEach(dice => {
         if(resultDices.find( ({ diceId }) => diceId === dice.diceId )){
             const number = getRandomNumber()
-            dice.number = number
-            console.log("numer:"+number)
+            dice.number = number     
             dice.image.image = <HTMLImageElement>document.getElementById("dice" + number)
         }
     })

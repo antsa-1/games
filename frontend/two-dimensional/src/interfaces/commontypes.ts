@@ -18,7 +18,6 @@ export interface IBaseTable {
 }
 export interface IMultiplayerTable extends IBaseTable {
     players: Array<IPlayer>
-    canvasEnabled: boolean
 }
 
 export interface IChat {
@@ -44,7 +43,8 @@ export interface IVector2 {
 export interface IGameCanvas {
     element: HTMLCanvasElement
     animating: boolean,
-    ctx: CanvasRenderingContext2D
+    ctx: CanvasRenderingContext2D,
+    enabled: boolean
 }
 
 export interface IGameOptions {
@@ -57,7 +57,7 @@ export interface Image {
     canvasDestination: IVector2,
     canvasRotationAngle: number,
     realDimension: IVector2,
-    visible: boolean, 
+    visible: boolean,
 }
 
 export interface IAction {

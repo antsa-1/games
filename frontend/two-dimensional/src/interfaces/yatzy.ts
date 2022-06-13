@@ -14,15 +14,6 @@ export interface IYatzyMessage {
     whoPlayed: string
 }
 
-export interface IYatzyAction {
-    turnResult?: IActionResult,
-    nextTurnPlayer?: IPlayer,
-    changePlayer?: boolean,
-    lastTurn?: boolean,
-    result?: IActionResult,
-    player?: IPlayer, // string
-}
-
 export interface IYatzyActionQueue {
     actions: IYatzyAction[],
     blocked: boolean
@@ -30,10 +21,11 @@ export interface IYatzyActionQueue {
 
 export interface IYatzyAction {
     actionName: string,
-    rollsLeft?: number,
+    rollsLeftAfterAction: number,
     rollResult?: IDice[],
     options?: IOption[],
-    whoPlayed?: string
+    whoPlayed?: string,
+    nextTurnPlayer: IPlayer,
 }
 
 export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
