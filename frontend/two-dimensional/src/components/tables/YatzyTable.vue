@@ -201,6 +201,11 @@ const resizeDocument = () => {
         yatzyTable.value.image.canvasDimension.x = 600
         yatzyTable.value.image.canvasDimension.y = 800
     }
+    const size = diceSize()
+    yatzyTable.value.dices.forEach( (dice) =>{
+        dice.image.canvasDimension.x = size.x
+        dice.image.canvasDimension.y = size.y
+    })
     repaintYatzyTable()
 }
 
