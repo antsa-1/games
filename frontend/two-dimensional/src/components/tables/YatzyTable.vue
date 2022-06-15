@@ -220,6 +220,16 @@ const sendRollRequest = () => {
     user.value.webSocket.send(JSON.stringify(obj))
 }
 
+const sendHandSelection = () => {
+     if (isMyTurn.value !== true || playerInTurn.value.rollsLeft === 3 || yatzyTable.value.canvas.animating === true ){
+        return
+     }
+    
+    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { hand: 0 } }
+    console.log("*** Sending selection " + JSON.stringify(obj))
+    user.value.webSocket.send(JSON.stringify(obj))
+}
+
 const attachListeners = () => {
     window.addEventListener('resize', resizeDocument)
    
@@ -406,8 +416,9 @@ const repaintButtons = () => {
 }
 
 //i18n !?
-const rollDicesText = "Click Roll button" 
-const selectOrRoll = "Select a hand or roll the dices"
+const rollDicesText = "Click the roll button" 
+const selectHand = "Select a hand"
+const selectOrRoll = "Select a hand, lock dices or roll unlocked dices"
 const nowInTurn = playerInTurn.value.name +" is now in turn"
 const itYourTurn = "It's your turn "+playerInTurn.value.name
 const waitingTurn = "Waiting your turn"
@@ -418,6 +429,9 @@ const optionsText = ():string =>{
     }
     if(playerInTurn.value.rollsLeft === 3){
         return rollDicesText
+    }
+    if(playerInTurn.value.rollsLeft === 0){
+        return selectHand
     }
     return selectOrRoll
 }
@@ -430,8 +444,8 @@ const repaintInfoTexts = () => {
     ctx.font = "18px bolder Arial";
     isMyTurn.value === true ?  ctx.fillStyle = "green" : ctx.fillStyle = "red"
     ctx.fillText(isMyTurn.value === false? nowInTurn : itYourTurn, x, turnInfoY)
-    ctx.fillText(optionsText(), x, y)
     ctx.fillStyle = "black"
+    ctx.fillText(optionsText(), x, y)
     ctx.closePath()
 }
 
