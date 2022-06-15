@@ -46,8 +46,8 @@ export interface ISection {
 }
 
 export interface IYatzyPlayer extends IPlayer {
-    scoreCard: IScoreCard,
-    rollsLeft: number
+    rollsLeft: number,
+    scoreCard: IScoreCard
 }
 
 export interface IYatzyComponent {
@@ -61,11 +61,19 @@ export interface IDice extends IYatzyComponent {
     diceId: string
 }
 
-export interface IScoreCard extends IYatzyComponent {
-    hands: IHand[],
+export interface IScoreCard {
     subTotal: number,
     total: number,
-    bonus: number
+    bonus: number,
+    hands: IHand[],
+}
+
+export interface IScoreCardRow {
+    rowStart: IVector2,
+    rowEnd: IVector2,
+    hover: boolean,
+    hand: IHand,
+    text: string
 }
 export interface IHand {
     handType: HandType,
