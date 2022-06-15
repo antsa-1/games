@@ -53,6 +53,9 @@ export const store = createStore<IStoreState>({
         theTable(state) {
             return state.theTable
         },
+        yatzyTable(state):IYatzyTable{
+            return <IYatzyTable> state.theTable 
+        },
         chatMessages(state) {
             if (state.theTable && state.theTable.chat) {
                 return state.theTable.chat.messages
