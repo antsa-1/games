@@ -503,11 +503,23 @@ const buttonSection = (): ISection => {
     //button section comes under dice section
     const dices: ISection = diceSection()
     const dSize = diceSize()
-    const buttonSectionStart: IVector2 = { x: dices.start.x, y: dSize.y * 2 }
-    const buttonSectionEnd: IVector2 = { x: dices.end.x, y: dSize.y * 3.5 }
+    const buttonSectionStart: IVector2 = { x: dices.start.x, y: dices.end.y +dSize.y }
+    const buttonSectionEnd: IVector2 = { x: dices.end.x, y: dices.end.y + 2.5 * dSize.y}
     return { start: buttonSectionStart, end: buttonSectionEnd }
 }
+/*
+const buttonSize = ():IVector2 => {
+   const canvasWidth = yatzyTable.value.canvas.element.width
+    if (canvasWidth > 1000) {
+        return { x: 100, y: 50 }
+    }
+    if (canvasWidth >= 768) {
 
+        return { x: 75, y: 40 }
+    }
+    return { x: 75, y: 40 } 
+}
+*/
 const diceSize = (): IVector2 => {
     const canvasWidth = yatzyTable.value.canvas.element.width
     if (canvasWidth > 1000) {
