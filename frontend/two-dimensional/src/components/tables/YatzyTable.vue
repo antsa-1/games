@@ -146,7 +146,7 @@ const consumeActions = () => {
         console.log("ActionIn:" + JSON.stringify(action))
         animateDices(yatzyTable.value.dices, action.rollResult).then(() => {
             const player = <IYatzyPlayer>yatzyTable.value.playerInTurn
-            player.rollsLeft = action.rollsLeftAfterAction
+            playerInTurn.value.rollsLeft = action.rollsLeftAfterAction
             setupDices(yatzyTable.value.dices, action.rollResult, player.rollsLeft === 0)
             drawAll()
             unblockQueue()
@@ -439,23 +439,23 @@ const repaintButtons = () => {
 
 //i18n !?
 const rollDicesText = "Click the roll button"
-const selectHand = "Select a hand"
-const selectOrRoll = "Select a hand, lock dices or roll unlocked dices"
+const selectHandText = "Select a hand"
+const selectOrRollText = "Select a hand, lock dices or roll unlocked dices"
 const nowInTurn = playerInTurn.value.name + " is now in turn"
 const itYourTurn = "It's your turn " + playerInTurn.value.name
-const waitingTurn = "Waiting your turn"
+const waitingTurnText = "Waiting your turn"
 
 const optionsText = (): string => {
     if (isMyTurn.value === false) {
-        return waitingTurn
+        return waitingTurnText
     }
     if (playerInTurn.value.rollsLeft === 3) {
-        return rollDicesText
+        return rollDicesText 
     }
     if (playerInTurn.value.rollsLeft === 0) {
-        return selectHand
+        return selectHandText
     }
-    return selectOrRoll
+    return selectOrRollText 
 }
 const repaintInfoTexts = () => {
     const x = diceSection().start.x + 75
@@ -467,7 +467,7 @@ const repaintInfoTexts = () => {
     isMyTurn.value === true ? ctx.fillStyle = "green" : ctx.fillStyle = "red"
     ctx.fillText(isMyTurn.value === false ? nowInTurn : itYourTurn, x, turnInfoY)
     ctx.fillStyle = "black"
-    ctx.fillText(optionsText(), x, y)
+    ctx.fillText(optionsText() +" (rolls = " + playerInTurn.value.rollsLeft +")", x, y)
     ctx.closePath()
 }
 
