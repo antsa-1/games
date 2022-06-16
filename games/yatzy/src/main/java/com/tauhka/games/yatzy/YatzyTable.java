@@ -70,6 +70,13 @@ public class YatzyTable extends Table {
 		return yatzyRuleBase.rollDices(this, dices, user);
 	}
 
+	public ScoreCard selectHand(User user, Integer hand) {
+		if (getPlayerInTurn().getRollsLeft() == 3) {
+			throw new IllegalArgumentException("Player has not rolled dices" + user);
+		}
+		return yatzyRuleBase.selectHand(this, user, hand);
+	}
+
 	public List<YatzyPlayer> getPlayers() {
 		return players;
 	}

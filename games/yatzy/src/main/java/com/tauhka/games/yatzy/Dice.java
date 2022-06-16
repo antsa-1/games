@@ -22,6 +22,10 @@ public class Dice {
 		// empty constr. serializing purposes
 	}
 
+	public Dice(int number) {
+		this.number = number;
+	}
+
 	public int roll() {
 		number = ThreadLocalRandom.current().nextInt(1, 6);
 		return number;
@@ -60,7 +64,7 @@ public class Dice {
 		return Objects.equals(diceId, other.diceId);
 	}
 
-	public int getNumber() {
+	public Integer getNumber() {
 		return number;
 	}
 

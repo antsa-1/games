@@ -11,6 +11,7 @@ import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.YatzyMessage;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 import com.tauhka.games.yatzy.Dice;
+import com.tauhka.games.yatzy.ScoreCard;
 import com.tauhka.games.yatzy.YatzyTable;
 
 import jakarta.enterprise.context.Dependent;
@@ -40,16 +41,22 @@ public class YatzyTableHandler extends CommonHandler {
 			throw new IllegalArgumentException("No yatzyMessage");
 		}
 		YatzyMessage playedTurnMessage = null;
+		Message updateMessage = new Message();
 		if (incomingMessage.getTitle() == MessageTitle.YATZY_ROLL_DICES) {
 			List<Dice> rolledDices = table.rollDices(endpoint.getUser(), incomingMessage.getYatzyMessage().dices);
 			playedTurnMessage = new YatzyMessage();
 			playedTurnMessage.setDices(rolledDices);
 			playedTurnMessage.setWhoPlayed(endpoint.getUser().getName());
+			updateMessage.setTitle(MessageTitle.YATZY_ROLL_DICES);
+		} else if (incomingMessage.getTitle() == MessageTitle.YATZY_SELECT_HAND) {
+			ScoreCard sc = table.selectHand(endpoint.getUser(), incomingMessage.getYatzyMessage().handVal);
+			playedTurnMessage = new YatzyMessage();
+			playedTurnMessage.setScoreCard(sc);
+			playedTurnMessage.setWhoPlayed(endpoint.getUser().getName());
+			updateMessage.setTitle(MessageTitle.YATZY_SELECT_HAND);
 		}
-		Message updateMessage = new Message();
 		updateMessage.setFrom(SYSTEM);
 		updateMessage.setTable(table);
-		updateMessage.setTitle(MessageTitle.YATZY_ROLL_DICES);
 		updateMessage.setYatzyMessage(playedTurnMessage);
 		return updateMessage;
 	}

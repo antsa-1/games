@@ -20,8 +20,8 @@ public class YatzyPlayer extends User implements Serializable {
 	@JsonbProperty("rollsLeft")
 	private int rollsLeft = 3;
 
-	public void selectHand(Hand hand) {
-		scoreCard.setHand(hand.getHandType(), hand);
+	public YatzyPlayer() {
+		scoreCard = new ScoreCard();
 	}
 
 	public ScoreCard getScoreCard() {

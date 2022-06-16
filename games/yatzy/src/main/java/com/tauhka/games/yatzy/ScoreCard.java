@@ -11,21 +11,27 @@ import jakarta.json.bind.annotation.JsonbProperty;
 
 public class ScoreCard {
 	private static final int BONUS = 50;
-	private static final int MIN_POINTS_FOR_BONUS = 63;
+	private static final int MIN_POINT_REQUIREMENT_FOR_BONUS = 63;
 	private static final int ZIP_NADA = 0;
 	@JsonbProperty(value = "hands")
 	private Map<HandType, Hand> hands;
 	@JsonbProperty(value = "total")
-	private Integer total = calculateTotal();
+	private Integer total;
 	@JsonbProperty(value = "subTotal")
-	private Integer subTotal = calculateSubTotal();
+	private Integer subTotal;
 	@JsonbProperty(value = "bonus")
-	private Integer bonus = calculateBonus();
+	private Integer bonus;
+	@JsonbProperty(value = "name")
+	private String name;
 	@JsonbProperty(value = "lastAdded")
-	private HandType handType;
+	private Hand lastAdded;
+
+	public ScoreCard() {
+		hands = new HashMap<HandType, Hand>();
+	}
 
 	public Integer calculateTotal() {
-		return hands.values().stream().mapToInt(hand -> hand.calculatePoints()).sum();
+		return hands.values().stream().mapToInt(hand -> hand.getValue()).sum();
 	}
 
 	public Integer calculateSubTotal() {
@@ -33,18 +39,14 @@ public class ScoreCard {
 	}
 
 	public Integer calculateBonus() {
-		return calculateSubTotal() >= MIN_POINTS_FOR_BONUS ? BONUS : ZIP_NADA;
+		return calculateSubTotal() >= MIN_POINT_REQUIREMENT_FOR_BONUS ? BONUS : ZIP_NADA;
 	}
 
-	public HandType getHandType() {
-		return handType;
-	}
-
-	public ScoreCard() {
-		hands = new HashMap<HandType, Hand>();
-	}
-
-	public void setHand(HandType handType, Hand hand) {
-		hands.put(handType, hand);
+	public void addHand(Hand hand) {
+		hands.put(hand.getHandType(), hand);
+		total = calculateTotal();
+		subTotal = calculateSubTotal();
+		bonus = calculateBonus();
+		lastAdded = hand;
 	}
 }

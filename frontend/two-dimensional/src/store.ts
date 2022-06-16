@@ -276,6 +276,9 @@ export const store = createStore<IStoreState>({
         yatzyRollDices(context, object) {
            
         },
+        yatzySelectHand(context, object) {
+           
+        },
         setUser(context, user: IUser) {
             context.commit('setUser', user)
 

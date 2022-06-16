@@ -2,44 +2,57 @@ package com.tauhka.games.yatzy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+import jakarta.json.bind.annotation.JsonbProperty;
 
 /**
  * @author antsa-1 from GitHub 12 May 2022
  **/
 
 public class Hand {
-
+	@JsonbProperty("dices")
 	private List<Dice> dices;
+	@JsonbProperty("dices")
 	private HandType handType;
-	private Integer points;
+	@JsonbProperty("value")
+	private Integer value;
 
-	public Hand() {
+	private Hand() {
+
+	}
+
+	public Hand(HandType handType, List<Dice> tableDices) {
 		dices = new ArrayList<Dice>(5);
+		for (Dice d : tableDices) {
+			Dice dice = new Dice();
+			dice.setNumber(d.getNumber());
+			dices.add(d);
+		}
+		this.handType = handType;
 	}
 
-	private boolean includeInSubtotal() {
-		return HandType.isSubTotalType(handType);
+	public Hand(HandType handType, List<Dice> tableDices, int value) {
+		for (Dice d : tableDices) {
+			Dice dice = new Dice();
+			dice.setNumber(d.getNumber());
+			dices.add(d);
+		}
+		this.handType = handType;
 	}
 
-	public boolean isLocked() {
-		Optional<Dice> locked = dices.stream().filter(dice -> dice == null).findFirst();
-		return locked.isEmpty();
+	public Integer getValue() {
+		return value;
 	}
 
 	public int calculateSubTotalPoints() {
-		if (includeInSubtotal()) {
-			return calculatePoints();
+		if (HandType.isSubTotalType(handType)) {
+			return value;
 		}
 		return 0;
 	}
 
-	public int calculatePoints() {
-		if (points != null) {
-			return points;
-		}
-		// TODO handType based calculation
-		return 1;
+	public List<Dice> getDices() {
+		return dices;
 	}
 
 	public HandType getHandType() {

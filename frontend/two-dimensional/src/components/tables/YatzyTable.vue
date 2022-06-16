@@ -122,6 +122,7 @@ const user = computed<IUser>(() => store.getters.user)
 const queueLength = computed<number>(() => actionQueue.value.actions.length)
 const playerInTurn = computed<IYatzyPlayer>(() => <IYatzyPlayer>yatzyTable.value.playerInTurn)
 const isAllowedToSelectDice = computed<boolean>(() => playerInTurn.value.rollsLeft > 0 && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
+const isAllowedToSelectHand = computed<boolean>(() =>  isMyTurn.value === true && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
 const isMyTurn = computed<boolean>(() => playerInTurn.value.name === userName.value)
 const isRollButtonVisible = computed<boolean>(() => isMyTurn.value && playerInTurn.value.rollsLeft > 0 && yatzyTable.value.canvas?.animating === false)
 const isMouseEnabled = computed<boolean>(() =>
@@ -153,8 +154,8 @@ const consumeActions = () => {
         })
         console.log("animations done")
 
-    } else if (action.actionName === "options") {
-        console.log("Actions to choose from")
+    } else if (action.actionName === "yatzySelectHand") {
+        console.log("YatzySelectHand consuming")
     }
 }
 
@@ -208,9 +209,9 @@ const resizeDocument = () => {
     repaintYatzyTable()
 }
 
-
+let expectingServerResponse:boolean = false
 const sendRollRequest = () => {
-    if (isMyTurn.value !== true || playerInTurn.value.rollsLeft <= 0 || yatzyTable.value.canvas.animating === true) {
+    if (isMyTurn.value !== true || playerInTurn.value.rollsLeft <= 0 || yatzyTable.value.canvas.animating === true || expectingServerResponse === true) {
         return
     }
     let rollTheseDices: IDice[] = []
@@ -224,12 +225,12 @@ const sendRollRequest = () => {
     user.value.webSocket.send(JSON.stringify(obj))
 }
 
-const sendHandSelection = () => {
+const sendHandSelection = (cursorPoint:IVector2) => {
     if (isMyTurn.value !== true || playerInTurn.value.rollsLeft === 3 || yatzyTable.value.canvas.animating === true) {
         return
     }
-
-    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { hand: 0 } }
+    expectingServerResponse = true
+    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { handVal: 1 } }
     console.log("*** Sending selection " + JSON.stringify(obj))
     user.value.webSocket.send(JSON.stringify(obj))
 }
@@ -243,10 +244,7 @@ const attachListeners = () => {
         if (!isMouseEnabled.value) {
             return
         }
-        const cursorPoint: IVector2 = { x: event.offsetX, y: event.offsetY }
-        if (isPointOnSection(cursorPoint, scoreCardSection())) {
-            console.log("scorecard section")
-        }
+      
     })
     canvas.addEventListener('pointerdown', (event) => {
         if (!isMouseEnabled.value) {
@@ -259,15 +257,19 @@ const attachListeners = () => {
             dice.selected ? dice.selected = false : dice.selected = true
         } else if (isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)) {
             sendRollRequest()
+        }else if (isAllowedToSelectHand.value === true && isPointOnSection(cursorPoint, scoreCardSection())) {
+            sendHandSelection(cursorPoint)
         }
         document.body.style.cursor = "default"
         repaintYatzyTable()
     })
     canvas.addEventListener('pointermove', (event) => {
+         const cursorPoint = { x: event.offsetX, y: event.offsetY }
+        console.log("test:"+(isAllowedToSelectHand.value === true)+ "__"+isPointOnSection(cursorPoint, scoreCardSection()))
         if (!isMouseEnabled.value) {
             return
         }
-        const cursorPoint = { x: event.offsetX, y: event.offsetY }
+       
         document.body.style.cursor = "default"
         if (isAllowedToSelectDice.value === true && isPointOnSection(cursorPoint, diceSection())) {
             const dice: IDice = getDice(cursorPoint)
@@ -275,6 +277,9 @@ const attachListeners = () => {
                 document.body.style.cursor = "pointer"
                 repaintYatzyTable()
             }
+        }else if (isAllowedToSelectHand.value === true && isPointOnSection(cursorPoint, scoreCardSection())) {
+            console.log("scorecard section")
+            document.body.style.cursor = "pointer"
         } else if (isPointOnSection(cursorPoint, buttonSection())) {
             if (isRollButtonVisible.value === true && isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)) {
                 document.body.style.cursor = "pointer"
@@ -366,8 +371,13 @@ const createAction = (action): IYatzyAction => {
             actionName: "yatzyRollDices", rollsLeftAfterAction: action.payload.table.playerInTurn.rollsLeft,
             rollResult: action.payload.yatzy.dices, whoPlayed: action.payload.yatzy.whoPlayed, nextTurnPlayer: action.payload.table.playerInTurn.name
         }
-    } else if (action.type === "selectHand") {
+    } else if (action.type === "yatzySelectHand") {
+        expectingServerResponse = false
         console.log("hand selected ")
+        return {
+            actionName: "yatzyRollDices", rollsLeftAfterAction: action.payload.table.playerInTurn.rollsLeft,
+            rollResult: action.payload.yatzy.dices, whoPlayed: action.payload.yatzy.whoPlayed, nextTurnPlayer: action.payload.table.playerInTurn.name
+        }
     }
     return
 }

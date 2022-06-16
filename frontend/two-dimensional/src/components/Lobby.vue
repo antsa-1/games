@@ -405,6 +405,9 @@ export default defineComponent({
                     case "YATZY_ROLL_DICES":                       	
 						this.$store.dispatch("yatzyRollDices", data)
 						break
+                    case "YATZY_ROLL_DICES":                       	
+						this.$store.dispatch("yatzySelectHand", data)
+						break
 					case "LEAVE_TABLE":						
 						this.$store.dispatch("leaveTable", data)
                         if(data.who.name === this.userName){

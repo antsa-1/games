@@ -92,9 +92,12 @@ public class YatzyRuleBase {
 		}
 	}
 
-	private ScoreCard selectHand(YatzyPlayer playerInTurn, Hand hand) {
-		ScoreCard card = playerInTurn.getScoreCard();
-		card.setHand(hand.getHandType(), hand);
-		return card;
+	public ScoreCard selectHand(YatzyTable table, User user, Integer handType) {
+		// TODO validations
+		
+		Hand hand = new Hand(HandType.getHandType(handType), table.getDices());
+		ScoreCard scoreCard = table.getPlayerInTurn().getScoreCard();
+		scoreCard.addHand(hand);
+		return scoreCard;
 	}
 }
