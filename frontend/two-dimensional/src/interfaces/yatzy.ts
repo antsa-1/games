@@ -32,7 +32,8 @@ export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
     players: IYatzyPlayer[],
     canvas: IGameCanvas,
     dices: IDice[],
-    playButton: IButton
+    playButton: IButton,
+    scoreCardRows: IScoreCardRow[]
 }
 
 export interface IButton extends IYatzyComponent {
@@ -69,11 +70,11 @@ export interface IScoreCard {
 }
 
 export interface IScoreCardRow {
-    rowStart: IVector2,
-    rowEnd: IVector2,
-    hover: boolean,
-    hand: IHand,
-    text: string
+    section: ISection,
+    title: string,
+    nth: number,
+    handType: HandType,
+    height: number
 }
 export interface IHand {
     handType: HandType,
@@ -85,5 +86,5 @@ export enum IOption {
 
 }
 export enum HandType {
-    PAIR = 1, TWO_PAIR, TRIPS, QUADS, YATZY, SMALL_STRAIGHT, LARGE_STRAIGHT, ONES, TWOS, THREES, FOURS, FIVES, SIXES, FULL_HOUSE, CHANCE
+    PAIR = 1, TWO_PAIR, TRIPS, QUADS, YATZY, SMALL_STRAIGHT, LARGE_STRAIGHT, ONES, TWOS, THREES, FOURS, FIVES, SIXES, FULL_HOUSE, CHANCE, BONUS, SUBTOTAL, TOTAL
 }
