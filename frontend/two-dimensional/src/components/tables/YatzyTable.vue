@@ -30,13 +30,9 @@
             <div v-else class="text-danger"> In turn: {{ yatzyTable.playerInTurn?.name }}</div>
         </div>
     </div>
-
-
     <div>
         <canvas id="canvas" width="1200" height="600" style="border:1px solid"></canvas>
     </div>
-
-
 </template>
 
 <script setup lang="ts">
@@ -65,25 +61,58 @@ onMounted(() => {
         yatzyTable.value.canvas.enabled = true
     }
     attachListeners()
+    resizeDocument()
     repaintYatzyTable()
 })
 
 const scoreCardSection = (): ISection => {
+
     const canvasWidth = yatzyTable.value.canvas.element.width
     const start: IVector2 = { x: 0, y: 0 }
     let end: IVector2 = undefined
-    if (canvasWidth >= 1200) {
-        const x = yatzyTable.value.canvas.element.width / 2
-        end = { x: x, y: yatzyTable.value.canvas.element.height }
+    if (canvasWidth >= 1200 || canvasWidth >= 1000 && yatzyTable.value.players.length <= 3) {
+       
+        let x = canvasWidth * 0.95 / 2
+        let y = x
+   //     yatzyTable.value.canvas.element.width = x
+   //     yatzyTable.value.canvas.element.height = y
+        end = { x: x, y: y }
+       // yatzyTable.value.image.canvasDimension = {x:x, y:y}
         return { start, end }
     }
-    if (canvasWidth >= 768 && yatzyTable.value.players.length === 2) {
-        const x = yatzyTable.value.canvas.element.width / 2
-        end = { x: x, y: yatzyTable.value.canvas.element.height }
+    if (canvasWidth  >= 1000 && yatzyTable.value.players.length === 4) {
+     
+        let x = screen.width * 0.95
+        let y = screen.height
+
+        //yatzyTable.value.image.canvasDimension = {x:x, y:y}
+        end = { x: x, y: y }
         return { start, end }
     }
-    const x = yatzyTable.value.canvas.element.width
-    end = { x: x, y: yatzyTable.value.canvas.element.height * 0.75 }
+    if (canvasWidth >= 768 && yatzyTable.value.players.length <= 3) {
+       
+        let x = screen.width * 0.99 / 2
+        let y = x
+    
+       // yatzyTable.value.image.canvasDimension = {x:x, y:y}
+        end = { x: x, y: y }
+        return { start, end }
+    }
+    if (canvasWidth >= 768 && yatzyTable.value.players.length === 4) {
+       
+        let x = screen.width * 0.90
+        let y = screen.height
+    
+      //  yatzyTable.value.image.canvasDimension = {x:x, y:y}
+        end = { x: x, y: y }
+        return { start, end }
+    }
+ 
+    const x = canvasWidth
+    const y = yatzyTable.value.canvas.element.height * 0.75
+    
+    end = { x: x, y: screen.height * 0.75 }
+   // yatzyTable.value.image.canvasDimension = {x:x, y:y}
     return { start, end }
 
 }
@@ -93,34 +122,35 @@ const scoreCardHeight = () => {
 }
 const initScoreCardRows = (): IScoreCardRow[] => {
     let rows: IScoreCardRow[] = []
-    let rowHeight = scoreCardHeight() / CANVAS_ROWS
+    let initialRowHeight = scoreCardHeight() / CANVAS_ROWS
     if (yatzyTable.value.canvas.element.width < 768) {
-        rowHeight = yatzyTable.value.canvas.element.height * 0.5 / CANVAS_ROWS       
+        initialRowHeight = yatzyTable.value.canvas.element.height * 0.5 / CANVAS_ROWS       
     }
     //Wrapper object with section and height..?
-    rows.push(createScoreCardRow("Ones [5]", 4, HandType.ONES, rowHeight))
-    rows.push(createScoreCardRow("Twos [10]", 5, HandType.TWOS, rowHeight))
-    rows.push(createScoreCardRow("Threes [15]", 6, HandType.THREES, rowHeight))
-    rows.push(createScoreCardRow("Fours [20]", 7, HandType.FOURS, rowHeight))
-    rows.push(createScoreCardRow("Fives [25]", 8, HandType.FIVES, rowHeight))
-    rows.push(createScoreCardRow("Sixes[30]", 9, HandType.SIXES, rowHeight))
-    rows.push(createScoreCardRow("Subtotal [105]", 10, HandType.SUBTOTAL, rowHeight))
-    rows.push(createScoreCardRow("Bonus [50] (upper > 63)", 11, HandType.BONUS, rowHeight))
-    rows.push(createScoreCardRow("Pair [12]", 12, HandType.PAIR, rowHeight))
-    rows.push(createScoreCardRow("Two pairs [22]", 13, HandType.TWO_PAIR, rowHeight))
-    rows.push(createScoreCardRow("Trips [18]", 14, HandType.TRIPS, rowHeight))
-    rows.push(createScoreCardRow("Full house [28]", 15, HandType.FULL_HOUSE, rowHeight))
-    rows.push(createScoreCardRow("Low straight (1-5) [15]", 16, HandType.SMALL_STRAIGHT, rowHeight))
-    rows.push(createScoreCardRow("High straight (2-6) [20]", 17, HandType.LARGE_STRAIGHT, rowHeight))
-    rows.push(createScoreCardRow("Quads [24]", 18, HandType.QUADS, rowHeight))
-    rows.push(createScoreCardRow("Chance [30]", 19, HandType.CHANCE, rowHeight))
-    rows.push(createScoreCardRow("Yatzy [50]", 20, HandType.YATZY, rowHeight))
-    rows.push(createScoreCardRow("Grand Total [374]", 21, HandType.TOTAL, rowHeight))
+    rows.push(createScoreCardRow("Ones [5]", 4, HandType.ONES, initialRowHeight))
+    rows.push(createScoreCardRow("Twos [10]", 5, HandType.TWOS, initialRowHeight))
+    rows.push(createScoreCardRow("Threes [15]", 6, HandType.THREES, initialRowHeight))
+    rows.push(createScoreCardRow("Fours [20]", 7, HandType.FOURS, initialRowHeight))
+    rows.push(createScoreCardRow("Fives [25]", 8, HandType.FIVES, initialRowHeight))
+    rows.push(createScoreCardRow("Sixes[30]", 9, HandType.SIXES, initialRowHeight))
+    rows.push(createScoreCardRow("Subtotal [105]", 10, HandType.SUBTOTAL, initialRowHeight))
+    rows.push(createScoreCardRow("Bonus [50] (upper > 63)", 11, HandType.BONUS, initialRowHeight))
+    rows.push(createScoreCardRow("Pair [12]", 12, HandType.PAIR, initialRowHeight))
+    rows.push(createScoreCardRow("Two pairs [22]", 13, HandType.TWO_PAIR, initialRowHeight))
+    rows.push(createScoreCardRow("Trips [18]", 14, HandType.TRIPS, initialRowHeight))
+    rows.push(createScoreCardRow("Full house [28]", 15, HandType.FULL_HOUSE, initialRowHeight))
+    rows.push(createScoreCardRow("Low straight (1-5) [15]", 16, HandType.SMALL_STRAIGHT, initialRowHeight))
+    rows.push(createScoreCardRow("High straight (2-6) [20]", 17, HandType.LARGE_STRAIGHT, initialRowHeight))
+    rows.push(createScoreCardRow("Quads [24]", 18, HandType.QUADS, initialRowHeight))
+    rows.push(createScoreCardRow("Chance [30]", 19, HandType.CHANCE, initialRowHeight))
+    rows.push(createScoreCardRow("Yatzy [50]", 20, HandType.YATZY, initialRowHeight))
+    rows.push(createScoreCardRow("Grand Total [374]", 21, HandType.TOTAL, initialRowHeight))
     return rows
 }
 const initTable = (): IYatzyTable => {
     console.log("initTable:")
-    const bgSize: IVector2 = { x: 1200, y: 1200 }
+    let initialTable: IYatzyTable = store.getters.yatzyTable
+    const bgSize: IVector2 = { x: 1600, y: 1600 }
     const tableImage = <Image>{
         image: <HTMLImageElement>document.getElementById("yatzybg"),
         canvasDimension: bgSize,
@@ -129,7 +159,7 @@ const initTable = (): IYatzyTable => {
         canvasRotationAngle: 0,
         visible: true
     }
-    let initialTable: IYatzyTable = store.getters.yatzyTable
+    initialTable.image = tableImage
     const players: IYatzyPlayer[] = initialTable.players
     initialTable.players.forEach(player => {
         player.scoreCard = { bonus: undefined, subTotal: undefined, total: undefined, hands: [] }
@@ -147,7 +177,7 @@ const initTable = (): IYatzyTable => {
         let dice: IDice = initialTable.dices[i - 1]
         dice.image = diceImage
     }
-    initialTable.image = tableImage
+    
     initialTable.players = players
     const playButtonImage = <Image>{
         image: <HTMLImageElement>document.getElementById("emptyButton"),
@@ -229,34 +259,57 @@ onUnmounted(() => {
     store.dispatch("clearTable")
 })
 
+const setCanvasPositionToLeft = () => {
+    yatzyTable.value.canvas.element.style.position = 'absolute'
+    yatzyTable.value.canvas.element.style.left = '0px'
+}
+
+const resetCanvasPosition = () => {
+    yatzyTable.value.canvas.element.style.position = 'relative '
+    yatzyTable.value.canvas.element.style.left = ''
+}
 
 
 const resizeDocument = () => {
-    console.log("resizeEvent" + screen.width)
-    if (screen.width >= 1200) {
+    //Resizes canvas size and sets position
+    console.log("resizeEvent screenWidth" + screen.width)
+    setTableLayout()
+    drawAll()
+}
+
+let verticalLayout:boolean = true
+
+const setTableLayout = ():boolean => {
+  verticalLayout = true
+    if (window.innerWidth >= 1200) {
+        resetCanvasPosition()
         yatzyTable.value.canvas.element.width = 1100
-        yatzyTable.value.canvas.element.height = screen.height
-        yatzyTable.value.image.canvasDimension.x = 1100
-        yatzyTable.value.image.canvasDimension.y = screen.height
+        yatzyTable.value.canvas.element.height = window.innerHeight
+    }else if (window.innerWidth >= 1000 && yatzyTable.value.players.length > 2) {
+        yatzyTable.value.canvas.element.width = window.innerWidth * 0.9
+        yatzyTable.value.canvas.element.height = 1000
     }
-    else if (screen.width >= 768) {
-        yatzyTable.value.canvas.element.width = screen.width * 0.9
-        yatzyTable.value.canvas.element.height = screen.height
-        yatzyTable.value.image.canvasDimension.x = screen.width * 0.9
-        yatzyTable.value.image.canvasDimension.y = screen.height
+    else if (window.innerWidth >= 940) {
+        if(yatzyTable.value.playerAmount >=3 ){
+            verticalLayout = false
+        }
+        setCanvasPositionToLeft()
+        yatzyTable.value.canvas.element.width = window.innerWidth
+        yatzyTable.value.canvas.element.height = window.innerHeight
     }
-    else if (screen.width >= 600) {
-        yatzyTable.value.canvas.element.width = 600
-        yatzyTable.value.canvas.element.height = 800
-        yatzyTable.value.image.canvasDimension.x = 600
-        yatzyTable.value.image.canvasDimension.y = 800
+    else {
+        verticalLayout = false
+        setCanvasPositionToLeft()
+        yatzyTable.value.canvas.element.width = screen.width
+        yatzyTable.value.canvas.element.height = window.innerHeight
     }
+    yatzyTable.value.scoreCardRows = initScoreCardRows()
     const size = diceSize()
     yatzyTable.value.dices.forEach((dice) => {
         dice.image.canvasDimension.x = size.x
         dice.image.canvasDimension.y = size.y
     })
-    repaintYatzyTable()
+    return verticalLayout
 }
 
 let expectingServerResponse: boolean = false
@@ -276,13 +329,14 @@ const sendRollRequest = () => {
 }
 
 const sendHandSelection = (cursorPoint: IVector2) => {
-    if (isMyTurn.value !== true || playerInTurn.value.rollsLeft === 3 || yatzyTable.value.canvas.animating === true) {
+    if (isMyTurn.value !== true || playerInTurn.value.rollsLeft === 3 || yatzyTable.value.canvas.animating === true && hightlightedRow !== null) {
         return
     }
     expectingServerResponse = true
-    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { handVal: 1 } }
+    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { handVal:hightlightedRow.handType } }
     console.log("*** Sending selection " + JSON.stringify(obj))
     user.value.webSocket.send(JSON.stringify(obj))
+    hightlightedRow = null
 }
 
 const attachListeners = () => {
@@ -306,11 +360,12 @@ const attachListeners = () => {
         if (dice && isAllowedToSelectDice.value === true) {
             dice.selected ? dice.selected = false : dice.selected = true
         } else if (isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)) {
+             document.body.style.cursor = "default"
             sendRollRequest()
         } else if (isAllowedToSelectHand.value === true && isPointOnSection(cursorPoint, scoreCardSection())) {
             sendHandSelection(cursorPoint)
         }
-        document.body.style.cursor = "default"
+       
         repaintYatzyTable()
     })
     canvas.addEventListener('pointermove', (event) => {
@@ -329,7 +384,7 @@ const attachListeners = () => {
         } else if (isAllowedToSelectHand.value === true && isPointOnSection(cursorPoint, scoreCardSection())) {
             console.log("scorecard section")
             document.body.style.cursor = "pointer"
-           // getScoreCardRow(cursorPoint)
+            getScoreCardRow(cursorPoint)
         } else if (isPointOnSection(cursorPoint, buttonSection())) {
             if (isRollButtonVisible.value === true && isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)) {
                 document.body.style.cursor = "pointer"
@@ -347,6 +402,14 @@ const getDice = (cursorPoint: IVector2) => {
     return yatzyTable.value.dices.filter(dice => getDiceOnCursor(dice, cursorPoint))[0]
 }
 
+let hightlightedRow:IScoreCardRow = null
+const getScoreCardRow = (cursorPoint: IVector2) => {
+    const yy = cursorPoint.y - scoreCardSection().start.y
+    let initialRowHeight = scoreCardHeight() / CANVAS_ROWS 
+    let nth:number = Math.floor(yy / (initialRowHeight))
+    const row:IScoreCardRow = yatzyTable.value.scoreCardRows[nth-4]
+    hightlightedRow = row
+}
 const getDiceOnCursor = (dice: IDice, cursorPoint: IVector2) => {
     const size = diceSize()
     if (cursorPoint.x < dice.position.x) {
@@ -519,78 +582,64 @@ const repaintInfoTexts = () => {
     ctx.closePath()
 }
 
-const gameSection = (): ISection => {
-    const canvasWidth = yatzyTable.value.canvas.element.width
-    const size = diceSize()
-    if (canvasWidth >= 1200) {
-        const y = yatzyTable.value.canvas.element.height / 10
-        return { start: { x: 700, y: y }, end: { x: 700 + 6 * size.x, y: y + (size.y * 2) } }
-    }
-    if (canvasWidth >= 768) {
-        const x = canvasWidth / 2
-        const y = 300
-        console.log("bbb")
-        return { start: { x: x, y: y }, end: { x: x + 6 * size.x, y: y + size.y } }
-    }
-    const x = 220
-    const y = 500
-    if (canvasWidth > 600) {
-        console.log("ccc")
-        return { start: { x: x, y: y }, end: { x: x + 6 * size.x, y: y + size.y } }
-    }
-    console.log("ddd")
-    return { start: { x: x, y: y }, end: { x: x + 6 * size.x, y: y + size.y } }
-}
 
 const diceSection = (): ISection => {
+    
+    const dSize: IVector2 = diceSize()
     const canvasWidth = yatzyTable.value.canvas.element.width
-    const size: IVector2 = diceSize()
-    if (canvasWidth >= 1200) {
+    if(verticalLayout && screen.width >= 1000){    
+       
         const y = yatzyTable.value.canvas.element.height / 10
-        return { start: { x: 700, y: y }, end: { x: 700 + 6 * size.x, y: y + (size.y * 2) } }
-    }
-    if (canvasWidth >= 768) {
-        const x = canvasWidth / 2
-        const y = 300
-        return { start: { x: x, y: y }, end: { x: x + 6 * size.x, y: y + size.y } }
-    }
-    const x = 220
-    const y = 500
-    if (canvasWidth > 600) {
-        console.log("ccc")
-        return { start: { x: x, y: y }, end: { x: x + 6 * size.x, y: y + size.y } }
-    }
-    console.log("ddd")
-    return { start: { x: x, y: y }, end: { x: x + 6 * size.x, y: y + size.y } }
+        const x = yatzyTable.value.canvas.element.width * 0.50
+        return { start: { x: x, y: y }, end: { x: x + 6 * dSize.x, y: y + (dSize.y * 2) } }
+    }    
+    if(verticalLayout && window.innerWidth < 1000){
+        
+        const y = yatzyTable.value.canvas.element.height / 10
+        const x = yatzyTable.value.canvas.element.width * 0.50
+        return { start: { x: x, y: y }, end: { x: x + 6 * dSize.x, y: y + (dSize.y * 2) } }
+    }   
+    
+    return { start: { x: 0, y: yatzyTable.value.canvas.element.height * 0.75}, end: { x: 20 + 6 * dSize.x, y: yatzyTable.value.canvas.element.height * 0.95} }
 }
-
-
-
 
 const buttonSection = (): ISection => {
     //button section comes under dice section
     const dices: ISection = diceSection()
     const dSize = diceSize()
-    const buttonSectionStart: IVector2 = { x: dices.start.x, y: dices.end.y + dSize.y }
-    const buttonSectionEnd: IVector2 = { x: dices.end.x, y: dices.end.y + 2.5 * dSize.y }
-    return { start: buttonSectionStart, end: buttonSectionEnd }
+    if(window.innerWidth >= 500 && verticalLayout) {
+        const buttonSectionStart: IVector2 = { x: dices.start.x, y: dices.start.y + dSize.y }
+        const buttonSectionEnd: IVector2 = { x: dices.end.x, y: dices.end.y + 2.5 * dSize.y }
+        return { start: buttonSectionStart, end: buttonSectionEnd }
+    }
+    if(window.innerWidth >= 670 && !verticalLayout){
+        const buttonSectionStart: IVector2 = { x: dices.end.x, y: dices.start.y  }
+        const buttonSectionEnd: IVector2 = { x: dices.end.x+ 2*dSize.x, y: dices.start.y }
+        return { start: buttonSectionStart, end: buttonSectionEnd }
+    }
+    if(!verticalLayout){      
+        const buttonSectionStart: IVector2 = { x: dices.start.x, y: dices.start.y - 1.5 * dSize.y }
+        const buttonSectionEnd: IVector2 = { x: dices.end.x, y: dices.start.y -dSize.y }
+        return { start: buttonSectionStart, end: buttonSectionEnd }
+    }
+    
 }
 
 const diceSize = (): IVector2 => {
     const canvasWidth = yatzyTable.value.canvas.element.width
-    if (canvasWidth > 1000) {
-        return { x: 80, y: 80 }
-    }
-    if (canvasWidth >= 768) {
-
-        return { x: 60, y: 60 }
-    }
-    return { x: 40, y: 40 }
+    if(verticalLayout && screen.width >= 1000){       
+        return { x: 85, y: 85 }
+    }    
+    if(verticalLayout && window.innerWidth < 1000){        
+       return { x: 70, y: 70 }
+    }   
+    return window.innerWidth < 500? { x: 60, y: 60 } :{ x: 80, y: 80 }
 }
 let animationRun = 0
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis))
 
 const drawAll = () => {
+    console.log("DRAW all")
     requestAnimationFrame(repaintYatzyTable)
 }
 const animateDices = async (tableDices: IDice[], resultDices: IDice[]) => {
@@ -698,6 +747,7 @@ const getPlayerTotal = (player: IYatzyPlayer): number => {
 
 const repaintYatzyTable = () => {
     const canvas = yatzyTable.value.canvas
+    console.log("repaintYatzyTable: canvas: "+JSON.stringify(canvas) + " image:"+JSON.stringify(yatzyTable.value.image))
     const ctx = canvas.ctx
     ctx.clearRect(0, 0, canvas.element.width, canvas.element.height)
     repaintComponent(yatzyTable.value)
@@ -721,15 +771,30 @@ const gapBetweenScoreCardRowTitleAndLine = 15
 
 const drawScoreCardRow = (row:IScoreCardRow, rowHeight:number) => {
     const ctx = yatzyTable.value.canvas.ctx
+  
     ctx.fillText(row.title, row.section.start.x, rowHeight * row.nth + gapBetweenScoreCardRowTitleAndLine)
-    for (let i = 0; i < yatzyTable.value.players.length; i++) {
+    fillPlayersPointsOnRow(row, rowHeight)
+    ctx.moveTo(row.section.start.x, row.section.start.y )
+    ctx.lineTo(row.section.end.x, row.section.end.y)
+    ctx.stroke()
+    if(hightlightedRow?.handType === row.handType){
+      //  let gradient = ctx.createLinearGradient(0, 0, 200, 0)
+     //   gradient.addColorStop(0, "red")
+      //  gradient.addColorStop(1, "white")
+        
+        ctx.strokeStyle = "#FF0000"
+        ctx.lineWidth = 6
+        ctx.strokeRect(row.section.start.x, rowHeight * row.nth, scoreCardSection().end.x, row.height)
+    }
+    ctx.lineWidth = 1
+    ctx.strokeStyle = "#000000"
+}
+const fillPlayersPointsOnRow = (row:IScoreCardRow, rowHeight:number)  => {
+     for (let i = 0; i < yatzyTable.value.players.length; i++) {
         const hand: IHand = getPlayerHand(row.handType, yatzyTable.value.players[i])
         const startPoint: IVector2 = { x: scoreCardTextEnd + 50 + magic * i, y: rowHeight * 5 }
         fillPlayerScore(hand, startPoint)
     }
-    ctx.moveTo(row.section.start.x, row.section.start.y )
-    ctx.lineTo(row.section.end.x, row.section.end.y)
-    ctx.stroke()
 }
 
 const createScoreCardRow = (title: string, nthRow: number, handType: HandType, height: number): IScoreCardRow => {
@@ -741,26 +806,16 @@ const createScoreCardRow = (title: string, nthRow: number, handType: HandType, h
 }
 
 
-const checkRowBackgroundColor = (rowHeight: number) => {
-    if (isAllowedToSelectHand.value !== true) {
-        return
-    }
-    const ctx = yatzyTable.value.canvas.ctx
-    var grd = ctx.createLinearGradient(0, 0, 200, 0)
-    grd.addColorStop(0, "red")
-    grd.addColorStop(1, "white")
-    ctx.fillStyle = grd
-    ctx.fillRect(10, 10, 150, 80);
-}
 
 const repaintScoreCard = () => {
     const canvas = yatzyTable.value.canvas
     const cardSection = scoreCardSection()
     let rowHeight = scoreCardHeight() / CANVAS_ROWS
+    console.log("rowHeight:"+rowHeight)
     const width = canvas.element.width
     const ctx = canvas.ctx
     ctx.font = "bolder " + FONT_SIZE.LARGEST + " Arial"
-    ctx.lineWidth = 1
+ 
     ctx.beginPath()
     ctx.fillText("Scorecards", 150, 35)
     ctx.font = "bold " + FONT_SIZE.DEFAULT + " Arial"
@@ -768,7 +823,7 @@ const repaintScoreCard = () => {
         rowHeight = canvas.element.height * 0.5 / CANVAS_ROWS
         ctx.font = FONT_SIZE.DEFAULT + " Arial"
     }
-    checkRowBackgroundColor(rowHeight)
+   // checkRowBackgroundColor(rowHeight)
     yatzyTable.value.scoreCardRows.forEach( row => {
         drawScoreCardRow(row, rowHeight)
     })

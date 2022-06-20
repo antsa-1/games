@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
@@ -42,6 +41,7 @@ public class YatzyTable extends Table {
 		y.setName(playerA.getName());
 		y.setId(playerA.getId());
 		y.setTable(this);
+		y.setScoreCard(new ScoreCard());
 		super.setPlayerA(y);
 		if (!randomizeStarter) {
 			this.playerInTurn = y;
@@ -130,6 +130,7 @@ public class YatzyTable extends Table {
 		YatzyPlayer y = new YatzyPlayer();
 		y.setName(user.getName());
 		y.setId(user.getId());
+		y.setScoreCard(new ScoreCard());
 		this.players.add(y);
 		if (players.size() != playerAmount) {
 			return false;
@@ -148,6 +149,49 @@ public class YatzyTable extends Table {
 		yatzyRuleBase = new YatzyRuleBase();
 		yatzyRuleBase.startGame(this);
 		return gameShouldStartNow;
+	}
+
+	@Override
+	public boolean removePlayerIfExist(User user) {
+		User removedPlayer = null;
+		if (playerA != null && playerA.equals(user)) {
+			detachPlayer(playerA);
+			removedPlayer = playerA;
+			playerA = null;
+		}
+		int index = players.indexOf(user);
+		if (index != -1) {
+			removedPlayer = players.remove(index);
+			detachPlayer(removedPlayer);
+		}
+		if (removedPlayer == null) {
+			// Nobody was removed
+			return false;
+		}
+		if (playerInTurn.equals(removedPlayer)) {
+			playerInTurn = null;
+			determineNextPlayerInTurn(index);
+		}
+		return true;
+	}
+
+	@Override
+	public void changePlayerInTurn() {
+		int index = players.indexOf(playerInTurn);
+		if (index == players.size() - 1) {
+			playerInTurn = players.get(0);
+		} else {
+			playerInTurn = players.get(index++);
+		}
+	}
+
+	private void determineNextPlayerInTurn(int removedIndex) {
+		if (removedIndex == players.size() - 1) {
+			playerInTurn = players.get(0);
+		} else {
+			playerInTurn = players.get(removedIndex++);
+		}
+
 	}
 
 	@Override

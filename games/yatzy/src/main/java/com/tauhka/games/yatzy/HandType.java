@@ -20,7 +20,7 @@ public enum HandType {
 	public static HandType getHandType(Integer type) {
 		if (type.equals(PAIR.getAsInt()))
 			return PAIR;
-		if (type.equals(PAIR.getAsInt()))
+		if (type.equals(TWO_PAIR.getAsInt()))
 			return TWO_PAIR;
 		if (type.equals(TRIPS.getAsInt()))
 			return TRIPS;

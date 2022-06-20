@@ -29,6 +29,7 @@ public class Hand {
 			dices.add(d);
 		}
 		this.handType = handType;
+		this.value = HandCalculator.calculateHandValue(this);
 	}
 
 	public Hand(HandType handType, List<Dice> tableDices, int value) {
