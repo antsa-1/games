@@ -1,19 +1,21 @@
 package com.tauhka.games.yatzy;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTypeAdapter;
 
 /**
  * @author antsa-1 from GitHub 14 May 2022
  **/
-
-public class ScoreCard {
+public class ScoreCard implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private static final int BONUS = 50;
 	private static final int MIN_POINT_REQUIREMENT_FOR_BONUS = 63;
 	private static final int ZIP_NADA = 0;
-	@JsonbProperty(value = "hands")
+
 	private Map<HandType, Hand> hands;
 	@JsonbProperty(value = "total")
 	private Integer total;
@@ -42,7 +44,56 @@ public class ScoreCard {
 		return calculateSubTotal() >= MIN_POINT_REQUIREMENT_FOR_BONUS ? BONUS : ZIP_NADA;
 	}
 
+	public Integer getTotal() {
+		return total;
+	}
+
+	public Map<HandType, Hand> getHands() {
+		return hands;
+	}
+
+	public void setHands(Map<HandType, Hand> hands) {
+		this.hands = hands;
+	}
+
+	public void setTotal(Integer total) {
+		this.total = total;
+	}
+
+	public Integer getSubTotal() {
+		return subTotal;
+	}
+
+	public void setSubTotal(Integer subTotal) {
+		this.subTotal = subTotal;
+	}
+
+	public Integer getBonus() {
+		return bonus;
+	}
+
+	public void setBonus(Integer bonus) {
+		this.bonus = bonus;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Hand getLastAdded() {
+		return lastAdded;
+	}
+
+	public void setLastAdded(Hand lastAdded) {
+		this.lastAdded = lastAdded;
+	}
+
 	public void addHand(Hand hand) {
+		hand.setTypeNumber(hand.getHandType().getAsInt());
 		hands.put(hand.getHandType(), hand);
 		total = calculateTotal();
 		subTotal = calculateSubTotal();

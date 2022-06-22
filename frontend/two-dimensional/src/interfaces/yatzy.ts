@@ -21,10 +21,10 @@ export interface IYatzyActionQueue {
 
 export interface IYatzyAction {
     actionName: string,
-    rollsLeftAfterAction: number,
+    rollsLeftAfterAction?: number,
     rollResult?: IDice[],
-    options?: IOption[],
     whoPlayed?: string,
+    scoreCard?: IScoreCard, //Scorecard of player who selected the hand
     nextTurnPlayer: IPlayer,
 }
 
@@ -67,6 +67,7 @@ export interface IScoreCard {
     total: number,
     bonus: number,
     hands: IHand[],
+    lastAdded: IHand
 }
 
 export interface IScoreCardRow {
@@ -78,6 +79,7 @@ export interface IScoreCardRow {
 }
 export interface IHand {
     handType: HandType,
+    typeNumber: number
     value: number
 }
 export enum IOption {
@@ -86,5 +88,6 @@ export enum IOption {
 
 }
 export enum HandType {
-    PAIR = 1, TWO_PAIR, TRIPS, QUADS, YATZY, SMALL_STRAIGHT, LARGE_STRAIGHT, ONES, TWOS, THREES, FOURS, FIVES, SIXES, FULL_HOUSE, CHANCE, BONUS, SUBTOTAL, TOTAL
+    ONES = 1, TWOS, THREES, FOURS, FIVES, SIXES, PAIR, TWO_PAIR, TRIPS, FULL_HOUSE, SMALL_STRAIGHT, LARGE_STRAIGHT, QUADS, CHANCE, YATZY, BONUS, SUBTOTAL, TOTAL
+
 }

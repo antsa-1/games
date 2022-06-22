@@ -27,7 +27,7 @@ public class Dice {
 	}
 
 	public int roll() {
-		number = ThreadLocalRandom.current().nextInt(1, 6);
+		number = ThreadLocalRandom.current().nextInt(1, 7);
 		return number;
 	}
 

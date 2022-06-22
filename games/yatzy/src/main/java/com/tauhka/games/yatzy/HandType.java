@@ -5,7 +5,7 @@ package com.tauhka.games.yatzy;
  **/
 
 public enum HandType {
-	PAIR(1), TWO_PAIR(2), TRIPS(3), QUADS(4), YATZY(5), SMALL_STRAIGHT(6), LARGE_STRAIGHT(7), ONES(8), TWOS(9), THREES(10), FOURS(11), FIVES(12), SIXES(13), FULL_HOUSE(14), CHANCE(15);
+	ONES(1), TWOS(2), THREES(3), FOURS(4), FIVES(5), SIXES(6), PAIR(7), TWO_PAIR(8), TRIPS(9), FULL_HOUSE(10), SMALL_STRAIGHT(11), LARGE_STRAIGHT(12), QUADS(13), CHANCE(14), YATZY(15);
 
 	private final int asInt;
 
@@ -42,8 +42,12 @@ public enum HandType {
 			return FOURS;
 		if (type.equals(FIVES.getAsInt()))
 			return FIVES;
+		if (type.equals(SIXES.getAsInt()))
+			return SIXES;
 		if (type.equals(FULL_HOUSE.getAsInt()))
 			return FULL_HOUSE;
+		if (type.equals(CHANCE.getAsInt()))
+			return CHANCE;
 		throw new IllegalArgumentException("No such handtype:" + type);
 	}
 

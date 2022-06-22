@@ -47,7 +47,7 @@ import { IYatzyPlayer, IYatzyMessage, IDice, ISection, IYatzySnapshot, IYatzyAct
 import Chat from "../Chat.vue"
 const CANVAS_ROWS = 22
 const router = useRouter()
-let tableSnapshot: IYatzySnapshot = undefined
+let gameSnapshot: IYatzySnapshot = undefined
 const store = useStore()
 const gameOptions = ref<IGameOptions>({ notificationSound: false })
 
@@ -71,17 +71,17 @@ const scoreCardSection = (): ISection => {
     const start: IVector2 = { x: 0, y: 0 }
     let end: IVector2 = undefined
     if (canvasWidth >= 1200 || canvasWidth >= 1000 && yatzyTable.value.players.length <= 3) {
-       
+
         let x = canvasWidth * 0.95 / 2
         let y = x
-   //     yatzyTable.value.canvas.element.width = x
-   //     yatzyTable.value.canvas.element.height = y
+        //     yatzyTable.value.canvas.element.width = x
+        //     yatzyTable.value.canvas.element.height = y
         end = { x: x, y: y }
-       // yatzyTable.value.image.canvasDimension = {x:x, y:y}
+        // yatzyTable.value.image.canvasDimension = {x:x, y:y}
         return { start, end }
     }
-    if (canvasWidth  >= 1000 && yatzyTable.value.players.length === 4) {
-     
+    if (canvasWidth >= 1000 && yatzyTable.value.players.length === 4) {
+
         let x = screen.width * 0.95
         let y = screen.height
 
@@ -90,29 +90,29 @@ const scoreCardSection = (): ISection => {
         return { start, end }
     }
     if (canvasWidth >= 768 && yatzyTable.value.players.length <= 3) {
-       
+
         let x = screen.width * 0.99 / 2
         let y = x
-    
-       // yatzyTable.value.image.canvasDimension = {x:x, y:y}
+
+        // yatzyTable.value.image.canvasDimension = {x:x, y:y}
         end = { x: x, y: y }
         return { start, end }
     }
     if (canvasWidth >= 768 && yatzyTable.value.players.length === 4) {
-       
+
         let x = screen.width * 0.90
         let y = screen.height
-    
-      //  yatzyTable.value.image.canvasDimension = {x:x, y:y}
+
+        //  yatzyTable.value.image.canvasDimension = {x:x, y:y}
         end = { x: x, y: y }
         return { start, end }
     }
- 
+
     const x = canvasWidth
     const y = yatzyTable.value.canvas.element.height * 0.75
-    
+
     end = { x: x, y: screen.height * 0.75 }
-   // yatzyTable.value.image.canvasDimension = {x:x, y:y}
+    // yatzyTable.value.image.canvasDimension = {x:x, y:y}
     return { start, end }
 
 }
@@ -124,7 +124,7 @@ const initScoreCardRows = (): IScoreCardRow[] => {
     let rows: IScoreCardRow[] = []
     let initialRowHeight = scoreCardHeight() / CANVAS_ROWS
     if (yatzyTable.value.canvas.element.width < 768) {
-        initialRowHeight = yatzyTable.value.canvas.element.height * 0.5 / CANVAS_ROWS       
+        initialRowHeight = yatzyTable.value.canvas.element.height * 0.5 / CANVAS_ROWS
     }
     //Wrapper object with section and height..?
     rows.push(createScoreCardRow("Ones [5]", 4, HandType.ONES, initialRowHeight))
@@ -162,9 +162,9 @@ const initTable = (): IYatzyTable => {
     initialTable.image = tableImage
     const players: IYatzyPlayer[] = initialTable.players
     initialTable.players.forEach(player => {
-        player.scoreCard = { bonus: undefined, subTotal: undefined, total: undefined, hands: [] }
+        player.scoreCard = { bonus: undefined, subTotal: undefined, total: undefined, hands: [], lastAdded: null }
     })
-    
+
     for (let i = 1; i < 6; i++) {
         const diceImage = <Image>{
             image: <HTMLImageElement>document.getElementById("dice" + i),
@@ -177,7 +177,7 @@ const initTable = (): IYatzyTable => {
         let dice: IDice = initialTable.dices[i - 1]
         dice.image = diceImage
     }
-    
+
     initialTable.players = players
     const playButtonImage = <Image>{
         image: <HTMLImageElement>document.getElementById("emptyButton"),
@@ -200,11 +200,12 @@ const actionQueue = ref<IYatzyActionQueue>({ actions: [], blocked: false })
 const userName = computed<string>(() => store.getters.user?.name)
 const user = computed<IUser>(() => store.getters.user)
 const queueLength = computed<number>(() => actionQueue.value.actions.length)
-const playerInTurn = computed<IYatzyPlayer>(() => <IYatzyPlayer>yatzyTable.value.playerInTurn)
+let playerInTurn = computed<IYatzyPlayer>(() => <IYatzyPlayer>yatzyTable.value.playerInTurn)
 const isAllowedToSelectDice = computed<boolean>(() => playerInTurn.value.rollsLeft > 0 && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
 const isAllowedToSelectHand = computed<boolean>(() => isMyTurn.value === true && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
-const isMyTurn = computed<boolean>(() => playerInTurn.value.name === userName.value)
-const isRollButtonVisible = computed<boolean>(() => isMyTurn.value && playerInTurn.value.rollsLeft > 0 && yatzyTable.value.canvas?.animating === false)
+const isMyTurn = computed<boolean>(() => yatzyTable.value.playerInTurn.name === userName.value)
+const isRollButtonVisible = computed<boolean>(() => isMyTurn.value && playerInTurn.value.rollsLeft > 0 && yatzyTable.value.canvas?.animating === false && isAllDicesSelected.value === false)
+const isAllDicesSelected = computed<boolean>(() => yatzyTable.value.dices.filter(dice => dice.selected).length === 5)
 const isMouseEnabled = computed<boolean>(() =>
     yatzyTable.value.canvas.enabled && isMyTurn.value === true
 )
@@ -215,16 +216,16 @@ watch(() => queueLength, (newVal) => {
     }
 }, { deep: true })
 
+
 const consumeActions = () => {
     if (actionQueue.value.blocked || actionQueue.value.actions.length === 0) {
         console.log("actionQueue not consuming " + actionQueue.value.actions.length)
         return
     }
     actionQueue.value.blocked = true
-    //console.log("Action queue consuming" + actionQueue.value + " " + JSON.stringify(actionQueue.value))
+    console.log("Action queue consuming" + actionQueue.value + " " + JSON.stringify(actionQueue.value))
     const action: IYatzyAction = actionQueue.value.actions.splice(0, 1)[0]
-    if (action.actionName === "yatzyRollDices") {
-        console.log("ActionIn:" + JSON.stringify(action))
+    if (action.actionName === "yatzyRollDices") {        
         animateDices(yatzyTable.value.dices, action.rollResult).then(() => {
             const player = <IYatzyPlayer>yatzyTable.value.playerInTurn
             playerInTurn.value.rollsLeft = action.rollsLeftAfterAction
@@ -233,9 +234,26 @@ const consumeActions = () => {
             unblockQueue()
         })
         console.log("animations done")
-
-    } else if (action.actionName === "yatzySelectHand") {
-        console.log("YatzySelectHand consuming")
+    } else if (action.actionName === "yatzySelectHand") {       
+        let yatzyPlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.whoPlayed)
+        yatzyPlayer.scoreCard.total = action.scoreCard.total
+        yatzyPlayer.scoreCard.subTotal = action.scoreCard.subTotal
+        yatzyPlayer.scoreCard.lastAdded = action.scoreCard.lastAdded
+        yatzyPlayer.scoreCard.hands.push({ handType: action.scoreCard.lastAdded.handType, typeNumber: action.scoreCard.lastAdded.typeNumber, value: action.scoreCard.lastAdded.value })
+        console.log("YatzyPlayerScoreCard:" + JSON.stringify(yatzyPlayer.scoreCard) + " PELAAJA:" + JSON.stringify(yatzyPlayer))
+        repaintScoreCard()
+        unblockQueue()
+    } else if (action.actionName === "changeTurn") {       
+        store.dispatch("changeTurn", action.nextTurnPlayer).then(() => {
+            yatzyTable.value.dices.forEach( dice => {
+                dice.selected = false
+            })       
+            unblockQueue()
+            document.body.style.cursor = "default"
+            yatzyTable.value.playerInTurn = action.nextTurnPlayer
+            console.log("CHANGE:"+yatzyTable.value.playerInTurn)
+            repaintYatzyTable()
+        })
     }
 }
 
@@ -248,12 +266,6 @@ const unblockQueue = (timeout: number = 0) => {
 
 onUnmounted(() => {
     console.log("onUnmounted")
-    //unsubscribe()
-    //unsubscribeAction()
-    //learIntervals()
-    //removeMouseListeners()
-    //window.removeEventListener("resize", this.resize)
-    //document.removeEventListener("visibilitychange", this.onVisibilityChange)
     const obj = { title: "LEAVE_TABLE", message: yatzyTable.value.tableId }
     store.getters.user.webSocket?.send(JSON.stringify(obj))
     store.dispatch("clearTable")
@@ -269,7 +281,6 @@ const resetCanvasPosition = () => {
     yatzyTable.value.canvas.element.style.left = ''
 }
 
-
 const resizeDocument = () => {
     //Resizes canvas size and sets position
     console.log("resizeEvent screenWidth" + screen.width)
@@ -277,20 +288,20 @@ const resizeDocument = () => {
     drawAll()
 }
 
-let verticalLayout:boolean = true
+let verticalLayout: boolean = true
 
-const setTableLayout = ():boolean => {
-  verticalLayout = true
+const setTableLayout = (): boolean => {
+    verticalLayout = true
     if (window.innerWidth >= 1200) {
         resetCanvasPosition()
         yatzyTable.value.canvas.element.width = 1100
         yatzyTable.value.canvas.element.height = window.innerHeight
-    }else if (window.innerWidth >= 1000 && yatzyTable.value.players.length > 2) {
+    } else if (window.innerWidth >= 1000 && yatzyTable.value.players.length > 2) {
         yatzyTable.value.canvas.element.width = window.innerWidth * 0.9
         yatzyTable.value.canvas.element.height = 1000
     }
     else if (window.innerWidth >= 940) {
-        if(yatzyTable.value.playerAmount >=3 ){
+        if (yatzyTable.value.playerAmount >= 3) {
             verticalLayout = false
         }
         setCanvasPositionToLeft()
@@ -314,7 +325,9 @@ const setTableLayout = ():boolean => {
 
 let expectingServerResponse: boolean = false
 const sendRollRequest = () => {
-    if (isMyTurn.value !== true || playerInTurn.value.rollsLeft <= 0 || yatzyTable.value.canvas.animating === true || expectingServerResponse === true) {
+    hightlightedRow = null
+ 
+    if (isRollButtonVisible.value === true && yatzyTable.value.canvas.animating === true || expectingServerResponse === true) {
         return
     }
     let rollTheseDices: IDice[] = []
@@ -329,11 +342,11 @@ const sendRollRequest = () => {
 }
 
 const sendHandSelection = (cursorPoint: IVector2) => {
-    if (isMyTurn.value !== true || playerInTurn.value.rollsLeft === 3 || yatzyTable.value.canvas.animating === true && hightlightedRow !== null) {
+    if (isMyTurn.value !== true || playerInTurn.value.rollsLeft === 3 || yatzyTable.value.canvas.animating === true && hightlightedRow === null) {
         return
     }
     expectingServerResponse = true
-    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { handVal:hightlightedRow.handType } }
+    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { handVal: hightlightedRow.handType } }
     console.log("*** Sending selection " + JSON.stringify(obj))
     user.value.webSocket.send(JSON.stringify(obj))
     hightlightedRow = null
@@ -344,11 +357,9 @@ const attachListeners = () => {
 
     const canvas = document.getElementById("canvas")
     canvas.addEventListener('pointerover', (event) => {
-        console.log('Pointer moved in')
         if (!isMouseEnabled.value) {
             return
         }
-
     })
     canvas.addEventListener('pointerdown', (event) => {
         if (!isMouseEnabled.value) {
@@ -360,12 +371,12 @@ const attachListeners = () => {
         if (dice && isAllowedToSelectDice.value === true) {
             dice.selected ? dice.selected = false : dice.selected = true
         } else if (isPointOnImage(cursorPoint, yatzyTable.value.playButton.image)) {
-             document.body.style.cursor = "default"
+            document.body.style.cursor = "default"
             sendRollRequest()
         } else if (isAllowedToSelectHand.value === true && isPointOnSection(cursorPoint, scoreCardSection())) {
             sendHandSelection(cursorPoint)
         }
-       
+
         repaintYatzyTable()
     })
     canvas.addEventListener('pointermove', (event) => {
@@ -392,6 +403,7 @@ const attachListeners = () => {
             }
         }
     })
+    document.addEventListener("visibilitychange", onVisibilityChange)
     // canvas.addEventListener("pointerdown", this.handleMouseDown, false)
     //	canvas.addEventListener("pointerup", this.handleMouseUp, false)
     //canvas.addEventListener("pointermove", this.handleMouseMove, false)
@@ -401,13 +413,39 @@ const attachListeners = () => {
 const getDice = (cursorPoint: IVector2) => {
     return yatzyTable.value.dices.filter(dice => getDiceOnCursor(dice, cursorPoint))[0]
 }
-
-let hightlightedRow:IScoreCardRow = null
+const isDocumentVisible = () => {
+    return document.visibilityState === 'visible'
+}
+const createTableFromSnapShot = () => {
+    if(!gameSnapshot){
+        return
+    }
+  //  initScoreCardRows()
+    setupDices(yatzyTable.value.dices, gameSnapshot.table.dices, false) 
+  /*  yatzyTable.value.players.forEach((player) => {
+       const a:IYatzyPlayer = gameSnapshot.table.players.find(snapshotPlayer => snapshotPlayer.name === player.name)
+       player.scoreCard = a.scoreCard
+    })
+    */
+    actionQueue.value.actions = []
+    createChangeTurnActionIfRequired(gameSnapshot.table)
+}
+const onVisibilityChange = () => { 
+    console.log("onVisiblityChange "+isDocumentVisible())
+    if (isDocumentVisible()) {	  
+		createTableFromSnapShot()
+		drawAll()
+        actionQueue.value.blocked = false	
+    } else {
+		actionQueue.value.blocked = true	
+	}
+}
+let hightlightedRow: IScoreCardRow = null
 const getScoreCardRow = (cursorPoint: IVector2) => {
     const yy = cursorPoint.y - scoreCardSection().start.y
-    let initialRowHeight = scoreCardHeight() / CANVAS_ROWS 
-    let nth:number = Math.floor(yy / (initialRowHeight))
-    const row:IScoreCardRow = yatzyTable.value.scoreCardRows[nth-4]
+    let initialRowHeight = scoreCardHeight() / CANVAS_ROWS
+    let nth: number = Math.floor(yy / (initialRowHeight))
+    const row: IScoreCardRow = yatzyTable.value.scoreCardRows[nth - 4]
     hightlightedRow = row
 }
 const getDiceOnCursor = (dice: IDice, cursorPoint: IVector2) => {
@@ -452,6 +490,9 @@ const isPointOnSection = (point: IVector2, section: ISection) => {
 }
 
 const unsubscribe = store.subscribe((mutation, state) => {
+    if(mutation.type === "changeTurn"){  
+       console.log("changePlayer mutation")
+    }
     if (mutation.type === "rematch") {
         console.log("rematch sub")
     }
@@ -461,11 +502,24 @@ const unsubscribe = store.subscribe((mutation, state) => {
 })
 
 const unsubscribeAction = store.subscribeAction((action, state) => {
-    tableSnapshot = action.payload
+    if (action.type === "changeTurn") {       
+       // yatzyTable.value.playerInTurn = action.payload.nextTurnPlayer
+        return
+    }
+    gameSnapshot = action.payload
+    console.log("GAMESNAPSHOT:"+JSON.stringify(action.payload))
     const createdAction: IYatzyAction = createAction(action)
-    actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, createdAction)
+    actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, createdAction)   
+    createChangeTurnActionIfRequired(action.payload.table)
 })
 
+const createChangeTurnActionIfRequired = (table) =>{
+     if (table.playerInTurn.name !== yatzyTable.value.playerInTurn.name) { 
+        console.log("createChangeTurnActionIfRequired !!")
+        const action = {actionName: "changeTurn", nextTurnPlayer:table.playerInTurn}
+        actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)
+    }
+}
 const createAction = (action): IYatzyAction => {
     if (action.type === "yatzyRollDices") {
         return {
@@ -476,11 +530,14 @@ const createAction = (action): IYatzyAction => {
         expectingServerResponse = false
         console.log("hand selected ")
         return {
-            actionName: "yatzyRollDices", rollsLeftAfterAction: action.payload.table.playerInTurn.rollsLeft,
-            rollResult: action.payload.yatzy.dices, whoPlayed: action.payload.yatzy.whoPlayed, nextTurnPlayer: action.payload.table.playerInTurn.name
+            actionName: "yatzySelectHand", scoreCard: action.payload.yatzy.scoreCard, whoPlayed: action.payload.yatzy.whoPlayed, nextTurnPlayer: action.payload.table.playerInTurn.name
+        }
+    } else if (action.type === "changeTurn") {
+        expectingServerResponse = false
+        return {
+            actionName: "changeTurn", nextTurnPlayer: action.payload.table.playerInTurn
         }
     }
-    return
 }
 const repaintComponent = (component: IYatzyComponent) => {
 
@@ -502,11 +559,6 @@ const repaintComponent = (component: IYatzyComponent) => {
 
     ctx.drawImage(component.image.image, 0, 0, component.image.realDimension.x, component.image.realDimension.y, component.image.canvasDestination.x, component.image.canvasDestination.y, component.image.canvasDimension.x, component.image.canvasDimension.y)
     //	ctx.resetTransform()
-}
-
-const repaintPlayerInTurn = () => {
-    let table: IYatzyPlayer = <IYatzyPlayer>yatzyTable.value.playerInTurn
-
 }
 
 const repaintDices = () => {
@@ -531,6 +583,7 @@ const repaintDices = () => {
 }
 
 const repaintButtons = () => {
+      
     if (isRollButtonVisible.value === true) {
         const button = yatzyTable.value.playButton
         const section: ISection = buttonSection()
@@ -552,8 +605,8 @@ const repaintButtons = () => {
 const rollDicesText = "Click the roll button"
 const selectHandText = "Select a hand"
 const selectOrRollText = "Select a hand, lock dices or roll unlocked dices"
-const nowInTurn = playerInTurn.value.name + " is now in turn"
-const itYourTurn = "It's your turn " + playerInTurn.value.name
+let nowInTurn = playerInTurn.value.name + " is now in turn"
+let itYourTurn = "It's your turn " + playerInTurn.value.name
 const waitingTurnText = "Waiting your turn"
 
 const optionsText = (): string => {
@@ -578,62 +631,62 @@ const repaintInfoTexts = () => {
     isMyTurn.value === true ? ctx.fillStyle = "green" : ctx.fillStyle = "red"
     ctx.fillText(isMyTurn.value === false ? nowInTurn : itYourTurn, x, turnInfoY)
     ctx.fillStyle = "black"
-    ctx.fillText(optionsText() + " (rolls = " + playerInTurn.value.rollsLeft + ")", x, y)
+    ctx.fillText(optionsText() + " (left = " + playerInTurn.value.rollsLeft + ")", x, y)
     ctx.closePath()
 }
 
 
 const diceSection = (): ISection => {
-    
+
     const dSize: IVector2 = diceSize()
     const canvasWidth = yatzyTable.value.canvas.element.width
-    if(verticalLayout && screen.width >= 1000){    
-       
+    if (verticalLayout && screen.width >= 1000) {
+
         const y = yatzyTable.value.canvas.element.height / 10
         const x = yatzyTable.value.canvas.element.width * 0.50
         return { start: { x: x, y: y }, end: { x: x + 6 * dSize.x, y: y + (dSize.y * 2) } }
-    }    
-    if(verticalLayout && window.innerWidth < 1000){
-        
+    }
+    if (verticalLayout && window.innerWidth < 1000) {
+
         const y = yatzyTable.value.canvas.element.height / 10
         const x = yatzyTable.value.canvas.element.width * 0.50
         return { start: { x: x, y: y }, end: { x: x + 6 * dSize.x, y: y + (dSize.y * 2) } }
-    }   
-    
-    return { start: { x: 0, y: yatzyTable.value.canvas.element.height * 0.75}, end: { x: 20 + 6 * dSize.x, y: yatzyTable.value.canvas.element.height * 0.95} }
+    }
+
+    return { start: { x: 0, y: yatzyTable.value.canvas.element.height * 0.75 }, end: { x: 20 + 6 * dSize.x, y: yatzyTable.value.canvas.element.height * 0.95 } }
 }
 
 const buttonSection = (): ISection => {
     //button section comes under dice section
     const dices: ISection = diceSection()
     const dSize = diceSize()
-    if(window.innerWidth >= 500 && verticalLayout) {
+    if (window.innerWidth >= 500 && verticalLayout) {
         const buttonSectionStart: IVector2 = { x: dices.start.x, y: dices.start.y + dSize.y }
         const buttonSectionEnd: IVector2 = { x: dices.end.x, y: dices.end.y + 2.5 * dSize.y }
         return { start: buttonSectionStart, end: buttonSectionEnd }
     }
-    if(window.innerWidth >= 670 && !verticalLayout){
-        const buttonSectionStart: IVector2 = { x: dices.end.x, y: dices.start.y  }
-        const buttonSectionEnd: IVector2 = { x: dices.end.x+ 2*dSize.x, y: dices.start.y }
+    if (window.innerWidth >= 670 && !verticalLayout) {
+        const buttonSectionStart: IVector2 = { x: dices.end.x, y: dices.start.y }
+        const buttonSectionEnd: IVector2 = { x: dices.end.x + 2 * dSize.x, y: dices.start.y }
         return { start: buttonSectionStart, end: buttonSectionEnd }
     }
-    if(!verticalLayout){      
+    if (!verticalLayout) {
         const buttonSectionStart: IVector2 = { x: dices.start.x, y: dices.start.y - 1.5 * dSize.y }
-        const buttonSectionEnd: IVector2 = { x: dices.end.x, y: dices.start.y -dSize.y }
+        const buttonSectionEnd: IVector2 = { x: dices.end.x, y: dices.start.y - dSize.y }
         return { start: buttonSectionStart, end: buttonSectionEnd }
     }
-    
+
 }
 
 const diceSize = (): IVector2 => {
     const canvasWidth = yatzyTable.value.canvas.element.width
-    if(verticalLayout && screen.width >= 1000){       
+    if (verticalLayout && screen.width >= 1000) {
         return { x: 85, y: 85 }
-    }    
-    if(verticalLayout && window.innerWidth < 1000){        
-       return { x: 70, y: 70 }
-    }   
-    return window.innerWidth < 500? { x: 60, y: 60 } :{ x: 80, y: 80 }
+    }
+    if (verticalLayout && window.innerWidth < 1000) {
+        return { x: 70, y: 70 }
+    }
+    return window.innerWidth < 500 ? { x: 60, y: 60 } : { x: 80, y: 80 }
 }
 let animationRun = 0
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis))
@@ -649,7 +702,7 @@ const animateDices = async (tableDices: IDice[], resultDices: IDice[]) => {
         requestAnimationFrame(repaintDices)
     } else {
         randomizeDices(yatzyTable.value.dices)
-        console.log("aniamteDices repaintTable")
+       
         drawAll()
     }
     animationRun++
@@ -689,7 +742,7 @@ const setupDices = async (tableDices: IDice[], resultDices: IDice[], animate: bo
 const setupDice = (dice: IDice, number: number) => {
     dice.number = number
     dice.image.image = <HTMLImageElement>document.getElementById("dice" + number)
-    console.log("diceSelected1:" + playerInTurn.value.rollsLeft)
+    
 }
 
 const setRandomNumber = (dice: IDice) => {
@@ -708,29 +761,20 @@ const getRandomNumber = (): number => {
     return Math.floor(Math.random() * 6 + 1);
 }
 
-const getPlayersHands = (handType: HandType): IHand[] => {
-    let hands: IHand[] = []
-    const obj = yatzyTable.value.players.forEach(player => {
-        const hand: IHand = getPlayerHand(handType, player)
-        if (hand)
-            hands.push(hand)
-    })
-    return hands
-}
-
 const getPlayerHand = (handType: HandType, player: IYatzyPlayer): IHand => {
-    let hand: IHand = player.scoreCard.hands.find(hand => hand.handType === handType)
-    if (hand) {
+    let hand: IHand = player.scoreCard.hands.find(hand => hand.handType.toString() === HandType[handType].toString())
+    if (hand) {      
         return hand
     }
     if (handType === HandType.BONUS) {
-        hand = { handType: undefined, value: player.scoreCard.bonus }
+        hand = { handType: undefined, value: player.scoreCard.bonus, typeNumber: 16 }
     } else if (handType === HandType.SUBTOTAL) {
-        hand = { handType: undefined, value: player.scoreCard.subTotal }
+        hand = { handType: undefined, value: player.scoreCard.subTotal, typeNumber: 17 }
     } else if (handType === HandType.TOTAL) {
-        hand = { handType: undefined, value: player.scoreCard.total }
+        hand = { handType: undefined, value: player.scoreCard.total, typeNumber: 18 }
     }
     return hand
+    return null
 }
 
 const getPlayerBonus = (player: IYatzyPlayer): number => {
@@ -746,8 +790,7 @@ const getPlayerTotal = (player: IYatzyPlayer): number => {
 }
 
 const repaintYatzyTable = () => {
-    const canvas = yatzyTable.value.canvas
-    console.log("repaintYatzyTable: canvas: "+JSON.stringify(canvas) + " image:"+JSON.stringify(yatzyTable.value.image))
+    const canvas = yatzyTable.value.canvas   
     const ctx = canvas.ctx
     ctx.clearRect(0, 0, canvas.element.width, canvas.element.height)
     repaintComponent(yatzyTable.value)
@@ -769,19 +812,19 @@ const scorecardRowStart = 25
 const scoreCardTextEnd = 200
 const gapBetweenScoreCardRowTitleAndLine = 15
 
-const drawScoreCardRow = (row:IScoreCardRow, rowHeight:number) => {
+const drawScoreCardRow = (row: IScoreCardRow, rowHeight: number) => {
     const ctx = yatzyTable.value.canvas.ctx
-  
+
     ctx.fillText(row.title, row.section.start.x, rowHeight * row.nth + gapBetweenScoreCardRowTitleAndLine)
     fillPlayersPointsOnRow(row, rowHeight)
-    ctx.moveTo(row.section.start.x, row.section.start.y )
+    ctx.moveTo(row.section.start.x, row.section.start.y)
     ctx.lineTo(row.section.end.x, row.section.end.y)
     ctx.stroke()
-    if(hightlightedRow?.handType === row.handType){
-      //  let gradient = ctx.createLinearGradient(0, 0, 200, 0)
-     //   gradient.addColorStop(0, "red")
-      //  gradient.addColorStop(1, "white")
-        
+    if (hightlightedRow?.handType === row.handType) {
+        //  let gradient = ctx.createLinearGradient(0, 0, 200, 0)
+        //   gradient.addColorStop(0, "red")
+        //  gradient.addColorStop(1, "white")
+
         ctx.strokeStyle = "#FF0000"
         ctx.lineWidth = 6
         ctx.strokeRect(row.section.start.x, rowHeight * row.nth, scoreCardSection().end.x, row.height)
@@ -789,33 +832,30 @@ const drawScoreCardRow = (row:IScoreCardRow, rowHeight:number) => {
     ctx.lineWidth = 1
     ctx.strokeStyle = "#000000"
 }
-const fillPlayersPointsOnRow = (row:IScoreCardRow, rowHeight:number)  => {
-     for (let i = 0; i < yatzyTable.value.players.length; i++) {
+const fillPlayersPointsOnRow = (row: IScoreCardRow, rowHeight: number) => {
+    for (let i = 0; i < yatzyTable.value.players.length; i++) {       
         const hand: IHand = getPlayerHand(row.handType, yatzyTable.value.players[i])
-        const startPoint: IVector2 = { x: scoreCardTextEnd + 50 + magic * i, y: rowHeight * 5 }
+        const startPoint: IVector2 = { x: scoreCardTextEnd + 50 + magic * i, y: rowHeight * (row.nth + 1) -5 }
         fillPlayerScore(hand, startPoint)
     }
 }
 
 const createScoreCardRow = (title: string, nthRow: number, handType: HandType, height: number): IScoreCardRow => {
     let sc: ISection = scoreCardSection()
-  //  sc.start.y = sc.start.y * nthRow +6
-   // sc.end.y = sc.end.y * nthRow +6
-    const rowSection: ISection = { start: { x: scorecardRowStart, y: height* nthRow}, end: { x: sc.end.x, y: height* nthRow } }
+    //  sc.start.y = sc.start.y * nthRow +6
+    // sc.end.y = sc.end.y * nthRow +6
+    const rowSection: ISection = { start: { x: scorecardRowStart, y: height * nthRow }, end: { x: sc.end.x, y: height * nthRow } }
     return { section: rowSection, title: title, nth: nthRow, handType: handType, height: height }
 }
-
-
 
 const repaintScoreCard = () => {
     const canvas = yatzyTable.value.canvas
     const cardSection = scoreCardSection()
-    let rowHeight = scoreCardHeight() / CANVAS_ROWS
-    console.log("rowHeight:"+rowHeight)
+    let rowHeight = scoreCardHeight() / CANVAS_ROWS    
     const width = canvas.element.width
     const ctx = canvas.ctx
     ctx.font = "bolder " + FONT_SIZE.LARGEST + " Arial"
- 
+
     ctx.beginPath()
     ctx.fillText("Scorecards", 150, 35)
     ctx.font = "bold " + FONT_SIZE.DEFAULT + " Arial"
@@ -823,8 +863,8 @@ const repaintScoreCard = () => {
         rowHeight = canvas.element.height * 0.5 / CANVAS_ROWS
         ctx.font = FONT_SIZE.DEFAULT + " Arial"
     }
-   // checkRowBackgroundColor(rowHeight)
-    yatzyTable.value.scoreCardRows.forEach( row => {
+    // checkRowBackgroundColor(rowHeight)
+    yatzyTable.value.scoreCardRows.forEach(row => {
         drawScoreCardRow(row, rowHeight)
     })
     //Vertical lines

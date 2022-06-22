@@ -405,7 +405,7 @@ export default defineComponent({
                     case "YATZY_ROLL_DICES":                       	
 						this.$store.dispatch("yatzyRollDices", data)
 						break
-                    case "YATZY_ROLL_DICES":                       	
+                    case "YATZY_SELECT_HAND":                       	
 						this.$store.dispatch("yatzySelectHand", data)
 						break
 					case "LEAVE_TABLE":						

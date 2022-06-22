@@ -3,5 +3,6 @@ module tauhka.yatzy {
 	requires java.logging;
 	requires transitive tauhka.core;
 	requires jakarta.json.bind;
+	requires transitive jakarta.json;
 }
 

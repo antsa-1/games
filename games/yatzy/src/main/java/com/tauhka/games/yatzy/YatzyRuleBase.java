@@ -93,8 +93,6 @@ public class YatzyRuleBase {
 	}
 
 	public ScoreCard selectHand(YatzyTable table, User user, Integer handType) {
-		// TODO validations
-		
 		Hand hand = new Hand(HandType.getHandType(handType), table.getDices());
 		ScoreCard scoreCard = table.getPlayerInTurn().getScoreCard();
 		scoreCard.addHand(hand);

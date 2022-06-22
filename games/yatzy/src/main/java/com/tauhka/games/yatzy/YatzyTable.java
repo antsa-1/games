@@ -22,7 +22,9 @@ import jakarta.json.bind.annotation.JsonbTransient;
 
 public class YatzyTable extends Table {
 	private static final long serialVersionUID = 1L;
+	@JsonbTransient
 	private Timer timer;
+	@JsonbTransient
 	private YatzyRuleBase yatzyRuleBase;
 	@JsonbProperty("players")
 	private List<YatzyPlayer> players;
@@ -74,7 +76,9 @@ public class YatzyTable extends Table {
 		if (getPlayerInTurn().getRollsLeft() == 3) {
 			throw new IllegalArgumentException("Player has not rolled dices" + user);
 		}
-		return yatzyRuleBase.selectHand(this, user, hand);
+		ScoreCard sc = yatzyRuleBase.selectHand(this, user, hand);
+		changePlayerInTurn();
+		return sc;
 	}
 
 	public List<YatzyPlayer> getPlayers() {
@@ -101,6 +105,11 @@ public class YatzyTable extends Table {
 		for (User u : this.players) {
 			u.setTable(null);
 		}
+	}
+
+	@Override
+	public boolean isPlayer(User user) {
+		return players.indexOf(user) != -1;
 	}
 
 	@Override
@@ -181,15 +190,22 @@ public class YatzyTable extends Table {
 		if (index == players.size() - 1) {
 			playerInTurn = players.get(0);
 		} else {
-			playerInTurn = players.get(index++);
+			index++;
+			playerInTurn = players.get(index);
 		}
+		YatzyPlayer y = (YatzyPlayer) playerInTurn;
+		y.setRollsLeft(3);
 	}
 
 	private void determineNextPlayerInTurn(int removedIndex) {
+		if (players.size() == 0) {
+			playerInTurn = null;
+			return;
+		}
 		if (removedIndex == players.size() - 1) {
 			playerInTurn = players.get(0);
 		} else {
-			playerInTurn = players.get(removedIndex++);
+			playerInTurn = players.get(removedIndex);
 		}
 
 	}

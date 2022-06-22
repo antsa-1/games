@@ -1,19 +1,24 @@
 package com.tauhka.games.yatzy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 /**
  * @author antsa-1 from GitHub 12 May 2022
  **/
 
-public class Hand {
-	@JsonbProperty("dices")
+public class Hand implements Serializable {
+	private static final long serialVersionUID = 1L;
+	@JsonbTransient
 	private List<Dice> dices;
-	@JsonbProperty("dices")
+	@JsonbProperty("handType")
 	private HandType handType;
+	@JsonbProperty("typeNumber")
+	private Integer typeNumber;
 	@JsonbProperty("value")
 	private Integer value;
 
@@ -41,8 +46,20 @@ public class Hand {
 		this.handType = handType;
 	}
 
+	public void setHandType(HandType handType) {
+		this.handType = handType;
+	}
+
 	public Integer getValue() {
 		return value;
+	}
+
+	public Integer getTypeNumber() {
+		return typeNumber;
+	}
+
+	public void setTypeNumber(Integer typeNumber) {
+		this.typeNumber = typeNumber;
 	}
 
 	public int calculateSubTotalPoints() {
