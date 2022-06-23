@@ -20,12 +20,9 @@ export interface IYatzyActionQueue {
 }
 
 export interface IYatzyAction {
-    actionName: string,
-    rollsLeftAfterAction?: number,
-    rollResult?: IDice[],
-    whoPlayed?: string,
-    scoreCard?: IScoreCard, //Scorecard of player who selected the hand
-    nextTurnPlayer: IPlayer,
+    type: string,
+    payload: any,
+
 }
 
 export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
