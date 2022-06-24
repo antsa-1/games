@@ -171,7 +171,7 @@ export default defineComponent({
 		},
 	computed: {
 			turnQueueLength(){				
-				return this.turnQueue.turns.length
+				return this.turnQueue.actions.length
 			},
 			mouseEnabled(){				
 				const playerInTurn = this.$store.getters.playerInTurn
@@ -222,7 +222,7 @@ export default defineComponent({
 			return retVal
 		},
 		consumeTurns(){
-			if(this.turnQueue.turns.length === 0 ){			
+			if(this.turnQueue.actions.length === 0 ){			
 				const enabled = this.isMyTurnInStore() ? true: false
 				this.poolTable.mouseEnabled = enabled
 				console.log("TurnQueue is empty, mouseEnabled "+this.poolTable.mouseEnabled)
@@ -233,7 +233,7 @@ export default defineComponent({
 				return
 			}
 			this.turnQueue.blocked = true
-			const turn:ITurn = this.turnQueue.turns.splice(0, 1)[0]			
+			const turn:ITurn = this.turnQueue.actions.splice(0, 1)[0]			
 			console.log("Starting to consume turn "+JSON.stringify(turn))
 			if(turn.shootBall){
 				console.log("shootball")	
@@ -322,38 +322,38 @@ export default defineComponent({
 		},
 		createAskHandBallPositionTurn(action):ITurn{			
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askHandBallPosition:true, askPocketSelection:false, setSelectedPocket: null, setHandBall:false, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}
-			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-			console.log("produced: createAskHandBallPositionTurn"+this.turnQueue.turns.length)
+			this.turnQueue.actions.splice(this.turnQueue.actions.length, 0, turn)
+			console.log("produced: createAskHandBallPositionTurn"+this.turnQueue.actions.length)
 			return turn
 		},
 		createAskPocketSelectionTurn(action):ITurn{			
 			let selectedPocket = action.payload.pool.selectedPocket
 			let nextTurnPlayer:IPlayer = action.payload.table.playerInTurn
 			let turn:ITurn = {changePlayer:false, turnResult:action.payload.pool.turnResult, askPocketSelection:true, setSelectedPocket: null, setHandBall:null,nextTurnPlayer:nextTurnPlayer, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}			
-			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-			console.log("produced: createAskPocketSelectionTurn"+this.turnQueue.turns.length)
+			this.turnQueue.actions.splice(this.turnQueue.actions.length, 0, turn)
+			console.log("produced: createAskPocketSelectionTurn"+this.turnQueue.actions.length)
 			return turn
 		},
 		createSelectPocketTurn(action):ITurn{		
 			let selectedPocket = action.payload.pool.selectedPocket
 			let turn:ITurn = {turnResult:action.payload.pool.turnResult, askPocketSelection:false, setSelectedPocket: selectedPocket, setHandBall:null, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}			
-			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-			console.log("produced: createSelectPocketTurn"+this.turnQueue.turns.length)
+			this.turnQueue.actions.splice(this.turnQueue.actions.length, 0, turn)
+			console.log("produced: createSelectPocketTurn"+this.turnQueue.actions.length)
 			return turn
 		},
 		createLastTurn(action):ITurn{
 			const turnResult = action.payload.pool.turnResult
 			const winner = action.payload.pool.winner.name
 			let turn:ITurn = { askPocketSelection:false, setSelectedPocket: null, setHandBall:null, lastTurn:true,winner:winner, winReason:turnResult,whoPlayed:action.payload.pool.whoPlayed}			
-			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)		
-			console.log("produced: createLastTurn"+this.turnQueue.turns.length)
+			this.turnQueue.actions.splice(this.turnQueue.actions.length, 0, turn)		
+			console.log("produced: createLastTurn"+this.turnQueue.actions.length)
 			return turn
 		},
 		createChangePlayerTurn(action):ITurn{
 			let player:IPlayer = action.payload.table.playerInTurn
 			let turn:ITurn = {changePlayer:true, nextTurnPlayer:player, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}			
-			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-			console.log("produced: createChangePlayerTurn"+this.turnQueue.turns.length)
+			this.turnQueue.actions.splice(this.turnQueue.actions.length, 0, turn)
+			console.log("produced: createChangePlayerTurn"+this.turnQueue.actions.length)
 			return turn
 		},
 		createShootBallTurn(action):ITurn{
@@ -361,8 +361,8 @@ export default defineComponent({
 			cue.force = action.payload.pool.cue.force
 			cue.angle = action.payload.pool.cue.angle
 			let turn:ITurn = {shootBall:true, cue:cue, turnResult:action.payload.pool.turnResult, lastTurn: false, whoPlayed:action.payload.pool.whoPlayed}			
-			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-			console.log("produced: createShootBallTurn"+this.turnQueue.turns.length)
+			this.turnQueue.actions.splice(this.turnQueue.actions.length, 0, turn)
+			console.log("produced: createShootBallTurn"+this.turnQueue.actions.length)
 			return turn	
 		},
 		createPoolSetHandBallTurn(action):ITurn{
@@ -374,8 +374,8 @@ export default defineComponent({
 			cueTemp.force = 0
 			cueTemp.position = cueBallTemp.position		
 			let turn:ITurn = {cue:cueTemp,cueBall:cueBallTemp,turnResult:action.payload.pool.turnResult,setHandBall:true,nextTurnPlayer:action.payload.table.playerInTurn, lastTurn: false,whoPlayed:action.payload.pool.whoPlayed}
-			this.turnQueue.turns.splice(this.turnQueue.turns.length, 0, turn)
-			console.log("produced: createPoolSetHandBallTurn"+this.turnQueue.turns.length)
+			this.turnQueue.actions.splice(this.turnQueue.actions.length, 0, turn)
+			console.log("produced: createPoolSetHandBallTurn"+this.turnQueue.actions.length)
 			return turn			
 		},
 		handleGameEnd(turn:ITurn){
@@ -664,7 +664,7 @@ export default defineComponent({
 			}			
 		},		
 		clearTurnQueue(){
-			this.turnQueue.turns.splice(0, this.turnQueue.turns.length)
+			this.turnQueue.actions.splice(0, this.turnQueue.actions.length)
 		},
 		createTableFromSnapShot(){
 		//	console.log("create table from snapshot")
