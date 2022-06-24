@@ -203,7 +203,7 @@ const queueLength = computed<number>(() => actionQueue.value.actions.length)
 const playerInTurn = computed<IYatzyPlayer>(() => <IYatzyPlayer>yatzyTable.value.playerInTurn)
 const isAllowedToSelectDice = computed<boolean>(() => playerInTurn.value.rollsLeft > 0 && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
 const isAllowedToSelectHand = computed<boolean>(() => isMyTurn.value === true && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
-const isMyTurn = computed<boolean>(() => yatzyTable.value.playerInTurn.name === userName.value)
+const isMyTurn = computed<boolean>(() => yatzyTable.value?.playerInTurn?.name === userName.value)
 const isRollButtonVisible = computed<boolean>(() => isMyTurn.value && playerInTurn.value.rollsLeft > 0 && yatzyTable.value.canvas?.animating === false && isAllDicesSelected.value === false)
 const isAllDicesSelected = computed<boolean>(() => yatzyTable.value.dices.filter(dice => dice.selected).length === 5)
 const isMouseEnabled = computed<boolean>(() =>
@@ -238,7 +238,7 @@ const consumeActions = () => {
         updateScoreCard(action.payload)
         repaintScoreCard()
         if(action.payload.yatzy.gameOver){
-            handleGameEnd(action.payload)
+            handleGameEnd(action)
         }else{
             unblockQueue()
         }        
@@ -259,7 +259,10 @@ const handleGameEnd = (action:any) => {
 	actionQueue.value.blocked = true
 	yatzyTable.value.canvas.enabled = false
 	const message:IChatMessage = {from:"System",text: "Game ended"}					
-        store.dispatch("chat", message)
+    store.dispatch("chat", message)
+    //yatzyTable.value.canvas.ctx.globalAlpha = 0.99
+	//yatzyTable.value.canvas.ctx.fillStyle = 'gray'
+    drawAll()
 	
 }
 const updateScoreCard = (payload:any) => {
@@ -448,6 +451,9 @@ const createTableFromSnapShot = () => {
     })
     actionQueue.value.actions = []
     const action = {payload: gameSnapshot}
+    if(gameSnapshot.yatzy.gameOver){
+        return handleGameEnd(action)
+    }
     createChangeTurnActionIfRequired(action)
 }
 const onVisibilityChange = () => { 
@@ -545,7 +551,7 @@ const unsubscribe = store.subscribe((mutation, state) => {
 })
 
 const unsubscribeAction = store.subscribeAction((action, state) => {
-    if (action.type === "changeTurn") {
+    if (action.type === "changeTurn" || action.type === "chat") {
        // yatzyTable.value.playerInTurn = action.payload.nextTurnPlayer
         return
     }
@@ -555,7 +561,10 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
 })
 
 const createChangeTurnActionIfRequired = (action) => {
-     if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name) {
+    if(action.payload.yatzy.gameOver){
+        return
+    }
+    if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name) {
         let changeTurnAction = { type:"changeTurn", payload:action.payload }
         actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, changeTurnAction)
     }
@@ -586,7 +595,7 @@ const repaintDices = () => {
         if (dice.selected) {
             //position down size of one dice
             dice.position = { x: section.start.x + i * size.x + 60, y: section.start.y + size.y }
-        } else if (playerInTurn.value.rollsLeft === 0 && dice.selected === false) {
+        } else if (playerInTurn?.value?.rollsLeft === 0 && dice.selected === false) {
             dice.position = { x: section.start.x + i * size.x + 60, y: section.start.y + (dice.position.y - section.start.y) }
         } else {
             //basic position
@@ -644,7 +653,12 @@ const repaintInfoTexts = () => {
     const y = diceSection().start.y - 10
     const ctx = yatzyTable.value.canvas.ctx
     ctx.beginPath()
-    ctx.font = "18px bolder Arial";
+    ctx.font = "18px bolder Arial"
+    if(gameSnapshot?.yatzy?.gameOver){
+        ctx.fillText("GAME OVER", x, turnInfoY)
+        ctx.closePath()
+        return
+    }
     isMyTurn.value === true ? ctx.fillStyle = "green" : ctx.fillStyle = "red"
     ctx.fillText(isMyTurn.value === false ? "In turn "+playerInTurn.value.name : itYourTurn, x, turnInfoY)
     ctx.fillStyle = "black"

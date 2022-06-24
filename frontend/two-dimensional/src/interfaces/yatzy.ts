@@ -13,6 +13,7 @@ export interface IYatzyMessage {
     dices: IDice[],
     whoPlayed: string,
     lastPlayedScoreCard: IScoreCard,
+    gameOver: boolean
 }
 
 export interface IYatzyActionQueue {
