@@ -16,7 +16,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { loginMixin } from "../mixins/mixins";
-import { IChat } from "../interfaces/interfaces";
+
+import { IChat } from "../interfaces/commontypes";
 export default defineComponent({
 	name: "Chat",
 	mixins: [loginMixin],
@@ -24,7 +25,6 @@ export default defineComponent({
 	data():IChat {
 		return {			
 			messages:null,
-			users:null,
 			message:{text:""},
 		}
 	},
