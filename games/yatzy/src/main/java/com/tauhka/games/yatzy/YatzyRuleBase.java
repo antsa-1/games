@@ -27,6 +27,7 @@ public class YatzyRuleBase {
 			dice.roll();
 			yatzyTable.getDices().add(dice);
 		}
+		yatzyTable.startTimer();
 	}
 
 	public List<Dice> rollDices(YatzyTable table, List<Dice> dicesToBeRolled, User user) {

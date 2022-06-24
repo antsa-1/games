@@ -73,6 +73,7 @@ public abstract class Table implements Serializable {
 		// Empty constr. for deserializing
 	}
 
+	
 	public Table(GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		this.tableId = UUID.randomUUID();
 		this.gameMode = gameMode;
@@ -420,6 +421,11 @@ public abstract class Table implements Serializable {
 
 	public Instant getStartTime() {
 		return startTime;
+	}
+
+	public void onTimeout() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

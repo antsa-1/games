@@ -820,12 +820,14 @@ const repaintYatzyTable = () => {
 }
 
 const magic: number = 120
-const fillPlayerScore = (hand: IHand, startPoint: IVector2) => {
+const fillPlayerScore = (player:IYatzyPlayer, hand: IHand, startPoint: IVector2) => {
+    const ctx = yatzyTable.value.canvas.ctx
     if (hand && hand.value > -1) {
         let handValue = hand.value > -1 ? hand.value.toString() : " - " 
-        const ctx = yatzyTable.value.canvas.ctx
+        ctx.fillStyle = player.disabled? "gray" : "black"
         ctx.fillText(handValue, startPoint.x, startPoint.y)
     }
+    ctx.fillStyle = "black"
 }
 const scorecardRowStart = 25
 const scoreCardTextEnd = 200
@@ -852,7 +854,7 @@ const fillPlayersPointsOnRow = (row: IScoreCardRow, rowHeight: number) => {
     for (let i = 0; i < yatzyTable.value.players.length; i++) {       
         const hand: IHand = getPlayerHand(row.handType, yatzyTable.value.players[i])
         const startPoint: IVector2 = { x: scoreCardTextEnd + 50 + magic * i, y: rowHeight * (row.nth + 1) -5 }
-        fillPlayerScore(hand, startPoint)
+        fillPlayerScore(yatzyTable.value.players[i], hand, startPoint)
     }
 }
 

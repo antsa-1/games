@@ -46,7 +46,8 @@ export interface ISection {
 
 export interface IYatzyPlayer extends IPlayer {
     rollsLeft: number,
-    scoreCard: IScoreCard
+    scoreCard: IScoreCard,
+    disabled: boolean
 }
 
 export interface IYatzyComponent {

@@ -58,7 +58,7 @@ public class YatzyTableHandler extends CommonHandler {
 			} else {
 				playedTurnMessage.setGameOver(table.isGameOver());
 			}
-			//playedTurnMessage.setGameOver(table.isGameOver());
+			playedTurnMessage.setGameOver(true);
 			playedTurnMessage.setScoreCard(sc);
 			playedTurnMessage.setWhoPlayed(endpoint.getUser().getName());
 			updateMessage.setTitle(MessageTitle.YATZY_SELECT_HAND);

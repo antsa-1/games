@@ -14,11 +14,12 @@ import jakarta.json.bind.annotation.JsonbProperty;
 public class YatzyPlayer extends User implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(YatzyPlayer.class.getName());
-	private static final int ALL_DICES_COUNT = 5;
 	@JsonbProperty("scoreCard")
 	private ScoreCard scoreCard;
 	@JsonbProperty("rollsLeft")
 	private int rollsLeft = 3;
+	@JsonbProperty("disabled")
+	private boolean disabled;
 
 	public YatzyPlayer() {
 		scoreCard = new ScoreCard();
@@ -34,6 +35,14 @@ public class YatzyPlayer extends User implements Serializable {
 
 	public int getRollsLeft() {
 		return rollsLeft;
+	}
+
+	public boolean isDisabled() {
+		return disabled;
+	}
+
+	public void setDisabled(boolean disabled) {
+		this.disabled = disabled;
 	}
 
 	public void setRollsLeft(int rollsLeft) {

@@ -4,11 +4,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.GameMode;
-import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
@@ -105,6 +105,25 @@ public class YatzyTable extends Table {
 			LOGGER.info("YatzyTable handSelection but gameOver " + this + " ** " + user);
 			throw new IllegalArgumentException("Game has ended");
 		}
+
+	}
+
+	/**
+	 * Some considerations regarding timeout: <br>
+	 * Should the player not to be able to play anymore after timeout? <br>
+	 * Should the player be set to "pause-mode" after timeout and could continue after coming back and meanwhile computer plays the turns.<br>
+	 * What would happend to ratings if player could come back to play if computer has played some turns and "paused player wins"<br>
+	 * In case of disconnection, should the player be able to come back to play??<br>
+	 * If pause mode -> UI needs some re-work <br>
+	 * Removing a player from players-list should not change the UI side. There can be total 2-4 players. <br>
+	 * So let's start with the simplest one..
+	 */
+	public void onTimeout() {
+		System.err.println("TIMEOUTED");
+		timer.cancel();
+		getPlayerInTurn().setDisabled(true);
+		playerInTurn = findNextEligiblePlayer();
+		System.out.println("changed playerInTurn:" + playerInTurn.getName());
 	}
 
 	public List<YatzyPlayer> getPlayers() {
@@ -188,15 +207,17 @@ public class YatzyTable extends Table {
 
 	@Override
 	public boolean removePlayerIfExist(User user) {
-		User removedPlayer = null;
+		YatzyPlayer removedPlayer = null;
+		int index = players.indexOf(user);
 		if (playerA != null && playerA.equals(user)) {
 			detachPlayer(playerA);
-			removedPlayer = playerA;
-			playerA = null;
+//			removedPlayer = playerA;
+			// playerA = null;
 		}
-		int index = players.indexOf(user);
 		if (index != -1) {
-			removedPlayer = players.remove(index);
+			// removedPlayer = players.remove(index);
+			removedPlayer = players.get(index);
+			removedPlayer.setDisabled(true);
 			detachPlayer(removedPlayer);
 		}
 		if (removedPlayer == null) {
@@ -204,38 +225,44 @@ public class YatzyTable extends Table {
 			return false;
 		}
 		if (playerInTurn.equals(removedPlayer)) {
-			playerInTurn = null;
-			determineNextPlayerInTurn(index);
+			playerInTurn = findNextEligiblePlayer();
 		}
 		return true;
 	}
 
 	@Override
 	public void changePlayerInTurn() {
-		int index = players.indexOf(playerInTurn);
-		if (index == players.size() - 1) {
-			playerInTurn = players.get(0);
-		} else {
-			index++;
-			playerInTurn = players.get(index);
-		}
-		YatzyPlayer y = (YatzyPlayer) playerInTurn;
+		YatzyPlayer y = findNextEligiblePlayer();
 		y.setRollsLeft(3);
 	}
 
-	private void determineNextPlayerInTurn(int removedIndex) {
-		if (players.size() == 0) {
-			playerInTurn = null;
-			return;
-		}
-		if (removedIndex == players.size() - 1) {
-			playerInTurn = players.get(0);
-		} else {
-			playerInTurn = players.get(removedIndex);
-		}
-
+	public void startTimer() {
+		this.timer = new Timer();
+		TimerTask task = new ReduceTimeTask(this);
+		timer.schedule(task, 1000, 1000);
 	}
 
+	private YatzyPlayer findNextEligiblePlayer() {
+		int currentPlayerIndex = players.indexOf(playerInTurn);
+		int breakoutCondition = 0;
+		while (breakoutCondition < 4) {
+			currentPlayerIndex++;
+			if (currentPlayerIndex == players.size()) {
+				currentPlayerIndex = 0;
+			}
+			YatzyPlayer y = players.get(currentPlayerIndex);
+			if (!y.isDisabled()) {
+				return y;
+			}
+			breakoutCondition++;
+		}
+		throw new RuntimeException("next player could not be found " + players.size());
+	}
+
+	/* private void determineNextPlayerInTurn(int removedIndex) { if (players.size() == 0) { playerInTurn = null; return; } if (removedIndex == players.size() - 1) { playerInTurn = players.get(0); } else { playerInTurn =
+	 * players.get(removedIndex); }
+	 * 
+	 * } */
 	@Override
 	public YatzyPlayer getPlayerInTurn() {
 		return (YatzyPlayer) playerInTurn;
