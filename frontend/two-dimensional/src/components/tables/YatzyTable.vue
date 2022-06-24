@@ -22,9 +22,8 @@
     </div>
     <div class="row">
 
-        <div class="col-xs-12 col-sm-4">
-            <span v-if="yatzyTable" class="text-success">Playing turn </span>
-            <span v-else-if="yatzyTable.playerInTurn?.name === userName" class="text-success"> It's your turn
+        <div class="col-xs-12 col-sm-4">           
+            <span v-if="yatzyTable.playerInTurn?.name === userName" class="text-success"> It's your turn
                 {{ userName }} > time left:{{ yatzyTable.secondsLeft }} </span>
             <span v-else-if="yatzyTable?.playerInTurn === null" class="text-success"> Game ended </span>
             <div v-else class="text-danger"> In turn: {{ yatzyTable.playerInTurn?.name }}</div>
@@ -33,16 +32,17 @@
     <div>
         <canvas id="canvas" width="1200" height="600" style="border:1px solid"></canvas>
     </div>
+   <!-- <chat :id="yatzyTable.tableId"> </chat>  -->
 </template>
 
 <script setup lang="ts">
 
 import { IPlayer, IUser } from '@/interfaces/interfaces';
-import { IYatzyComponent, IYatzyTable } from '@/interfaces/yatzy';
+import { IScoreCard, IYatzyComponent, IYatzyTable } from '@/interfaces/yatzy';
 import { ref, computed, onMounted, onBeforeMount, onUnmounted, watch, ComputedRef, } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { IGameOptions, Image, IVector2, IGameCanvas, FONT_SIZE, FONT, IAction } from "../../interfaces/commontypes"
+import { IGameOptions, Image, IVector2, IGameCanvas, FONT_SIZE, FONT, IChatMessage } from "../../interfaces/commontypes"
 import { IYatzyPlayer, IYatzyMessage, IDice, ISection, IYatzySnapshot, IYatzyAction, IYatzyActionQueue, HandType, IHand, IScoreCardRow } from "../../interfaces/yatzy"
 import Chat from "../Chat.vue"
 const CANVAS_ROWS = 22
@@ -200,7 +200,7 @@ const actionQueue = ref<IYatzyActionQueue>({ actions: [], blocked: false })
 const userName = computed<string>(() => store.getters.user?.name)
 const user = computed<IUser>(() => store.getters.user)
 const queueLength = computed<number>(() => actionQueue.value.actions.length)
-let playerInTurn = computed<IYatzyPlayer>(() => <IYatzyPlayer>yatzyTable.value.playerInTurn)
+const playerInTurn = computed<IYatzyPlayer>(() => <IYatzyPlayer>yatzyTable.value.playerInTurn)
 const isAllowedToSelectDice = computed<boolean>(() => playerInTurn.value.rollsLeft > 0 && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
 const isAllowedToSelectHand = computed<boolean>(() => isMyTurn.value === true && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
 const isMyTurn = computed<boolean>(() => yatzyTable.value.playerInTurn.name === userName.value)
@@ -235,9 +235,13 @@ const consumeActions = () => {
             console.log("animations done")
         })
     } else if (action.type === "yatzySelectHand") {
-        updateScoreCardLastAdded(action.payload)
+        updateScoreCard(action.payload)
         repaintScoreCard()
-        unblockQueue()
+        if(action.payload.yatzy.gameOver){
+            handleGameEnd(action.payload)
+        }else{
+            unblockQueue()
+        }        
     } else if (action.type === "changeTurn") {
         store.dispatch("changeTurn", action.payload.table.playerInTurn).then(() => {
             yatzyTable.value.dices.forEach(dice => {
@@ -250,9 +254,18 @@ const consumeActions = () => {
         })
     }
 }
-const updateScoreCardLastAdded = (payload:any) => {
+const handleGameEnd = (action:any) => {
+    yatzyTable.value.playerInTurn = null
+	actionQueue.value.blocked = true
+	yatzyTable.value.canvas.enabled = false
+	const message:IChatMessage = {from:"System",text: "Game ended"}					
+        store.dispatch("chat", message)
+	
+}
+const updateScoreCard = (payload:any) => {
     let yatzyPlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === payload.yatzy.whoPlayed)
     yatzyPlayer.scoreCard.total = payload.yatzy.scoreCard.total
+    yatzyPlayer.scoreCard.bonus = payload.yatzy.scoreCard.bonus
     yatzyPlayer.scoreCard.subTotal = payload.yatzy.scoreCard.subTotal
     yatzyPlayer.scoreCard.lastAdded = payload.yatzy.scoreCard.lastAdded
     yatzyPlayer.scoreCard.hands.push({ handType: payload.yatzy.scoreCard.lastAdded.handType, typeNumber: payload.yatzy.scoreCard.lastAdded.typeNumber, value: payload.yatzy.scoreCard.lastAdded.value })
@@ -422,12 +435,10 @@ const createTableFromSnapShot = () => {
     setupDices(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     //Creates all hands from scratch -> although lastAdded, bonus, subTotal and Total are the only ones with re-calculations requirements
     //Can be used for watcher which need to build all from scratch
-    gameSnapshot.table.players.forEach(snapshotPlayer => {       
-       
+    gameSnapshot.table.players.forEach(snapshotPlayer => {     
         const tablePlayer:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
         const snapshotPlayerHands:IHand [] = snapshotPlayer.scoreCard.hands
         tablePlayer.scoreCard.hands = []
-        
         for (const [key, value] of Object.entries(snapshotPlayerHands)) {          
             tablePlayer.scoreCard.hands.push(value)
         }
@@ -450,13 +461,13 @@ const onVisibilityChange = () => {
 	}
 }
 let highlightedRow: IScoreCardRow = null
+
 const getScoreCardRow = (cursorPoint: IVector2) => {
     const yy = cursorPoint.y - scoreCardSection().start.y
     let initialRowHeight = scoreCardHeight() / CANVAS_ROWS
     let nth: number = Math.floor(yy / (initialRowHeight))
     const row: IScoreCardRow = yatzyTable.value.scoreCardRows[nth - 4] 
-    if(!row || isUnselectableRow(row)){        
-       
+    if(!row || !isHighlightableRow(row)){       
         document.body.style.cursor = "default"
         return
     }  
@@ -469,8 +480,15 @@ const getScoreCardRow = (cursorPoint: IVector2) => {
     })
     index === -1? highlightedRow = row : ""
 }
-const isUnselectableRow = (row:IScoreCardRow) => {
-    return row.handType === HandType.BONUS || row.handType === HandType.SUBTOTAL || row.handType === HandType.TOTAL
+const isHighlightableRow = (row:IScoreCardRow) => {
+    if( row.handType === HandType.BONUS || row.handType === HandType.SUBTOTAL || row.handType === HandType.TOTAL){
+        return false
+    }
+    const scoreCard:IScoreCard = yatzyTable.value.players.find(player => player.name === userName.value).scoreCard
+    const hand:IHand = scoreCard.hands.find(hand => hand.handType.toString() === HandType[row.handType].toString()) 
+    console.log("HandTYPEE:"+JSON.stringify(scoreCard))
+  
+    return hand ? false : true
 }
 
 const getDiceOnCursor = (dice: IDice, cursorPoint: IVector2) => {
@@ -531,7 +549,6 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
        // yatzyTable.value.playerInTurn = action.payload.nextTurnPlayer
         return
     }
-    
     gameSnapshot = action.payload
     actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)    
     createChangeTurnActionIfRequired(action)
@@ -606,7 +623,7 @@ const rollDicesText = "Click the roll button"
 const selectHandText = "Select a hand"
 const selectOrRollText = "Select a hand, lock dices or roll unlocked dices"
 let nowInTurn = playerInTurn.value.name + " is now in turn"
-let itYourTurn = "It's your turn " + playerInTurn.value.name
+let itYourTurn = "It's your turn " + userName.value
 const waitingTurnText = "Waiting your turn"
 
 const optionsText = (): string => {
@@ -629,7 +646,7 @@ const repaintInfoTexts = () => {
     ctx.beginPath()
     ctx.font = "18px bolder Arial";
     isMyTurn.value === true ? ctx.fillStyle = "green" : ctx.fillStyle = "red"
-    ctx.fillText(isMyTurn.value === false ? nowInTurn : itYourTurn, x, turnInfoY)
+    ctx.fillText(isMyTurn.value === false ? "In turn "+playerInTurn.value.name : itYourTurn, x, turnInfoY)
     ctx.fillStyle = "black"
     ctx.fillText(optionsText() + " (left = " + playerInTurn.value.rollsLeft + ")", x, y)
     ctx.closePath()
@@ -777,18 +794,6 @@ const getPlayerHand = (handType: HandType, player: IYatzyPlayer): IHand => {
     return null
 }
 
-const getPlayerBonus = (player: IYatzyPlayer): number => {
-    return player.scoreCard.bonus
-}
-
-const getPlayerSubTotal = (player: IYatzyPlayer): number => {
-    return player.scoreCard.subTotal
-}
-
-const getPlayerTotal = (player: IYatzyPlayer): number => {
-    return player.scoreCard.total
-}
-
 const repaintYatzyTable = () => {
     const canvas = yatzyTable.value.canvas   
     const ctx = canvas.ctx
@@ -802,8 +807,8 @@ const repaintYatzyTable = () => {
 
 const magic: number = 120
 const fillPlayerScore = (hand: IHand, startPoint: IVector2) => {
-    if (hand && hand.value) {
-        const handValue = hand.value ? hand.value.toString() : " - "
+    if (hand && hand.value > -1) {
+        let handValue = hand.value > -1 ? hand.value.toString() : " - " 
         const ctx = yatzyTable.value.canvas.ctx
         ctx.fillText(handValue, startPoint.x, startPoint.y)
     }
@@ -823,7 +828,7 @@ const drawScoreCardRow = (row: IScoreCardRow, rowHeight: number) => {
     if (highlightedRow?.handType === row.handType) {
 
         ctx.strokeStyle = "#FF0000"
-        ctx.lineWidth = 6
+        ctx.lineWidth = 3
         ctx.strokeRect(row.section.start.x, rowHeight * row.nth, scoreCardSection().end.x, row.height)
     }
     ctx.lineWidth = 1

@@ -2,8 +2,8 @@ package com.tauhka.games.messaging;
 
 import java.util.List;
 
+import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.yatzy.Dice;
-import com.tauhka.games.yatzy.Hand;
 import com.tauhka.games.yatzy.ScoreCard;
 
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -22,8 +22,11 @@ public class YatzyMessage {
 	@JsonbProperty("scoreCard")
 	private ScoreCard scoreCard;
 
-	@JsonbProperty("hand")
-	public Hand addedHand;
+	@JsonbProperty("gameOver")
+	public boolean gameOver;
+
+	@JsonbProperty("result")
+	public GameResultType result;
 
 	public List<Dice> getDices() {
 		return dices;
@@ -41,16 +44,16 @@ public class YatzyMessage {
 		this.handVal = handVal;
 	}
 
-	public Hand getAddedHand() {
-		return addedHand;
-	}
-
-	public void setAddedHand(Hand addedHand) {
-		this.addedHand = addedHand;
-	}
-
 	public ScoreCard getScoreCard() {
 		return scoreCard;
+	}
+
+	public boolean isGameOver() {
+		return gameOver;
+	}
+
+	public void setGameOver(boolean gameOver) {
+		this.gameOver = gameOver;
 	}
 
 	public void setScoreCard(ScoreCard scoreCard) {
@@ -63,6 +66,14 @@ public class YatzyMessage {
 
 	public void setWhoPlayed(String whoPlayed) {
 		this.whoPlayed = whoPlayed;
+	}
+
+	public GameResultType getResult() {
+		return result;
+	}
+
+	public void setResult(GameResultType result) {
+		this.result = result;
 	}
 
 }

@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 
 import com.tauhka.games.core.GameMode;
+import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
@@ -22,6 +24,7 @@ import jakarta.json.bind.annotation.JsonbTransient;
 
 public class YatzyTable extends Table {
 	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = Logger.getLogger(YatzyTable.class.getName());
 	@JsonbTransient
 	private Timer timer;
 	@JsonbTransient
@@ -60,8 +63,9 @@ public class YatzyTable extends Table {
 
 	@Override
 	public Object playTurn(User user, Object yatzyTurn) {
-
 		YatzyTurn incomingTurn = (YatzyTurn) yatzyTurn;
+		LOGGER.info("YatzyTable playTurn rollDices:" + this + "  turn:" + yatzyTurn);
+		checkGuards(user);
 		return yatzyRuleBase.playTurn(this, incomingTurn);
 	}
 
@@ -72,13 +76,35 @@ public class YatzyTable extends Table {
 		return yatzyRuleBase.rollDices(this, dices, user);
 	}
 
+	@Override
+	public boolean isGameOver() {
+		if (startTime == null) {
+			return false;
+		}
+		// Players can disconnect/leave table anytime. Last player can play the game to the end.
+		if (this.players.size() < 1) {
+			return true;
+		}
+		int playedAllHands = (int) players.stream().filter(player -> player.getScoreCard().getHands().size() == 15).count();
+		return playedAllHands == this.players.size();
+	}
+
 	public ScoreCard selectHand(User user, Integer hand) {
+		LOGGER.info("YatzyTable playTurn selectHand:" + hand + " table:" + this);
+		checkGuards(user);
 		if (getPlayerInTurn().getRollsLeft() == 3) {
 			throw new IllegalArgumentException("Player has not rolled dices" + user);
 		}
 		ScoreCard sc = yatzyRuleBase.selectHand(this, user, hand);
-		changePlayerInTurn();
+
 		return sc;
+	}
+
+	private void checkGuards(User user) {
+		if (isGameOver()) {
+			LOGGER.info("YatzyTable handSelection but gameOver " + this + " ** " + user);
+			throw new IllegalArgumentException("Game has ended");
+		}
 	}
 
 	public List<YatzyPlayer> getPlayers() {
@@ -224,6 +250,11 @@ public class YatzyTable extends Table {
 	@JsonbProperty(value = "tableType")
 	public TableType getTableType() {
 		return TableType.MULTI;
+	}
+
+	@Override
+	public String toString() {
+		return "YatzyTable [timer=" + timer + ", players=" + players + ", dices=" + dices + "]";
 	}
 
 }

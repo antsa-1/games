@@ -72,4 +72,9 @@ public class Dice {
 		this.number = number;
 	}
 
+	@Override
+	public String toString() {
+		return "Dice [diceId=" + diceId + ", number=" + number + ", selected=" + selected + "]";
+	}
+
 }

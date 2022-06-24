@@ -2,7 +2,7 @@ package com.tauhka.games.core;
 
 public enum GameResultType {
 
-	WIN_BY_PLAY(1), WIN_BY_TIME(2), WIN_BY_RESIGNATION(3), WIN_BY_DISCONNECT(4), DRAW(5), LEFT_ONGOING_GAME(6);
+	WIN_BY_PLAY(1), WIN_BY_TIME(2), WIN_BY_RESIGNATION(3), WIN_BY_DISCONNECT(4), DRAW(5), LEFT_ONGOING_GAME(6), WIN_OTHERS_LEFT(7);
 
 	private int asInt = 0;
 
@@ -25,6 +25,8 @@ public enum GameResultType {
 		} else if (type == WIN_BY_RESIGNATION) {
 			return true;
 		} else if (type == WIN_BY_DISCONNECT) {
+			return true;
+		} else if (type == WIN_OTHERS_LEFT) {
 			return true;
 		}
 		return false;

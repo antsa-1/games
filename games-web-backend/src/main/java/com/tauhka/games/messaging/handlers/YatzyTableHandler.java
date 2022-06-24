@@ -5,6 +5,7 @@ import static com.tauhka.games.core.util.Constants.SYSTEM;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
@@ -51,6 +52,13 @@ public class YatzyTableHandler extends CommonHandler {
 		} else if (incomingMessage.getTitle() == MessageTitle.YATZY_SELECT_HAND) {
 			ScoreCard sc = table.selectHand(endpoint.getUser(), incomingMessage.getYatzyMessage().handVal);
 			playedTurnMessage = new YatzyMessage();
+			boolean gameOver = table.isGameOver();
+			if (!gameOver) {
+				table.changePlayerInTurn();
+			} else {
+				playedTurnMessage.setGameOver(table.isGameOver());
+			}
+			playedTurnMessage.setGameOver(table.isGameOver());
 			playedTurnMessage.setScoreCard(sc);
 			playedTurnMessage.setWhoPlayed(endpoint.getUser().getName());
 			updateMessage.setTitle(MessageTitle.YATZY_SELECT_HAND);
@@ -59,5 +67,10 @@ public class YatzyTableHandler extends CommonHandler {
 		updateMessage.setTable(table);
 		updateMessage.setYatzyMessage(playedTurnMessage);
 		return updateMessage;
+	}
+
+	private void handleGameEndStats(YatzyTable table) {
+		// TODO Auto-generated method stub
+
 	}
 }

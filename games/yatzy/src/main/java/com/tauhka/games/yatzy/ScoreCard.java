@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.json.bind.annotation.JsonbProperty;
-import jakarta.json.bind.annotation.JsonbTypeAdapter;
 
 /**
  * @author antsa-1 from GitHub 14 May 2022
@@ -94,7 +93,10 @@ public class ScoreCard implements Serializable {
 
 	public void addHand(Hand hand) {
 		hand.setTypeNumber(hand.getHandType().getAsInt());
-		hands.put(hand.getHandType(), hand);
+		var key = hands.putIfAbsent(hand.getHandType(), hand);
+		if (key != null) {
+			throw new IllegalArgumentException("HandDuplicate for:" + hand);
+		}
 		total = calculateTotal();
 		subTotal = calculateSubTotal();
 		bonus = calculateBonus();

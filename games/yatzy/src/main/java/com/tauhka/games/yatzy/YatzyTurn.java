@@ -45,4 +45,9 @@ public class YatzyTurn implements Serializable {
 		this.handType = handType;
 	}
 
+	@Override
+	public String toString() {
+		return "YatzyTurn [diceIds=" + diceIds + ", handType=" + handType + ", dices=" + dices + "]";
+	}
+
 }

@@ -11,7 +11,8 @@ export interface IYatzySnapshot {
 
 export interface IYatzyMessage {
     dices: IDice[],
-    whoPlayed: string
+    whoPlayed: string,
+    lastPlayedScoreCard: IScoreCard,
 }
 
 export interface IYatzyActionQueue {
@@ -22,7 +23,6 @@ export interface IYatzyActionQueue {
 export interface IYatzyAction {
     type: string,
     payload: any,
-
 }
 
 export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
