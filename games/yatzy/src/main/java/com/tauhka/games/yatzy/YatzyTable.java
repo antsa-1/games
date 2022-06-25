@@ -1,11 +1,13 @@
 package com.tauhka.games.yatzy;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.GameMode;
@@ -15,8 +17,11 @@ import com.tauhka.games.core.tables.TableType;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.util.Constants;
 
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.websocket.EncodeException;
 
 /**
  * @author antsa-1 from GitHub 12 May 2022
@@ -25,6 +30,8 @@ import jakarta.json.bind.annotation.JsonbTransient;
 public class YatzyTable extends Table {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(YatzyTable.class.getName());
+	// Avoiding refactoring Message.class to Core-project, fixing inheritance.
+	private static final Jsonb jsonb = JsonbBuilder.create(); // All the methods in this class are safe for use by multiple concurrent threads.
 	@JsonbTransient
 	private Timer timer;
 	@JsonbTransient
@@ -33,6 +40,8 @@ public class YatzyTable extends Table {
 	private List<YatzyPlayer> players;
 	@JsonbProperty("dices")
 	private List<Dice> dices;
+	@JsonbProperty("timedOutPlayerName")
+	private String timedOutPlayerName;
 
 	public YatzyTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		super(gameMode, randomizeStarter, registeredOnly, timeControlIndex, playerAmount);
@@ -44,6 +53,7 @@ public class YatzyTable extends Table {
 		this.randomizeStarter = randomizeStarter;
 		YatzyPlayer y = new YatzyPlayer();
 		y.setName(playerA.getName());
+		y.setWebsocketSession(playerA.getWebsocketSession());
 		y.setId(playerA.getId());
 		y.setTable(this);
 		y.setScoreCard(new ScoreCard());
@@ -85,6 +95,10 @@ public class YatzyTable extends Table {
 		if (this.players.size() < 1) {
 			return true;
 		}
+		int disabledCount = (int) this.players.stream().filter(player -> player.isDisabled()).count();
+		if (disabledCount == this.players.size()) {
+			return true;
+		}
 		int playedAllHands = (int) players.stream().filter(player -> player.getScoreCard().getHands().size() == 15).count();
 		return playedAllHands == this.players.size();
 	}
@@ -101,6 +115,9 @@ public class YatzyTable extends Table {
 	}
 
 	private void checkGuards(User user) {
+		if (!getPlayerInTurn().equals(user)) {
+			throw new IllegalArgumentException("Player is not in turn:" + user + " table=" + this);
+		}
 		if (isGameOver()) {
 			LOGGER.info("YatzyTable handSelection but gameOver " + this + " ** " + user);
 			throw new IllegalArgumentException("Game has ended");
@@ -116,14 +133,48 @@ public class YatzyTable extends Table {
 	 * In case of disconnection, should the player be able to come back to play??<br>
 	 * If pause mode -> UI needs some re-work <br>
 	 * Removing a player from players-list should not change the UI side. There can be total 2-4 players. <br>
-	 * So let's start with the simplest one..
+	 * So let\"s start with the simplest one..
 	 */
+
+	// This project does not have dependency to games-web and Table classes are not CDI tables so timeoutEvent cannot be fired from here with current setup.
+	// This class does not know about CommonEndpoint which has Websocket client handling
+	// CommonEndpoint is connect to Message.class, YatzyTable.class does not know about Message..
+	// Testing to send timeoutInfo directly from here to clients. This is the only place (25.6.2022) where direct push-notifications are used.
+	@Override
 	public void onTimeout() {
-		System.err.println("TIMEOUTED");
 		timer.cancel();
-		getPlayerInTurn().setDisabled(true);
-		playerInTurn = findNextEligiblePlayer();
-		System.out.println("changed playerInTurn:" + playerInTurn.getName());
+		YatzyPlayer playerInTurn = getPlayerInTurn();
+		if (playerInTurn != null) {
+			playerInTurn.setDisabled(true);
+			this.timedOutPlayerName = playerInTurn.getName();
+		}
+		if (!isGameOver()) {
+			playerInTurn = setupNextTurn();
+		}
+		for (User user : getUsers()) {
+			if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
+				try {
+					// This is not enough for UI-snapshots ->
+					// user.getWebsocketSession().getBasicRemote().sendText("{\"title\":\"TIMEOUT\", \"table\":\"" + getTableId() + "\",\"timeoutPlayer\":\"" + timeoutPlayer + "\",\"nextTurnPlayer\":\"" + nextPlayer + "\",\"gameOver\":" +
+					// gameOver + "}");
+					String table = jsonb.toJson(this);
+					String yatzy = ",\"yatzy\":{\"gameOver\":" + isGameOver() + "}}";
+					String message = "{\"title\":\"TIMEOUT\", \"table\":" + table + yatzy;
+					user.getWebsocketSession().getBasicRemote().sendText(message);
+				} catch (IOException e) {
+					LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
+				}
+			}
+		}
+		timedOutPlayerName = null;
+	}
+
+	public String getTimedOutPlayerName() {
+		return timedOutPlayerName;
+	}
+
+	public void setTimedOutPlayerName(String timedOutPlayerName) {
+		this.timedOutPlayerName = timedOutPlayerName;
 	}
 
 	public List<YatzyPlayer> getPlayers() {
@@ -185,6 +236,7 @@ public class YatzyTable extends Table {
 		y.setName(user.getName());
 		y.setId(user.getId());
 		y.setScoreCard(new ScoreCard());
+		y.setWebsocketSession(user.getWebsocketSession());
 		this.players.add(y);
 		if (players.size() != playerAmount) {
 			return false;
@@ -225,38 +277,44 @@ public class YatzyTable extends Table {
 			return false;
 		}
 		if (playerInTurn.equals(removedPlayer)) {
-			playerInTurn = findNextEligiblePlayer();
+			playerInTurn = setupNextTurn();
 		}
 		return true;
 	}
 
 	@Override
 	public void changePlayerInTurn() {
-		YatzyPlayer y = findNextEligiblePlayer();
-		y.setRollsLeft(3);
+		playerInTurn = setupNextTurn();
 	}
 
 	public void startTimer() {
+		if (this.timer != null) {
+			this.timer.cancel();
+		}
 		this.timer = new Timer();
 		TimerTask task = new ReduceTimeTask(this);
 		timer.schedule(task, 1000, 1000);
 	}
 
-	private YatzyPlayer findNextEligiblePlayer() {
+	private YatzyPlayer setupNextTurn() {
 		int currentPlayerIndex = players.indexOf(playerInTurn);
 		int breakoutCondition = 0;
 		while (breakoutCondition < 4) {
 			currentPlayerIndex++;
-			if (currentPlayerIndex == players.size()) {
+			if (currentPlayerIndex >= players.size()) {
 				currentPlayerIndex = 0;
 			}
 			YatzyPlayer y = players.get(currentPlayerIndex);
 			if (!y.isDisabled()) {
+				y.setRollsLeft(3);
+				startTimer();
+				playerInTurn = y;
 				return y;
 			}
 			breakoutCondition++;
 		}
-		throw new RuntimeException("next player could not be found " + players.size());
+		gameOver = true;
+		return null;
 	}
 
 	/* private void determineNextPlayerInTurn(int removedIndex) { if (players.size() == 0) { playerInTurn = null; return; } if (removedIndex == players.size() - 1) { playerInTurn = players.get(0); } else { playerInTurn =

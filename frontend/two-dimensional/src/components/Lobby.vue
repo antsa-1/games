@@ -408,6 +408,9 @@ export default defineComponent({
                     case "YATZY_SELECT_HAND":                       	
 						this.$store.dispatch("yatzySelectHand", data)
 						break
+                    case "TIMEOUT":                       	
+						this.$store.dispatch("timeout", data)
+						break
 					case "LEAVE_TABLE":						
 						this.$store.dispatch("leaveTable", data)
                         if(data.who.name === this.userName){

@@ -11,6 +11,7 @@ module tauhka.core {
 
 	requires jakarta.inject;
 	requires jakarta.json;
-	requires jakarta.json.bind;
+	requires transitive jakarta.websocket;
 	requires java.logging;
+	requires jakarta.json.bind;
 }

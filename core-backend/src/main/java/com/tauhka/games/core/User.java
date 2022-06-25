@@ -8,6 +8,7 @@ import com.tauhka.games.core.util.Constants;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.websocket.Session;
 
 public class User { // Combine with Portal User.java?
 	@JsonbProperty("name")
@@ -26,6 +27,8 @@ public class User { // Combine with Portal User.java?
 	private Double initialCalculationsRank = -1d;
 	@JsonbTransient
 	private Table table = null;
+	@JsonbTransient
+	private Session websocketSession;
 
 	public String getName() {
 		return name;
@@ -53,6 +56,14 @@ public class User { // Combine with Portal User.java?
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Session getWebsocketSession() {
+		return websocketSession;
+	}
+
+	public void setWebsocketSession(Session websocketSession) {
+		this.websocketSession = websocketSession;
 	}
 
 	public boolean isGuestPlayer() {

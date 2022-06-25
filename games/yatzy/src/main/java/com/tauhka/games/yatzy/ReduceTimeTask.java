@@ -12,7 +12,7 @@ public class ReduceTimeTask extends TimerTask {
 
 	public ReduceTimeTask(YatzyTable table) {
 		// this.secondsLeft = table.getTimeControlIndex();
-		this.secondsLeft = 10;
+		this.secondsLeft = 20; // TODO use real timecontrol
 		this.table = table;
 	}
 

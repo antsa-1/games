@@ -54,7 +54,7 @@ public class CommonEndpoint {
 	private YatzyTableHandler yatzyTableHandler;
 	@Inject
 	private AIHandler aiHandler;
-	private Session session;
+	// private Session session;
 	private User user;
 
 	@OnOpen
@@ -63,7 +63,7 @@ public class CommonEndpoint {
 		session.setMaxIdleTimeout(1000 * 60 * 20); // millis
 		session.setMaxTextMessageBufferSize(1000);
 		session.setMaxBinaryMessageBufferSize(0);
-		this.session = session;
+		// this.session = session;
 	}
 
 	public void observeGameTimeouts(@Observes TimeoutEvent timeoutEvent) {
@@ -79,6 +79,7 @@ public class CommonEndpoint {
 			if (message.getTitle() == MessageTitle.LOGIN && this.user == null) {
 				gameMessage = userHandler.handleLogin(message, session, this);
 				this.user = gameMessage.getWho();
+				this.user.setWebsocketSession(session);
 				gameMessage.setTo(this.user.getName());
 				gameMessage.setFrom("System");
 				sendPrivateMessage(gameMessage);
@@ -190,10 +191,10 @@ public class CommonEndpoint {
 
 	public void sendPrivateMessage(Message message) {
 		try {
-			if (this.session.isOpen()) {// && this.session.isSecure()) {
-				this.session.getBasicRemote().sendObject(message);
+			if (this.user.getWebsocketSession().isOpen()) {// && this.session.isSecure()) {
+				this.user.getWebsocketSession().getBasicRemote().sendObject(message);
 			} else {
-				this.session.close();
+				this.user.getWebsocketSession().close();
 			}
 		} catch (IOException e) {
 			LOGGER.log(Level.SEVERE, "CommonEndpoint sendPrivateMessage IO-error error", e);
@@ -273,11 +274,7 @@ public class CommonEndpoint {
 	}
 
 	public Session getSession() {
-		return session;
-	}
-
-	public void setSession(Session session) {
-		this.session = session;
+		return user.getWebsocketSession();
 	}
 
 	@OnClose

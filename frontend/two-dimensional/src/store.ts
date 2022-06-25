@@ -271,14 +271,17 @@ export const store = createStore<IStoreState>({
             // PoolTable has subscribed to this action
         },        
         poolGameEnded(context, object){
-            
+            // PoolTable has subscribed to this action
         } ,
         yatzyRollDices(context, object) {
-           
+           //YatzyTable has subscribe to this action
         },
         yatzySelectHand(context, object) {
-           
+           //YatzyTable has subscribe to this action
         },
+        timeout(context, object) {
+           //YatzyTable has subscribe to this action
+        },       
         setUser(context, user: IUser) {
             context.commit('setUser', user)
 
