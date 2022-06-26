@@ -254,8 +254,7 @@ const consumeActions = () => {
         })
        } else if(action.type === "timeout"){
             let yatzyPlayer = <IYatzyPlayer> yatzyTable.value.players.find(player => player.name === action.payload.table.timedOutPlayerName)
-            yatzyPlayer.enabled = false
-            yatzyPlayer.scoreCard.bonus = -10
+            yatzyPlayer.enabled = false         
             if(userName.value === yatzyPlayer.name){
                 yatzyTable.value.canvas.enabled = false
             }

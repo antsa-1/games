@@ -5,6 +5,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
@@ -13,6 +15,8 @@ import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.AI;
+import com.tauhka.games.core.timer.ReduceTimeTask;
+import com.tauhka.games.core.timer.TimeControlIndex;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.util.Constants;
 
@@ -33,7 +37,8 @@ public abstract class Table implements Serializable {
 	protected User playerA;
 	@JsonbProperty("playerB")
 	protected User playerB;
-
+	@JsonbTransient
+	protected Timer timer;
 	@JsonbProperty("playerInTurn")
 	protected User playerInTurn;
 	@JsonbTransient
@@ -42,8 +47,7 @@ public abstract class Table implements Serializable {
 	protected User startingPlayer;
 	@JsonbProperty("playerAmount")
 	protected int playerAmount;
-	@JsonbProperty("timer")
-	protected int timer = 180;
+
 	@JsonbProperty("watchers")
 	protected List<User> watchers = new ArrayList<User>();
 
@@ -53,7 +57,8 @@ public abstract class Table implements Serializable {
 	protected boolean randomizeStarter;
 	@JsonbProperty("timeControlIndex")
 	protected int timeControlIndex;
-
+	@JsonbProperty("secondsLeft")
+	protected int secondsLeft;
 	@JsonbProperty("registeredOnly")
 	protected boolean registeredOnly;
 
@@ -73,7 +78,6 @@ public abstract class Table implements Serializable {
 		// Empty constr. for deserializing
 	}
 
-	
 	public Table(GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		this.tableId = UUID.randomUUID();
 		this.gameMode = gameMode;
@@ -84,6 +88,7 @@ public abstract class Table implements Serializable {
 		this.playerAmount = playerAmount;
 		this.registeredOnly = registeredOnly;
 		this.timeControlIndex = timeControlIndex;
+		secondsLeft = TimeControlIndex.getWithIndex(timeControlIndex).getSeconds();
 	}
 
 	public Table(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
@@ -97,6 +102,7 @@ public abstract class Table implements Serializable {
 		this.playerAmount = playerAmount;
 		this.registeredOnly = registeredOnly;
 		this.timeControlIndex = timeControlIndex;
+		secondsLeft = TimeControlIndex.getWithIndex(timeControlIndex).getSeconds();
 	}
 
 	public abstract GameResult checkWinAndDraw();
@@ -224,6 +230,14 @@ public abstract class Table implements Serializable {
 		return false;
 	}
 
+	public int getSecondsLeft() {
+		return secondsLeft;
+	}
+
+	public void setSecondsLeft(int secondsLeft) {
+		this.secondsLeft = secondsLeft;
+	}
+
 	protected void addPlayersToResult(GameResult result) {
 		// Order does not actually matter
 		result.setPlayerA(this.playerA);
@@ -238,12 +252,14 @@ public abstract class Table implements Serializable {
 		}
 	}
 
-	public int getTimer() {
-		return timer;
-	}
-
-	public void setTimer(int timer) {
-		this.timer = timer;
+	public void startTimer() {
+		if (this.timer != null) {
+			this.timer.cancel();
+		}
+		this.secondsLeft = TimeControlIndex.getWithIndex(timeControlIndex).getSeconds();
+		this.timer = new Timer();
+		TimerTask task = new ReduceTimeTask(this);
+		timer.schedule(task, 1000, 1000);
 	}
 
 	@JsonbTransient
@@ -338,6 +354,14 @@ public abstract class Table implements Serializable {
 		return this.startTime != null;
 	}
 
+	public Timer getTimer() {
+		return timer;
+	}
+
+	public void setTimer(Timer timer) {
+		this.timer = timer;
+	}
+
 	public void changePlayerInTurn() {
 		if (this.playerInTurn.equals(playerA)) {
 			this.playerInTurn = playerB;
@@ -425,7 +449,7 @@ public abstract class Table implements Serializable {
 
 	public void onTimeout() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

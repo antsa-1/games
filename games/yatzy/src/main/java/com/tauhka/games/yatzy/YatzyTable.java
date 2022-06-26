@@ -14,6 +14,7 @@ import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
+import com.tauhka.games.core.timer.ReduceTimeTask;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.util.Constants;
 
@@ -21,7 +22,6 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
-import jakarta.websocket.EncodeException;
 
 /**
  * @author antsa-1 from GitHub 12 May 2022
@@ -30,10 +30,8 @@ import jakarta.websocket.EncodeException;
 public class YatzyTable extends Table {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(YatzyTable.class.getName());
-	// Avoiding refactoring Message.class to Core-project, fixing inheritance.
 	private static final Jsonb jsonb = JsonbBuilder.create(); // All the methods in this class are safe for use by multiple concurrent threads.
-	@JsonbTransient
-	private Timer timer;
+
 	@JsonbTransient
 	private YatzyRuleBase yatzyRuleBase;
 	@JsonbProperty("players")
@@ -42,6 +40,9 @@ public class YatzyTable extends Table {
 	private List<Dice> dices;
 	@JsonbProperty("timedOutPlayerName")
 	private String timedOutPlayerName;
+
+	@JsonbProperty("secondsLeft")
+	private int secondsLeft;
 
 	public YatzyTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		super(gameMode, randomizeStarter, registeredOnly, timeControlIndex, playerAmount);
@@ -125,24 +126,10 @@ public class YatzyTable extends Table {
 
 	}
 
-	/**
-	 * Some considerations regarding timeout: <br>
-	 * Should the player not to be able to play anymore after timeout? <br>
-	 * Should the player be set to "pause-mode" after timeout and could continue after coming back and meanwhile computer plays the turns.<br>
-	 * What would happend to ratings if player could come back to play if computer has played some turns and "paused player wins"<br>
-	 * In case of disconnection, should the player be able to come back to play??<br>
-	 * If pause mode -> UI needs some re-work <br>
-	 * Removing a player from players-list should not change the UI side. There can be total 2-4 players. <br>
-	 * So let\"s start with the simplest one..
-	 */
-
-	// This project does not have dependency to games-web and Table classes are not CDI tables so timeoutEvent cannot be fired from here with current setup.
-	// This class does not know about CommonEndpoint which has Websocket client handling
-	// CommonEndpoint is connect to Message.class, YatzyTable.class does not know about Message..
-	// Testing to send timeoutInfo directly from here to clients. This is the only place (25.6.2022) where direct push-notifications are used.
 	@Override
 	public void onTimeout() {
 		timer.cancel();
+		System.out.println("YatzyTable TIMEOUT");
 		YatzyPlayer playerInTurn = getPlayerInTurn();
 		if (playerInTurn != null) {
 			playerInTurn.setEnabled(false);
@@ -151,12 +138,10 @@ public class YatzyTable extends Table {
 		if (!isGameOver()) {
 			playerInTurn = setupNextTurn();
 		}
+
 		for (User user : getUsers()) {
 			if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
 				try {
-					// This is not enough for UI-snapshots ->
-					// user.getWebsocketSession().getBasicRemote().sendText("{\"title\":\"TIMEOUT\", \"table\":\"" + getTableId() + "\",\"timeoutPlayer\":\"" + timeoutPlayer + "\",\"nextTurnPlayer\":\"" + nextPlayer + "\",\"gameOver\":" +
-					// gameOver + "}");
 					String table = jsonb.toJson(this);
 					String yatzy = ",\"yatzy\":{\"gameOver\":" + isGameOver() + "}}";
 					String message = "{\"title\":\"TIMEOUT\", \"table\":" + table + yatzy;
@@ -287,14 +272,7 @@ public class YatzyTable extends Table {
 		playerInTurn = setupNextTurn();
 	}
 
-	public void startTimer() {
-		if (this.timer != null) {
-			this.timer.cancel();
-		}
-		this.timer = new Timer();
-		TimerTask task = new ReduceTimeTask(this);
-		timer.schedule(task, 1000, 1000);
-	}
+
 
 	private YatzyPlayer setupNextTurn() {
 		int currentPlayerIndex = players.indexOf(playerInTurn);
