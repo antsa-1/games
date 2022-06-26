@@ -95,7 +95,7 @@ public class YatzyTable extends Table {
 		if (this.players.size() < 1) {
 			return true;
 		}
-		int disabledCount = (int) this.players.stream().filter(player -> player.isDisabled()).count();
+		int disabledCount = (int) this.players.stream().filter(player -> !player.isEnabled()).count();
 		if (disabledCount == this.players.size()) {
 			return true;
 		}
@@ -145,7 +145,7 @@ public class YatzyTable extends Table {
 		timer.cancel();
 		YatzyPlayer playerInTurn = getPlayerInTurn();
 		if (playerInTurn != null) {
-			playerInTurn.setDisabled(true);
+			playerInTurn.setEnabled(false);
 			this.timedOutPlayerName = playerInTurn.getName();
 		}
 		if (!isGameOver()) {
@@ -269,7 +269,7 @@ public class YatzyTable extends Table {
 		if (index != -1) {
 			// removedPlayer = players.remove(index);
 			removedPlayer = players.get(index);
-			removedPlayer.setDisabled(true);
+			removedPlayer.setEnabled(false);
 			detachPlayer(removedPlayer);
 		}
 		if (removedPlayer == null) {
@@ -305,7 +305,7 @@ public class YatzyTable extends Table {
 				currentPlayerIndex = 0;
 			}
 			YatzyPlayer y = players.get(currentPlayerIndex);
-			if (!y.isDisabled()) {
+			if (y.isEnabled()) {
 				y.setRollsLeft(3);
 				startTimer();
 				playerInTurn = y;

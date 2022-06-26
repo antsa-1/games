@@ -249,14 +249,12 @@ const consumeActions = () => {
             })
             unblockQueue()
             document.body.style.cursor = "default"
-            yatzyTable.value.playerInTurn = action.payload.table.playerInTurn
-            console.log("CHANTE TURN"+JSON.stringify(yatzyTable.value.playerInTurn))
+            yatzyTable.value.playerInTurn = action.payload.table.playerInTurn           
             repaintYatzyTable()
         })
-       } else if(action.type === "timeout"){  
-            console.log("timeouttia")
+       } else if(action.type === "timeout"){
             let yatzyPlayer = <IYatzyPlayer> yatzyTable.value.players.find(player => player.name === action.payload.table.timedOutPlayerName)
-            yatzyPlayer.disabled = true
+            yatzyPlayer.enabled = false
             yatzyPlayer.scoreCard.bonus = -10
             if(userName.value === yatzyPlayer.name){
                 yatzyTable.value.canvas.enabled = false
@@ -462,7 +460,8 @@ const createTableFromSnapShot = () => {
         }
         tablePlayer.scoreCard.bonus = snapshotPlayer.scoreCard.bonus
         tablePlayer.scoreCard.total = snapshotPlayer.scoreCard.total
-        tablePlayer.scoreCard.subTotal = snapshotPlayer.scoreCard.subTotal           
+        tablePlayer.scoreCard.subTotal = snapshotPlayer.scoreCard.subTotal
+        tablePlayer.enabled = snapshotPlayer.enabled    
     })
     actionQueue.value.actions = []
     const action = {payload: gameSnapshot}
@@ -576,10 +575,9 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
 const initNewTurnIfRequired = (action) => {    
     if(action.payload.yatzy.gameOver){
         return
-    }
-    console.log("initNE:"+JSON.stringify(yatzyTable.value.players))
+    }  
     //One person can play to the end if others timeouts or leaves
-    if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name || yatzyTable.value.players.filter(player => player.disabled !== true).length === 1 ) {      
+    if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name || yatzyTable.value.players.filter(player => player.enabled === true).length === 1 ) {      
         let changeTurnAction = { type:"changeTurn", payload:action.payload }
         actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, changeTurnAction)
     }
@@ -840,7 +838,7 @@ const fillPlayerScore = (player:IYatzyPlayer, hand: IHand, startPoint: IVector2)
     const ctx = yatzyTable.value.canvas.ctx
     if (hand && hand.value > -1) {
         let handValue = hand.value > -1 ? hand.value.toString() : " - " 
-        ctx.fillStyle = player.disabled? "gray" : "black"
+        ctx.fillStyle = player.enabled? "black" : "gray"
         ctx.fillText(handValue, startPoint.x, startPoint.y)
     }
     ctx.fillStyle = "black"
@@ -902,7 +900,7 @@ const repaintScoreCard = () => {
     })
     //Vertical lines
     for (let i = 0; i < yatzyTable.value.players.length; i++) {
-        ctx.fillStyle = yatzyTable.value.players[i].disabled? "gray" : "black"
+        ctx.fillStyle = yatzyTable.value.players[i].enabled? "black" : "gray"
         ctx.fillText(yatzyTable.value.players[i].name, scoreCardTextEnd + 20 + i * magic, rowHeight * 3)
         ctx.moveTo(scoreCardTextEnd + i * magic, rowHeight * 3)
         ctx.lineTo(scoreCardTextEnd + i * magic, rowHeight * 21)

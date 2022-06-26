@@ -18,11 +18,12 @@ public class YatzyPlayer extends User implements Serializable {
 	private ScoreCard scoreCard;
 	@JsonbProperty("rollsLeft")
 	private int rollsLeft = 3;
-	@JsonbProperty("disabled")
-	private boolean disabled;
+	@JsonbProperty("enabled")
+	private boolean enabled;
 
 	public YatzyPlayer() {
 		scoreCard = new ScoreCard();
+		enabled = true;
 	}
 
 	public ScoreCard getScoreCard() {
@@ -37,16 +38,16 @@ public class YatzyPlayer extends User implements Serializable {
 		return rollsLeft;
 	}
 
-	public boolean isDisabled() {
-		return disabled;
-	}
-
-	public void setDisabled(boolean disabled) {
-		this.disabled = disabled;
-	}
-
 	public void setRollsLeft(int rollsLeft) {
 		this.rollsLeft = rollsLeft;
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 }
