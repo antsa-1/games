@@ -1,5 +1,5 @@
 import { ITable, IPlayer, } from "@/interfaces/interfaces"
-import { Image, IGameCanvas, IBaseTable, IMultiplayerTable, IVector2, IAction, IActionResult } from "@/interfaces/commonTypes"
+import { Image, IGameCanvas, IBaseTable, IMultiplayerTable, IVector2, IAction, IGameOptions } from "@/interfaces/commonTypes"
 
 export interface IYatzyGame {
     snapshot: any, //action
@@ -31,7 +31,8 @@ export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
     canvas: IGameCanvas,
     dices: IDice[],
     playButton: IButton,
-    scoreCardRows: IScoreCardRow[]
+    scoreCardRows: IScoreCardRow[],
+    secondsLeft: number,
 }
 
 export interface IButton extends IYatzyComponent {

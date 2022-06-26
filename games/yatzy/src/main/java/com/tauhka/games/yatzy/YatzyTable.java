@@ -4,17 +4,17 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.naming.spi.DirStateFactory.Result;
+
 import com.tauhka.games.core.GameMode;
+import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
-import com.tauhka.games.core.timer.ReduceTimeTask;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.util.Constants;
 
@@ -43,6 +43,8 @@ public class YatzyTable extends Table {
 
 	@JsonbProperty("secondsLeft")
 	private int secondsLeft;
+	@JsonbProperty("gameResult")
+	private GameResultType gameResult;
 
 	public YatzyTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		super(gameMode, randomizeStarter, registeredOnly, timeControlIndex, playerAmount);
@@ -98,6 +100,7 @@ public class YatzyTable extends Table {
 		}
 		int disabledCount = (int) this.players.stream().filter(player -> !player.isEnabled()).count();
 		if (disabledCount == this.players.size()) {
+			gameResult = GameResultType.NO_PLAYERS;
 			return true;
 		}
 		int playedAllHands = (int) players.stream().filter(player -> player.getScoreCard().getHands().size() == 15).count();
@@ -143,7 +146,12 @@ public class YatzyTable extends Table {
 			if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
 				try {
 					String table = jsonb.toJson(this);
-					String yatzy = ",\"yatzy\":{\"gameOver\":" + isGameOver() + "}}";
+					String yatzy = null;
+					if (gameOver == true) {
+						yatzy = ",\"yatzy\":{\"gameOver\":" + isGameOver() + "}, \"result\":" + GameResultType.NO_PLAYERS + "}";
+					} else {
+						yatzy = ",\"yatzy\":{\"gameOver\":" + isGameOver() + "}}";
+					}
 					String message = "{\"title\":\"TIMEOUT\", \"table\":" + table + yatzy;
 					user.getWebsocketSession().getBasicRemote().sendText(message);
 				} catch (IOException e) {
@@ -271,8 +279,6 @@ public class YatzyTable extends Table {
 	public void changePlayerInTurn() {
 		playerInTurn = setupNextTurn();
 	}
-
-
 
 	private YatzyPlayer setupNextTurn() {
 		int currentPlayerIndex = players.indexOf(playerInTurn);

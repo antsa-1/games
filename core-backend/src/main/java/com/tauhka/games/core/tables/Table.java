@@ -259,7 +259,7 @@ public abstract class Table implements Serializable {
 		this.secondsLeft = TimeControlIndex.getWithIndex(timeControlIndex).getSeconds();
 		this.timer = new Timer();
 		TimerTask task = new ReduceTimeTask(this);
-		timer.schedule(task, 1000, 1000);
+		timer.schedule(task, 1800, 1000);
 	}
 
 	@JsonbTransient

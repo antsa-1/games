@@ -3,6 +3,7 @@ package com.tauhka.games.yatzy;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
+import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 
 import jakarta.json.bind.annotation.JsonbProperty;

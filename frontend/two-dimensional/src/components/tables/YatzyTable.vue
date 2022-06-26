@@ -24,9 +24,9 @@
 
         <div class="col-xs-12 col-sm-4">           
             <span v-if="yatzyTable.playerInTurn?.name === userName" class="text-success"> It's your turn
-                {{ userName }} > time left:{{ yatzyTable.secondsLeft }} </span>
+                {{ userName }} time:{{ yatzyTable.secondsLeft }}  </span>
             <span v-else-if="yatzyTable?.playerInTurn === null" class="text-success"> Game ended </span>
-            <div v-else class="text-danger"> In turn: {{ yatzyTable.playerInTurn?.name }}</div>
+            <div v-else class="text-danger"> In turn: {{ yatzyTable.playerInTurn?.name }} time:{{ yatzyTable.secondsLeft }}</div>
         </div>
     </div>
     <div>
@@ -53,6 +53,7 @@ const gameOptions = ref<IGameOptions>({ notificationSound: false })
 
 
 onMounted(() => {
+    restartPlayersTimeInterval(yatzyTable.value.secondsLeft)
     let canvasElement = <HTMLCanvasElement>document.getElementById("canvas")
     yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, ctx: canvasElement.getContext("2d") }
     yatzyTable.value.canvas.ctx.imageSmoothingEnabled = true
@@ -63,6 +64,7 @@ onMounted(() => {
     attachListeners()
     resizeDocument()
     repaintYatzyTable()
+    yatzyTable.value.secondsLeft
 })
 
 const scoreCardSection = (): ISection => {
@@ -234,14 +236,14 @@ const consumeActions = () => {
             unblockQueue()
             console.log("animations done")
         })
-    } else if (action.type === "yatzySelectHand") {
+    } else if (action.type === "yatzySelectHand") {        
         updateScoreCard(action.payload)
         repaintScoreCard()
         if(action.payload.yatzy.gameOver){
-            handleGameEnd()
+            handleGameOver()
         } else {
             unblockQueue()
-        }        
+        }
     } else if(action.type === "changeTurn") {
         store.dispatch("changeTurn", action.payload.table.playerInTurn).then(() => {
             yatzyTable.value.dices.forEach(dice => {
@@ -259,23 +261,39 @@ const consumeActions = () => {
                 yatzyTable.value.canvas.enabled = false
             }
             repaintScoreCard()
-            if(action.payload.table.gameOver){
-                handleGameEnd()
+            if(action.payload.yatzy.gameOver){
+                handleGameOver()
             } else {
                 unblockQueue()
             } 
         }
 }
-const handleGameEnd = () => {
+const handleGameOver = () => {
+    stopPlayerTimeInterval()
     yatzyTable.value.playerInTurn = null
 	actionQueue.value.blocked = true
 	yatzyTable.value.canvas.enabled = false
 	const message:IChatMessage = {from:"System",text: "Game ended"}					
     store.dispatch("chat", message)
-    //yatzyTable.value.canvas.ctx.globalAlpha = 0.99
-	//yatzyTable.value.canvas.ctx.fillStyle = 'gray'
     drawAll()
-	
+}
+let playerTimeInterval = null
+//let secondsLeft = null
+const stopPlayerTimeInterval = () =>  {
+    playerTimeInterval = clearInterval(playerTimeInterval)
+}
+const restartPlayersTimeInterval = (seconds:number) => {
+    console.log("restartInterval "+seconds)
+    if(playerTimeInterval){
+		stopPlayerTimeInterval()
+    }
+	yatzyTable.value.secondsLeft = seconds		
+	playerTimeInterval = setInterval(() => {
+        console.log("seonds left:"+yatzyTable.value.secondsLeft )
+		yatzyTable.value.secondsLeft --
+        if(yatzyTable.value.secondsLeft  <= 0 || !yatzyTable.value.secondsLeft )
+            stopPlayerTimeInterval()
+	}, 1000)
 }
 const updateScoreCard = (payload:any) => {
     let yatzyPlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === payload.yatzy.whoPlayed)
@@ -465,7 +483,7 @@ const createTableFromSnapShot = () => {
     actionQueue.value.actions = []
     const action = {payload: gameSnapshot}
     if(gameSnapshot.yatzy.gameOver){
-        return handleGameEnd()
+        return handleGameOver()
     }
     initNewTurnIfRequired(action)
 }
@@ -565,7 +583,8 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
     if (action.type === "changeTurn" || action.type === "chat") {
        // yatzyTable.value.playerInTurn = action.payload.nextTurnPlayer
         return
-    } 
+    }
+    restartPlayersTimeInterval(action.payload.table.secondsLeft)
     gameSnapshot = action.payload
     actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)    
     initNewTurnIfRequired(action)
