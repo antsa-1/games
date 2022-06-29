@@ -116,6 +116,9 @@ public class YatzyTable extends Table {
 		if (hasEnabledPlayersPlayedAllHands(enabledPlayers)) {
 			gameOver = true;
 		}
+		if (gameOver) {
+			timer.cancel();
+		}
 		return gameOver;
 	}
 
