@@ -1,4 +1,4 @@
-package com.tauhka.games.ejb;
+package com.tauhka.games.db;
 
 import static com.tauhka.games.core.util.Constants.*;
 

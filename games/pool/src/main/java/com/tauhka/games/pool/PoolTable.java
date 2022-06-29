@@ -380,6 +380,7 @@ public class PoolTable extends Table implements PoolComponent {
 		EightBallInitializer.init(this);
 		expectingHandBallUpdate = true;
 		gameOver = false;
+		super.setGameResult(null);
 		super.resetRematchPlayer();
 		return this;
 	}
@@ -433,6 +434,12 @@ public class PoolTable extends Table implements PoolComponent {
 	public int getNumber() {
 		// TODO Auto-generated method stub
 		return -1;
+	}
+
+	@Override
+	public void leaveTable(User user) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

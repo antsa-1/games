@@ -12,14 +12,13 @@ import jakarta.json.bind.annotation.JsonbProperty;
 
 public class Dice {
 	@JsonbProperty(value = "diceId")
-	public UUID diceId;
+	private UUID diceId;
 	@JsonbProperty(value = "number")
 	private int number;
 	@JsonbProperty(value = "selected")
 	private boolean selected;
 
 	public Dice() {
-		// empty constr. serializing purposes
 	}
 
 	public Dice(int number) {

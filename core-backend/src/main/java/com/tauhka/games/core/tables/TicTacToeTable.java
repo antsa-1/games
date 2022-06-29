@@ -58,6 +58,7 @@ public class TicTacToeTable extends Table {
 		this.addedTokens = 0;
 		this.gameOver = false;
 		this.startTime = Instant.now();
+		super.setGameResult(null);
 		return this;
 	}
 
@@ -153,5 +154,11 @@ public class TicTacToeTable extends Table {
 
 	public void setBoard(GameToken[][] board) {
 		this.board = board;
+	}
+
+	@Override
+	public void leaveTable(User user) {
+		// TODO Auto-generated method stub
+		
 	}
 }

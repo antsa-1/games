@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import com.tauhka.games.yatzy.Dice;
 import com.tauhka.games.yatzy.Hand;
-import com.tauhka.games.yatzy.HandCalculator;
 import com.tauhka.games.yatzy.HandType;
+import com.tauhka.games.yatzy.util.HandCalculator;
 
 /**
  * @author antsa-1 from GitHub 16 Jun 2022

@@ -9,6 +9,7 @@ import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.tables.Table;
+import com.tauhka.games.core.tables.TableType;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
@@ -55,7 +56,9 @@ public class CommonHandler {
 			// Statistics go another route since game ended "normally"
 			return;
 		}
-		table.setGameOver(true); // stats only once per game/leaver
+		if (table.getTableType() == TableType.BASE) {
+			table.setGameOver(true); // stats only once per game/leaver
+		}
 		User user = table.getOpponent(endpoint.getUser());
 		GameResult result = new GameResult();
 		result.setPlayerA(table.getPlayerA());

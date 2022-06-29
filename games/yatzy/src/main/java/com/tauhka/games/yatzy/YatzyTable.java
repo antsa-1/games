@@ -4,15 +4,16 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.naming.spi.DirStateFactory.Result;
+import java.util.stream.Collectors;
 
 import com.tauhka.games.core.GameMode;
-import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.stats.Player;
+import com.tauhka.games.core.stats.Status;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
 import com.tauhka.games.core.twodimen.GameResult;
@@ -40,11 +41,10 @@ public class YatzyTable extends Table {
 	private List<Dice> dices;
 	@JsonbProperty("timedOutPlayerName")
 	private String timedOutPlayerName;
-
+	@JsonbTransient
+	private UUID gameId;
 	@JsonbProperty("secondsLeft")
 	private int secondsLeft;
-	@JsonbProperty("gameResult")
-	private GameResultType gameResult;
 
 	public YatzyTable(User playerA, GameMode gameMode, boolean randomizeStarter, boolean registeredOnly, int timeControlIndex, int playerAmount) {
 		super(gameMode, randomizeStarter, registeredOnly, timeControlIndex, playerAmount);
@@ -76,17 +76,26 @@ public class YatzyTable extends Table {
 
 	@Override
 	public Object playTurn(User user, Object yatzyTurn) {
-		YatzyTurn incomingTurn = (YatzyTurn) yatzyTurn;
-		LOGGER.info("YatzyTable playTurn rollDices:" + this + "  turn:" + yatzyTurn);
-		checkGuards(user);
-		return yatzyRuleBase.playTurn(this, incomingTurn);
+		// Not used
+		return null;
 	}
 
 	public List<Dice> rollDices(User user, List<Dice> dices) {
 		if (getPlayerInTurn().getRollsLeft() <= 0) {
 			throw new IllegalArgumentException("No rolls left for player:" + user);
 		}
-		return yatzyRuleBase.rollDices(this, dices, user);
+		List<Dice> dicesRolled = yatzyRuleBase.rollDices(this, dices, user);
+
+		return dicesRolled;
+	}
+
+	public Integer getPosition(Dice dice) {
+		for (int i = 0; i < this.dices.size(); i++) {
+			if (dice.getDiceId().equals(this.dices.get(i).getDiceId())) {
+				return i + 1;
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -94,17 +103,19 @@ public class YatzyTable extends Table {
 		if (startTime == null) {
 			return false;
 		}
-		// Players can disconnect/leave table anytime. Last player can play the game to the end.
-		if (this.players.size() < 1) {
-			return true;
+		// Players can disconnect/leave table anytime. Last player can play the game to the end. if (this.players.size() < 1) { gameOver = true; }
+		List<YatzyPlayer> enabledPlayers = this.players.stream().filter(player -> player.isEnabled()).collect(Collectors.toList());
+		if (this.players.size() - enabledPlayers.size() == this.players.size()) {
+			gameOver = true;
 		}
-		int disabledCount = (int) this.players.stream().filter(player -> !player.isEnabled()).count();
-		if (disabledCount == this.players.size()) {
-			gameResult = GameResultType.NO_PLAYERS;
-			return true;
+		if (hasEnabledPlayersPlayedAllHands(enabledPlayers)) {
+			gameOver = true;
 		}
-		int playedAllHands = (int) players.stream().filter(player -> player.getScoreCard().getHands().size() == 15).count();
-		return playedAllHands == this.players.size();
+		return gameOver;
+	}
+
+	private boolean hasEnabledPlayersPlayedAllHands(List<YatzyPlayer> enabledPlayers) {
+		return (int) enabledPlayers.stream().filter(player -> player.getScoreCard().getHands().size() == 1).count() == enabledPlayers.size();
 	}
 
 	public ScoreCard selectHand(User user, Integer hand) {
@@ -113,9 +124,7 @@ public class YatzyTable extends Table {
 		if (getPlayerInTurn().getRollsLeft() == 3) {
 			throw new IllegalArgumentException("Player has not rolled dices" + user);
 		}
-		ScoreCard sc = yatzyRuleBase.selectHand(this, user, hand);
-
-		return sc;
+		return yatzyRuleBase.selectHand(this, user, hand);
 	}
 
 	private void checkGuards(User user) {
@@ -131,35 +140,32 @@ public class YatzyTable extends Table {
 
 	@Override
 	public void onTimeout() {
-		timer.cancel();
-		System.out.println("YatzyTable TIMEOUT");
-		YatzyPlayer playerInTurn = getPlayerInTurn();
-		if (playerInTurn != null) {
-			playerInTurn.setEnabled(false);
-			this.timedOutPlayerName = playerInTurn.getName();
-		}
-		if (!isGameOver()) {
-			playerInTurn = setupNextTurn();
-		}
-
-		for (User user : getUsers()) {
-			if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
-				try {
-					String table = jsonb.toJson(this);
-					String yatzy = null;
-					if (gameOver == true) {
-						yatzy = ",\"yatzy\":{\"gameOver\":" + isGameOver() + "}, \"result\":" + GameResultType.NO_PLAYERS + "}";
-					} else {
-						yatzy = ",\"yatzy\":{\"gameOver\":" + isGameOver() + "}}";
+		synchronized (this) {
+			timer.cancel();
+			System.out.println("YatzyTable TIMEOUT");
+			YatzyPlayer playerInTurn = getPlayerInTurn();
+			if (playerInTurn != null) {
+				playerInTurn.setEnabled(false);
+				timedOutPlayerName = playerInTurn.getName();
+				// Guest players don't have id
+				getGameResult().changeStatus(playerInTurn.getName(), playerInTurn.getId(), Status.TIMED_OUT);
+			}
+			if (!isGameOver()) {
+				playerInTurn = setupNextTurn();
+			}
+			String tableJson = jsonb.toJson(this);
+			String message = "{\"title\":\"TIMEOUT\", \"table\":" + tableJson + "}";
+			for (User user : getUsers()) {
+				if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
+					try {
+						user.getWebsocketSession().getBasicRemote().sendText(message);
+					} catch (IOException e) {
+						LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
 					}
-					String message = "{\"title\":\"TIMEOUT\", \"table\":" + table + yatzy;
-					user.getWebsocketSession().getBasicRemote().sendText(message);
-				} catch (IOException e) {
-					LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
 				}
 			}
+			timedOutPlayerName = null;
 		}
-		timedOutPlayerName = null;
 	}
 
 	public String getTimedOutPlayerName() {
@@ -184,8 +190,16 @@ public class YatzyTable extends Table {
 
 	@Override
 	public GameResult checkWinAndDraw() {
-		// TODO Auto-generated method stub
+
 		return null;
+	}
+
+	public UUID getGameId() {
+		return gameId;
+	}
+
+	public void setGameId(UUID gameId) {
+		this.gameId = gameId;
 	}
 
 	@Override
@@ -312,7 +326,8 @@ public class YatzyTable extends Table {
 
 	@Override
 	protected Table startRematch() {
-		// TODO Auto-generated method stub
+		super.setGameResult(null);
+		super.gameOver = false;
 		return null;
 	}
 
@@ -326,4 +341,22 @@ public class YatzyTable extends Table {
 		return "YatzyTable [timer=" + timer + ", players=" + players + ", dices=" + dices + "]";
 	}
 
+	@Override
+	public void leaveTable(User user) {
+		synchronized (this) {
+			int index = players.indexOf(user);
+			if (index >= 0) {
+				YatzyPlayer y = players.get(index);
+				y.setEnabled(false);
+				if (y.isGuestPlayer()) {
+					getGameResult().findPlayer(y.getName()).setStatus(Status.LEFT);
+				} else {
+					getGameResult().findPlayer(y.getId()).setStatus(Status.LEFT);
+				}
+			}
+			if (playerInTurn != null && playerInTurn.equals(user)) {
+				setupNextTurn();
+			}
+		}
+	}
 }

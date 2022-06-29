@@ -1,4 +1,4 @@
-package com.tauhka.games.ejb;
+package com.tauhka.games.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

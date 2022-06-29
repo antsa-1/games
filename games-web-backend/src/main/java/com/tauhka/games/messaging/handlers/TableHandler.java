@@ -189,13 +189,16 @@ public class TableHandler extends CommonHandler {
 		if (table.getOpponent(endpoint.getUser()) instanceof AI) {
 			table.suggestRematch(table.getOpponent(endpoint.getUser()));
 		}
-		Message winnerMessage = new Message();
-		winnerMessage.setFrom(SYSTEM);
-		winnerMessage.setMessage("R"); // R=resignition in UI
-		winnerMessage.setTable(table);
-		winnerMessage.setWho(gameResult.getWinner());
-		winnerMessage.setTitle(MessageTitle.RESIGN);
-		return winnerMessage;
+		Message resultMessage = new Message();
+		resultMessage.setFrom(SYSTEM);
+		resultMessage.setTable(table);
+		if (table.isGameOver()) {
+			resultMessage.setGameResult(gameResult);
+		}
+		resultMessage.setWho(endpoint.getUser());
+		resultMessage.setTitle(MessageTitle.RESIGN);
+		return resultMessage;
+
 	}
 
 	public Message rematch(CommonEndpoint endpoint) {

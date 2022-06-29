@@ -1,4 +1,4 @@
-package com.tauhka.games.yatzy;
+package com.tauhka.games.yatzy.util;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +10,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.tauhka.games.yatzy.Dice;
+import com.tauhka.games.yatzy.Hand;
 
 /**
  * @author antsa-1 from GitHub 16 Jun 2022

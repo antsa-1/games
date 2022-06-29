@@ -66,9 +66,6 @@ public class CommonEndpoint {
 		// this.session = session;
 	}
 
-	public void observeGameTimeouts(@Observes TimeoutEvent timeoutEvent) {
-		LOGGER.info("CommonEndpoint testing timeouts...");
-	}
 
 	// Factory here??
 	@OnMessage

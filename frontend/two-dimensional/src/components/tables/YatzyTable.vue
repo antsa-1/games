@@ -239,7 +239,7 @@ const consumeActions = () => {
     } else if (action.type === "yatzySelectHand") {        
         updateScoreCard(action.payload)
         repaintScoreCard()
-        if(action.payload.yatzy.gameOver){
+        if(action.payload.table.gameOver){
             handleGameOver()
         } else {
             unblockQueue()
@@ -261,7 +261,7 @@ const consumeActions = () => {
                 yatzyTable.value.canvas.enabled = false
             }
             repaintScoreCard()
-            if(action.payload.yatzy.gameOver){
+            if(action.payload.table.gameOver){
                 handleGameOver()
             } else {
                 unblockQueue()
@@ -270,6 +270,7 @@ const consumeActions = () => {
 }
 const handleGameOver = () => {
     stopPlayerTimeInterval()
+    console.log("Handling gameOver")
     yatzyTable.value.playerInTurn = null
 	actionQueue.value.blocked = true
 	yatzyTable.value.canvas.enabled = false
@@ -289,7 +290,6 @@ const restartPlayersTimeInterval = (seconds:number) => {
     }
 	yatzyTable.value.secondsLeft = seconds		
 	playerTimeInterval = setInterval(() => {
-        console.log("seonds left:"+yatzyTable.value.secondsLeft )
 		yatzyTable.value.secondsLeft --
         if(yatzyTable.value.secondsLeft  <= 0 || !yatzyTable.value.secondsLeft )
             stopPlayerTimeInterval()
@@ -466,8 +466,6 @@ const createTableFromSnapShot = () => {
         return
     }
     setupDices(yatzyTable.value.dices, gameSnapshot.table.dices, false)
-    //Creates all hands from scratch -> although lastAdded, bonus, subTotal and Total are the only ones with re-calculations requirements
-    //Can be used for watcher which need to build all from scratch
     gameSnapshot.table.players.forEach(snapshotPlayer => {     
         const tablePlayer:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
         const snapshotPlayerHands:IHand [] = snapshotPlayer.scoreCard.hands
@@ -482,7 +480,7 @@ const createTableFromSnapShot = () => {
     })
     actionQueue.value.actions = []
     const action = {payload: gameSnapshot}
-    if(gameSnapshot.yatzy.gameOver){
+    if(gameSnapshot.table.gameOver){
         return handleGameOver()
     }
     initNewTurnIfRequired(action)
@@ -591,7 +589,7 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
 })
 
 const initNewTurnIfRequired = (action) => {    
-    if(action.payload.yatzy.gameOver){
+    if(action.payload.table.gameOver){
         return
     }  
     //One person can play to the end if others timeouts or leaves
@@ -692,9 +690,9 @@ const repaintInfoTexts = () => {
         return
     }
     isMyTurn.value === true ? ctx.fillStyle = "green" : ctx.fillStyle = "red"
-    ctx.fillText(isMyTurn.value === false ? "In turn "+playerInTurn.value.name : itYourTurn, x, turnInfoY)
+    ctx.fillText(isMyTurn.value === false ? "In turn "+playerInTurn?.value?.name : itYourTurn, x, turnInfoY)
     ctx.fillStyle = "black"
-    ctx.fillText(optionsText() + " (left = " + playerInTurn.value.rollsLeft + ")", x, y)
+    ctx.fillText(optionsText() + " (left = " + playerInTurn?.value?.rollsLeft + ")", x, y)
     ctx.closePath()
 }
 

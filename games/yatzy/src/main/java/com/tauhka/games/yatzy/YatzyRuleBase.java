@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.stats.Player;
+import com.tauhka.games.core.stats.Result;
 
 /**
  * @author antsa-1 from GitHub 28 May 2022
@@ -27,6 +29,14 @@ public class YatzyRuleBase {
 			dice.roll();
 			yatzyTable.getDices().add(dice);
 		}
+		yatzyTable.setGameResult(new Result());
+		for (YatzyPlayer y : yatzyTable.getPlayers()) {
+			// Players will now be in result of the game regardless of how the game ends
+			Player p = new Player(y.getId());
+			p.setName(y.getName());
+			yatzyTable.getGameResult().addPlayer(p);
+		}
+		yatzyTable.setGameId(UUID.randomUUID());
 		yatzyTable.startTimer();
 	}
 

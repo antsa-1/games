@@ -15,6 +15,7 @@ import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.AI;
+import com.tauhka.games.core.stats.Result;
 import com.tauhka.games.core.timer.ReduceTimeTask;
 import com.tauhka.games.core.timer.TimeControlIndex;
 import com.tauhka.games.core.twodimen.GameResult;
@@ -37,6 +38,7 @@ public abstract class Table implements Serializable {
 	protected User playerA;
 	@JsonbProperty("playerB")
 	protected User playerB;
+
 	@JsonbTransient
 	protected Timer timer;
 	@JsonbProperty("playerInTurn")
@@ -66,8 +68,11 @@ public abstract class Table implements Serializable {
 	protected GameMode gameMode;
 	@JsonbProperty("startTime")
 	protected Instant startTime;
-	@JsonbTransient
+	@JsonbProperty("gameOver")
 	protected boolean gameOver;
+
+	@JsonbTransient
+	protected Result gameResult;
 
 	@JsonbProperty(value = "tableType")
 	public TableType getTableType() {
@@ -109,6 +114,8 @@ public abstract class Table implements Serializable {
 
 	public abstract Object playTurn(User user, Object o);
 
+	public abstract void leaveTable(User user);
+
 	protected abstract Table startRematch();
 
 	@JsonbTransient
@@ -139,6 +146,7 @@ public abstract class Table implements Serializable {
 			gameResult.setPlayerB(this.playerB);
 			gameResult.setResigner(player);
 			gameResult.setResultType(GameResultType.WIN_BY_RESIGNATION);
+
 			return gameResult;
 		}
 		throw new IllegalArgumentException("Resign not possible" + player);
@@ -171,6 +179,14 @@ public abstract class Table implements Serializable {
 
 	public GameMode getGameMode() {
 		return gameMode;
+	}
+
+	public Result getGameResult() {
+		return gameResult;
+	}
+
+	public void setGameResult(Result gameResult) {
+		this.gameResult = gameResult;
 	}
 
 	public void setDraws(int draws) {

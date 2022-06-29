@@ -1,7 +1,7 @@
 module tauhka.games {
 	exports com.tauhka.games.messaging.util;
 	// exports com.tauhka.tictactoe.tests.win;
-	exports com.tauhka.games.ejb;
+	exports com.tauhka.games.db;
 	// exports com.tauhka.connectfour.tests.board;
 	exports com.tauhka.games.messaging.handlers;
 	exports com.tauhka.games.web.filter;

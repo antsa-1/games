@@ -33,6 +33,7 @@ export interface IYatzyTable extends IMultiplayerTable, IYatzyComponent {
     playButton: IButton,
     scoreCardRows: IScoreCardRow[],
     secondsLeft: number,
+    gameOver: boolean
 }
 
 export interface IButton extends IYatzyComponent {

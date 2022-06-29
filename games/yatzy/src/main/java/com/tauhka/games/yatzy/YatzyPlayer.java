@@ -3,7 +3,6 @@ package com.tauhka.games.yatzy;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
-import com.tauhka.games.core.GameResultType;
 import com.tauhka.games.core.User;
 
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -12,7 +11,7 @@ import jakarta.json.bind.annotation.JsonbProperty;
  * @author antsa-1 from GitHub 14 May 2022
  **/
 
-public class YatzyPlayer extends User implements Serializable {
+public class YatzyPlayer extends User implements Serializable, Comparable<YatzyPlayer> {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(YatzyPlayer.class.getName());
 	@JsonbProperty("scoreCard")
@@ -51,4 +50,15 @@ public class YatzyPlayer extends User implements Serializable {
 		this.enabled = enabled;
 	}
 
+	@Override
+	public int compareTo(YatzyPlayer other) {
+		int total = this.scoreCard.calculateTotal();
+		int otherTotal = other.scoreCard.calculateTotal();
+		if (total > otherTotal) {
+			return 1;
+		} else if (otherTotal > total) {
+			return -1;
+		}
+		return 0;
+	}
 }

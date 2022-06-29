@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.tables.Table;
-import com.tauhka.games.ejb.UserEJBC;
+import com.tauhka.games.db.UserEJBC;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.util.GamesUtils;
