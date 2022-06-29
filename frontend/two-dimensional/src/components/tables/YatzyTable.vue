@@ -256,8 +256,9 @@ const consumeActions = () => {
         })
        } else if(action.type === "timeout"){
             let yatzyPlayer = <IYatzyPlayer> yatzyTable.value.players.find(player => player.name === action.payload.table.timedOutPlayerName)
-            yatzyPlayer.enabled = false         
+            yatzyPlayer.enabled = false
             if(userName.value === yatzyPlayer.name){
+                iTimedOut = true
                 yatzyTable.value.canvas.enabled = false
             }
             repaintScoreCard()
@@ -479,6 +480,14 @@ const createTableFromSnapShot = () => {
         tablePlayer.enabled = snapshotPlayer.enabled    
     })
     actionQueue.value.actions = []
+    let player:IYatzyPlayer = <IYatzyPlayer>gameSnapshot.table.playerInTurn
+    if(playerInTurn.value){
+        playerInTurn.value.rollsLeft = player.rollsLeft
+    }
+    let me:IYatzyPlayer = gameSnapshot.table.players.find(player => !player.enabled && player.name === userName.value)
+    if(me){
+        iTimedOut = true
+    }
     const action = {payload: gameSnapshot}
     if(gameSnapshot.table.gameOver){
         return handleGameOver()
@@ -665,7 +674,12 @@ let itYourTurn = "It's your turn " + userName.value
 const waitingTurnText = "Waiting your turn"
 const youHaveTimedOut = "You timed out"
 
+let iTimedOut = false
+
 const optionsText = (): string => {
+    if(iTimedOut){
+       return youHaveTimedOut
+    }
     if (isMyTurn.value === false) {
         return waitingTurnText
     }
@@ -684,15 +698,15 @@ const repaintInfoTexts = () => {
     const ctx = yatzyTable.value.canvas.ctx
     ctx.beginPath()
     ctx.font = "18px bolder Arial"
-    if(gameSnapshot?.yatzy?.gameOver){
+    if(!playerInTurn.value){
         ctx.fillText("GAME OVER", x, turnInfoY)
         ctx.closePath()
         return
     }
     isMyTurn.value === true ? ctx.fillStyle = "green" : ctx.fillStyle = "red"
-    ctx.fillText(isMyTurn.value === false ? "In turn "+playerInTurn?.value?.name : itYourTurn, x, turnInfoY)
+    ctx.fillText(isMyTurn.value === false ? "In turn "+playerInTurn?.value?.name +" (left = " + playerInTurn?.value?.rollsLeft + ")" : itYourTurn +" (left = " + playerInTurn?.value?.rollsLeft + ")", x, turnInfoY)
     ctx.fillStyle = "black"
-    ctx.fillText(optionsText() + " (left = " + playerInTurn?.value?.rollsLeft + ")", x, y)
+    ctx.fillText(optionsText() , x, y)
     ctx.closePath()
 }
 

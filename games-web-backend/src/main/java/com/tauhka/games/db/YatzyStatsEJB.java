@@ -61,7 +61,7 @@ public class YatzyStatsEJB {
 		} catch (SQLException e) {
 			LOGGER.log(Level.SEVERE, "YatzyStatsEJB sqle:" + e + " data:" + yatzyTurnDao);
 		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "YatzyStatsEJB saveYatzyTurn exception :" + e + " data:" + yatzyTurnDao);
+			LOGGER.log(Level.SEVERE, "YatzyStatsEJB saveYatzyTurn exception data:" + yatzyTurnDao, e);
 		} finally {
 			try {
 				if (stmt != null) {
@@ -71,7 +71,7 @@ public class YatzyStatsEJB {
 					con.close();
 				}
 			} catch (SQLException e) {
-				LOGGER.log(Level.SEVERE, "YatzyStatsEJB finally crashed" + e);
+				LOGGER.log(Level.SEVERE, "YatzyStatsEJB finally crashed", e);
 			}
 		}
 	}

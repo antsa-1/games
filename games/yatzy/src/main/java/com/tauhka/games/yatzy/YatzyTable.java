@@ -99,6 +99,11 @@ public class YatzyTable extends Table {
 	}
 
 	@Override
+	public boolean isWaitingOpponent() {
+		return this.players.size() == 1;
+	}
+
+	@Override
 	public boolean isGameOver() {
 		if (startTime == null) {
 			return false;
@@ -115,7 +120,7 @@ public class YatzyTable extends Table {
 	}
 
 	private boolean hasEnabledPlayersPlayedAllHands(List<YatzyPlayer> enabledPlayers) {
-		return (int) enabledPlayers.stream().filter(player -> player.getScoreCard().getHands().size() == 1).count() == enabledPlayers.size();
+		return (int) enabledPlayers.stream().filter(player -> player.getScoreCard().getHands().size() == 15).count() == enabledPlayers.size();
 	}
 
 	public ScoreCard selectHand(User user, Integer hand) {
@@ -150,7 +155,9 @@ public class YatzyTable extends Table {
 				// Guest players don't have id
 				getGameResult().changeStatus(playerInTurn.getName(), playerInTurn.getId(), Status.TIMED_OUT);
 			}
-			if (!isGameOver()) {
+			if (isGameOver()) {
+				playerInTurn = null;
+			} else {
 				playerInTurn = setupNextTurn();
 			}
 			String tableJson = jsonb.toJson(this);
