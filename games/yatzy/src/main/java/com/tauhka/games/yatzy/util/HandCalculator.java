@@ -51,10 +51,10 @@ public class HandCalculator {
 				total += iterator.next() * 2;
 			}
 			return total;
-		case TRIPS:
+		case THREE_OF_KIND:
 			int trips = getNumberWhichExistAtLeastTimes(3, hand);
 			return trips > 0 ? trips * 3 : NO_POINTS;
-		case QUADS:
+		case FOUR_OF_KIND:
 			int quads = getNumberWhichExistAtLeastTimes(4, hand);
 			return quads > 0 ? quads * 4 : NO_POINTS;
 		case YATZY:

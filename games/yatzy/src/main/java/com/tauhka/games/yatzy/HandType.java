@@ -5,7 +5,7 @@ package com.tauhka.games.yatzy;
  **/
 
 public enum HandType {
-	ONES(1), TWOS(2), THREES(3), FOURS(4), FIVES(5), SIXES(6), PAIR(7), TWO_PAIR(8), TRIPS(9), FULL_HOUSE(10), SMALL_STRAIGHT(11), LARGE_STRAIGHT(12), QUADS(13), CHANCE(14), YATZY(15);
+	ONES(1), TWOS(2), THREES(3), FOURS(4), FIVES(5), SIXES(6), PAIR(7), TWO_PAIR(8), THREE_OF_KIND(9), FULL_HOUSE(10), SMALL_STRAIGHT(11), LARGE_STRAIGHT(12), FOUR_OF_KIND(13), CHANCE(14), YATZY(15);
 
 	private final int asInt;
 
@@ -22,10 +22,10 @@ public enum HandType {
 			return PAIR;
 		if (type.equals(TWO_PAIR.getAsInt()))
 			return TWO_PAIR;
-		if (type.equals(TRIPS.getAsInt()))
-			return TRIPS;
-		if (type.equals(QUADS.getAsInt()))
-			return QUADS;
+		if (type.equals(THREE_OF_KIND.getAsInt()))
+			return THREE_OF_KIND;
+		if (type.equals(FOUR_OF_KIND.getAsInt()))
+			return FOUR_OF_KIND;
 		if (type.equals(YATZY.getAsInt()))
 			return YATZY;
 		if (type.equals(SMALL_STRAIGHT.getAsInt()))

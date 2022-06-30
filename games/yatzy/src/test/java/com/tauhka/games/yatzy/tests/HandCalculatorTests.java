@@ -157,50 +157,50 @@ public class HandCalculatorTests {
 	}
 
 	@Test
-	public void tripsIsFoundFromBeginning() {
-		Hand h = createDices(HandType.TRIPS, 1, 1, 1, 4, 5);
+	public void threeOfKindIsFoundFromBeginning() {
+		Hand h = createDices(HandType.THREE_OF_KIND, 1, 1, 1, 4, 5);
 		assertEquals(3, HandCalculator.calculateHandValue(h));
 	}
 
 	@Test
-	public void tripsFromMiddlePositions() {
-		Hand h = createDices(HandType.TRIPS, 1, 2, 2, 2, 4);
+	public void threeOfKindFromMiddlePositions() {
+		Hand h = createDices(HandType.THREE_OF_KIND, 1, 2, 2, 2, 4);
 		assertEquals(6, HandCalculator.calculateHandValue(h));
 	}
 
 	@Test
-	public void tripsFromFiveOfAKindFound() {
-		Hand h = createDices(HandType.TRIPS, 5, 5, 5, 5, 5);
+	public void threeOfKindFromFiveOfAKindFound() {
+		Hand h = createDices(HandType.THREE_OF_KIND, 5, 5, 5, 5, 5);
 		assertEquals(15, HandCalculator.calculateHandValue(h));
 	}
 
 	@Test
-	public void tripsFromFourOfAKindFound() {
-		Hand h = createDices(HandType.TRIPS, 2, 4, 2, 5, 2);
+	public void THREE_OF_KINDFromFourOfAKindFound() {
+		Hand h = createDices(HandType.THREE_OF_KIND, 2, 4, 2, 5, 2);
 		assertEquals(6, HandCalculator.calculateHandValue(h));
 	}
 
 	@Test
-	public void tripsFromMiddlePositionFound() {
-		Hand h = createDices(HandType.TRIPS, 2, 3, 3, 3, 2);
+	public void threeOfKindFromMiddlePositionFound() {
+		Hand h = createDices(HandType.THREE_OF_KIND, 2, 3, 3, 3, 2);
 		assertEquals(9, HandCalculator.calculateHandValue(h));
 	}
 
 	@Test
-	public void tripsNotFound() {
-		Hand h = createDices(HandType.TRIPS, 6, 5, 4, 3, 2);
+	public void threeOfKindNotFound() {
+		Hand h = createDices(HandType.THREE_OF_KIND, 6, 5, 4, 3, 2);
 		assertEquals(0, HandCalculator.calculateHandValue(h));
 	}
 
 	@Test
-	public void quadsFromEndPositionFound() {
-		Hand h = createDices(HandType.QUADS, 2, 1, 1, 1, 1);
+	public void fourOfKindFromEndPositionFound() {
+		Hand h = createDices(HandType.FOUR_OF_KIND, 2, 1, 1, 1, 1);
 		assertEquals(4, HandCalculator.calculateHandValue(h));
 	}
 
 	@Test
-	public void quadsNotFound() {
-		Hand h = createDices(HandType.QUADS, 5, 5, 5, 6, 6);
+	public void fourOfKindSNotFound() {
+		Hand h = createDices(HandType.FOUR_OF_KIND, 5, 5, 5, 6, 6);
 		assertEquals(0, HandCalculator.calculateHandValue(h));
 	}
 
