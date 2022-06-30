@@ -5,14 +5,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
-import com.tauhka.games.core.stats.Player;
 import com.tauhka.games.core.stats.Status;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
@@ -80,6 +78,10 @@ public class YatzyTable extends Table {
 		return null;
 	}
 
+	public boolean getRandomizeStarter() {
+		return super.randomizeStarter;
+	}
+
 	public List<Dice> rollDices(User user, List<Dice> dices) {
 		if (getPlayerInTurn().getRollsLeft() <= 0) {
 			throw new IllegalArgumentException("No rolls left for player:" + user);
@@ -96,6 +98,10 @@ public class YatzyTable extends Table {
 			}
 		}
 		return null;
+	}
+
+	public void setStartTime(Instant startTime) {
+		super.startTime = startTime;
 	}
 
 	@Override
@@ -117,7 +123,7 @@ public class YatzyTable extends Table {
 			gameOver = true;
 		}
 		if (gameOver) {
-			timer.cancel();
+			cancelTimer();
 		}
 		return gameOver;
 	}
@@ -149,7 +155,7 @@ public class YatzyTable extends Table {
 	@Override
 	public void onTimeout() {
 		synchronized (this) {
-			timer.cancel();
+			cancelTimer();
 			System.out.println("YatzyTable TIMEOUT");
 			YatzyPlayer playerInTurn = getPlayerInTurn();
 			if (playerInTurn != null) {
@@ -242,6 +248,10 @@ public class YatzyTable extends Table {
 		return users;
 	}
 
+	public int enabledPlayersCount() {
+		return (int) this.players.stream().filter(player -> player.isEnabled()).count();
+	}
+
 	@Override
 	public boolean joinTableAsPlayer(User user) {
 
@@ -259,16 +269,6 @@ public class YatzyTable extends Table {
 			return false;
 		}
 		// Table full
-		this.startTime = Instant.now();
-		if (this.randomizeStarter) {
-			int i = ThreadLocalRandom.current().nextInt(1, players.size());
-			this.startingPlayer = players.get(i - 1);
-			playerInTurn = this.startingPlayer;
-
-		} else {
-			this.startingPlayer = players.get(0);
-			playerInTurn = players.get(0);
-		}
 		yatzyRuleBase = new YatzyRuleBase();
 		yatzyRuleBase.startGame(this);
 		return gameShouldStartNow;
@@ -293,7 +293,7 @@ public class YatzyTable extends Table {
 			// Nobody was removed
 			return false;
 		}
-		if (playerInTurn.equals(removedPlayer)) {
+		if (playerInTurn != null && playerInTurn.equals(removedPlayer)) {
 			playerInTurn = setupNextTurn();
 		}
 		return true;
@@ -334,11 +334,15 @@ public class YatzyTable extends Table {
 		return (YatzyPlayer) playerInTurn;
 	}
 
+	public void cancelTimer() {
+		if (this.timer != null)
+			timer.cancel();
+	}
+
 	@Override
 	protected Table startRematch() {
-		super.setGameResult(null);
-		super.gameOver = false;
-		return null;
+		this.yatzyRuleBase.startGame(this);
+		return this;
 	}
 
 	@JsonbProperty(value = "tableType")
@@ -349,6 +353,18 @@ public class YatzyTable extends Table {
 	@Override
 	public String toString() {
 		return "YatzyTable [timer=" + timer + ", players=" + players + ", dices=" + dices + "]";
+	}
+
+	@Override
+	public boolean addWatcher(User watcher) {
+		if (this.startTime == null && this.playerA == null) {
+			return false;
+		}
+		if (!this.watchers.contains(watcher)) {
+			this.watchers.add(watcher);
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -363,6 +379,14 @@ public class YatzyTable extends Table {
 				} else {
 					getGameResult().findPlayer(y.getId()).setStatus(Status.LEFT);
 				}
+				detachPlayer(user);
+			}
+			if (enabledPlayersCount() == 0) {
+				cancelTimer();
+				LOGGER.info("No active players in table: Shutting down table" + this);
+				this.playerA = null;
+				gameOver = true;
+				return;
 			}
 			if (playerInTurn != null && playerInTurn.equals(user)) {
 				setupNextTurn();

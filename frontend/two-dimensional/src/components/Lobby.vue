@@ -366,7 +366,7 @@ export default defineComponent({
 						this.$store.dispatch("chat", message)
 						break
 					case "REMATCH":
-						this.$store.dispatch("rematch", data.table).then(() => {
+						this.$store.dispatch("rematch", data).then(() => {
 							//this.$router.push({ name: 'Table', id:data.table.id})
 						})
 						break

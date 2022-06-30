@@ -189,6 +189,10 @@ export const store = createStore<IStoreState>({
         },
         leaveStartedTable(state, userName: string) {
             if (state.theTable) {
+                if(state.theTable.gameMode.gameNumber === 4){
+                    //TODO something for multiplayer tables??
+                    return
+                }
                 if (state.theTable.playerA.name === userName) {
                     state.theTable.playerInTurn = null
                 } else if (state.theTable.playerB.name === userName) {
@@ -200,7 +204,7 @@ export const store = createStore<IStoreState>({
                 state.theTable.chat.messages.unshift(chatMessage)
             }
         },
-        leaveStartingTable(state, data:any) {            
+        leaveStartingTable(state, data:any) {
             let tableFrom:IMultiplayerTable = data.table
             let userName:string = data.who.name
             let table:IMultiplayerTable = <IMultiplayerTable>state.tables.find(table => table.tableId == tableFrom.tableId)
@@ -209,19 +213,16 @@ export const store = createStore<IStoreState>({
                 table.players.splice(index, 1)
             }
         },
-        rematch(state, table: ITable) {
+        rematch(state, payload: any) {
             let chat: IChat = { messages: [], message: { text: "" } };
             if (state.theTable && state.theTable.chat) {
                 chat = state.theTable.chat
             }
-          //  const board: ISquare[] = []
-           // table.board = board
             const rematchMessage: IChatMessage = { text: "Rematch started", from: "System" }
             chat.messages.unshift(rematchMessage)
-            table.playerA.wins = table.playerA.wins
-            table.playerB.wins = table.playerB.wins
-            table.chat = chat
-            state.theTable = table
+         
+            payload.table.chat = chat
+            state.theTable = payload.table
         },
         updateWinner(state, win: IWin) {
 

@@ -12,6 +12,7 @@ import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.AI;
 import com.tauhka.games.core.tables.ConnectFourTable;
 import com.tauhka.games.core.tables.Table;
+import com.tauhka.games.core.tables.TableType;
 import com.tauhka.games.core.tables.TicTacToeTable;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
@@ -80,7 +81,9 @@ public class TableHandler extends CommonHandler {
 		}
 		User user = endpoint.getUser();
 		user.setTable(null);
-		if (table.isPlayer(user) && table.getStartTime() != null) {
+		if (table.isPlayer(user) && table.getStartTime() != null && table.getTableType() == TableType.MULTI) {
+			table.leaveTable(user);
+		} else if (table.isPlayer(user) && table.getStartTime() != null) {
 			handleLeavingPlayerStatistics(table, endpoint);
 		}
 		Message message = new Message();

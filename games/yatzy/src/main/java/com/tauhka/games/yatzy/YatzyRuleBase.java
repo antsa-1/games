@@ -1,9 +1,11 @@
 package com.tauhka.games.yatzy;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -20,9 +22,17 @@ public class YatzyRuleBase {
 	private static final Logger LOGGER = Logger.getLogger(YatzyRuleBase.class.getName());
 
 	public void startGame(YatzyTable yatzyTable) {
-		if (yatzyTable.getDices() == null) {
-			yatzyTable.setDices(new ArrayList<Dice>(5));
+		yatzyTable.setStartTime(Instant.now());
+		if (yatzyTable.getRandomizeStarter()) {
+			int i = ThreadLocalRandom.current().nextInt(1, yatzyTable.getPlayers().size());
+			yatzyTable.setStartingPlayer(yatzyTable.getPlayers().get(i - 1));
+			yatzyTable.setPlayerInTurn(yatzyTable.getStartingPlayer());
+		} else {
+			yatzyTable.setStartingPlayer(yatzyTable.getPlayers().get(0));
+			yatzyTable.setPlayerInTurn(yatzyTable.getStartingPlayer());
 		}
+		yatzyTable.getPlayerInTurn().setRollsLeft(3);
+		yatzyTable.setDices(new ArrayList<Dice>(5));
 		for (int i = 0; i < ALL_DICES_COUNT; i++) {
 			Dice dice = new Dice();
 			dice.setDiceId(UUID.randomUUID());
@@ -35,6 +45,8 @@ public class YatzyRuleBase {
 			Player p = new Player(y.getId());
 			p.setName(y.getName());
 			yatzyTable.getGameResult().addPlayer(p);
+			y.setScoreCard(new ScoreCard());
+			y.setEnabled(true);
 		}
 		yatzyTable.setGameId(UUID.randomUUID());
 		yatzyTable.startTimer();

@@ -455,6 +455,14 @@ public abstract class Table implements Serializable {
 		return true;
 	}
 
+	public User getStartingPlayer() {
+		return startingPlayer;
+	}
+
+	public void setStartingPlayer(User startingPlayer) {
+		this.startingPlayer = startingPlayer;
+	}
+
 	public void setPlayerA(User playerA) {
 		this.playerA = playerA;
 	}

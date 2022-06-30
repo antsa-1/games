@@ -5,7 +5,7 @@
                 class="btn btn-primary w-30 float-xs-start float-sm-end">
                 Resign
             </button>
-            <button v-if="true" @click="" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
+            <button v-if="true" @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
                 Rematch
             </button>
         </div>
@@ -42,6 +42,8 @@ import { IScoreCard, IYatzyComponent, IYatzyTable } from '@/interfaces/yatzy';
 import { ref, computed, onMounted, onBeforeMount, onUnmounted, watch, ComputedRef, } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
+import { leaveTable,rematch } from '../composables/tableComposable'
+
 import { IGameOptions, Image, IVector2, IGameCanvas, FONT_SIZE, FONT, IChatMessage } from "../../interfaces/commontypes"
 import { IYatzyPlayer, IYatzyMessage, IDice, ISection, IYatzySnapshot, IYatzyAction, IYatzyActionQueue, HandType, IHand, IScoreCardRow } from "../../interfaces/yatzy"
 import Chat from "../Chat.vue"
@@ -51,68 +53,54 @@ let gameSnapshot: IYatzySnapshot = undefined
 const store = useStore()
 const gameOptions = ref<IGameOptions>({ notificationSound: false })
 
-
 onMounted(() => {
-    restartPlayersTimeInterval(yatzyTable.value.secondsLeft)
+    startCountdownTimer(yatzyTable.value.secondsLeft) 
+    setupCanvas() 
+    attachListeners()
+    resizeDocument()
+    repaintYatzyTable()
+})
+
+const setupCanvas = () => {
     let canvasElement = <HTMLCanvasElement>document.getElementById("canvas")
     yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, ctx: canvasElement.getContext("2d") }
     yatzyTable.value.canvas.ctx.imageSmoothingEnabled = true
     yatzyTable.value.scoreCardRows = initScoreCardRows()
-    if (isMyTurn) {
+    if (isMyTurn.value) {
         yatzyTable.value.canvas.enabled = true
     }
-    attachListeners()
-    resizeDocument()
-    repaintYatzyTable()
-    yatzyTable.value.secondsLeft
-})
-
+}
 const scoreCardSection = (): ISection => {
 
     const canvasWidth = yatzyTable.value.canvas.element.width
     const start: IVector2 = { x: 0, y: 0 }
     let end: IVector2 = undefined
     if (canvasWidth >= 1200 || canvasWidth >= 1000 && yatzyTable.value.players.length <= 3) {
-
         let x = canvasWidth * 0.95 / 2
         let y = x
-        //     yatzyTable.value.canvas.element.width = x
-        //     yatzyTable.value.canvas.element.height = y
         end = { x: x, y: y }
-        // yatzyTable.value.image.canvasDimension = {x:x, y:y}
         return { start, end }
     }
     if (canvasWidth >= 1000 && yatzyTable.value.players.length === 4) {
-
         let x = screen.width * 0.95
         let y = screen.height
-
-        //yatzyTable.value.image.canvasDimension = {x:x, y:y}
         end = { x: x, y: y }
         return { start, end }
     }
     if (canvasWidth >= 768 && yatzyTable.value.players.length <= 3) {
-
         let x = screen.width * 0.99 / 2
         let y = x
-
-        // yatzyTable.value.image.canvasDimension = {x:x, y:y}
         end = { x: x, y: y }
         return { start, end }
     }
     if (canvasWidth >= 768 && yatzyTable.value.players.length === 4) {
-
         let x = screen.width * 0.90
         let y = screen.height
-
-        //  yatzyTable.value.image.canvasDimension = {x:x, y:y}
         end = { x: x, y: y }
         return { start, end }
     }
-
     const x = canvasWidth
     const y = yatzyTable.value.canvas.element.height * 0.75
-
     end = { x: x, y: screen.height * 0.75 }
     // yatzyTable.value.image.canvasDimension = {x:x, y:y}
     return { start, end }
@@ -251,7 +239,10 @@ const consumeActions = () => {
             })
             unblockQueue()
             document.body.style.cursor = "default"
-            yatzyTable.value.playerInTurn = action.payload.table.playerInTurn           
+            yatzyTable.value.playerInTurn = action.payload.table.playerInTurn
+            if(isMyTurn.value){
+                yatzyTable.value.canvas.enabled = true
+            }       
             repaintYatzyTable()
         })
        } else if(action.type === "timeout"){
@@ -284,7 +275,7 @@ let playerTimeInterval = null
 const stopPlayerTimeInterval = () =>  {
     playerTimeInterval = clearInterval(playerTimeInterval)
 }
-const restartPlayersTimeInterval = (seconds:number) => {
+const startCountdownTimer = (seconds:number) => {
     console.log("restartInterval "+seconds)
     if(playerTimeInterval){
 		stopPlayerTimeInterval()
@@ -314,9 +305,10 @@ const unblockQueue = (timeout: number = 0) => {
 
 onUnmounted(() => {
     console.log("onUnmounted")
-    const obj = { title: "LEAVE_TABLE", message: yatzyTable.value.tableId }
-    store.getters.user.webSocket?.send(JSON.stringify(obj))
-    store.dispatch("clearTable")
+    unsubscribeAction()
+    unsubscribe()
+	document.removeEventListener("visibilitychange", onVisibilityChange)
+    leaveTable(yatzyTable.value.tableId)
 })
 
 const setCanvasPositionToLeft = () => {
@@ -574,12 +566,22 @@ const isPointOnSection = (point: IVector2, section: ISection) => {
     return true
 }
 
+onUnmounted(() => {
+    unsubscribe()
+    stopPlayerTimeInterval()
+    leaveTable(yatzyTable.value.tableId)
+    console.log("unmounted")
+})
+
 const unsubscribe = store.subscribe((mutation, state) => {
     if(mutation.type === "changeTurn"){  
        console.log("changePlayer mutation")
     }
     if (mutation.type === "rematch") {
         console.log("rematch sub")
+        yatzyTable.value = initTable()
+        setupCanvas()
+        drawAll()
     }
     if (mutation.type === "resign") {
         console.log("resign sub")
@@ -587,13 +589,20 @@ const unsubscribe = store.subscribe((mutation, state) => {
 })
 
 const unsubscribeAction = store.subscribeAction((action, state) => {
-    if (action.type === "changeTurn" || action.type === "chat") {
-       // yatzyTable.value.playerInTurn = action.payload.nextTurnPlayer
+    console.log("ACTION:"+JSON.stringify(action))
+    if (action.type === "changeTurn" || action.type === "chat" || action.type ==="removePlayer") {
+        return
+    } 
+    if(action.type === "LEAVE_TABLE"){
+        let player:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who)
+        player.enabled = false
+        drawAll()
+        //Chat line TODO
         return
     }
-    restartPlayersTimeInterval(action.payload.table.secondsLeft)
     gameSnapshot = action.payload
-    actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)    
+    startCountdownTimer(action.payload.table.secondsLeft)
+    actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)
     initNewTurnIfRequired(action)
 })
 
@@ -680,8 +689,11 @@ const optionsText = (): string => {
     if(iTimedOut){
        return youHaveTimedOut
     }
-    if (isMyTurn.value === false) {
+    if (isMyTurn.value === false &&iTimedOut === false) {
         return waitingTurnText
+    }
+    if (isMyTurn.value === false) {
+        return ""
     }
     if (playerInTurn.value.rollsLeft === 3) {
         return rollDicesText
