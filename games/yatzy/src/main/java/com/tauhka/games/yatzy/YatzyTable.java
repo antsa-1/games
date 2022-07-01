@@ -3,7 +3,9 @@ package com.tauhka.games.yatzy;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,7 +13,6 @@ import java.util.stream.Collectors;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
-import com.tauhka.games.core.stats.Player;
 import com.tauhka.games.core.stats.Status;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
@@ -42,6 +43,8 @@ public class YatzyTable extends Table {
 	private String timedOutPlayerName;
 	@JsonbTransient
 	private UUID gameId;
+	@JsonbTransient
+	private Set<YatzyPlayer> rematchPlayers;
 	@JsonbProperty("secondsLeft")
 	private int secondsLeft;
 
@@ -258,7 +261,7 @@ public class YatzyTable extends Table {
 		return users;
 	}
 
-	public int enabledPlayersCount() {
+	public int getEnabledPlayersCount() {
 		return (int) this.players.stream().filter(player -> player.isEnabled()).count();
 	}
 
@@ -389,8 +392,9 @@ public class YatzyTable extends Table {
 				if (!isStarted()) {
 					players.remove(index);
 				}
+
 			}
-			if (enabledPlayersCount() == 0) {
+			if (getEnabledPlayersCount() == 0) {
 				cancelTimer();
 				LOGGER.info("No active players in table: Shutting down table" + this);
 				this.playerA = null;
@@ -404,6 +408,21 @@ public class YatzyTable extends Table {
 		}
 	}
 
+	@Override
+	public synchronized boolean suggestRematch(User user) {
+		int index = players.indexOf(user);
+		if (index == -1) {
+			LOGGER.info("Yatzy wrong rematch player, not in the game:" + user);
+			return false;
+		}
+		rematchPlayers.add(players.get(index));
+		return rematchPlayers.size() == players.size(); // All players required to click "rematch"
+	}
+
+	public Set<YatzyPlayer> getRematchPlayers() {
+		return rematchPlayers;
+	}
+
 	private void updateResult(YatzyPlayer y) {
 		if (!this.isStarted()) {
 			return;
@@ -413,5 +432,10 @@ public class YatzyTable extends Table {
 		} else {
 			getGameResult().findPlayer(y.getId()).setStatus(Status.LEFT);
 		}
+	}
+
+	public void resetRematchPlayers() {
+		this.rematchPlayers = new HashSet<YatzyPlayer>();
+
 	}
 }

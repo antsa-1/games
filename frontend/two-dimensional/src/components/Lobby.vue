@@ -264,19 +264,16 @@ export default defineComponent({
         },
 		isRemoveTableButtonVisible(){
 			const firstTable:ITable = this.$store.getters.tables[0]
-			if(firstTable && firstTable.playerA){
-				return firstTable.playerA.name===this.userName
+            console.log("firstTable:"+JSON.stringify(firstTable))
+ 			if(firstTable && firstTable.playerA){
+                return firstTable.playerA.name === this.userName && !firstTable.started
 			}
 			return false
 		},		
 	},
 	created() {
-		
 		if (this.user && !this.user.webSocket) {
-			
 			this.connect(this.user.token);
-		}else{
-			
 		}
 	},
 	methods: {
@@ -316,6 +313,7 @@ export default defineComponent({
 					case "REMOVE_PLAYER":
                         //if I am in a table and user who left was in the same table
                         if(store.getters?.theTable?.tableId == data?.table?.tableId){
+                            console.log("lobby remove player "+store.getters?.theTable?.tableId)
                                 this.$store.dispatch("leaveTable", data).then(() => {
 							    this.$store.dispatch("removePlayer", data.who)							
 						})} else {
@@ -571,7 +569,7 @@ export default defineComponent({
             }
             return true
 		},
-        leaveButtonVisible(table:IBaseTable){           
+        leaveButtonVisible(table:IBaseTable){
             return this.user.tableId === table.tableId
         },
         watchButtonVisible(table:IBaseTable){

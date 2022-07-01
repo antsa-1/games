@@ -135,6 +135,10 @@ public class TableHandler extends CommonHandler {
 		}
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
+		if (table == null) {
+			LOGGER.info("No Such Table:" + tableID);
+			return null;
+		}
 		synchronized (table) {
 			if (!table.isWaitingOpponent()) {
 				throw new IllegalArgumentException("Table is not waiting player " + table + " trying user:" + endpoint.getUser());
@@ -160,6 +164,9 @@ public class TableHandler extends CommonHandler {
 	public Message watch(Message message, CommonEndpoint CommonEndpoint) {
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
+		if (table == null) {
+			LOGGER.info("No Such Table to watch:" + tableID);
+		}
 		if (table.addWatcher(CommonEndpoint.getUser())) {
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.WATCH);
@@ -169,9 +176,13 @@ public class TableHandler extends CommonHandler {
 		throw new IllegalArgumentException("Watcher not allowed in table" + table);
 	}
 
-	public Message getWatcherInfo(Message message, CommonEndpoint CommonEndpoint) {
+	public Message createWatchMessage(Message message, CommonEndpoint CommonEndpoint) {
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
+		if (table == null) {
+			LOGGER.info("No Such Table to watch:" + tableID);
+			return null;
+		}
 		Message watcherMessage = new Message();
 		watcherMessage.setTitle(MessageTitle.ADD_WATCHER);
 		watcherMessage.setWho(CommonEndpoint.getUser());

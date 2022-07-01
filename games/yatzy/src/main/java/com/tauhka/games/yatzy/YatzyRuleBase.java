@@ -49,6 +49,7 @@ public class YatzyRuleBase {
 			y.setEnabled(true);
 		}
 		yatzyTable.setGameId(UUID.randomUUID());
+		yatzyTable.resetRematchPlayers();
 		yatzyTable.startTimer();
 	}
 

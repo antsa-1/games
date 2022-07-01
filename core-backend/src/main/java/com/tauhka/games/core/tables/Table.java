@@ -170,8 +170,15 @@ public abstract class Table implements Serializable {
 	}
 
 	protected void detachPlayer(User user) {
-		if (user != null)
-			user.setTable(null);
+		if (user == null) {
+			return;
+		}
+		user.setTable(null);
+		if (user.equals(playerA)) {
+			playerA = null;
+		}
+		if (user.equals(playerB))
+			playerB = null;
 	}
 
 	public int getDraws() {

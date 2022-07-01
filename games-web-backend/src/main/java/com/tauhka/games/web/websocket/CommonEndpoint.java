@@ -121,7 +121,7 @@ public class CommonEndpoint {
 			} else if (message.getTitle() == MessageTitle.WATCH) {
 				gameMessage = tableHandler.watch(message, this);
 				sendPrivateMessage(gameMessage);
-				gameMessage = tableHandler.getWatcherInfo(message, this);
+				gameMessage = tableHandler.createWatchMessage(message, this);
 				sendMessageToAllInTableExcept(gameMessage, user);
 			} else if (message.getTitle() == MessageTitle.RESIGN) {
 				gameMessage = tableHandler.resign(this);

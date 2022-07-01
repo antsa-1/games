@@ -315,14 +315,6 @@ const unblockQueue = (timeout: number = 0) => {
     }, timeout)
 }
 
-onUnmounted(() => {
-    console.log("onUnmounted")
-    unsubscribeAction()
-    unsubscribe()
-	document.removeEventListener("visibilitychange", onVisibilityChange)
-    leaveTable(yatzyTable.value.tableId)
-})
-
 const setCanvasPositionToLeft = () => {
     yatzyTable.value.canvas.element.style.position = 'absolute'
     yatzyTable.value.canvas.element.style.left = '0px'
@@ -469,6 +461,7 @@ const isDocumentVisible = () => {
 const createTableFromSnapShot = () => {
 
     if(!gameSnapshot?.table){
+        unblockQueue()
         return
     }
     setupDices(yatzyTable.value.dices, gameSnapshot.table.dices, false)
@@ -499,6 +492,7 @@ const createTableFromSnapShot = () => {
         return handleGameOver()
     }
     initNewTurnIfRequired(action)
+    unblockQueue()
    
 }
 const onVisibilityChange = () => { 
@@ -580,12 +574,12 @@ const isPointOnSection = (point: IVector2, section: ISection) => {
     }
     return true
 }
-
 onUnmounted(() => {
+    console.log("onUnmounted")
+    unsubscribeAction()
     unsubscribe()
-    stopPlayerTimeInterval()
+	document.removeEventListener("visibilitychange", onVisibilityChange)
     leaveTable(yatzyTable.value.tableId)
-    console.log("unmounted")
 })
 
 const unsubscribe = store.subscribe((mutation, state) => {
@@ -605,13 +599,10 @@ const unsubscribe = store.subscribe((mutation, state) => {
 
 const unsubscribeAction = store.subscribeAction((action, state) => {
     console.log("Action in:"+JSON.stringify(action))
-    if (action.type === "changeTurn" || action.type === "chat" || action.type ==="removePlayer" || action.type ==="watch" ||  action.type ===" addPlayer" ) {
+    //TODO revert to acceptable action types 
+    if (action.type !== "yatzyRollDices" && action.type !== "yatzySelectHand" && action.type !== "leaveTable") {
         return
     } 
-    if(action.type === "addWatcher"){
-        console.log(" watcher arrived")
-        return
-    }
     if(action.type === "leaveTable"){
         return handleLeavingPerson(action)
     }
