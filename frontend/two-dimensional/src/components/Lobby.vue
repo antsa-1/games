@@ -75,7 +75,7 @@
 								{{getTimeControl(table)}}s
 							</td>						
 							<td>
-								<section v-if="!hasCreatedTable">
+								<section v-if="!hasCreatedUnStartedTable">
 									<button v-if="playButtonVisible(table)" @click="play(table)" type="button" class="btn btn-primary w-30 float-start">
 										Play
 									</button>
@@ -85,7 +85,7 @@
 									<button v-else-if="watchButtonVisible(table)" @click="watchTable(table)"  type="button" class="btn btn-primary w-30 float-end">
 										Watch
 									</button>
-									<span v-else-if="requiresLoginTextVisible(table)">Requires login</span>
+									<span v-else-if="isLoginRequiredTextVisible(table)">Requires login</span>
 								</section>
 							</td>
 						</tr>								
@@ -234,7 +234,7 @@ export default defineComponent({
 		},
         isMainCreateTableButtonVisible(){
             //TODO, can only this.userName.tableId be used -> check createTable, does it set value effect also then in removeTable
-           return  !this.hasCreatedTable  && !this.user.tableId 
+           return  !this.hasCreatedUnStartedTable  && !this.user.tableId 
         },
         hasVariants(){
             return this.selectedGame !== 0 && this.selectedGame !== 4
@@ -245,9 +245,9 @@ export default defineComponent({
 		tablesExist(){
 			return this.$store.getters.tables.length > 0
 		},
-		hasCreatedTable(){
+		hasCreatedUnStartedTable(){
 			const firstTable:ITable = this.$store.getters.tables[0]
-			if(firstTable && firstTable.playerA){
+			if(firstTable && firstTable.playerA && !firstTable.started){
 				return firstTable.playerA.name === this.userName
 			}
 			return false
@@ -575,7 +575,7 @@ export default defineComponent({
         watchButtonVisible(table:IBaseTable){
             return table.started? true: false
         },
-        requiresLoginTextVisible(table:IBaseTable){
+        isLoginRequiredTextVisible(table:IBaseTable){
             return !this.authenticated && !this.user.tableId && table.registeredOnly
         },
 		isOwnTable(table:ITable){
