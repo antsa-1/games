@@ -192,6 +192,7 @@ import Chat from "./Chat.vue";
 import { tablesMixin } from "@/mixins/tablesMixin";
 import { poolMixin } from "@/mixins/poolMixin";
 import { IYatzyTable } from "@/interfaces/yatzy";
+import { store } from "@/store";
 export default defineComponent({
 	
 	name: "Lobby",
@@ -313,11 +314,14 @@ export default defineComponent({
 						break;
 
 					case "REMOVE_PLAYER":
-						this.$store.dispatch("leaveTable", data).then(()=>{
-							this.$store.dispatch("removePlayer", data.who)
-							
-						})
-					
+                        //if I am in a table and user who left was in the same table
+                        if(store.getters?.theTable?.tableId == data?.table?.tableId){
+                                this.$store.dispatch("leaveTable", data).then(() => {
+							    this.$store.dispatch("removePlayer", data.who)							
+						})} else {
+                            //remove player only from players list
+                            this.$store.dispatch("removePlayer", data.who)	
+                        }
 						break;
 					case "REMOVE_TABLE":							
 						this.$store.dispatch("removeTable", data.table)
@@ -347,8 +351,9 @@ export default defineComponent({
 						this.$store.dispatch("changeTurn", data.table.playerInTurn)
 						break
 					case "WATCH":
-						console.log("watch arrived selecting table "+data.table)
+
 						this.$store.dispatch("selectTable", data.table).then(() => {
+                            console.log("LOBBY TABLE:"+ JSON.stringify(this.$store.getters.theTable))
 							this.openWatcherTable(data.table)
 						})
 						break
@@ -498,7 +503,7 @@ export default defineComponent({
             if(this.canSelectPlayerAmount){
 				obj.playerAmount = this.selectedPlayerAmount
 			}
-            console.log("DATA:"+JSON.stringify(obj))
+     
 			this.user.webSocket.send(JSON.stringify(obj))
 			this.computerLevel = null
 			this.playAgainstComputerChecked = false

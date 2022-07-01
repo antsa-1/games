@@ -118,6 +118,11 @@ public abstract class Table implements Serializable {
 
 	protected abstract Table startRematch();
 
+	public void onClose() {
+		// Default implementation
+		detachPlayers();
+	}
+
 	@JsonbTransient
 	public boolean isArtificialPlayerInTurn() {
 		return this.playerInTurn != null && this.playerInTurn instanceof AI;
@@ -156,7 +161,7 @@ public abstract class Table implements Serializable {
 		throw new IllegalArgumentException("Resign not possible" + player);
 	}
 
-	public void detachPlayers() {
+	protected void detachPlayers() {
 		detachPlayer(playerA);
 		detachPlayer(playerB);
 		for (User u : watchers) {

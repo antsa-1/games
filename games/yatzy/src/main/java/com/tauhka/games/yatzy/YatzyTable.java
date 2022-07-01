@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.stats.Player;
 import com.tauhka.games.core.stats.Status;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
@@ -106,7 +107,7 @@ public class YatzyTable extends Table {
 
 	@Override
 	public boolean isWaitingOpponent() {
-		return this.players.size() == 1;
+		return this.players.size() != this.playerAmount && !isStarted();
 	}
 
 	@Override
@@ -220,6 +221,11 @@ public class YatzyTable extends Table {
 
 	public void setGameId(UUID gameId) {
 		this.gameId = gameId;
+	}
+
+	@Override
+	public void onClose() {
+		detachPlayers();
 	}
 
 	@Override
@@ -378,12 +384,11 @@ public class YatzyTable extends Table {
 			if (index >= 0) {
 				YatzyPlayer y = players.get(index);
 				y.setEnabled(false);
-				if (y.isGuestPlayer()) {
-					getGameResult().findPlayer(y.getName()).setStatus(Status.LEFT);
-				} else {
-					getGameResult().findPlayer(y.getId()).setStatus(Status.LEFT);
-				}
+				updateResult(y);
 				detachPlayer(user);
+				if (!isStarted()) {
+					players.remove(index);
+				}
 			}
 			if (enabledPlayersCount() == 0) {
 				cancelTimer();
@@ -396,6 +401,17 @@ public class YatzyTable extends Table {
 			if (playerInTurn != null && playerInTurn.equals(user)) {
 				setupNextTurn();
 			}
+		}
+	}
+
+	private void updateResult(YatzyPlayer y) {
+		if (!this.isStarted()) {
+			return;
+		}
+		if (y.isGuestPlayer()) {
+			getGameResult().findPlayer(y.getName()).setStatus(Status.LEFT);
+		} else {
+			getGameResult().findPlayer(y.getId()).setStatus(Status.LEFT);
 		}
 	}
 }

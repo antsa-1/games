@@ -81,17 +81,19 @@ public class TableHandler extends CommonHandler {
 		}
 		User user = endpoint.getUser();
 		user.setTable(null);
-		if (table.isPlayer(user) && table.getStartTime() != null && table.getTableType() == TableType.MULTI) {
-			table.leaveTable(user);
-		} else if (table.isPlayer(user) && table.getStartTime() != null) {
-			handleLeavingPlayerStatistics(table, endpoint);
-		}
 		Message message = new Message();
 		message.setTitle(MessageTitle.LEAVE_TABLE);
 		message.setTable(table);
-		if (table.removePlayerIfExist(user) || table.removeWatcherIfExist(user)) {
+		if (table.isPlayer(user) && table.getTableType() == TableType.MULTI) {
+			table.leaveTable(user);
 			message.setWho(endpoint.getUser());
 			return message;
+		} else if (table.isPlayer(user) && table.isStarted()) {
+			handleLeavingPlayerStatistics(table, endpoint);
+			if (table.removePlayerIfExist(user) || table.removeWatcherIfExist(user)) {
+				message.setWho(endpoint.getUser());
+				return message;
+			}
 		}
 		return null;
 	}
@@ -103,7 +105,7 @@ public class TableHandler extends CommonHandler {
 
 		if (table.isStarted() && !table.isSomebodyInTurn() || !table.isStarted() && table.getPlayerA() == null) {
 			CommonEndpoint.TABLES.remove(table.getTableId());
-			table.detachPlayers();
+			table.onClose();
 			Message message = new Message();
 			message.setTitle(MessageTitle.REMOVE_TABLE);
 			message.setTable(table);
@@ -116,9 +118,8 @@ public class TableHandler extends CommonHandler {
 		// Using params would be faster...
 		Optional<Table> tableOptional = CommonEndpoint.TABLES.values().stream().filter(taabel -> taabel.getPlayerA() != null).filter(taabel -> taabel.getPlayerA().equals(endpoint.getUser())).findFirst();
 		if (tableOptional.isPresent()) {
-			tableOptional.get().detachPlayers();
-			endpoint.getUser().setTable(null);
 			Table removedTable = CommonEndpoint.TABLES.remove(tableOptional.get().getTableId());
+			removedTable.onClose();
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.REMOVE_TABLE);
 			message_.setTable(removedTable);

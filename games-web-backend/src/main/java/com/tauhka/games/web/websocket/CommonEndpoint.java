@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.tables.Table;
-import com.tauhka.games.core.timer.TimeoutEvent;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageDecoder;
 import com.tauhka.games.messaging.MessageEncoder;
@@ -22,7 +21,6 @@ import com.tauhka.games.messaging.handlers.YatzyTableHandler;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.pool.TurnResult;
 
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.EncodeException;
@@ -124,7 +122,7 @@ public class CommonEndpoint {
 				gameMessage = tableHandler.watch(message, this);
 				sendPrivateMessage(gameMessage);
 				gameMessage = tableHandler.getWatcherInfo(message, this);
-				sendMessageToTable(gameMessage.getTable(), gameMessage);
+				sendMessageToAllInTableExcept(gameMessage, user);
 			} else if (message.getTitle() == MessageTitle.RESIGN) {
 				gameMessage = tableHandler.resign(this);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);

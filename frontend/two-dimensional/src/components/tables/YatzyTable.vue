@@ -52,11 +52,21 @@ const router = useRouter()
 let gameSnapshot: IYatzySnapshot = undefined
 const store = useStore()
 const gameOptions = ref<IGameOptions>({ notificationSound: false })
+const props = defineProps(['watch'])
 
 onMounted(() => {
-    startCountdownTimer(yatzyTable.value.secondsLeft) 
-    setupCanvas() 
-    attachListeners()
+    startCountdownTimer(yatzyTable.value.secondsLeft)
+    setupCanvas()
+    if(props.watch === "1"){
+        const tableSnapshot:IYatzyTable = <IYatzyTable> store.getters.theTable
+      
+        gameSnapshot = {table:tableSnapshot, yatzy:null}
+    
+        createTableFromSnapShot()
+    } else {
+        attachListeners()
+    }
+
     resizeDocument()
     repaintYatzyTable()
 })
@@ -138,8 +148,8 @@ const initScoreCardRows = (): IScoreCardRow[] => {
     return rows
 }
 const initTable = (): IYatzyTable => {
-    console.log("initTable:")
     let initialTable: IYatzyTable = store.getters.yatzyTable
+    console.log("initTable:"+JSON.stringify(initialTable))
     const bgSize: IVector2 = { x: 1600, y: 1600 }
     const tableImage = <Image>{
         image: <HTMLImageElement>document.getElementById("yatzybg"),
@@ -151,10 +161,12 @@ const initTable = (): IYatzyTable => {
     }
     initialTable.image = tableImage
     const players: IYatzyPlayer[] = initialTable.players
-    initialTable.players.forEach(player => {
-        player.scoreCard = { bonus: undefined, subTotal: 0, total: 0, hands: [], lastAdded: null }
-    })
-
+    if(!props.watch){ // no scoreCard reseting for watchers 
+        initialTable.players.forEach(player => {
+            player.scoreCard = { bonus: undefined, subTotal: 0, total: 0, hands: [], lastAdded: null }
+        })
+    }
+    initialTable.players = players
     for (let i = 1; i < 6; i++) {
         const diceImage = <Image>{
             image: <HTMLImageElement>document.getElementById("dice" + i),
@@ -168,7 +180,7 @@ const initTable = (): IYatzyTable => {
         dice.image = diceImage
     }
 
-    initialTable.players = players
+ 
     const playButtonImage = <Image>{
         image: <HTMLImageElement>document.getElementById("emptyButton"),
         canvasDimension: { x: 100, y: 50 },
@@ -455,13 +467,14 @@ const isDocumentVisible = () => {
     return document.visibilityState === 'visible'
 }
 const createTableFromSnapShot = () => {
+
     if(!gameSnapshot?.table){
-        console.log("quick ecit")
         return
     }
     setupDices(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     gameSnapshot.table.players.forEach(snapshotPlayer => {     
         const tablePlayer:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
+     
         const snapshotPlayerHands:IHand [] = snapshotPlayer.scoreCard.hands
         tablePlayer.scoreCard.hands = []
         for (const [key, value] of Object.entries(snapshotPlayerHands)) {          
@@ -591,23 +604,36 @@ const unsubscribe = store.subscribe((mutation, state) => {
 })
 
 const unsubscribeAction = store.subscribeAction((action, state) => {
-    console.log("ACTION:"+JSON.stringify(action))
-    if (action.type === "changeTurn" || action.type === "chat"|| action.type ==="removePlayer" ) {
+    console.log("Action in:"+JSON.stringify(action))
+    if (action.type === "changeTurn" || action.type === "chat" || action.type ==="removePlayer" || action.type ==="watch" ||  action.type ===" addPlayer" ) {
         return
     } 
-    if(action.type === "leaveTable"){
-        let player:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
-        player.enabled = false
-        startCountdownTimer(action.payload.table.secondsLeft)
-        initNewTurnIfRequired(action)
-        drawAll()
+    if(action.type === "addWatcher"){
+        console.log(" watcher arrived")
         return
+    }
+    if(action.type === "leaveTable"){
+        return handleLeavingPerson(action)
     }
     gameSnapshot = action.payload
     startCountdownTimer(action.payload.table.secondsLeft)
     actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)
     initNewTurnIfRequired(action)
 })
+const handleLeavingPerson = (action:any) =>{
+     let player:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
+     
+        if(!player){
+            // watcher left
+            console.log("watcher left")
+            return
+        }
+        player.enabled = false
+     
+        initNewTurnIfRequired(action)
+        unblockQueue()
+        drawAll()
+}
 
 const initNewTurnIfRequired = (action) => {    
     if(action.payload.table.gameOver){
@@ -615,7 +641,7 @@ const initNewTurnIfRequired = (action) => {
     }  
     //One person can play to the end if others timeouts or leaves
     if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name || yatzyTable.value.players.filter(player => player.enabled === true).length === 1 ) {
-        console.log("CHAGNE TURN")
+       
         let changeTurnAction = { type:"changeTurn", payload:action.payload }
         actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, changeTurnAction)
     }
@@ -693,7 +719,7 @@ const optionsText = (): string => {
     if(iTimedOut){
        return youHaveTimedOut
     }
-    if (isMyTurn.value === false &&iTimedOut === false) {
+    if (isMyTurn.value === false &&iTimedOut === false && !props.watch) {
         return waitingTurnText
     }
     if (isMyTurn.value === false) {
