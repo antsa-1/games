@@ -66,7 +66,6 @@ public class CommonEndpoint {
 		// this.session = session;
 	}
 
-
 	// Factory here??
 	@OnMessage
 	public void onMessage(Message message, Session session) {
@@ -289,6 +288,7 @@ public class CommonEndpoint {
 					table = TABLES.get(tableId);
 					sendCommonMessage(tableHandler.removeTableIfRequired(table, null));
 				}
+
 				Message disconnectMessage = userHandler.getUserDisconnectedMessage(this, table);
 				sendCommonMessage(disconnectMessage);
 			} catch (IOException e) {
@@ -297,22 +297,27 @@ public class CommonEndpoint {
 		}
 	}
 
+	private boolean isMultiplayerTableContinuing(Table table) {
+		return table != null && table.isMultiplayerTable() && !table.isGameOver();
+	}
+
 	private UUID removePlayerFromTable() {
-		for (Table table : TABLES.values()) {
-			boolean isPlayer = table.removePlayerIfExist(this.user);
-			if (isPlayer) {
-				return table.getTableId();
-			} else {
-				boolean isWatcher = table.removeWatcherIfExist(this.user);
-				if (isWatcher) {
-					Message removeWatcher = new Message();
-					removeWatcher.setTitle(MessageTitle.WATCHER_LEFT);
-					removeWatcher.setWho(this.user);
-					// removeWatcher.setMessage(table.getId());
-					sendMessageToTable(table, removeWatcher);
-					break;
-				}
-			}
+		Table userTable = user.getTable();
+		if (userTable == null) {
+			return null;
+		}
+		userTable.leaveTable(user); // Table needs to do what table needs to do
+		boolean isPlayer = userTable.removePlayerIfExist(this.user);
+		if (isPlayer) {
+
+			return userTable.getTableId();
+		}
+		boolean isWatcher = userTable.removeWatcherIfExist(this.user);
+		if (isWatcher) {
+			Message removeWatcher = new Message();
+			removeWatcher.setTitle(MessageTitle.WATCHER_LEFT);
+			removeWatcher.setWho(this.user);
+			sendMessageToTable(userTable, removeWatcher);
 		}
 		return null;
 	}

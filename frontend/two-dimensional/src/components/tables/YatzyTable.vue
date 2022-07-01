@@ -456,6 +456,7 @@ const isDocumentVisible = () => {
 }
 const createTableFromSnapShot = () => {
     if(!gameSnapshot?.table){
+        console.log("quick ecit")
         return
     }
     setupDices(yatzyTable.value.dices, gameSnapshot.table.dices, false)
@@ -485,6 +486,7 @@ const createTableFromSnapShot = () => {
         return handleGameOver()
     }
     initNewTurnIfRequired(action)
+   
 }
 const onVisibilityChange = () => { 
     console.log("onVisiblityChange "+isDocumentVisible())
@@ -590,14 +592,15 @@ const unsubscribe = store.subscribe((mutation, state) => {
 
 const unsubscribeAction = store.subscribeAction((action, state) => {
     console.log("ACTION:"+JSON.stringify(action))
-    if (action.type === "changeTurn" || action.type === "chat" || action.type ==="removePlayer") {
+    if (action.type === "changeTurn" || action.type === "chat"|| action.type ==="removePlayer" ) {
         return
     } 
-    if(action.type === "LEAVE_TABLE"){
-        let player:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who)
+    if(action.type === "leaveTable"){
+        let player:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
         player.enabled = false
+        startCountdownTimer(action.payload.table.secondsLeft)
+        initNewTurnIfRequired(action)
         drawAll()
-        //Chat line TODO
         return
     }
     gameSnapshot = action.payload
@@ -611,7 +614,8 @@ const initNewTurnIfRequired = (action) => {
         return
     }  
     //One person can play to the end if others timeouts or leaves
-    if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name || yatzyTable.value.players.filter(player => player.enabled === true).length === 1 ) {      
+    if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name || yatzyTable.value.players.filter(player => player.enabled === true).length === 1 ) {
+        console.log("CHAGNE TURN")
         let changeTurnAction = { type:"changeTurn", payload:action.payload }
         actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, changeTurnAction)
     }

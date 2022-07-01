@@ -134,6 +134,10 @@ public abstract class Table implements Serializable {
 		return this.playerInTurn.equals(u);
 	}
 
+	public boolean isMultiplayerTable() {
+		return this.getTableType() == TableType.MULTI;
+	}
+
 	public synchronized GameResult resign(User player) {
 		if (this.isPlayer(player) && this.playerInTurn != null) {
 			this.playerInTurn = null;

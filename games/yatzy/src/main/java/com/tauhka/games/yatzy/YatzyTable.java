@@ -171,16 +171,20 @@ public class YatzyTable extends Table {
 			}
 			String tableJson = jsonb.toJson(this);
 			String message = "{\"title\":\"TIMEOUT\", \"table\":" + tableJson + "}";
-			for (User user : getUsers()) {
-				if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
-					try {
-						user.getWebsocketSession().getBasicRemote().sendText(message);
-					} catch (IOException e) {
-						LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
-					}
+			sendMessageToTable(message);
+			timedOutPlayerName = null;
+		}
+	}
+
+	private void sendMessageToTable(String message) {
+		for (User user : getUsers()) {
+			if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
+				try {
+					user.getWebsocketSession().getBasicRemote().sendText(message);
+				} catch (IOException e) {
+					LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
 				}
 			}
-			timedOutPlayerName = null;
 		}
 	}
 
@@ -386,6 +390,7 @@ public class YatzyTable extends Table {
 				LOGGER.info("No active players in table: Shutting down table" + this);
 				this.playerA = null;
 				gameOver = true;
+				this.playerInTurn = null;
 				return;
 			}
 			if (playerInTurn != null && playerInTurn.equals(user)) {
