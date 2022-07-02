@@ -64,12 +64,13 @@ public class TableHandler extends CommonHandler {
 				message_ = new Message();
 				message_.setTitle(MessageTitle.START_GAME);
 				message_.setTable(table);
+				return message_;
 			}
-		} else {
-			message_ = new Message();
-			message_.setTitle(MessageTitle.CREATE_TABLE);
-			message_.setTable(table);
 		}
+		message_ = new Message();
+		message_.setTitle(MessageTitle.CREATE_TABLE);
+		message_.setTable(table);
+
 		return message_;
 	}
 
