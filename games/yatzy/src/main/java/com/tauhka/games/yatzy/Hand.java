@@ -35,13 +35,13 @@ public class Hand implements Serializable {
 		this.value = HandCalculator.calculateHandValue(this);
 	}
 
-	public Hand(HandType handType, List<Dice> tableDices, int value) {
+	public Hand(List<Dice> tableDices) {
+		dices = new ArrayList<Dice>(5);
 		for (Dice d : tableDices) {
 			Dice dice = new Dice();
 			dice.setNumber(d.getNumber());
 			dices.add(d);
 		}
-		this.handType = handType;
 	}
 
 	public void setHandType(HandType handType) {

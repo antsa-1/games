@@ -87,6 +87,9 @@ public class YatzyTable extends Table {
 	}
 
 	public List<Dice> rollDices(User user, List<Dice> dices) {
+		if (getPlayerInTurn().getRollsLeft() == 3) {
+			this.getDices().forEach(dice -> dice.setSelected(false));
+		}
 		if (getPlayerInTurn().getRollsLeft() <= 0) {
 			throw new IllegalArgumentException("No rolls left for player:" + user);
 		}
@@ -371,7 +374,7 @@ public class YatzyTable extends Table {
 
 	@Override
 	public String toString() {
-		return "YatzyTable [timer=" + timer + ", players=" + players + ", dices=" + dices + "]";
+		return "YatzyTable [players=" + players + ", dices=" + dices + ", timedOutPlayerName=" + timedOutPlayerName + ", gameId=" + gameId + ", secondsLeft=" + secondsLeft + ", playerInTurn=" + playerInTurn + "]";
 	}
 
 	@Override
@@ -448,6 +451,6 @@ public class YatzyTable extends Table {
 
 	public void resetRematchPlayers() {
 		this.rematchPlayers = new HashSet<YatzyPlayer>();
-
 	}
+
 }

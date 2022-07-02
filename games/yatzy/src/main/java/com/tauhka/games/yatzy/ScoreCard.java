@@ -91,6 +91,11 @@ public class ScoreCard implements Serializable {
 		this.lastAdded = lastAdded;
 	}
 
+	public boolean hasEmptySlotForPairKinds() {
+		return !getHands().containsKey(HandType.PAIR) || !getHands().containsKey(HandType.TWO_PAIR) || !getHands().containsKey(HandType.THREE_OF_KIND) || !getHands().containsKey(HandType.FULL_HOUSE)
+				|| !getHands().containsKey(HandType.FOUR_OF_KIND) || !getHands().containsKey(HandType.YATZY);
+	}
+
 	public void addHand(Hand hand) {
 		hand.setTypeNumber(hand.getHandType().getAsInt());
 		var key = hands.putIfAbsent(hand.getHandType(), hand);

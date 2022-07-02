@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 /**
  * @author antsa-1 from GitHub 12 May 2022
@@ -15,7 +16,7 @@ public class Dice {
 	private UUID diceId;
 	@JsonbProperty(value = "number")
 	private int number;
-	@JsonbProperty(value = "selected")
+	@JsonbTransient
 	private boolean selected;
 
 	public Dice() {
@@ -40,6 +41,10 @@ public class Dice {
 
 	public boolean isSelected() {
 		return selected;
+	}
+
+	public void selectDice() {
+		this.selected = true;
 	}
 
 	public void setSelected(boolean selected) {

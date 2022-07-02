@@ -79,7 +79,7 @@ public class HandCalculator {
 		return hand.getDices().stream().map(Dice::getNumber).collect(Collectors.summingInt(Integer::intValue));
 	}
 
-	private static int findFullHouse(Hand hand) {
+	public static int findFullHouse(Hand hand) {
 		List<Integer> numbers = hand.getDices().stream().map(Dice::getNumber).collect(Collectors.toList());
 		Set<Integer> ints = new HashSet<Integer>(numbers);
 		if (ints.size() != 2) {
@@ -106,6 +106,14 @@ public class HandCalculator {
 	private static boolean isStraight(List<Integer> straight, Hand hand) {
 		List<Integer> numbers = hand.getDices().stream().map(Dice::getNumber).collect(Collectors.toList());
 		return numbers.containsAll(straight);
+	}
+
+	public static boolean isSmallStraight(Hand hand) {
+		return isStraight(SMALL_STRAIGHT, hand);
+	}
+
+	public static boolean isLargeStraight(Hand hand) {
+		return isStraight(LARGE_STRAIGHT, hand);
 	}
 
 	// Usage -> callees have minimumTimes of 3 -> using 5 dices, only one number can exist which has >= frequency

@@ -62,10 +62,9 @@ public class YatzyTableHandler extends CommonHandler {
 	}
 
 	private YatzyMessage selectHand(User user, Message incomingMessage, YatzyTable table) {
-		YatzyMessage playedTurnMessage = new YatzyMessage();
 		ScoreCard sc = table.selectHand(user, incomingMessage.getYatzyMessage().handType);
 		saveHandSelectionToDatabase(table, sc);
-
+		YatzyMessage playedTurnMessage = new YatzyMessage();
 		boolean gameOver = table.isGameOver();
 		if (!gameOver) {
 			table.changePlayerInTurn();

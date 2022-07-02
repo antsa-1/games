@@ -123,6 +123,7 @@ public class YatzyRuleBase {
 		Hand hand = new Hand(HandType.getHandType(handType), table.getDices());
 		ScoreCard scoreCard = table.getPlayerInTurn().getScoreCard();
 		scoreCard.addHand(hand);
+		//table.getDices().forEach(dice -> dice.selectDice());
 		return scoreCard;
 	}
 }
