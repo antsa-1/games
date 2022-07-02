@@ -228,7 +228,13 @@ public class YatzyTable extends Table {
 
 	@Override
 	public void onClose() {
+		LOGGER.info("YatzyTable onClose" + this);
+		cancelTimer();
 		detachPlayers();
+		this.playerA = null;
+		gameOver = true;
+		this.playerInTurn = null;
+
 	}
 
 	@Override
@@ -272,7 +278,7 @@ public class YatzyTable extends Table {
 			// Also guest players can use this option atm..
 			throw new IllegalArgumentException("Only registered players allowed to join to play." + user.getName() + " table:" + this);
 		}
-		YatzyPlayer y = new YatzyPlayer();
+		YatzyPlayer y = user.getName().equals(Constants.OLAV_COMPUTER) ? new YatzyAI() : new YatzyPlayer(); // instanceof AI
 		y.setName(user.getName());
 		y.setId(user.getId());
 		y.setScoreCard(new ScoreCard());
@@ -392,14 +398,9 @@ public class YatzyTable extends Table {
 				if (!isStarted()) {
 					players.remove(index);
 				}
-
 			}
 			if (getEnabledPlayersCount() == 0) {
-				cancelTimer();
-				LOGGER.info("No active players in table: Shutting down table" + this);
-				this.playerA = null;
-				gameOver = true;
-				this.playerInTurn = null;
+				onClose();
 				return;
 			}
 			if (playerInTurn != null && playerInTurn.equals(user)) {
@@ -409,14 +410,25 @@ public class YatzyTable extends Table {
 	}
 
 	@Override
-	public synchronized boolean suggestRematch(User user) {
-		int index = players.indexOf(user);
-		if (index == -1) {
-			LOGGER.info("Yatzy wrong rematch player, not in the game:" + user);
+	public boolean suggestRematch(User user) {
+		if (!isPlayer(user)) {
 			return false;
 		}
-		rematchPlayers.add(players.get(index));
-		return rematchPlayers.size() == players.size(); // All players required to click "rematch"
+		synchronized (this) {
+			int index = players.indexOf(user);
+			if (index == -1) {
+				LOGGER.info("Yatzy wrong rematch player, not in the game:" + user);
+				return false;
+			}
+			rematchPlayers.add(players.get(index));
+			if (rematchPlayers.size() == players.size()) {
+				// All players required to click "rematch"
+				yatzyRuleBase.startGame(this);
+				return true;
+			}
+			return false;
+		}
+
 	}
 
 	public Set<YatzyPlayer> getRematchPlayers() {

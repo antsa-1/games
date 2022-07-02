@@ -64,7 +64,6 @@ public class CommonEndpoint {
 		// this.session = session;
 	}
 
-	// Factory here??
 	@OnMessage
 	public void onMessage(Message message, Session session) {
 		LOGGER.log(Level.INFO, "CommonEndpoint onMessage" + message);
@@ -89,22 +88,13 @@ public class CommonEndpoint {
 					if (gameMessage.getTable() instanceof PoolTable) {
 						playPoolAITurns(gameMessage);
 					} else {
-						artMoveMessage = aiHandler.makeComputerMove(gameMessage.getTable());
+						artMoveMessage = aiHandler.makeGridTableMove(gameMessage.getTable());
 					}
 					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 				}
 
 			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) {
-				gameMessage = tableHandler.leaveTable(message, this);
-				if (gameMessage == null) {
-					return;
-				}
-				if (gameMessage.getTable().isStarted()) {
-					sendMessageToTable(gameMessage.getTable(), gameMessage);
-				} else {
-					sendCommonMessage(gameMessage);
-				}
-				sendCommonMessage(tableHandler.removeTableIfRequired(gameMessage.getTable(), this));
+				handleLeavingPlayer(message);
 			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) {
 				gameMessage = tableHandler.joinTable(message, this);
 				sendCommonMessage(gameMessage);
@@ -115,7 +105,7 @@ public class CommonEndpoint {
 				gameMessage = gridTableHandler.handleNewToken(message, this.getUser());
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
 				if (gameMessage.getTable().isArtificialPlayerInTurn() && gameMessage.getTitle() != MessageTitle.GAME_END) {
-					Message artMoveMessage = aiHandler.makeComputerMove(gameMessage.getTable());
+					Message artMoveMessage = aiHandler.makeGridTableMove(gameMessage.getTable());
 					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 				}
 			} else if (message.getTitle() == MessageTitle.WATCH) {
@@ -135,7 +125,7 @@ public class CommonEndpoint {
 						if (gameMessage.getTable() instanceof PoolTable) {
 							playPoolAITurns(gameMessage);
 						} else {
-							artMoveMessage = aiHandler.makeComputerMove(gameMessage.getTable());
+							artMoveMessage = aiHandler.makeGridTableMove(gameMessage.getTable());
 						}
 						sendMessageToTable(gameMessage.getTable(), artMoveMessage);
 					}
@@ -159,8 +149,7 @@ public class CommonEndpoint {
 				gameMessage = pooltableHandler.selectPocket(this, message);
 				sendMessageToTable(gameMessage.getTable(), gameMessage);
 			} else if (MessageTitle.isYatzyMessage(message.getTitle())) {
-				gameMessage = yatzyTableHandler.handleYatzyMessage(this, message);
-				sendMessageToTable(gameMessage.getTable(), gameMessage);
+				yatzyTableHandler.handleYatzyMessage(this, message);
 			} else {
 				throw new CloseWebSocketException("unknown command:" + message);
 			}
@@ -170,6 +159,20 @@ public class CommonEndpoint {
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "CommonEndpoint onMessagessa virhe", e);
 		}
+	}
+
+	private void handleLeavingPlayer(Message message) {
+		Message gameMessage;
+		gameMessage = tableHandler.leaveTable(message, this);
+		if (gameMessage == null) {
+			return;
+		}
+		if (gameMessage.getTable().isStarted()) {
+			sendMessageToTable(gameMessage.getTable(), gameMessage);
+		} else {
+			sendCommonMessage(gameMessage);
+		}
+		sendCommonMessage(tableHandler.removeTableIfRequired(gameMessage.getTable(), this));
 	}
 
 	private void playPoolAITurns(Message gameMessage) throws InterruptedException {

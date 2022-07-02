@@ -300,6 +300,7 @@ const startCountdownTimer = (seconds:number) => {
 	}, 1000)
 }
 const updateScoreCard = (payload:any) => {
+    console.log("updateScorec:"+JSON.stringify(payload))
     let yatzyPlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === payload.yatzy.whoPlayed)
     yatzyPlayer.scoreCard.total = payload.yatzy.scoreCard.total
     yatzyPlayer.scoreCard.bonus = payload.yatzy.scoreCard.bonus
@@ -390,7 +391,7 @@ const sendHandSelection = (cursorPoint: IVector2) => {
         return
     }
     //expectingServerResponse = true
-    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { handVal: highlightedRow.handType } }
+    const obj = { title: "YATZY_SELECT_HAND", message: yatzyTable.value.tableId, yatzy: { handType: highlightedRow.handType } }
     console.log("*** Sending selection " + JSON.stringify(obj))
     user.value.webSocket.send(JSON.stringify(obj))
     highlightedRow = null
@@ -600,7 +601,7 @@ const unsubscribe = store.subscribe((mutation, state) => {
 const unsubscribeAction = store.subscribeAction((action, state) => {
     console.log("Action in:"+JSON.stringify(action))
     //TODO revert to acceptable action types 
-    if (action.type !== "yatzyRollDices" && action.type !== "yatzySelectHand" && action.type !== "leaveTable") {
+    if (isTableRelatedAction(action)) {
         return
     } 
     if(action.type === "leaveTable"){
@@ -611,6 +612,9 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
     actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)
     initNewTurnIfRequired(action)
 })
+const isTableRelatedAction = (action:any) => {
+    return action.type !== "yatzyRollDices" && action.type !== "yatzySelectHand" && action.type !== "leaveTable" && action.type !=="timeout" && action.type !=="rematch"
+}
 const handleLeavingPerson = (action:any) =>{
      let player:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
      

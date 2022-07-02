@@ -5,7 +5,8 @@ import static com.tauhka.games.core.util.Constants.SYSTEM;
 import java.util.List;
 import java.util.logging.Logger;
 
-import com.tauhka.games.core.stats.MultiplayerRankingCalculator;
+import com.tauhka.games.core.User;
+import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.db.YatzyStatsEJB;
 import com.tauhka.games.db.dao.YatzyTurnDao;
 import com.tauhka.games.messaging.Message;
@@ -29,10 +30,12 @@ import jakarta.inject.Inject;
 public class YatzyTableHandler extends CommonHandler {
 	private static final Logger LOGGER = Logger.getLogger(YatzyTableHandler.class.getName());
 	@Inject
-	YatzyStatsEJB yatzyStatsEJB;
+	private YatzyStatsEJB yatzyStatsEJB;
+	@Inject
+	private AIHandler aiHandler;
 
-	public Message handleYatzyMessage(CommonEndpoint endpoint, Message incomingMessage) {
-		YatzyTable table = (YatzyTable) findUserTable(endpoint); // this can become
+	public void handleYatzyMessage(CommonEndpoint endpoint, Message incomingMessage) {
+		YatzyTable table = (YatzyTable) findUserTable(endpoint);
 
 		if (!table.isPlayerInTurn(endpoint.getUser())) {
 			throw new IllegalArgumentException("Player is not in turn" + endpoint.getUser());
@@ -40,35 +43,79 @@ public class YatzyTableHandler extends CommonHandler {
 		if (incomingMessage.getYatzyMessage() == null) {
 			throw new IllegalArgumentException("No yatzyMessage");
 		}
-		YatzyMessage playedTurnMessage = null;
+		YatzyMessage yatzyMessage = null;
 		Message updateMessage = new Message();
 		if (incomingMessage.getTitle() == MessageTitle.YATZY_ROLL_DICES) {
-			List<Dice> rolledDices = table.rollDices(endpoint.getUser(), incomingMessage.getYatzyMessage().dices);
-			playedTurnMessage = new YatzyMessage();
-			playedTurnMessage.setDices(rolledDices);
-			playedTurnMessage.setWhoPlayed(endpoint.getUser().getName());
+			yatzyMessage = rollDices(table.getPlayerInTurn(), incomingMessage, table);
 			updateMessage.setTitle(MessageTitle.YATZY_ROLL_DICES);
-			createTurnDAOForRolledDices(table, rolledDices);
 		} else if (incomingMessage.getTitle() == MessageTitle.YATZY_SELECT_HAND) {
-			ScoreCard sc = table.selectHand(endpoint.getUser(), incomingMessage.getYatzyMessage().handVal);
-			saveHandSelectionToDatabase(table, sc);
-			playedTurnMessage = new YatzyMessage();
-			boolean gameOver = table.isGameOver();
-			if (!gameOver) {
-				table.changePlayerInTurn();
-			} else {
-				table.checkWinAndDraw();
-				playedTurnMessage.setGameOver(gameOver);
-				//MultiplayerRankingCalculator.calculateNewRankings(table.getGameResult());
-			}
-			playedTurnMessage.setScoreCard(sc);
-			playedTurnMessage.setWhoPlayed(endpoint.getUser().getName());
 			updateMessage.setTitle(MessageTitle.YATZY_SELECT_HAND);
+			yatzyMessage = selectHand(table.getPlayerInTurn(), incomingMessage, table);
 		}
 		updateMessage.setFrom(SYSTEM);
 		updateMessage.setTable(table);
-		updateMessage.setYatzyMessage(playedTurnMessage);
-		return updateMessage;
+		updateMessage.setYatzyMessage(yatzyMessage);
+		sendMessageToTable(table, updateMessage);
+		if (table.isArtificialPlayerInTurn()) {
+			playComputerTurn(table);
+		}
+	}
+
+	private YatzyMessage selectHand(User user, Message incomingMessage, YatzyTable table) {
+		YatzyMessage playedTurnMessage = new YatzyMessage();
+		ScoreCard sc = table.selectHand(user, incomingMessage.getYatzyMessage().handType);
+		saveHandSelectionToDatabase(table, sc);
+
+		boolean gameOver = table.isGameOver();
+		if (!gameOver) {
+			table.changePlayerInTurn();
+		} else {
+			table.checkWinAndDraw();
+			playedTurnMessage.setGameOver(gameOver);
+			// MultiplayerRankingCalculator.calculateNewRankings(table.getGameResult());
+		}
+		playedTurnMessage.setScoreCard(sc);
+		playedTurnMessage.setWhoPlayed(user.getName());
+
+		return playedTurnMessage;
+	}
+
+	private YatzyMessage rollDices(User user, Message incomingMessage, YatzyTable table) {
+		YatzyMessage playedTurnMessage;
+		List<Dice> rolledDices = table.rollDices(user, incomingMessage.getYatzyMessage().dices);
+		playedTurnMessage = new YatzyMessage();
+		playedTurnMessage.setDices(rolledDices);
+		playedTurnMessage.setWhoPlayed(user.getName());
+		Message updateMessage = new Message();
+		updateMessage.setTitle(MessageTitle.YATZY_ROLL_DICES);
+		createTurnDAOForRolledDices(table, rolledDices);
+		return playedTurnMessage;
+	}
+
+	private void playComputerTurn(Table table) {
+		int finalExitCondition = 0; // 4 moves maximum
+		YatzyTable yatzyTable = (YatzyTable) table;
+		while (table.isArtificialPlayerInTurn() || finalExitCondition >= 4) {
+			try {
+				finalExitCondition++;
+				Thread.sleep(4000);
+				Message nextMoveMessage = aiHandler.calculateNextYatzyMove(yatzyTable);
+				YatzyMessage yMessage = null;
+				if (nextMoveMessage.getTitle() == MessageTitle.YATZY_SELECT_HAND) {
+					yMessage = selectHand(table.getPlayerInTurn(), nextMoveMessage, yatzyTable);
+				} else {
+					yMessage = rollDices(table.getPlayerInTurn(), nextMoveMessage, yatzyTable);
+				}
+				nextMoveMessage.setTable(table);
+				nextMoveMessage.setYatzyMessage(yMessage);
+				sendMessageToTable(table, nextMoveMessage);
+			} catch (InterruptedException e) {
+				LOGGER.severe("YatzyTableHandler exception in playing computer turns");
+			}
+			if (finalExitCondition == 4) {
+				break;
+			}
+		}
 	}
 
 	private void createTurnDAOForRolledDices(YatzyTable table, List<Dice> rolledDices) {
@@ -94,4 +141,5 @@ public class YatzyTableHandler extends CommonHandler {
 		YatzyTurnDao dao = new YatzyTurnDao(table.getPlayerInTurn().getName(), table.getPlayerInTurn().getId(), diceValue1, diceValue2, diceValue3, diceValue4, diceValue5, score, handType, table.getGameId());
 		yatzyStatsEJB.saveYatzyTurn(dao);
 	}
+
 }

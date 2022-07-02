@@ -24,10 +24,6 @@ public class Hand implements Serializable {
 	@JsonbProperty("value")
 	private Integer value;
 
-	private Hand() {
-
-	}
-
 	public Hand(HandType handType, List<Dice> tableDices) {
 		dices = new ArrayList<Dice>(5);
 		for (Dice d : tableDices) {
@@ -57,7 +53,7 @@ public class Hand implements Serializable {
 	}
 
 	public Integer getTypeNumber() {
-		return typeNumber;
+		return handType.getAsInt();
 	}
 
 	public void setTypeNumber(Integer typeNumber) {
@@ -77,6 +73,11 @@ public class Hand implements Serializable {
 
 	public HandType getHandType() {
 		return handType;
+	}
+
+	@Override
+	public String toString() {
+		return "Hand [dices=" + dices + ", handType=" + handType + ", value=" + value + "]";
 	}
 
 }

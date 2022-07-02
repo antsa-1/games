@@ -1,6 +1,6 @@
 module tauhka.yatzy {
 	exports com.tauhka.games.yatzy;
-
+	exports com.tauhka.games.yatzy.util;
 	requires jakarta.cdi;
 	requires transitive jakarta.inject;
 	requires java.logging;

@@ -75,8 +75,8 @@ public class YatzyRuleBase {
 
 	private void validate(YatzyTable table, List<Dice> diceIds, User user) {
 		validatePlayer(table, user);
-		validateIncomingDices(table, diceIds);
 		validateRollsCount(table);
+		validateIncomingDices(table, diceIds);
 	}
 
 	private void validatePlayer(YatzyTable table, User user) {
@@ -117,6 +117,9 @@ public class YatzyRuleBase {
 	}
 
 	public ScoreCard selectHand(YatzyTable table, User user, Integer handType) {
+		if (table.getPlayerInTurn().getRollsLeft() == 3) {
+			throw new IllegalArgumentException("Player has not rolled dices");
+		}
 		Hand hand = new Hand(HandType.getHandType(handType), table.getDices());
 		ScoreCard scoreCard = table.getPlayerInTurn().getScoreCard();
 		scoreCard.addHand(hand);

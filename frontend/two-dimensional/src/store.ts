@@ -207,7 +207,7 @@ export const store = createStore<IStoreState>({
         leaveStartingTable(state, data:any) {
             let tableFrom:IMultiplayerTable = data.table
             let userName:string = data.who.name
-            let table:IMultiplayerTable = <IMultiplayerTable>state.tables.find(table => table.tableId == tableFrom.tableId)
+            let table:IMultiplayerTable = <IMultiplayerTable>state.tables.find(table => table.tableId == tableFrom?.tableId)
             if(table && table.players){
                 let index:number = table.players.findIndex(player => player.name === userName)
                 table.players.splice(index, 1)

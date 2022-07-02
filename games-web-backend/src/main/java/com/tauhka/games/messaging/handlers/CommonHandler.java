@@ -1,5 +1,6 @@
 package com.tauhka.games.messaging.handlers;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,10 +12,12 @@ import com.tauhka.games.core.stats.GameStatisticsEvent;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
 import com.tauhka.games.core.twodimen.GameResult;
+import com.tauhka.games.messaging.Message;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
+import jakarta.websocket.EncodeException;
 
 /**
  * @author antsa-1 from GitHub 12 May 2022
@@ -68,5 +71,22 @@ public class CommonHandler {
 		result.setGameMode(table.getGameMode());
 		result.setStartInstant(table.getStartTime());
 		fireStatisticsEventSync(table, result);
+	}
+
+	public void sendMessageToTable(Table table, Message message) {
+		if (message == null) {
+			return;
+		}
+		for (User user : table.getUsers()) {
+			if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
+				try {
+					user.getWebsocketSession().getBasicRemote().sendObject(message);
+				} catch (IOException e) {
+					LOGGER.log(Level.SEVERE, "CommonHandler sendMessage to table io.error", e);
+				} catch (EncodeException e) {
+					LOGGER.log(Level.SEVERE, "CommonHandler sendMessage to table encoding error", e);
+				}
+			}
+		}
 	}
 }
