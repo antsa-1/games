@@ -29,7 +29,7 @@ public class CommonHandler {
 	@Inject
 	private Event<GameStatisticsEvent> statisticsEvent;
 	private static final Logger LOGGER = Logger.getLogger(CommonHandler.class.getName());
-	
+
 //	protected Table findUserTable(User user, Message message) {
 //		UUID id = GamesUtils.validateTableId(message);
 //		Table table = CommonEndpoint.TABLES.get(id);
@@ -41,14 +41,12 @@ public class CommonHandler {
 //	}
 
 	protected Table findPlayerTable(User user, Message message) {
-		// return user.getTable()
-		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
-		stream = stream.filter(table -> table.isPlayer(user));
-		Optional<Table> tableOptional = stream.findFirst();
-		if (tableOptional.isPresent()) {
-			return tableOptional.get();
+		UUID tableId = GamesUtils.validateTableId(message);
+		Table table = CommonEndpoint.TABLES.get(tableId);
+		if (!table.isPlayer(user)) {
+			throw new IllegalArgumentException("User:" + user + " is not player in table:" + table);
 		}
-		throw new IllegalArgumentException("User is not player in table:" + user);
+		return table;
 	}
 
 	protected void fireStatisticsEventAsync(Table table, GameResult result) {

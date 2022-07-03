@@ -1,15 +1,11 @@
 package com.tauhka.games.messaging.handlers;
 
-import java.util.UUID;
-
 import com.tauhka.games.core.Move;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
-import com.tauhka.games.messaging.util.GamesUtils;
-import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
@@ -20,12 +16,9 @@ import jakarta.enterprise.inject.Default;
 @Default
 @Dependent
 public class GridTableHandler extends CommonHandler {
+
 	public Message handleNewToken(Message message, User user) {
-		UUID tableId = GamesUtils.validateTableId(message);
-		Table table = CommonEndpoint.TABLES.get(tableId);
-		if (!table.isPlayer(user)) {
-			throw new IllegalArgumentException("User:" + user + " is not a player in table:" + table);
-		}
+		Table table = findPlayerTable(user, message);
 		Message tokenMessage = new Message();
 		int x = message.getX();
 		int y = message.getY();
