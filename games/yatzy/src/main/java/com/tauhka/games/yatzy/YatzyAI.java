@@ -1,5 +1,6 @@
 package com.tauhka.games.yatzy;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -62,7 +63,7 @@ public class YatzyAI extends YatzyPlayer implements AI {
 			}
 			return wrapper.getSecondMostValuable();
 		}
-		if (wrapper.getMostValuable().getValue() > 20 && !isMissingHandType(scoreCard, HandType.CHANCE)) {
+		if (wrapper.getMostValuable().getValue() > 20 && !scoreCardIsMissingHandType(scoreCard, HandType.CHANCE)) {
 			return wrapper.getMostValuable();
 		} else if (wrapper.getSecondMostValuable().getValue() >= 24) {
 			return wrapper.getSecondMostValuable();
@@ -115,23 +116,59 @@ public class YatzyAI extends YatzyPlayer implements AI {
 		return false;
 	}
 
+//	public static void main(String[] args) {
+//		ScoreCard sc = new ScoreCard();
+//		Dice d1 = new Dice(3);
+//		Dice d2 = new Dice(3);
+//		Dice d3 = new Dice(3);
+//		Dice d4 = new Dice(1);
+//		Dice d5 = new Dice(1);
+//
+//		List<Dice> dices = new ArrayList<Dice>();
+//		dices.add(d1);
+//		dices.add(d2);
+//		dices.add(d3);
+//		dices.add(d4);
+//		dices.add(d5);
+//		Hand hand = new Hand(HandType.FULL_HOUSE, dices);
+//		sc.addHand(hand);
+//
+//		Dice d6 = new Dice(3);
+//		Dice d7 = new Dice(3);
+//		Dice d8 = new Dice(3);
+//		Dice d9 = new Dice(5);
+//		Dice d10 = new Dice(5);
+//
+//		List<Dice> dices2 = new ArrayList<Dice>();
+//		dices2.add(d6);
+//		dices2.add(d7);
+//		dices2.add(d8);
+//		dices2.add(d9);
+//		dices2.add(d10);
+//		YatzyAI y = new YatzyAI();
+//		Hand hand2 = new Hand(dices2);
+//		boolean val = y.shouldSelectTwoPair(sc, dices2, hand2);
+//		System.out.println("VAL:" + val);
+//	}
+
 	private boolean shouldSelectTwoPair(ScoreCard scoreCard, List<Dice> dices, Hand hand) {
-		if (!isMissingHandType(scoreCard, HandType.TWO_PAIR) && !isMissingHandType(scoreCard, HandType.FULL_HOUSE)) {
+		if (!scoreCardIsMissingHandType(scoreCard, HandType.TWO_PAIR) && !scoreCardIsMissingHandType(scoreCard, HandType.FULL_HOUSE)) {
 			return false;
 		}
 		Set<Integer> pairs = HandCalculator.searchAllPairsFromBiggestToSmallest(hand);
 		if (pairs.size() == 2) {
-			int firstNumber = pairs.iterator().next();
-			int secondNumber = pairs.iterator().next();
-			int selectedCount = 0;
-			for (Dice d : dices) {
-				if (d.getNumber() == firstNumber || d.getNumber() == secondNumber) {
+			int firstNumber = (int) pairs.toArray()[0];
+			int secondNumber = (int) pairs.toArray()[1];
+			int selectedCountNumber1 = 0;
+			int selectedCountNumber2 = 0;
+			for (Dice d : dices) { // 2-3 different numbers in various orders
+				// Not allowed to select all dices without forming an actual hand -> leads to situation where action ="ROLL_DICES" but no dices to roll
+				if (d.getNumber() == firstNumber && selectedCountNumber1 < 2) {
 					d.selectDice();
-					selectedCount++;
-				}
-				if (selectedCount == 4) {
-					// Not allowed to select all dices without forming an actual hand -> leads to situation where action ="ROLL_DICES" but no dices to roll
-					break;
+					selectedCountNumber1++;
+				} else if (d.getNumber() == secondNumber && selectedCountNumber2 < 2) {
+					d.selectDice();
+					selectedCountNumber2++;
 				}
 			}
 			return true;
@@ -139,7 +176,7 @@ public class YatzyAI extends YatzyPlayer implements AI {
 		return false;
 	}
 
-	private boolean isMissingHandType(ScoreCard sc, HandType handType) {
+	private boolean scoreCardIsMissingHandType(ScoreCard sc, HandType handType) {
 		return !sc.getHands().containsKey(handType);
 	}
 
