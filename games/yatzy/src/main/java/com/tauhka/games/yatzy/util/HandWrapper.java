@@ -10,17 +10,29 @@ import com.tauhka.games.yatzy.Hand;
  **/
 
 public class HandWrapper {
-	private double probability;
-	private Hand hand;
+	private Hand mostValuable;
+	private Hand secondMostValuable;
 	private List<Dice> dices;
 
 	public HandWrapper(Hand hand) {
 		super();
-		this.hand = hand;
+		this.mostValuable = hand;
 	}
 
-	public Hand getHand() {
-		return hand;
+	public Hand getMostValuable() {
+		return mostValuable;
+	}
+
+	public void setMostValuable(Hand mostValuable) {
+		this.mostValuable = mostValuable;
+	}
+
+	public Hand getSecondMostValuable() {
+		return secondMostValuable;
+	}
+
+	public void setSecondMostValuable(Hand secondMostValuable) {
+		this.secondMostValuable = secondMostValuable;
 	}
 
 	public List<Dice> getDices() {
@@ -30,17 +42,4 @@ public class HandWrapper {
 	public void setDices(List<Dice> dices) {
 		this.dices = dices;
 	}
-
-	public void setHand(Hand hand) {
-		this.hand = hand;
-	}
-
-	public double getProbability() {
-		return probability;
-	}
-
-	public void setProbability(double probability) {
-		this.probability = probability;
-	}
-
 }

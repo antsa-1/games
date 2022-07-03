@@ -13,63 +13,74 @@ import com.tauhka.games.yatzy.ScoreCard;
 
 public class HandSelector {
 
-	public static Hand getBestHand(ScoreCard sc, List<Dice> dices) {
+	public static HandWrapper getMostValuableHands(ScoreCard sc, List<Dice> dices) {
 		HandWrapper handWrapper = new HandWrapper(null);
 		if (!sc.getHands().containsKey(HandType.YATZY)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.YATZY, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.YATZY, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.SMALL_STRAIGHT)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.SMALL_STRAIGHT, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.SMALL_STRAIGHT, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.LARGE_STRAIGHT)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.LARGE_STRAIGHT, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.LARGE_STRAIGHT, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.ONES)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.ONES, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.ONES, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.TWOS)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.TWOS, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.TWOS, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.THREES)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.THREES, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.THREES, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.FOURS)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.FOURS, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.FOURS, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.FIVES)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.FIVES, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.FIVES, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.SIXES)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.SIXES, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.SIXES, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.PAIR)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.PAIR, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.PAIR, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.TWO_PAIR)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.TWO_PAIR, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.TWO_PAIR, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.THREE_OF_KIND)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.THREE_OF_KIND, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.THREE_OF_KIND, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.FULL_HOUSE)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.FULL_HOUSE, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.FULL_HOUSE, handWrapper);
 		}
 
 		if (!sc.getHands().containsKey(HandType.FOUR_OF_KIND)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.FOUR_OF_KIND, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.FOUR_OF_KIND, handWrapper);
 		}
 		if (!sc.getHands().containsKey(HandType.CHANCE)) {
-			handWrapper = verifyMostValuableHand(dices, HandType.CHANCE, handWrapper);
+			handWrapper = verifyMostValuableHands(dices, HandType.CHANCE, handWrapper);
 		}
-		return handWrapper.getHand();
+		if (handWrapper.getSecondMostValuable() == null) {
+			// In last hand there is only one possibility
+			handWrapper.setSecondMostValuable(handWrapper.getMostValuable());
+		}
+		return handWrapper;
 	}
 
-	private static HandWrapper verifyMostValuableHand(List<Dice> dices, HandType handTypeToCheck, HandWrapper wrapper) {
+	private static HandWrapper verifyMostValuableHands(List<Dice> dices, HandType handTypeToCheck, HandWrapper wrapper) {
 		Hand handCandidate = new Hand(handTypeToCheck, dices);
 		int value = HandCalculator.calculateHandValue(handCandidate);
-		if (wrapper.getHand() == null || value > wrapper.getHand().getValue()) {
-			wrapper.setHand(handCandidate);
+		if (wrapper.getMostValuable() == null || value > wrapper.getMostValuable().getValue()) {
+			wrapper.setSecondMostValuable(wrapper.getMostValuable());
+			wrapper.setMostValuable(handCandidate);
 			return wrapper;
+		}
+		if (handCandidate.getHandType() != wrapper.getMostValuable().getHandType()) {
+			if (wrapper.getSecondMostValuable() == null || value > wrapper.getSecondMostValuable().getValue()) {
+				wrapper.setSecondMostValuable(handCandidate);
+				return wrapper;
+			}
 		}
 		return wrapper;
 	}

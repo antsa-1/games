@@ -117,7 +117,7 @@ public class HandCalculator {
 	}
 
 	// Usage -> callees have minimumTimes of 3 -> using 5 dices, only one number can exist which has >= frequency
-	private static Integer getNumberWhichExistAtLeastTimes(int minimumTimes, Hand hand) {
+	public static Integer getNumberWhichExistAtLeastTimes(int minimumTimes, Hand hand) {
 		List<Integer> numbers = hand.getDices().stream().map(Dice::getNumber).collect(Collectors.toList());
 		Set<Integer> ints = new HashSet<Integer>(numbers);
 		for (Integer i : ints) {
@@ -129,7 +129,7 @@ public class HandCalculator {
 		return -1;
 	}
 
-	private static Set<Integer> searchAllPairsFromBiggestToSmallest(Hand hand) {
+	public static Set<Integer> searchAllPairsFromBiggestToSmallest(Hand hand) {
 		List<Integer> numbers = hand.getDices().stream().map(Dice::getNumber).collect(Collectors.toList());
 		Set<Integer> pairs = new HashSet<Integer>();
 		SortedSet<Integer> sortedSet = new TreeSet<Integer>(Collections.reverseOrder());

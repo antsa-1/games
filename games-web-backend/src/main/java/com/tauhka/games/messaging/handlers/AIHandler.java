@@ -6,7 +6,6 @@ import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_EIGHT_BALL_RANK
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_ID;
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_TICTACTOE_RANKING;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -27,11 +26,10 @@ import com.tauhka.games.pool.PoolAI;
 import com.tauhka.games.yatzy.Dice;
 import com.tauhka.games.yatzy.Hand;
 import com.tauhka.games.yatzy.HandType;
-import com.tauhka.games.yatzy.ScoreCard;
-import com.tauhka.games.yatzy.YatzyPlayer;
+import com.tauhka.games.yatzy.YatzyAI;
 import com.tauhka.games.yatzy.YatzyTable;
-import com.tauhka.games.yatzy.util.HandCalculator;
 import com.tauhka.games.yatzy.util.HandSelector;
+import com.tauhka.games.yatzy.util.HandWrapper;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
@@ -62,91 +60,27 @@ public class AIHandler {
 	}
 
 	public Message calculateNextYatzyMove(YatzyTable table) {
-		YatzyPlayer player = (YatzyPlayer) table.getPlayerInTurn();
+		YatzyAI yatzyAI = (YatzyAI) table.getPlayerInTurn();
 		YatzyTable yatzyTable = (YatzyTable) table;
 		YatzyMessage yatzyMessage = new YatzyMessage();
 		Message message = new Message();
 		message.setYatzyMessage(yatzyMessage);
-		if (player.getRollsLeft() == 3) {
+		if (yatzyAI.getRollsLeft() == 3) {
 			message.setTitle(MessageTitle.YATZY_ROLL_DICES);
 			yatzyMessage.dices = yatzyTable.getDices();
 			return message;
 		}
-		List<Integer> numbers = yatzyTable.getDices().stream().map(Dice::getNumber).collect(Collectors.toList());
-		Set<Integer> individualNumbersInOrder = new TreeSet<Integer>(Set.copyOf(numbers));
-		Hand bestHand = HandSelector.getBestHand(player.getScoreCard(), yatzyTable.getDices());
-		if (bestHand.getValue() > 21 || player.getRollsLeft() == 0) { // testing with 21 points
+		Hand hand = yatzyAI.deepContemplateHands(yatzyAI.getScoreCard(), table.getDices(), yatzyAI.getRollsLeft());
+		if (hand != null) {
 			message.setTitle(MessageTitle.YATZY_SELECT_HAND);
-			yatzyMessage.setHandType(bestHand.getTypeNumber());
-		} else {
-			selectDices(player.getScoreCard(), table.getDices(), individualNumbersInOrder, numbers);
-			message.setTitle(MessageTitle.YATZY_ROLL_DICES);
-			yatzyMessage.dices = yatzyTable.getDices().stream().filter(dice -> !dice.isSelected()).collect(Collectors.toList());
+			yatzyMessage.setHandType(hand.getHandType().getAsInt());
+			yatzyMessage.handType = hand.getHandType().getAsInt();
+			return message;
 		}
+		// No suitable hand found, interesting dices have been selected
+		message.setTitle(MessageTitle.YATZY_ROLL_DICES);
+		yatzyMessage.dices = table.getDices().stream().filter(dice -> !dice.isSelected()).collect(Collectors.toList());
 		return message;
-	}
-
-	private void selectDices(ScoreCard scoreCard, List<Dice> dices, Set<Integer> individualNumbers, List<Integer> numbers) {
-		Hand h = new Hand(dices);
-		if (isMissingFullHouse(scoreCard, h)) {
-			selectAllDices(dices);
-			return;
-		}
-		if (isMissingSmallStraight(scoreCard, h)) {
-			selectAllDices(dices);
-			return;
-		}
-		if (isMissingLargeStraight(scoreCard, h)) {
-			selectAllDices(dices);
-			return;
-		}
-		if (individualNumbers.size() == 1) {
-			if (!scoreCard.getHands().containsKey(HandType.YATZY)) {
-				selectAllDices(dices);
-			}
-		}
-		int sixesCount = Collections.frequency(numbers, 6);
-		if (shouldSelectNumbers(scoreCard, dices, sixesCount, 6)) {
-			return;
-		}
-		int fivesCount = Collections.frequency(numbers, 5);
-		if (shouldSelectNumbers(scoreCard, dices, fivesCount, 5)) {
-			return;
-		}
-		int foursCount = Collections.frequency(numbers, 4);
-		if (shouldSelectNumbers(scoreCard, dices, foursCount, 4)) {
-			return;
-		}
-		int threesCount = Collections.frequency(numbers, 3);
-		if (shouldSelectNumbers(scoreCard, dices, threesCount, 3)) {
-			return;
-		}
-	}
-
-	private boolean isMissingLargeStraight(ScoreCard scoreCard, Hand h) {
-		return !scoreCard.getHands().containsKey(HandType.LARGE_STRAIGHT) && HandCalculator.isSmallStraight(h);
-	}
-
-	private boolean isMissingSmallStraight(ScoreCard scoreCard, Hand h) {
-		return !scoreCard.getHands().containsKey(HandType.SMALL_STRAIGHT) && HandCalculator.isSmallStraight(h);
-	}
-
-	private boolean isMissingFullHouse(ScoreCard scoreCard, Hand h) {
-		return !scoreCard.getHands().containsKey(HandType.FULL_HOUSE) && HandCalculator.findFullHouse(h) > 0;
-	}
-
-	private void selectAllDices(List<Dice> dices) {
-		for (Dice d : dices) {
-			d.selectDice();
-		}
-	}
-
-	private boolean shouldSelectNumbers(ScoreCard scoreCard, List<Dice> dices, int numberCount, int actualNumber) {
-		if (numberCount >= 2 && scoreCard.hasEmptySlotForPairKinds()) {
-			dices.stream().filter(dice -> dice.getNumber() == actualNumber).forEach(dice -> dice.selectDice());
-			return true;
-		}
-		return false;
 	}
 
 	private Message createGridTableMove(Table table) {

@@ -107,4 +107,10 @@ public class ScoreCard implements Serializable {
 		bonus = calculateBonus();
 		lastAdded = hand;
 	}
+
+	public boolean hasEmptySlotForCurrentNumber(int actualNumber) {
+		// Ones, Twos, threes etc..
+		HandType type = HandType.getHandType(actualNumber);
+		return !this.getHands().containsKey(type);
+	}
 }

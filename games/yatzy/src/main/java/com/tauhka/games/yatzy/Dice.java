@@ -47,6 +47,10 @@ public class Dice {
 		this.selected = true;
 	}
 
+	public void unSelectDice() {
+		this.selected = false;
+	}
+
 	public void setSelected(boolean selected) {
 		this.selected = selected;
 	}
