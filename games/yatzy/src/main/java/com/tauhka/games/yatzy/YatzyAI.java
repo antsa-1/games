@@ -69,13 +69,6 @@ public class YatzyAI extends YatzyPlayer implements AI {
 			return wrapper.getSecondMostValuable();
 		}
 		if (shouldSelectTwoPair(scoreCard, dices, h)) {
-			int firstPairNumber = individualNumbersInOrder.iterator().next();
-			int secondPairNumber = individualNumbersInOrder.iterator().next();
-			for (Dice d : dices) {
-				if (d.getNumber() == firstPairNumber || d.getNumber() == secondPairNumber) {
-					d.selectDice();
-				}
-			}
 			return null;
 		}
 		int sixesCount = Collections.frequency(numbers, 6);
