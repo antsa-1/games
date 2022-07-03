@@ -4,12 +4,14 @@ import static com.tauhka.games.core.util.Constants.GUEST_LOGIN_NAME;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.tauhka.games.core.Game;
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.ai.ArtificialUser;
 import com.tauhka.games.core.stats.GameStatisticsEvent;
+import com.tauhka.games.messaging.Message;
 
 /**
  * @author antsa-1 from GitHub 25 Mar 2022
@@ -61,4 +63,18 @@ public class GamesUtils {
 		return !playerA.getName().startsWith(GUEST_LOGIN_NAME) || !playerB.getName().startsWith(GUEST_LOGIN_NAME) && !computerPlayer;
 	}
 
+	public static UUID validateTableId(Message message) {
+		if (message.getMessage() == null) {
+			throw new IllegalArgumentException("TableParam missing");
+		}
+		String idFromUser = message.getMessage();
+		if (idFromUser == null) {
+			throw new IllegalArgumentException("Id is missing");
+		}
+		UUID idFromComponent = UUID.fromString(idFromUser);
+		if (idFromComponent.toString().equals(idFromUser)) {
+			return idFromComponent;
+		}
+		throw new IllegalArgumentException("TableId does not match with componentId:");
+	}
 }

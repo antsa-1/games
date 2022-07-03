@@ -11,6 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.naming.OperationNotSupportedException;
+
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.stats.Status;
@@ -79,7 +81,7 @@ public class YatzyTable extends Table {
 	@Override
 	public Object playTurn(User user, Object yatzyTurn) {
 		// Not used
-		return null;
+		throw new IllegalAccessError("YatzyTable playTurn");
 	}
 
 	public boolean getRandomizeStarter() {
@@ -87,6 +89,7 @@ public class YatzyTable extends Table {
 	}
 
 	public List<Dice> rollDices(User user, List<Dice> dices) {
+		LOGGER.info("YatzyTable rollDices from user:" + user + " table:" + this);
 		if (getPlayerInTurn().getRollsLeft() == 3) {
 			this.getDices().forEach(dice -> dice.setSelected(false));
 		}
@@ -140,7 +143,7 @@ public class YatzyTable extends Table {
 	}
 
 	public ScoreCard selectHand(User user, Integer hand) {
-		LOGGER.info("YatzyTable playTurn selectHand:" + hand + " table:" + this);
+		LOGGER.info("YatzyTable selectHand from user:" + user + " selectHand:" + hand + " table:" + this);
 		checkGuards(user);
 		if (getPlayerInTurn().getRollsLeft() == 3) {
 			throw new IllegalArgumentException("Player has not rolled dices" + user);
@@ -184,12 +187,14 @@ public class YatzyTable extends Table {
 	}
 
 	private void sendMessageToTable(String message) {
-		for (User user : getUsers()) {
-			if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
-				try {
-					user.getWebsocketSession().getBasicRemote().sendText(message);
-				} catch (IOException e) {
-					LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
+		synchronized (this) {
+			for (User user : getUsers()) {
+				if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
+					try {
+						user.getWebsocketSession().getBasicRemote().sendText(message);
+					} catch (IOException e) {
+						LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
+					}
 				}
 			}
 		}

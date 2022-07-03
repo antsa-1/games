@@ -157,6 +157,7 @@ public class AIHandler {
 		message.setTitle(MessageTitle.MOVE);
 		message.setX(move.getX());
 		message.setY(move.getY());
+		message.setMessage(table.getTableId().toString());
 		return gridTableHandler.handleNewToken(message, artificialUser);
 	}
 }

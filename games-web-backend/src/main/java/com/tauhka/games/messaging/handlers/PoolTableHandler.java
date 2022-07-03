@@ -40,7 +40,7 @@ public class PoolTableHandler extends CommonHandler {
 	private Event<GameStatisticsEvent> statisticsEvent;
 
 	public Message updateCuePosition(CommonEndpoint endpoint, Message message) {
-		Table table = findUserTable(endpoint); // this can become
+		Table table = findPlayerTable(endpoint.getUser(), message); // this can become
 
 		if (!table.isPlayerInTurn(endpoint.getUser())) {
 			// throw new IllegalArgumentException("pool, not updating cue, player is not in turn");
@@ -52,14 +52,14 @@ public class PoolTableHandler extends CommonHandler {
 		updateMessage.setTitle(MessageTitle.POOL_UPDATE);
 		PoolMessage updateCueMessage = new PoolMessage();
 		updateCueMessage.setCue(message.getPoolMessage().getCue());
-		//updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
-		//updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
+		// updateCueMessage.setCueBall(message.getPoolMessage().getCueBall());
+		// updateCueMessage.setCanvas(message.getPoolMessage().getCanvas());
 		updateMessage.setPoolMessage(updateCueMessage);
 		return updateMessage;
 	}
 
 	public Message selectPocket(CommonEndpoint endpoint, Message message) {
-		PoolTable table = (PoolTable) findUserTable(endpoint);
+		PoolTable table = (PoolTable) findPlayerTable(endpoint.getUser(), message);
 		PoolTurn incomingTurn = new PoolTurn();
 		incomingTurn.setCanvas(message.getPoolMessage().getCanvas());
 		incomingTurn.setCue(message.getPoolMessage().getCue());
@@ -82,7 +82,7 @@ public class PoolTableHandler extends CommonHandler {
 	}
 
 	public Message updateHandBall(CommonEndpoint endpoint, Message incomingMessage) {
-		PoolTable table = (PoolTable) findUserTable(endpoint);
+		PoolTable table = (PoolTable) findPlayerTable(endpoint.getUser(), incomingMessage);
 		PoolTurn incomingTurn = new PoolTurn();
 		incomingTurn.setCanvas(incomingMessage.getPoolMessage().getCanvas());
 		incomingTurn.setCue(incomingMessage.getPoolMessage().getCue());
@@ -110,7 +110,7 @@ public class PoolTableHandler extends CommonHandler {
 		incomingTurn.setCanvas(message.getPoolMessage().getCanvas());
 		incomingTurn.setCue(message.getPoolMessage().getCue());
 		incomingTurn.setCueBall(message.getPoolMessage().getCueBall());
-		PoolTable table = (PoolTable) findUserTable(endpoint);
+		PoolTable table = (PoolTable) findPlayerTable(endpoint.getUser(), message);
 		PoolTurn playedTurn = (PoolTurn) table.playTurn(endpoint.getUser(), incomingTurn);
 		Message playTurnMessage = createPlayedTurnMessage(table, playedTurn);
 		addTurnToDatabase(incomingTurn, table, playedTurn, endpoint.getUser(), TurnType.PLAY);
@@ -223,7 +223,5 @@ public class PoolTableHandler extends CommonHandler {
 		statsEvent.setGameResult(turnResult);
 		poolStatsEvent.fireAsync(statsEvent);
 	}
-
-
 
 }

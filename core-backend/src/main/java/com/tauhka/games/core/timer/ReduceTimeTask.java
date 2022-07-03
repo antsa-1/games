@@ -20,7 +20,7 @@ public class ReduceTimeTask extends TimerTask {
 		int seconds = table.getSecondsLeft();
 		seconds--;
 		table.setSecondsLeft(seconds);
-		System.out.println("Seconds LEFT:" + table.getSecondsLeft());
+	//	System.out.println("Seconds LEFT:" + table.getSecondsLeft());
 		if (table.getSecondsLeft() <= 0) {
 			table.onTimeout();
 		}

@@ -2,6 +2,7 @@ package com.tauhka.games.messaging.handlers;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -13,6 +14,7 @@ import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.messaging.Message;
+import com.tauhka.games.messaging.util.GamesUtils;
 import com.tauhka.games.web.websocket.CommonEndpoint;
 
 import jakarta.enterprise.event.Event;
@@ -27,15 +29,26 @@ public class CommonHandler {
 	@Inject
 	private Event<GameStatisticsEvent> statisticsEvent;
 	private static final Logger LOGGER = Logger.getLogger(CommonHandler.class.getName());
+	
+//	protected Table findUserTable(User user, Message message) {
+//		UUID id = GamesUtils.validateTableId(message);
+//		Table table = CommonEndpoint.TABLES.get(id);
+//		// return user.getTable()
+//		if (table == null || !table.isInTable(user)) {
+//			throw new IllegalArgumentException("User was not found in table:" + user + " table:" + table);
+//		}
+//		return table;
+//	}
 
-	protected Table findUserTable(CommonEndpoint endpoint) {
+	protected Table findPlayerTable(User user, Message message) {
+		// return user.getTable()
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
-		stream = stream.filter(table -> table.isPlayer(endpoint.getUser()));
+		stream = stream.filter(table -> table.isPlayer(user));
 		Optional<Table> tableOptional = stream.findFirst();
-		if (tableOptional.isEmpty()) {
-			throw new IllegalArgumentException("no table for:" + endpoint.getUser());
+		if (tableOptional.isPresent()) {
+			return tableOptional.get();
 		}
-		return tableOptional.get();
+		throw new IllegalArgumentException("User is not player in table:" + user);
 	}
 
 	protected void fireStatisticsEventAsync(Table table, GameResult result) {

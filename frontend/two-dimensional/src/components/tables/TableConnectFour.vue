@@ -325,7 +325,7 @@ export default defineComponent({
       this.renderingContext.fill();
     },
     handleClick(event: MouseEvent) {
-      const obj = { title: "MOVE", y: this.column - 1 };
+      const obj = { title: "MOVE",message:this.theTable.tableId, y: this.column - 1 };
       this.user.webSocket.send(JSON.stringify(obj));
     },
     disableBoard() {

@@ -73,7 +73,7 @@ public class TicTacToeTable extends Table {
 	@Override
 	public synchronized Move playTurn(User user, Object moveInObject) {
 		if (!user.equals(this.playerInTurn)) {
-			throw new IllegalArgumentException("Player is not in turn in board:" + this);
+			throw new IllegalArgumentException("Player:"+ user+"  is not in turn in board:" + this);
 			// throw new CloseWebSocketExcepetion("Player is not in turn in board:" + this);
 		}
 		Move moveIn = (Move) moveInObject;

@@ -337,7 +337,7 @@ export default defineComponent({
 			if(!elementExist){
 				
 				this.removeMouseListener()
-				const obj = { title: "MOVE",x:clickedSquare.x,y:clickedSquare.y};
+				const obj = { title: "MOVE",message: this.theTable.tableId, x:clickedSquare.x,y:clickedSquare.y};
 				this.user.webSocket.send(JSON.stringify(obj));
 				this.removeMouseListener()		
 			}

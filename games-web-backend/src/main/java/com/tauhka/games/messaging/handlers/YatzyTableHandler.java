@@ -35,7 +35,7 @@ public class YatzyTableHandler extends CommonHandler {
 	private AIHandler aiHandler;
 
 	public void handleYatzyMessage(CommonEndpoint endpoint, Message incomingMessage) {
-		YatzyTable table = (YatzyTable) findUserTable(endpoint);
+		YatzyTable table = (YatzyTable) findPlayerTable(endpoint.getUser(), incomingMessage);
 
 		if (!table.isPlayerInTurn(endpoint.getUser())) {
 			throw new IllegalArgumentException("Player is not in turn" + endpoint.getUser());
