@@ -126,6 +126,11 @@ public class YatzyTable extends Table {
 		}
 		// Players can disconnect/leave table anytime. Last player can play the game to the end. if (this.players.size() < 1) { gameOver = true; }
 		List<YatzyPlayer> enabledPlayers = this.players.stream().filter(player -> player.isEnabled()).collect(Collectors.toList());
+		if (enabledPlayers.size() == 1) {
+			if (enabledPlayers.get(0) instanceof YatzyAI) {
+				return true;
+			}
+		}
 		if (this.players.size() - enabledPlayers.size() == this.players.size()) {
 			gameOver = true;
 		}
