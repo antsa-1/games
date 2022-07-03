@@ -81,14 +81,15 @@ export interface IScoreCardRow {
 export interface IHand {
     handType: HandType,
     typeNumber: number
-    value: number
+    value: number,
+    last?: boolean
 }
 export enum IOption {
     ROLL_DICES,
     SELECT_HAND,
 
 }
-export enum HandType { 
+export enum HandType {
     ONES = 1, TWOS, THREES, FOURS, FIVES, SIXES, PAIR, TWO_PAIR, THREE_OF_KIND, FULL_HOUSE, SMALL_STRAIGHT, LARGE_STRAIGHT, FOUR_OF_KIND, CHANCE, YATZY, BONUS, SUBTOTAL, TOTAL
 
 }

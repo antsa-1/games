@@ -306,7 +306,11 @@ const updateScoreCard = (payload:any) => {
     yatzyPlayer.scoreCard.bonus = payload.yatzy.scoreCard.bonus
     yatzyPlayer.scoreCard.subTotal = payload.yatzy.scoreCard.subTotal
     yatzyPlayer.scoreCard.lastAdded = payload.yatzy.scoreCard.lastAdded
-    yatzyPlayer.scoreCard.hands.push({ handType: payload.yatzy.scoreCard.lastAdded.handType, typeNumber: payload.yatzy.scoreCard.lastAdded.typeNumber, value: payload.yatzy.scoreCard.lastAdded.value })
+    let lastHand = yatzyPlayer.scoreCard.hands.find(hand => hand.last === true)
+    if(lastHand && lastHand.last){
+        lastHand.last = false
+    }
+    yatzyPlayer.scoreCard.hands.push({ handType: payload.yatzy.scoreCard.lastAdded.handType, typeNumber: payload.yatzy.scoreCard.lastAdded.typeNumber, value: payload.yatzy.scoreCard.lastAdded.value, last:true })
 }
 const unblockQueue = (timeout: number = 0) => {
     expectingServerResponse = false
@@ -936,6 +940,14 @@ const fillPlayersPointsOnRow = (row: IScoreCardRow, rowHeight: number) => {
         const hand: IHand = getPlayerHand(row.handType, yatzyTable.value.players[i])
         const startPoint: IVector2 = { x: scoreCardTextEnd + 50 + magic * i, y: rowHeight * (row.nth + 1) -5 }
         fillPlayerScore(yatzyTable.value.players[i], hand, startPoint)
+        if(hand && hand.last){
+            const ctx = yatzyTable.value.canvas.ctx
+            ctx.fillStyle = "red"
+            ctx.font='900 24px Arial'
+            ctx.fillText(" *", startPoint.x+20, startPoint.y+5)
+            ctx.font = "bold " + FONT_SIZE.DEFAULT + " Arial"
+            ctx.fillStyle = "black"
+        }
     }
 }
 
