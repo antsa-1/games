@@ -1,201 +1,110 @@
 package com.tauhka.games.yatzy;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import com.tauhka.games.core.ai.AI;
-import com.tauhka.games.yatzy.util.HandCalculator;
-import com.tauhka.games.yatzy.util.HandSelector;
-import com.tauhka.games.yatzy.util.HandWrapper;
+import com.tauhka.games.yatzy.ai.ContemplationResult;
+import com.tauhka.games.yatzy.ai.LowerSectionStrategy;
+import com.tauhka.games.yatzy.ai.UpperSectionStrategy;
+import com.tauhka.games.yatzy.ai.YatzyAII;
 
 /**
  * @author antsa-1 from GitHub 2 Jul 2022
  **/
 
-public class YatzyAI extends YatzyPlayer implements AI {
+public class YatzyAI extends YatzyPlayer implements AI, YatzyAII {
 
 	private static final long serialVersionUID = 1L;
 
-	public Hand deepContemplateHands(ScoreCard scoreCard, List<Dice> dices, int rollsLeft) {
-		List<Integer> numbers = dices.stream().map(Dice::getNumber).collect(Collectors.toList());
-		Set<Integer> individualNumbersInOrder = new TreeSet<Integer>(Set.copyOf(numbers));
-		// return immediately hands if they are not in scoreCard
-		Hand h = new Hand(dices);
-		if (isFullHouseMissingFromScoreCard(scoreCard, h)) {
-			h.setHandType(HandType.FULL_HOUSE);
-			selectAllDices(dices);
-			return h;
+	public Hand deepContemplateHands(ScoreCard scoreCard, List<Dice> dices) {
+		List<Dice> copies = deepCopyDices(dices);
+		ContemplationResult lowerResult = new LowerSectionStrategy().deepContemplateHands(scoreCard, copies, this);
+		Hand lowerSectionHand = lowerResult.getHand();
+		if (lowerSectionHand != null && (lowerSectionHand.isStraight() || lowerSectionHand.isYatzy())) {
+			return lowerSectionHand;
+		}
+		if (lowerSectionHand != null && (lowerSectionHand.isStraight() || lowerSectionHand.isYatzy())) {
+			return lowerSectionHand;
+		}
+		if (lowerSectionHand != null && lowerSectionHand.isFullHouse()) {
+			return lowerSectionHand;
 		}
 
-		if (isSmallStraightMissingFromScoreCard(scoreCard, h)) {
-			h.setHandType(HandType.SMALL_STRAIGHT);
-			selectAllDices(dices);
-			return h;
-		}
-		if (isLargeStraightMissingFromScoreCard(scoreCard, h)) {
-			h.setHandType(HandType.LARGE_STRAIGHT);
-			selectAllDices(dices);
-			return h;
-		}
-		if (individualNumbersInOrder.size() == 1) {
-			if (!scoreCard.getHands().containsKey(HandType.YATZY)) {
-				h.setHandType(HandType.YATZY);
-				selectAllDices(dices);
-				return h;
+		ContemplationResult upperResult = new UpperSectionStrategy().deepContemplateHands(scoreCard, copies, this);
+		Hand higherSectionHand = upperResult.getHand();
+		if (higherSectionHand != null && higherSectionHand.isSixes()) {
+			if (higherSectionHand.getValue() >= 18) {
+				return higherSectionHand;
 			}
 		}
-		if (isDecentFourOfKindMissingFromScoreCard(scoreCard, h, dices)) {
-			h.setHandType(HandType.FOUR_OF_KIND);
-			return h;
-		}
-		HandWrapper wrapper = HandSelector.getMostValuableHands(getScoreCard(), dices);
-		if (rollsLeft == 0) {
-			// It is what it is, not much left to be done
-			if (wrapper.getSecondMostValuable() == null) {
-				wrapper.getMostValuable();
+		if (higherSectionHand != null && higherSectionHand.isFives()) {
+			if (higherSectionHand.getValue() >= 15) {
+				return higherSectionHand;
 			}
-			if (wrapper.getMostValuable().getValue() > 20) {
-				return wrapper.getMostValuable();
+		}
+		if (lowerSectionHand != null && lowerSectionHand.isFourOfKind()) {
+			if (higherSectionHand != null && (higherSectionHand.isFives() || higherSectionHand.isSixes())) {
+				return higherSectionHand;
 			}
-			return wrapper.getSecondMostValuable();
+			return lowerSectionHand;
 		}
-		if (wrapper.getMostValuable().getValue() > 20 && !scoreCardIsMissingHandType(scoreCard, HandType.CHANCE)) {
-			return wrapper.getMostValuable();
-		} else if (wrapper.getSecondMostValuable().getValue() >= 24) {
-			return wrapper.getSecondMostValuable();
-		}
-		if (shouldSelectTwoPair(scoreCard, dices, h)) {
-			return null;
-		}
-		int sixesCount = Collections.frequency(numbers, 6);
-		if (selectInterestingDices(scoreCard, dices, sixesCount, 6)) {
-			return null;
-		}
-		int fivesCount = Collections.frequency(numbers, 5);
-		if (selectInterestingDices(scoreCard, dices, fivesCount, 5)) {
-			return null;
-		}
-		int foursCount = Collections.frequency(numbers, 4);
-		if (selectInterestingDices(scoreCard, dices, foursCount, 4)) {
-			return null;
-		}
-		int threesCount = Collections.frequency(numbers, 3);
-		if (selectInterestingDices(scoreCard, dices, threesCount, 3)) {
-			return null;
-		}
-		int twosCount = Collections.frequency(numbers, 2);
-		if (selectInterestingDices(scoreCard, dices, twosCount, 2)) {
-			return null;
-		}
-		// Select nothing
-		return null;
-	}
-
-	private boolean isDecentFourOfKindMissingFromScoreCard(ScoreCard scoreCard, Hand hand, List<Dice> dices) {
-		if (scoreCard.getHands().containsKey(HandType.FOUR_OF_KIND)) {
-			return false;
-		}
-		Integer number = HandCalculator.getNumberWhichExistAtLeastTimes(4, hand);
-		if (number != null && number > 2) {
-			for (Dice d : dices) {
-				d.selectDice();
-			}
-			return true;
-		}
-		return false;
-	}
-
-//	public static void main(String[] args) {
-//		ScoreCard sc = new ScoreCard();
-//		Dice d1 = new Dice(3);
-//		Dice d2 = new Dice(3);
-//		Dice d3 = new Dice(3);
-//		Dice d4 = new Dice(1);
-//		Dice d5 = new Dice(1);
-//
-//		List<Dice> dices = new ArrayList<Dice>();
-//		dices.add(d1);
-//		dices.add(d2);
-//		dices.add(d3);
-//		dices.add(d4);
-//		dices.add(d5);
-//		Hand hand = new Hand(HandType.FULL_HOUSE, dices);
-//		sc.addHand(hand);
-//
-//		Dice d6 = new Dice(3);
-//		Dice d7 = new Dice(3);
-//		Dice d8 = new Dice(3);
-//		Dice d9 = new Dice(5);
-//		Dice d10 = new Dice(5);
-//
-//		List<Dice> dices2 = new ArrayList<Dice>();
-//		dices2.add(d6);
-//		dices2.add(d7);
-//		dices2.add(d8);
-//		dices2.add(d9);
-//		dices2.add(d10);
-//		YatzyAI y = new YatzyAI();
-//		Hand hand2 = new Hand(dices2);
-//		boolean val = y.shouldSelectTwoPair(sc, dices2, hand2);
-//		System.out.println("VAL:" + val);
-//	}
-
-	private boolean shouldSelectTwoPair(ScoreCard scoreCard, List<Dice> dices, Hand hand) {
-		if (!scoreCardIsMissingHandType(scoreCard, HandType.TWO_PAIR) && !scoreCardIsMissingHandType(scoreCard, HandType.FULL_HOUSE)) {
-			return false;
-		}
-		Set<Integer> pairs = HandCalculator.searchAllPairsFromBiggestToSmallest(hand);
-		if (pairs.size() == 2) {
-			int firstNumber = (int) pairs.toArray()[0];
-			int secondNumber = (int) pairs.toArray()[1];
-			int selectedCountNumber1 = 0;
-			int selectedCountNumber2 = 0;
-			for (Dice d : dices) { // 2-3 different numbers in various orders
-				// Not allowed to select all dices without forming an actual hand -> leads to situation where action ="ROLL_DICES" but no dices to roll
-				if (d.getNumber() == firstNumber && selectedCountNumber1 < 2) {
-					d.selectDice();
-					selectedCountNumber1++;
-				} else if (d.getNumber() == secondNumber && selectedCountNumber2 < 2) {
-					d.selectDice();
-					selectedCountNumber2++;
+		if (lowerSectionHand != null && higherSectionHand == null) {
+			// Chance, Four of a kind,FullHouse, Three of a kind, Two pair, pair
+			if (lowerSectionHand.isPairOrTrips()) {
+				int upperSelectedCount = (int) upperResult.getCopies().stream().filter(dice -> dice.isSelected()).count();
+				if (upperSelectedCount >= 3) {
+					selectRealDices(copies, dices);
+					return null;
 				}
+				return lowerSectionHand;
 			}
-			return true;
 		}
-		return false;
+		if (lowerSectionHand == null && higherSectionHand != null) {
+			int selected = (int) lowerResult.getCopies().stream().filter(dice -> dice.isSelected()).count();
+			if (selected >= 3) {
+				selectRealDices(lowerResult.getCopies(), dices);
+				return null;
+			}
+			return higherSectionHand;
+		}
+		if (lowerSectionHand != null && getRollsLeft() == 0) {
+			return lowerSectionHand;
+		}
+		if (higherSectionHand != null && getRollsLeft() == 0) {
+			return higherSectionHand;
+		}
+
+		int lowerCount = (int) lowerResult.getCopies().stream().filter(dice -> dice.isSelected()).count();
+		int higherCount = (int) upperResult.getCopies().stream().filter(dice -> dice.isSelected()).count();
+		if (lowerCount > higherCount) {
+			selectRealDices(lowerResult.getCopies(), dices);
+		} else {
+			selectRealDices(upperResult.getCopies(), dices);
+		}
+		// Dices are known, handType remains yet to be seen
+		return new Hand(null, dices);
 	}
 
-	private boolean scoreCardIsMissingHandType(ScoreCard sc, HandType handType) {
-		return !sc.getHands().containsKey(handType);
-	}
-
-	private boolean isLargeStraightMissingFromScoreCard(ScoreCard scoreCard, Hand h) {
-		return !scoreCard.getHands().containsKey(HandType.LARGE_STRAIGHT) && HandCalculator.isSmallStraight(h);
-	}
-
-	private boolean isSmallStraightMissingFromScoreCard(ScoreCard scoreCard, Hand h) {
-		return !scoreCard.getHands().containsKey(HandType.SMALL_STRAIGHT) && HandCalculator.isSmallStraight(h);
-	}
-
-	private boolean isFullHouseMissingFromScoreCard(ScoreCard scoreCard, Hand h) {
-		return !scoreCard.getHands().containsKey(HandType.FULL_HOUSE) && HandCalculator.findFullHouse(h) > 0;
-	}
-
-	private void selectAllDices(List<Dice> dices) {
-		for (Dice d : dices) {
-			d.selectDice();
+	private void selectRealDices(List<Dice> copies, List<Dice> reals) {
+		for (Dice d : reals) {
+			int index = copies.indexOf(d);
+			Dice copy = copies.get(index);
+			if (copy.isSelected()) {
+				d.select();
+			}
 		}
 	}
 
-	private boolean selectInterestingDices(ScoreCard scoreCard, List<Dice> dices, int numberCount, int actualNumber) {
-		if (numberCount >= 2 && (scoreCard.hasEmptySlotForPairKinds() || scoreCard.hasEmptySlotForCurrentNumber(actualNumber))) {
-			dices.stream().filter(dice -> dice.getNumber() == actualNumber).forEach(dice -> dice.selectDice());
-			return true;
+	private List<Dice> deepCopyDices(List<Dice> dices) {
+
+		List<Dice> copiedDices = new ArrayList<Dice>();
+		for (Dice dice : dices) {
+			Dice copy = new Dice(dice.getNumber());
+			copy.setDiceId(dice.getDiceId());
+			copiedDices.add(copy);
 		}
-		return false;
+		return copiedDices;
 	}
+
 }

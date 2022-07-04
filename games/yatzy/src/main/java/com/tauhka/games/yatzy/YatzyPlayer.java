@@ -46,6 +46,10 @@ public class YatzyPlayer extends User implements Serializable, Comparable<YatzyP
 		return enabled;
 	}
 
+	public boolean hasRollsLeft() {
+		return rollsLeft > 0;
+	}
+
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}

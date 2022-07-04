@@ -23,6 +23,8 @@ public class Hand implements Serializable {
 	private Integer typeNumber;
 	@JsonbProperty("value")
 	private Integer value;
+	@JsonbTransient
+	private int count;
 
 	public Hand(HandType handType, List<Dice> tableDices) {
 		dices = new ArrayList<Dice>(5);
@@ -30,9 +32,11 @@ public class Hand implements Serializable {
 			Dice dice = new Dice();
 			dice.setNumber(d.getNumber());
 			dices.add(d);
+			count += dice.getNumber();
 		}
 		this.handType = handType;
-		this.value = HandCalculator.calculateHandValue(this);
+		if (handType != null)
+			this.value = HandCalculator.calculateHandValue(this);
 	}
 
 	public Hand(List<Dice> tableDices) {
@@ -41,6 +45,7 @@ public class Hand implements Serializable {
 			Dice dice = new Dice();
 			dice.setNumber(d.getNumber());
 			dices.add(d);
+			count += dice.getNumber();
 		}
 	}
 
@@ -49,11 +54,17 @@ public class Hand implements Serializable {
 	}
 
 	public Integer getValue() {
+		if (value == null)
+			value = HandCalculator.calculateHandValue(this);
 		return value;
 	}
 
 	public Integer getTypeNumber() {
 		return handType.getAsInt();
+	}
+
+	public boolean isYatzy() {
+		return this.handType == HandType.YATZY;
 	}
 
 	public void setTypeNumber(Integer typeNumber) {
@@ -73,6 +84,34 @@ public class Hand implements Serializable {
 
 	public HandType getHandType() {
 		return handType;
+	}
+
+	public boolean isStraight() {
+		return this.handType == HandType.SMALL_STRAIGHT || this.handType == HandType.LARGE_STRAIGHT;
+	}
+
+	public boolean isSixes() {
+		return this.handType == HandType.SIXES;
+	}
+
+	public boolean isFives() {
+		return this.handType == HandType.FIVES;
+	}
+
+	public boolean isFullHouse() {
+		return this.handType == HandType.FULL_HOUSE;
+	}
+
+	public boolean isFourOfKind() {
+		return this.handType == HandType.FOUR_OF_KIND;
+	}
+
+	public boolean isPairOrTrips() {
+		return this.handType == HandType.PAIR || this.handType == HandType.THREE_OF_KIND;
+	}
+
+	public Integer getCount() {
+		return count;
 	}
 
 	@Override

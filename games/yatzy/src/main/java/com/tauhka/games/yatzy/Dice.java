@@ -26,6 +26,12 @@ public class Dice {
 		this.number = number;
 	}
 
+	public Dice(UUID diceId, int number) {
+		super();
+		this.diceId = diceId;
+		this.number = number;
+	}
+
 	public int roll() {
 		number = ThreadLocalRandom.current().nextInt(1, 7);
 		return number;
@@ -43,11 +49,11 @@ public class Dice {
 		return selected;
 	}
 
-	public void selectDice() {
+	public void select() {
 		this.selected = true;
 	}
 
-	public void unSelectDice() {
+	public void unselect() {
 		this.selected = false;
 	}
 

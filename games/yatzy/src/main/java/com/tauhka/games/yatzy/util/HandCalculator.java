@@ -75,7 +75,7 @@ public class HandCalculator {
 		}
 	}
 
-	private static int addAllNumbers(Hand hand) {
+	public static int addAllNumbers(Hand hand) {
 		return hand.getDices().stream().map(Dice::getNumber).collect(Collectors.summingInt(Integer::intValue));
 	}
 

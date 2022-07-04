@@ -6,9 +6,6 @@ import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_EIGHT_BALL_RANK
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_ID;
 import static com.tauhka.games.core.util.Constants.OLAV_COMPUTER_TICTACTOE_RANKING;
 
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -23,13 +20,10 @@ import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
 import com.tauhka.games.messaging.YatzyMessage;
 import com.tauhka.games.pool.PoolAI;
-import com.tauhka.games.yatzy.Dice;
 import com.tauhka.games.yatzy.Hand;
-import com.tauhka.games.yatzy.HandType;
 import com.tauhka.games.yatzy.YatzyAI;
 import com.tauhka.games.yatzy.YatzyTable;
 import com.tauhka.games.yatzy.util.HandSelector;
-import com.tauhka.games.yatzy.util.HandWrapper;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
@@ -70,17 +64,40 @@ public class AIHandler {
 			yatzyMessage.dices = yatzyTable.getDices();
 			return message;
 		}
-		Hand hand = yatzyAI.deepContemplateHands(yatzyAI.getScoreCard(), table.getDices(), yatzyAI.getRollsLeft());
-		if (hand != null) {
+		Hand hand = yatzyAI.deepContemplateHands(yatzyAI.getScoreCard(), table.getDices());
+		yatzyMessage.dices = table.getDices().stream().filter(dice -> !dice.isSelected()).collect(Collectors.toList());
+		hand = checkFallBack(table, yatzyAI, hand, message);
+		if (hand != null && hand.getHandType() != null) {
 			message.setTitle(MessageTitle.YATZY_SELECT_HAND);
 			yatzyMessage.setHandType(hand.getHandType().getAsInt());
-			yatzyMessage.handType = hand.getHandType().getAsInt();
+//			yatzyMessage.handType = hand.getHandType().getAsInt();
 			return message;
 		}
-		// No suitable hand found, interesting dices have been selected
 		message.setTitle(MessageTitle.YATZY_ROLL_DICES);
-		yatzyMessage.dices = table.getDices().stream().filter(dice -> !dice.isSelected()).collect(Collectors.toList());
+		checkFallBack(table, yatzyAI, hand, message);
 		return message;
+	}
+
+	private Hand checkFallBack(YatzyTable table, YatzyAI yatzyAI, Hand hand, Message message) {
+		// Fallback is used for not creating enough unit tests
+		if (MessageTitle.YATZY_SELECT_HAND == message.getTitle() && hand == null) {
+			LOGGER.info("Yatzy using handSelecion fallBack \n" + table);
+			hand = HandSelector.getMostValuableHands(yatzyAI.getScoreCard(), table.getDices()).getMostValuable();
+			return hand;
+		}
+		if (!yatzyAI.hasRollsLeft() && message.getTitle() == MessageTitle.YATZY_ROLL_DICES) {
+			LOGGER.info("Yatzy using handSelecion fallBack 2 \n" + table);
+			hand = HandSelector.getMostValuableHands(yatzyAI.getScoreCard(), table.getDices()).getMostValuable();
+			message.setTitle(MessageTitle.YATZY_SELECT_HAND);
+			message.getYatzyMessage().setHandType(hand.getHandType().getAsInt());
+		}
+		if ((message.getYatzyMessage().getDices().size() == 0 && message.getTitle()== MessageTitle.YATZY_ROLL_DICES)) {
+			LOGGER.info("Yatzy using handSelecion fallBack 3 \n" + table);
+			hand = HandSelector.getMostValuableHands(yatzyAI.getScoreCard(), table.getDices()).getMostValuable();
+			message.setTitle(MessageTitle.YATZY_SELECT_HAND);
+			message.getYatzyMessage().setHandType(hand.getHandType().getAsInt());
+		}
+		return hand;
 	}
 
 	private Message createGridTableMove(Table table) {

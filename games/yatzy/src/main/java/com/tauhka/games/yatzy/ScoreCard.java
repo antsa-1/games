@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 /**
  * @author antsa-1 from GitHub 14 May 2022
@@ -32,7 +33,7 @@ public class ScoreCard implements Serializable {
 	}
 
 	public Integer calculateTotal() {
-		return hands.values().stream().mapToInt(hand -> hand.getValue()).sum();
+		return hands.values().stream().mapToInt(hand -> hand.getValue()).sum() + calculateBonus();
 	}
 
 	public Integer calculateSubTotal() {
@@ -57,6 +58,10 @@ public class ScoreCard implements Serializable {
 
 	public void setTotal(Integer total) {
 		this.total = total;
+	}
+
+	public int handsLeft() {
+		return 15 - hands.keySet().size();
 	}
 
 	public Integer getSubTotal() {
@@ -108,9 +113,23 @@ public class ScoreCard implements Serializable {
 		lastAdded = hand;
 	}
 
-	public boolean hasEmptySlotForCurrentNumber(int actualNumber) {
-		// Ones, Twos, threes etc..
-		HandType type = HandType.getHandType(actualNumber);
-		return !this.getHands().containsKey(type);
+	@JsonbTransient
+	public boolean isMissingHandType(HandType type) {
+		return !hands.containsKey(type);
+	}
+
+	@JsonbTransient
+	public boolean isMissingStraight() {
+		return !hands.containsKey(HandType.SMALL_STRAIGHT) || !hands.containsKey(HandType.LARGE_STRAIGHT);
+	}
+
+	@JsonbTransient
+	public boolean isMissingTwoPair() {
+		return !hands.containsKey(HandType.TWO_PAIR);
+	}
+
+	@JsonbTransient
+	public boolean isMissingPair() {
+		return !hands.containsKey(HandType.PAIR);
 	}
 }

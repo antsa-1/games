@@ -347,6 +347,7 @@ public class YatzyTable extends Table {
 			YatzyPlayer y = players.get(currentPlayerIndex);
 			if (y.isEnabled()) {
 				y.setRollsLeft(3);
+				getDices().forEach(dice -> dice.unselect());
 				startTimer();
 				playerInTurn = y;
 				return y;
