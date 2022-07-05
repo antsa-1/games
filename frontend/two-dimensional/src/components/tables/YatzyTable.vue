@@ -58,15 +58,12 @@ onMounted(() => {
     startCountdownTimer(yatzyTable.value.secondsLeft)
     setupCanvas()
     if(props.watch === "1"){
-        const tableSnapshot:IYatzyTable = <IYatzyTable> store.getters.theTable
-      
-        gameSnapshot = {table:tableSnapshot, yatzy:null}
-    
+        const tableSnapshot:IYatzyTable = <IYatzyTable> store.getters.theTable      
+        gameSnapshot = {table:tableSnapshot, yatzy:null}    
         createTableFromSnapShot()
     } else {
         attachListeners()
     }
-
     resizeDocument()
     repaintYatzyTable()
 })
@@ -178,9 +175,7 @@ const initTable = (): IYatzyTable => {
         }
         let dice: IDice = initialTable.dices[i - 1]
         dice.image = diceImage
-    }
-
- 
+    } 
     const playButtonImage = <Image>{
         image: <HTMLImageElement>document.getElementById("emptyButton"),
         canvasDimension: { x: 100, y: 50 },
@@ -192,12 +187,9 @@ const initTable = (): IYatzyTable => {
 
     initialTable.playButton = { image: playButtonImage, position: { x: 650, y: 300 } }
     initialTable.position = <IVector2>{ x: 0, y: 0 }
-
     return initialTable
 }
-
 const yatzyTable = ref<IYatzyTable>(initTable())
-
 const actionQueue = ref<IYatzyActionQueue>({ actions: [], blocked: false })
 const userName = computed<string>(() => store.getters.user?.name)
 const user = computed<IUser>(() => store.getters.user)
@@ -603,8 +595,7 @@ const unsubscribe = store.subscribe((mutation, state) => {
 
 const unsubscribeAction = store.subscribeAction((action, state) => {
     console.log("Action in:"+JSON.stringify(action))
-    //TODO revert to acceptable action types 
-    if (isTableRelatedAction(action)) {
+    if (!isYatzyTableRelatedAction(action)) {
         return
     } 
     if(action.type === "leaveTable"){
@@ -615,8 +606,8 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
     actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)
     initNewTurnIfRequired(action)
 })
-const isTableRelatedAction = (action:any) => {
-    return action.type !== "yatzyRollDices" && action.type !== "yatzySelectHand" && action.type !== "leaveTable" && action.type !=="timeout" && action.type !=="rematch"
+const isYatzyTableRelatedAction = (action:any) => {
+    return action.type === "yatzyRollDices" && action.type === "yatzySelectHand" && action.type === "leaveTable" && action.type ==="timeout" && action.type ==="rematch"
 }
 const handleLeavingPerson = (action:any) =>{
      let player:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
@@ -749,10 +740,7 @@ const repaintInfoTexts = () => {
     ctx.fillText(optionsText() , x, y)
     ctx.closePath()
 }
-
-
 const diceSection = (): ISection => {
-
     const dSize: IVector2 = diceSize()
     const canvasWidth = yatzyTable.value.canvas.element.width
     if (verticalLayout && screen.width >= 1000) {
@@ -963,8 +951,6 @@ const fillPlayersPointsOnRow = (row: IScoreCardRow, rowHeight: number) => {
 
 const createScoreCardRow = (title: string, nthRow: number, handType: HandType, height: number): IScoreCardRow => {
     let sc: ISection = scoreCardSection()
-    //  sc.start.y = sc.start.y * nthRow +6
-    // sc.end.y = sc.end.y * nthRow +6
     const rowSection: ISection = { start: { x: scorecardRowStart, y: height * nthRow }, end: { x: sc.end.x, y: height * nthRow } }
     return { section: rowSection, title: title, nth: nthRow, handType: handType, height: height }
 }
@@ -1005,9 +991,6 @@ const repaintScoreCard = () => {
  * 	@author antsa-1 from GitHub 
  -->
 <style scoped>
-.hidden {
-    visibility: hidden
-}
 
 .yatzyLeft {
     position: absolute;
