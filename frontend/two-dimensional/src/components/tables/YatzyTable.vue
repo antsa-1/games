@@ -227,11 +227,11 @@ const consumeActions = () => {
     actionQueue.value.blocked = true
     const action: IYatzyAction = actionQueue.value.actions.splice(0, 1)[0]   
     expectingServerResponse = false
-    if (action.type === "yatzyRollDices") {        
-        animateDices(yatzyTable.value.dices, action.payload.table.dices).then(() => {
+    if (action.type === "yatzyRollDices") {      
+        animateDices(yatzyTable.value.dices, action.payload.yatzy.dices).then(() => {
             const player = <IYatzyPlayer>yatzyTable.value.playerInTurn
             playerInTurn.value.rollsLeft = action.payload.table.playerInTurn.rollsLeft
-            setupDices(yatzyTable.value.dices, action.payload.table.dices, player.rollsLeft === 0)
+            setDiceNumbers(yatzyTable.value.dices, action.payload.table.dices, player.rollsLeft === 0)
             drawAll()
             unblockQueue()
             console.log("animations done")
@@ -300,7 +300,6 @@ const startCountdownTimer = (seconds:number) => {
 	}, 1000)
 }
 const updateScoreCard = (payload:any) => {
-    console.log("updateScorec:"+JSON.stringify(payload))
     let yatzyPlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === payload.yatzy.whoPlayed)
     yatzyPlayer.scoreCard.total = payload.yatzy.scoreCard.total
     yatzyPlayer.scoreCard.bonus = payload.yatzy.scoreCard.bonus
@@ -469,7 +468,7 @@ const createTableFromSnapShot = () => {
         unblockQueue()
         return
     }
-    setupDices(yatzyTable.value.dices, gameSnapshot.table.dices, false)
+    setDiceNumbers(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     gameSnapshot.table.players.forEach(snapshotPlayer => {     
         const tablePlayer:IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
      
@@ -817,8 +816,8 @@ const animateDices = async (tableDices: IDice[], resultDices: IDice[]) => {
         randomizeDices(yatzyTable.value.dices)
         requestAnimationFrame(repaintDices)
     } else {
-        randomizeDices(yatzyTable.value.dices)
-       
+        prepareDicesForRoll(tableDices,resultDices)
+        randomizeDices(yatzyTable.value.dices)       
         drawAll()
     }
     animationRun++
@@ -830,11 +829,22 @@ const animateDices = async (tableDices: IDice[], resultDices: IDice[]) => {
         yatzyTable.value.canvas.animating = false
     }
 }
+const prepareDicesForRoll = async (tableDices: IDice[], resultDices: IDice[]) => {
+      tableDices.forEach(tableDice => {
+        let dice: IDice = resultDices.find(resultDice => tableDice.diceId === resultDice.diceId)
+        if(dice){
+            tableDice.selected = false
+        }else{
+            tableDice.selected = true
+        }
+    })
+    await delay(1000)
+}
 
-const setupDices = async (tableDices: IDice[], resultDices: IDice[], animate: boolean = false) => {
+const setDiceNumbers = async (tableDices: IDice[], resultDices: IDice[], animate: boolean = false) => {
     resultDices.forEach(resultDice => {
         const tableDice: IDice = tableDices.find(tableDice => tableDice.diceId === resultDice.diceId)
-        setupDice(tableDice, resultDice.number)
+        setDiceNumber(tableDice, resultDice.number)
     })
     if (animate === false) {
         return
@@ -855,7 +865,7 @@ const setupDices = async (tableDices: IDice[], resultDices: IDice[], animate: bo
     yatzyTable.value.canvas.animating = false
 }
 
-const setupDice = (dice: IDice, number: number) => {
+const setDiceNumber = (dice: IDice, number: number) => {
     dice.number = number
     dice.image.image = <HTMLImageElement>document.getElementById("dice" + number)
     
@@ -863,7 +873,7 @@ const setupDice = (dice: IDice, number: number) => {
 
 const setRandomNumber = (dice: IDice) => {
     if (!dice.selected) {
-        setupDice(dice, getRandomNumber())
+        setDiceNumber(dice, getRandomNumber())
     }
 }
 
