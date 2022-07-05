@@ -608,7 +608,7 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
     initNewTurnIfRequired(action)
 })
 const isYatzyTableRelatedAction = (action: any) => {
-    return action.type === "yatzyRollDices" && action.type === "yatzySelectHand" && action.type === "leaveTable" && action.type === "timeout" && action.type === "rematch"
+    return action.type === "yatzyRollDices" || action.type === "yatzySelectHand" || action.type === "leaveTable" || action.type === "timeout"|| action.type === "rematch"
 }
 const handleLeavingPerson = (action: any) => {
     let player: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
