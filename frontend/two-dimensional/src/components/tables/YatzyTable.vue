@@ -18,16 +18,18 @@
                 <i class="bi bi-music-note"></i>
             </label>
             <input type="checkbox" id="notificationSound" v-model="gameOptions.notificationSound">
+            <span class="ps-4">
+				<input class=""  type="checkbox" id="pointerLine" @click="onAnimationChange" v-model= "gameOptions.animations">
+				<label class="" for="pointerLine"> animate</label>
+			</span>
         </div>
     </div>
     <div class="row">
-
         <div class="col-xs-12 col-sm-4">
             <span v-if="yatzyTable.playerInTurn?.name === userName" class="text-success"> It's your turn
                 {{ userName }} time:{{ yatzyTable.secondsLeft }} </span>
             <span v-else-if="yatzyTable?.playerInTurn === null" class="text-success"> Game ended </span>
-            <div v-else class="text-danger"> In turn: {{ yatzyTable.playerInTurn?.name }} time:{{ yatzyTable.secondsLeft
-            }}</div>
+            <div v-else class="text-danger"> In turn: {{ yatzyTable.playerInTurn?.name }} time:{{ yatzyTable.secondsLeft}}</div>
         </div>
     </div>
     <div>
@@ -45,14 +47,14 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { leaveTable, rematch } from '../composables/tableComposable'
 
-import { IGameOptions, Image, IVector2, IGameCanvas, FONT_SIZE, FONT, IChatMessage } from "../../interfaces/commontypes"
-import { IYatzyPlayer, IYatzyMessage, IDice, ISection, IYatzySnapshot, IYatzyAction, IYatzyActionQueue, HandType, IHand, IScoreCardRow } from "../../interfaces/yatzy"
+import {Image, IVector2, IGameCanvas, FONT_SIZE, FONT, IChatMessage } from "../../interfaces/commontypes"
+import { IYatzyPlayer, IYatzyMessage, IDice, ISection, IYatzySnapshot, IYatzyAction, IYatzyActionQueue, HandType, IHand, IScoreCardRow, IYatzyOptions } from "../../interfaces/yatzy"
 import Chat from "../Chat.vue"
 const CANVAS_ROWS = 22
 const router = useRouter()
 let gameSnapshot: IYatzySnapshot = undefined
 const store = useStore()
-const gameOptions = ref<IGameOptions>({ notificationSound: false })
+const gameOptions = ref<IYatzyOptions>({ notificationSound: false, animations:true })
 const props = defineProps(['watch'])
 
 onMounted(() => {
@@ -76,6 +78,11 @@ const setupCanvas = () => {
     yatzyTable.value.scoreCardRows = initScoreCardRows()
     if (isMyTurn.value) {
         yatzyTable.value.canvas.enabled = true
+    }
+}
+const onAnimationChange = () =>{
+    if(gameOptions.value.animations){ // v-model has not yet changed immediately after click
+        yatzyTable.value.canvas.animating = false
     }
 }
 const scoreCardSection = (): ISection => {
@@ -800,6 +807,9 @@ const drawAll = () => {
     requestAnimationFrame(repaintYatzyTable)
 }
 const animateDices = async (tableDices: IDice[], resultDices: IDice[]) => {
+    if(gameOptions.value.animations ===false){
+        return
+    }
     yatzyTable.value.canvas.animating = true
     if (animationRun !== 0) {
         randomizeDices(yatzyTable.value.dices)
@@ -835,7 +845,7 @@ const setDiceNumbers = async (tableDices: IDice[], resultDices: IDice[], animate
         const tableDice: IDice = tableDices.find(tableDice => tableDice.diceId === resultDice.diceId)
         setDiceNumber(tableDice, resultDice.number)
     })
-    if (animate === false) {
+    if (animate === false || !gameOptions.value.animations) {
         return
     }
     let counter = 0
