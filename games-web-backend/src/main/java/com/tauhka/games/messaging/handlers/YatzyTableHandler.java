@@ -3,9 +3,11 @@ package com.tauhka.games.messaging.handlers;
 import static com.tauhka.games.core.util.Constants.SYSTEM;
 
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.stats.Result;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.db.YatzyStatsEJB;
 import com.tauhka.games.db.dao.YatzyTurnDao;
@@ -75,7 +77,8 @@ public class YatzyTableHandler extends CommonHandler {
 		}
 		playedTurnMessage.setScoreCard(sc);
 		playedTurnMessage.setWhoPlayed(user.getName());
-
+		// TODO db-call only once
+		Future<Result> futureResult = yatzyStatsEJB.updateInitialRankings(table.getGameResult());
 		return playedTurnMessage;
 	}
 

@@ -31,6 +31,8 @@ public class Result {
 	private GameMode gameMode;
 	@JsonbTransient
 	private TimeControlIndex timeControlIndex;
+	@JsonbTransient
+	private boolean initialDataFetched;
 
 	public Instant getEndInstant() {
 		return endInstant;
@@ -56,6 +58,18 @@ public class Result {
 
 	public void changeStatus(Player p, GameResultType type) {
 
+	}
+
+	public boolean isInitialDataFetched() {
+		return initialDataFetched;
+	}
+
+	public void setInitialDataFetched(boolean initialDataFetched) {
+		this.initialDataFetched = initialDataFetched;
+	}
+
+	public void setPlayers(List<Player> players) {
+		this.players = players;
 	}
 
 	public Instant getStartInstant() {

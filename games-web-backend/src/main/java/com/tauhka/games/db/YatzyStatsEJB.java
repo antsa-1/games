@@ -4,16 +4,25 @@ import static com.tauhka.games.core.util.Constants.LOG_PREFIX_GAMES;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import com.tauhka.games.core.stats.Player;
+import com.tauhka.games.core.stats.Result;
 import com.tauhka.games.db.dao.YatzyTurnDao;
 
 import jakarta.annotation.Resource;
 import jakarta.ejb.AccessTimeout;
+import jakarta.ejb.AsyncResult;
 import jakarta.ejb.Asynchronous;
 import jakarta.ejb.Stateless;
 
@@ -25,8 +34,65 @@ import jakarta.ejb.Stateless;
 public class YatzyStatsEJB {
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource yatzyDatasource;
-	private static final String INSERT_EVENT = "INSERT INTO yatzy_event (player_name,player_id, game_id, event_type, dice1, dice2, dice3, dice4, dice5, hand_score,selected_hand) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+	private static final String INSERT_EVENT_SQL = "INSERT INTO yatzy_event (player_name,player_id, game_id, event_type, dice1, dice2, dice3, dice4, dice5, hand_score,selected_hand) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+	private static final String INSERT_GAME_SQL = "INSERT INTO yatzy_game (start_time,end_time, game_id, game_type,player1_name,player2_name,player3_name,player4_name,player1_start_ranking,player1_end_ranking,player2_start_ranking,player2_end_ranking,player3_start_ranking,player3_end_ranking,player4_start_ranking,player4_end_ranking,player1_score,player2_score,player3_score,player4_score) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
 	private static final Logger LOGGER = Logger.getLogger(YatzyStatsEJB.class.getName());
+
+	@AccessTimeout(15000)
+	@Asynchronous
+	public void saveYatzyGame(Result result) {
+
+		PreparedStatement stmt = null;
+		Connection con = null;
+		try {
+			con = yatzyDatasource.getConnection();
+			stmt = con.prepareStatement(INSERT_GAME_SQL);
+			stmt.setTimestamp(1, Timestamp.from(result.getStartInstant()));
+			stmt.setTimestamp(2, Timestamp.from(result.getEndInstant()));
+			stmt.setString(3, result.getGameId().toString());
+			stmt.setInt(4, result.getGameMode().getGameNumber());
+			stmt.setString(5, result.getPlayers().get(0).getName());
+			stmt.setString(6, result.getPlayers().get(1).getName());
+			addPlayerIfExist(stmt, 7, result.getPlayers(), 2);
+			addPlayerIfExist(stmt, 8, result.getPlayers(), 3);
+			stmt.setDouble(9, result.getPlayers().get(0).getInitialRanking());
+			stmt.setDouble(10, result.getPlayers().get(0).getFinalRanking());
+			stmt.setDouble(11, result.getPlayers().get(1).getInitialRanking());
+			stmt.setDouble(12, result.getPlayers().get(1).getFinalRanking());
+			addStartRanking(stmt, 13, result.getPlayers(), 2);
+			addFinalRanking(stmt, 14, result.getPlayers(), 2);
+			addStartRanking(stmt, 15, result.getPlayers(), 3);
+			addFinalRanking(stmt, 16, result.getPlayers(), 3);
+			setNullOrInteger(stmt, 17, result.getPlayers().get(0).getScore());
+			setNullOrInteger(stmt, 18, result.getPlayers().get(1).getScore());
+			addPlayerScore(stmt, 19, result.getPlayers(), 2);
+			addPlayerScore(stmt, 20, result.getPlayers(), 3);
+			int dbRes = stmt.executeUpdate();
+			if (dbRes > 0) {
+				LOGGER.info(LOG_PREFIX_GAMES + "YatzyStatsEJB updated turn:" + result);
+				return;
+			}
+			// Do nothing, update manually from log or put to error queue?
+			LOGGER.severe(LOG_PREFIX_GAMES + "YatzyStatsEJB failed to write to db:" + result);
+			return;
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "YatzyStatsEJB sqle:" + e + " data:" + result);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "YatzyStatsEJB saveYatzyTurn exception data:" + result, e);
+		} finally {
+			try {
+				if (stmt != null) {
+					stmt.close();
+				}
+				if (con != null) {
+					con.close();
+				}
+			} catch (SQLException e) {
+				LOGGER.log(Level.SEVERE, "YatzyStatsEJB finally crashed", e);
+			}
+		}
+	}
 
 	@SuppressWarnings("exports")
 	@AccessTimeout(15000)
@@ -38,7 +104,7 @@ public class YatzyStatsEJB {
 		try {
 			con = yatzyDatasource.getConnection();
 			boolean rollAction = yatzyTurnDao.getHandType() == null;
-			stmt = con.prepareStatement(INSERT_EVENT);
+			stmt = con.prepareStatement(INSERT_EVENT_SQL);
 			stmt.setString(1, yatzyTurnDao.getPlayerName());
 			setNullOrString(stmt, 2, yatzyTurnDao.getPlayerId());
 			stmt.setString(3, yatzyTurnDao.getGameId());
@@ -76,12 +142,100 @@ public class YatzyStatsEJB {
 		}
 	}
 
+	// to void method and call db once per new started game??
+	@AccessTimeout(15000)
+	public Future<Result> updateInitialRankings(Result result) {
+		PreparedStatement stmt = null;
+		Connection con = null;
+		LOGGER.info("YatzyStatsEJB starting update initialRankings");
+		try {
+			Stream<Player> playerStream = result.getPlayers().stream();
+			List<Player> playersWithId = playerStream.filter(player -> player.getId() != null).collect(Collectors.toList());
+			if (playersWithId.size() < 2) {
+				// No ranking points will be calculated
+				return new AsyncResult<Result>(result);
+			}
+			playerStream = result.getPlayers().stream();
+			con = yatzyDatasource.getConnection();
+//			Array arrOfIds =con.createArrayOf("VARCHAR", playersWithId.toArray());
+			String readRankingsSQL = String.format("select yatzy, player_id from rankings where player_id in (%s)", playerStream.filter(player -> player.getId() != null).map(values -> "?").collect(Collectors.joining(", ")));
+			stmt = con.prepareStatement(readRankingsSQL);
+			for (int i = 0; i < playersWithId.size(); i++) {
+				stmt.setString(i + 1, playersWithId.get(i).getId().toString());
+			}
+			ResultSet rs = stmt.executeQuery();
+			int index = 0;
+			while (rs.next()) {
+				Double ranking = rs.getDouble(1);
+				String id = rs.getString(2);
+				for (Player p : result.getPlayers()) {
+					if (p.getId() != null && p.getId().toString().equals(id)) {
+						p.setInitialRanking(ranking);
+					}
+				}
+				result.getPlayers().get(index).setInitialRanking(ranking);
+				index++;
+			}
+			rs.close();
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "YatzyStatsEJB readInitialRankings sqle:" + e + " data:", result);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "YatzyStatsEJB readInitialRankings exception data:" + result, e);
+		} finally {
+			try {
+				if (stmt != null) {
+					stmt.close();
+				}
+				if (con != null) {
+					con.close();
+				}
+			} catch (SQLException e) {
+				LOGGER.log(Level.SEVERE, "YatzyStatsEJB readInitialRankings finally crashed", e);
+			}
+
+		}
+		return new AsyncResult<Result>(result);
+	}
+
+	private void addStartRanking(PreparedStatement preparedStatement, int index, List<Player> players, int nth) throws SQLException {
+		if (players.get(nth) == null) {
+			preparedStatement.setNull(index, java.sql.Types.NULL);
+			return;
+		}
+		preparedStatement.setDouble(index, players.get(nth).getInitialRanking());
+	}
+
+	private void addFinalRanking(PreparedStatement preparedStatement, int index, List<Player> players, int nth) throws SQLException {
+		if (players.get(nth) == null) {
+			preparedStatement.setNull(index, java.sql.Types.NULL);
+			return;
+		}
+		preparedStatement.setDouble(index, players.get(nth).getFinalRanking());
+	}
+
+	private void addPlayerIfExist(PreparedStatement preparedStatement, int index, List<Player> players, int nth) throws SQLException {
+		if (players.get(nth) == null) {
+			preparedStatement.setNull(index, java.sql.Types.NULL);
+			return;
+		}
+		preparedStatement.setString(index, players.get(nth).getName());
+	}
+
 	private void setNullOrInteger(PreparedStatement predparedStatement, int index, Integer val) throws SQLException {
 		if (val == null) {
 			predparedStatement.setNull(index, java.sql.Types.NULL);
 			return;
 		}
 		predparedStatement.setInt(index, val);
+	}
+
+	public void addPlayerScore(PreparedStatement stmt, int nth, List<Player> players, int nthPlayer) throws SQLException {
+		if (players.size() >= nth) {
+			Integer score = players.get(nth).getScore();
+			setNullOrInteger(stmt, nth, score);
+			return;
+		}
+		stmt.setNull(nth, java.sql.Types.NULL);
 	}
 
 	private void setNullOrString(PreparedStatement predparedStatement, int index, String val) throws SQLException {
@@ -91,4 +245,5 @@ public class YatzyStatsEJB {
 		}
 		predparedStatement.setString(index, val);
 	}
+
 }

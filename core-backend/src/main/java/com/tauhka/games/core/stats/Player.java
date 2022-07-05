@@ -46,7 +46,7 @@ public class Player {
 		this.finishPosition = finishPosition;
 	}
 
-	public double getInitialRanking() {
+	public Double getInitialRanking() {
 		return initialRanking;
 	}
 
