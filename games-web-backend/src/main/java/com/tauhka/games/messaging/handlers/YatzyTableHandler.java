@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import com.tauhka.games.core.User;
 import com.tauhka.games.core.stats.Result;
 import com.tauhka.games.core.tables.Table;
-import com.tauhka.games.db.YatzyStatsEJB;
+import com.tauhka.games.db.YatzyEventEJB;
 import com.tauhka.games.db.dao.YatzyTurnDao;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageTitle;
@@ -23,7 +23,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
-/**
+/**t
  * @author antsa-1 from GitHub 12 May 2022
  **/
 
@@ -32,7 +32,7 @@ import jakarta.inject.Inject;
 public class YatzyTableHandler extends CommonHandler {
 	private static final Logger LOGGER = Logger.getLogger(YatzyTableHandler.class.getName());
 	@Inject
-	private YatzyStatsEJB yatzyStatsEJB;
+	private YatzyEventEJB yatzyStatsEJB;
 	@Inject
 	private AIHandler aiHandler;
 
@@ -77,8 +77,6 @@ public class YatzyTableHandler extends CommonHandler {
 		}
 		playedTurnMessage.setScoreCard(sc);
 		playedTurnMessage.setWhoPlayed(user.getName());
-		// TODO db-call only once
-		Future<Result> futureResult = yatzyStatsEJB.updateInitialRankings(table.getGameResult());
 		return playedTurnMessage;
 	}
 

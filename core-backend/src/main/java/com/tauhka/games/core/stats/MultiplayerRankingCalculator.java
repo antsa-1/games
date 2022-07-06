@@ -13,15 +13,18 @@ public class MultiplayerRankingCalculator {
 		if (result == null) {
 			throw new IllegalArgumentException("Cannot calculate ranking from nothing");
 		}
-		for (Player p : result.getPlayers()) {
-			List<Player> others = getOtherPlayers(result, p);
+		for (Player p : result.getPlayersWithInitialRanking()) {
+			if (p.getId() == null) {
+				continue;
+			}
+			List<Player> othersWithRanking = result.getOtherRankedPlayers(p.getId());
 			Double newRankingA = 0d;
 //			Double newRankingB = 0d;
-			for (Player other : others) {
+			for (Player other : othersWithRanking) {
 				Double aRankingInitial = p.getInitialRanking();
 				Double bRankingInitial = other.getInitialRanking();
 				Double aExpectedPercentage = 1 / (1 + Math.pow(10, (bRankingInitial - aRankingInitial) / 400d));
-//				Double bExpectedPercentage = 1 / (1 + Math.pow(10, (aRankingInitial - bRankingInitial) / 400d));
+				Double bExpectedPercentage = 1 / (1 + Math.pow(10, (aRankingInitial - bRankingInitial) / 400d));
 
 				if (p.getFinishPosition() < other.getFinishPosition()) {
 					newRankingA = aRankingInitial + 16 * (1d - aExpectedPercentage);// OK
@@ -39,10 +42,9 @@ public class MultiplayerRankingCalculator {
 			Double sum = p.getRankingsAfter().stream().mapToDouble(Double::doubleValue).sum();
 			p.setFinalRanking(sum / result.getPlayers().size());
 		}
-
 	}
 
-	private static List<Player> getOtherPlayers(Result r, Player p) {
-		return r.getPlayers().stream().filter(player -> !player.getId().equals(p.getId())).collect(Collectors.toList());
+	private static List<Player> getOtherRankedPlayers(Result r, Player p) {
+		return r.getPlayers().stream().filter(player -> player.getId() != null && !player.getId().equals(p.getId())).collect(Collectors.toList());
 	}
 }

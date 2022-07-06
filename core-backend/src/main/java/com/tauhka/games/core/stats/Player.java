@@ -5,13 +5,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.tauhka.games.core.GameResultType;
-
 /**
  * @author antsa-1 from GitHub 26 Jun 2022
  **/
 
-public class Player {
+public class Player implements Comparable<Player> {
 	private UUID id;
 	private String name;
 	private Double initialRanking;
@@ -91,12 +89,8 @@ public class Player {
 		this.initialRanking = initialRanking;
 	}
 
-	public int getFinishPosition() {
+	public Integer getFinishPosition() {
 		return finishPosition;
-	}
-
-	public void setFinishPosition(int finishPosition) {
-		this.finishPosition = finishPosition;
 	}
 
 	public void setInitialRanking(double initialRanking) {
@@ -117,6 +111,17 @@ public class Player {
 
 	public void setRankingsAfter(List<Double> rankingsAfter) {
 		this.rankingsAfter = rankingsAfter;
+	}
+
+	@Override
+	public int compareTo(Player other) {
+		int otherScore = other.score;
+		if (score > otherScore) {
+			return -1;
+		} else if (otherScore > score) {
+			return 1;
+		}
+		return 0;
 	}
 
 }

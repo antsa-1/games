@@ -123,7 +123,7 @@ export const tablesMixin = {
             }
         },
         getTimeControls() {
-            return [{ id: 0, seconds: 20 }, { id: 1, seconds: 30 }, { id: 2, seconds: 45 }, { id: 3, seconds: 60 }, { id: 4, seconds: 90 }, { id: 5, seconds: 120 },{ id: 5, seconds: 180 }]
+            return [{ id: 0, seconds: 10 }, { id: 1, seconds: 20 }, { id: 2, seconds: 30 }, { id: 3, seconds: 45 }, { id: 4, seconds: 60 }, { id: 5, seconds: 90 },{ id: 7, seconds: 240 },{ id: 7, seconds: 300 }]
         },
         isPlayerInTurn(userName: string) {
             return this.theTable.playerInTurn.name === userName

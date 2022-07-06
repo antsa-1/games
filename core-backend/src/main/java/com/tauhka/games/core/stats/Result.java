@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.tauhka.games.core.GameMode;
@@ -32,7 +33,7 @@ public class Result {
 	@JsonbTransient
 	private TimeControlIndex timeControlIndex;
 	@JsonbTransient
-	private boolean initialDataFetched;
+	private boolean complete;
 
 	public Instant getEndInstant() {
 		return endInstant;
@@ -60,16 +61,12 @@ public class Result {
 
 	}
 
-	public boolean isInitialDataFetched() {
-		return initialDataFetched;
+	public boolean isComplete() {
+		return complete;
 	}
 
-	public void setInitialDataFetched(boolean initialDataFetched) {
-		this.initialDataFetched = initialDataFetched;
-	}
-
-	public void setPlayers(List<Player> players) {
-		this.players = players;
+	public void setComplete(boolean complete) {
+		this.complete = complete;
 	}
 
 	public Instant getStartInstant() {
@@ -78,6 +75,14 @@ public class Result {
 
 	public void setStartInstant(Instant startInstant) {
 		this.startInstant = startInstant;
+	}
+
+	public TimeControlIndex getTimeControlIndex() {
+		return timeControlIndex;
+	}
+
+	public void setTimeControlIndex(TimeControlIndex timeControlIndex) {
+		this.timeControlIndex = timeControlIndex;
 	}
 
 	public UUID getGameId() {
@@ -98,6 +103,14 @@ public class Result {
 
 	public List<Player> getPlayers() {
 		return players;
+	}
+
+	public List<Player> getPlayersWithInitialRanking() {
+		return players.stream().filter(player -> player.getId() != null && player.getInitialRanking() != null).collect(Collectors.toList());
+	}
+
+	public List<Player> getOtherRankedPlayers(UUID myId) {
+		return players.stream().filter(player -> player.getId() != null && !player.getId().equals(myId)).collect(Collectors.toList());
 	}
 
 	public void changeStatus(String name, UUID id, Status status) {

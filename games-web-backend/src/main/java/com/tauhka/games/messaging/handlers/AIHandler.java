@@ -54,6 +54,12 @@ public class AIHandler {
 	}
 
 	public Message calculateNextYatzyMove(YatzyTable table) {
+		if (!(table.getPlayerInTurn() instanceof YatzyAI)) {
+			// 6.7.2022 Thread sleeping time is too long for 10 second turn time 3*4 seconds =12 seconds. Player in turn has changed due to timeout
+			// And table itself has send the message to players
+			LOGGER.info("Olav_Computer has timed out while thread was sleeping. TimeControlIndex:" + table.getTimeControlIndex());
+			throw new IllegalStateException("Not computer turn");
+		}
 		YatzyAI yatzyAI = (YatzyAI) table.getPlayerInTurn();
 		YatzyTable yatzyTable = (YatzyTable) table;
 		YatzyMessage yatzyMessage = new YatzyMessage();
@@ -91,7 +97,7 @@ public class AIHandler {
 			message.setTitle(MessageTitle.YATZY_SELECT_HAND);
 			message.getYatzyMessage().setHandType(hand.getHandType().getAsInt());
 		}
-		if ((message.getYatzyMessage().getDices().size() == 0 && message.getTitle()== MessageTitle.YATZY_ROLL_DICES)) {
+		if ((message.getYatzyMessage().getDices().size() == 0 && message.getTitle() == MessageTitle.YATZY_ROLL_DICES)) {
 			LOGGER.info("Yatzy using handSelecion fallBack 3 \n" + table);
 			hand = HandSelector.getMostValuableHands(yatzyAI.getScoreCard(), table.getDices()).getMostValuable();
 			message.setTitle(MessageTitle.YATZY_SELECT_HAND);

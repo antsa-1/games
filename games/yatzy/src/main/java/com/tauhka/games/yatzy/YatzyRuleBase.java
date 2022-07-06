@@ -39,11 +39,13 @@ public class YatzyRuleBase {
 			dice.roll();
 			yatzyTable.getDices().add(dice);
 		}
+
 		yatzyTable.setGameResult(new Result());
 		for (YatzyPlayer y : yatzyTable.getPlayers()) {
 			// Players will now be in result of the game regardless of how the game ends
 			Player p = new Player(y.getId());
 			p.setName(y.getName());
+			p.setInitialRanking(1000); // This will be overriden when saving to database
 			yatzyTable.getGameResult().addPlayer(p);
 			y.setScoreCard(new ScoreCard());
 			y.setEnabled(true);
@@ -123,7 +125,7 @@ public class YatzyRuleBase {
 		Hand hand = new Hand(HandType.getHandType(handType), table.getDices());
 		ScoreCard scoreCard = table.getPlayerInTurn().getScoreCard();
 		scoreCard.addHand(hand);
-		
+
 		return scoreCard;
 	}
 }

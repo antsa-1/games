@@ -6,7 +6,7 @@ package com.tauhka.games.core.timer;
 
 //TODO from Database
 public enum TimeControlIndex {
-	INDEX_0(20), INDEX_1(30), INDEX_2(45), INDEX_3(60), INDEX_4(90), INDEX_5(180), INDEX_6(240);
+	INDEX_0(10), INDEX_1(20), INDEX_2(30), INDEX_3(45), INDEX_4(60), INDEX_5(90), INDEX_6(240), INDEX_7(300);
 
 	private int seconds;
 
@@ -34,6 +34,8 @@ public enum TimeControlIndex {
 			return INDEX_5;
 		case 6:
 			return INDEX_6;
+		case 7:
+			return INDEX_7;
 		default:
 			throw new IllegalArgumentException("no such timeControlIndex:" + index);
 		}

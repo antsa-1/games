@@ -3,6 +3,7 @@ package com.tauhka.games.yatzy;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,16 +12,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.naming.OperationNotSupportedException;
-
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.stats.Player;
 import com.tauhka.games.core.stats.Status;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
+import com.tauhka.games.core.timer.TimeControlIndex;
 import com.tauhka.games.core.twodimen.GameResult;
 import com.tauhka.games.core.util.Constants;
+import com.tauhka.games.yatzy.util.YatzyGameEJB;
 
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.json.bind.annotation.JsonbProperty;
@@ -33,7 +36,7 @@ import jakarta.json.bind.annotation.JsonbTransient;
 public class YatzyTable extends Table {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(YatzyTable.class.getName());
-	private static final Jsonb jsonb = JsonbBuilder.create(); // All the methods in this class are safe for use by multiple concurrent threads.
+	private static final Jsonb jsonb = JsonbBuilder.create(); // All the methods in Jsonb class are safe for use by multiple concurrent threads.
 
 	@JsonbTransient
 	private YatzyRuleBase yatzyRuleBase;
@@ -128,19 +131,65 @@ public class YatzyTable extends Table {
 		List<YatzyPlayer> enabledPlayers = this.players.stream().filter(player -> player.isEnabled()).collect(Collectors.toList());
 		if (enabledPlayers.size() == 1) {
 			if (enabledPlayers.get(0) instanceof YatzyAI) {
-				return true;
+				gameOver = true;
 			}
 		}
-		if (this.players.size() - enabledPlayers.size() == this.players.size()) {
+		if (!gameOver && this.players.size() - enabledPlayers.size() == this.players.size()) {
 			gameOver = true;
 		}
-		if (hasEnabledPlayersPlayedAllHands(enabledPlayers)) {
+		if (!gameOver && hasEnabledPlayersPlayedAllHands(enabledPlayers)) {
 			gameOver = true;
 		}
 		if (gameOver) {
-			cancelTimer();
+			handleGameOver();
 		}
 		return gameOver;
+	}
+
+	private void handleGameOver() {
+		cancelTimer();
+		if (!gameResult.isComplete()) {
+			finalizeGameResult();
+			YatzyGameEJB yatzyGameEjb = CDI.current().select(YatzyGameEJB.class).get();
+			yatzyGameEjb.saveYatzyGame(gameResult);
+		}
+		playerInTurn = null;
+	}
+
+	private void finalizeGameResult() {
+		gameResult.setStartInstant(this.startTime);
+		gameResult.setEndInstant(Instant.now());
+		gameResult.setGameId(gameId);
+		gameResult.setGameMode(this.gameMode);
+		gameResult.setTimeControlIndex(TimeControlIndex.getWithIndex(timeControlIndex));
+		setFinishStatuses();
+		setFinishPositions();
+	}
+
+	private void setFinishPositions() {
+		Collections.sort(gameResult.getPlayers());
+		for (int i = 0; i < gameResult.getPlayers().size(); i++) {
+			Player indexPlayer = gameResult.getPlayers().get(i);
+			if (indexPlayer.getFinishPosition() == null) {
+				indexPlayer.setFinishPosition(i);
+			}
+			for (int j = i; j < gameResult.getPlayers().size(); j++) {
+				Player nextPlayer = gameResult.getPlayers().get(j);
+				if (nextPlayer.getScore() == indexPlayer.getScore() && nextPlayer.getFinishPosition() == null) {
+					nextPlayer.setFinishPosition(i);
+				}
+			}
+		}
+	}
+
+	private void setFinishStatuses() {
+		for (YatzyPlayer y : players) {
+			Player p = gameResult.findPlayer(y.getName());
+			p.setScore(y.getScoreCard().calculateTotal());
+			if (p.getStatus() == null) {
+				p.setStatus(Status.FINISHED);
+			}
+		}
 	}
 
 	private boolean hasEnabledPlayersPlayedAllHands(List<YatzyPlayer> enabledPlayers) {
