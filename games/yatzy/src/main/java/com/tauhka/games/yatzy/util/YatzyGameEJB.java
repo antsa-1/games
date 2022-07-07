@@ -41,13 +41,15 @@ public class YatzyGameEJB {
 	@AccessTimeout(15000)
 	@Asynchronous
 	public void saveYatzyGame(Result result) {
-
+		if (result.isComplete()) {
+			return;
+		}
 		PreparedStatement stmt = null;
 		Connection con = null;
 		if (!result.isComplete()) {
+			result.setComplete(true);
 			fetchInitialRankings(result);
 			MultiplayerRankingCalculator.calculateNewRankings(result);
-			result.setComplete(true);
 		}
 		try {
 			con = yatzyDatasource.getConnection();

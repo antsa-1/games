@@ -127,6 +127,9 @@ public class YatzyTable extends Table {
 		if (startTime == null) {
 			return false;
 		}
+		if (gameOver && gameResult.isComplete()) {
+			return true;
+		}
 		// Players can disconnect/leave table anytime. Last player can play the game to the end. if (this.players.size() < 1) { gameOver = true; }
 		List<YatzyPlayer> enabledPlayers = this.players.stream().filter(player -> player.isEnabled()).collect(Collectors.toList());
 		if (enabledPlayers.size() == 1) {
@@ -220,7 +223,7 @@ public class YatzyTable extends Table {
 	public void onTimeout() {
 		synchronized (this) {
 			cancelTimer();
-			System.out.println("YatzyTable TIMEOUT");
+			System.out.println("YatzyTable TIMEOUT+" + getPlayerInTurn());
 			YatzyPlayer playerInTurn = getPlayerInTurn();
 			if (playerInTurn != null) {
 				playerInTurn.setEnabled(false);
@@ -247,7 +250,7 @@ public class YatzyTable extends Table {
 					try {
 						user.getWebsocketSession().getBasicRemote().sendText(message);
 					} catch (IOException e) {
-						LOGGER.log(Level.SEVERE, "CommonEndpoint sendMessage to table io.error", e);
+						LOGGER.log(Level.SEVERE, "YatzyTable timeout message to table failed", e);
 					}
 				}
 			}

@@ -53,4 +53,10 @@ public class YatzyPlayer extends User implements Serializable {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+
+	@Override
+	public String toString() {
+		return "YatzyPlayer [scoreCard=" + scoreCard + ", rollsLeft=" + rollsLeft + ", enabled=" + enabled + ", getName()=" + getName() + "]";
+	}
+
 }

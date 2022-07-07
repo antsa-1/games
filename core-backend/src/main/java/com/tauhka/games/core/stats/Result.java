@@ -48,7 +48,7 @@ public class Result {
 	}
 
 	public Player findPlayer(UUID id) {
-		return players.stream().filter(player -> player.getId().equals(id)).findFirst().get();
+		return players.stream().filter(player -> player.getId() != null && player.getId().equals(id)).findFirst().get();
 	}
 
 	public Player findPlayer(String nickname) {
@@ -120,4 +120,10 @@ public class Result {
 		}
 		findPlayer(name).setStatus(status);
 	}
+
+	@Override
+	public String toString() {
+		return "Result [players=" + players + ", endInstant=" + endInstant + ", startInstant=" + startInstant + ", gameId=" + gameId + ", gameMode=" + gameMode + ", timeControlIndex=" + timeControlIndex + ", complete=" + complete + "]";
+	}
+
 }
