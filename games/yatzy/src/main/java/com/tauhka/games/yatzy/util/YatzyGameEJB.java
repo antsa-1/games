@@ -23,7 +23,6 @@ import jakarta.annotation.Resource;
 import jakarta.ejb.AccessTimeout;
 import jakarta.ejb.Asynchronous;
 import jakarta.ejb.Stateless;
-import jakarta.enterprise.context.Dependent;
 
 /**
  * @author antsa-1 from GitHub 27 Jun 2022
@@ -33,7 +32,6 @@ import jakarta.enterprise.context.Dependent;
 public class YatzyGameEJB {
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource yatzyDatasource;
-//	private static final String INSERT_EVENT_SQL = "INSERT INTO yatzy_event (player_name,player_id, game_id, event_type, dice1, dice2, dice3, dice4, dice5, hand_score,selected_hand) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 	private static final String INSERT_GAME_SQL = "INSERT INTO yatzy_game (start_time,end_time, game_id, game_type,player1_name,player2_name,player3_name,player4_name,player1_start_ranking,player1_end_ranking,player2_start_ranking,player2_end_ranking,player3_start_ranking,player3_end_ranking,player4_start_ranking,player4_end_ranking,player1_score,player2_score,player3_score,player4_score,player1_id,player2_id,player3_id,player4_id, timecontrol_seconds) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 	private static final Logger LOGGER = Logger.getLogger(YatzyGameEJB.class.getName());
@@ -81,15 +79,16 @@ public class YatzyGameEJB {
 			stmt.setInt(25, result.getTimeControlIndex().getSeconds());
 			int dbRes = stmt.executeUpdate();
 			if (dbRes > 0) {
-				LOGGER.info(LOG_PREFIX_GAMES + "YatzyStatsEJB updated turn:" + result);
+				updateLatestRankings(result);
+				LOGGER.info(LOG_PREFIX_GAMES + "YatzyGameEJB updated game result:" + result);
 				return;
 			}
-			LOGGER.severe(LOG_PREFIX_GAMES + "YatzyStatsEJB failed to write to db:" + result);
+			LOGGER.severe(LOG_PREFIX_GAMES + "YatzyGameEJB failed to write to db:" + result);
 			return;
 		} catch (SQLException e) {
-			LOGGER.log(Level.SEVERE, "YatzyStatsEJB sqle:" + e + " data:" + result);
+			LOGGER.log(Level.SEVERE, "YatzyGameEJB sqle:" + result, e);
 		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "YatzyStatsEJB saveYatzyTurn exception data:" + result, e);
+			LOGGER.log(Level.SEVERE, "YatzyGameEJB saveYatzyTurn exception data:" + result, e);
 		} finally {
 			try {
 				if (stmt != null) {
@@ -99,7 +98,57 @@ public class YatzyGameEJB {
 					con.close();
 				}
 			} catch (SQLException e) {
-				LOGGER.log(Level.SEVERE, "YatzyStatsEJB finally crashed", e);
+				LOGGER.log(Level.SEVERE, "YatzyGameEJB finally crashed", e);
+			}
+		}
+
+	}
+
+	private void updateLatestRankings(Result result) {
+		LOGGER.info("YatzyGameEJB Updating latest rankings");
+		if (result.getRankingPlayers().size() < 1) { // 2 at least at runtime
+			LOGGER.info("YatzyGameEJB no final rankings");
+			return;
+		}
+		PreparedStatement stmt = null;
+		Connection con = null;
+		try {
+			String sql = String.format("insert into rankings(player_id, player_name, yatzy) values (%s",
+					result.getRankingPlayers().stream().filter(player -> player.getFinalRanking() != null).map(values -> "?,?,?)").collect(Collectors.joining(",(")));
+			sql += "ON DUPLICATE KEY UPDATE yatzy=values(yatzy)";
+			con = yatzyDatasource.getConnection();
+			stmt = con.prepareStatement(sql);
+			// produces similar to
+			// insert into rankings(player_id, player_name, yatzy) values ('6474132f-424e-4edb-b8de-e9f86c71d153','best',1000.0),('72a4d71f-e6b9-48aa-bc92-927741eae12b','test',1000.0),('41e62ede-0c56-44be-bb60-f4fa70036c5a','rest',1000.0)ON
+			// DUPLICATE KEY UPDATE yatzy=values(yatzy)
+			int playerIndex = 0;
+			for (int i = 1; i < result.getRankingPlayers().size() * 3; i = i + 3) {
+				stmt.setString(i, result.getRankingPlayers().get(playerIndex).getId().toString());
+				stmt.setString(i + 1, result.getRankingPlayers().get(playerIndex).getName());
+				stmt.setDouble(i + 2, result.getRankingPlayers().get(playerIndex).getFinalRanking());
+				playerIndex++;
+			}
+			int dbRes = stmt.executeUpdate();
+			if (dbRes > 0) {
+				LOGGER.info(LOG_PREFIX_GAMES + "YatzyGameEJB updated latest rankings:" + result);
+				return;
+			}
+			LOGGER.severe(LOG_PREFIX_GAMES + "YatzyGameEJB updateLatest rankings failed to write to db:" + result);
+			return;
+		} catch (SQLException e) {
+			LOGGER.log(Level.SEVERE, "YatzyGameEJB updateLatest sqle: data:" + result, e);
+		} catch (Exception e) {
+			LOGGER.log(Level.SEVERE, "YatzyGameEJB updateLatest exception data:" + result, e);
+		} finally {
+			try {
+				if (stmt != null) {
+					stmt.close();
+				}
+				if (con != null) {
+					con.close();
+				}
+			} catch (SQLException e) {
+				LOGGER.log(Level.SEVERE, "YatzyGameEJB finally crashed", e);
 			}
 		}
 	}

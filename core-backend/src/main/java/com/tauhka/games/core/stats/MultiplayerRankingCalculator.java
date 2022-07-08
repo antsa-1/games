@@ -12,13 +12,12 @@ public class MultiplayerRankingCalculator {
 		if (result == null) {
 			throw new IllegalArgumentException("Cannot calculate ranking from nothing");
 		}
-		for (Player p : result.getPlayersWithInitialRanking()) {
+		for (Player p : result.getRankingPlayers()) {
 			if (p.getId() == null) {
 				continue;
 			}
 			List<Player> othersWithRanking = result.getOtherRankedPlayers(p.getId());
 			Double newRankingA = 0d;
-//			Double newRankingB = 0d;
 			for (Player other : othersWithRanking) {
 				Double aRankingInitial = p.getInitialRanking();
 				Double bRankingInitial = other.getInitialRanking();
@@ -30,17 +29,19 @@ public class MultiplayerRankingCalculator {
 				} else {
 					// Equal scores
 					if (aRankingInitial > bRankingInitial) {
-						newRankingA -= 2;
+						newRankingA = aRankingInitial - 2;
 					} else if (aRankingInitial < bRankingInitial) {
-						newRankingA += 2;
+						newRankingA = aRankingInitial + 2;
 					} else {
 						newRankingA = aRankingInitial;
 					}
 				}
 				p.getRankingsAfter().add(newRankingA);
 			}
-			Double sum = p.getRankingsAfter().stream().mapToDouble(Double::doubleValue).sum();
-			p.setFinalRanking(sum / p.getRankingsAfter().size());
+			if (p.getRankingsAfter().size() > 0) {
+				Double sum = p.getRankingsAfter().stream().mapToDouble(Double::doubleValue).sum();
+				p.setFinalRanking(sum / p.getRankingsAfter().size());
+			}
 		}
 	}
 

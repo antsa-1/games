@@ -61,6 +61,10 @@ public class Result {
 
 	}
 
+	public boolean containsFinalRankings() {
+		return this.players.stream().filter(player -> player.getId() != null && player.getFinalRanking() != null).collect(Collectors.toList()).size() > 0;
+	}
+
 	public boolean isComplete() {
 		return complete;
 	}
@@ -105,7 +109,7 @@ public class Result {
 		return players;
 	}
 
-	public List<Player> getPlayersWithInitialRanking() {
+	public List<Player> getRankingPlayers() {
 		return players.stream().filter(player -> player.getId() != null && player.getInitialRanking() != null).collect(Collectors.toList());
 	}
 
