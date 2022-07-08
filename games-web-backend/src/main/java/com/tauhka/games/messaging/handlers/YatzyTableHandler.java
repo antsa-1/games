@@ -23,7 +23,9 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
-/**t
+/**
+ * t
+ * 
  * @author antsa-1 from GitHub 12 May 2022
  **/
 
@@ -92,13 +94,17 @@ public class YatzyTableHandler extends CommonHandler {
 		return playedTurnMessage;
 	}
 
+	private int getWaitTime(Table table) {
+		return table.getTimeControlIndex() > 1 ? 4000 : 50;
+	}
+
 	private void playComputerTurn(Table table) {
 		int finalExitCondition = 0; // 4 moves maximum
 		YatzyTable yatzyTable = (YatzyTable) table;
 		while (table.isArtificialPlayerInTurn() || finalExitCondition >= 4) {
 			try {
 				finalExitCondition++;
-				Thread.sleep(4000);
+				Thread.sleep(getWaitTime(yatzyTable));
 				Message nextMoveMessage = aiHandler.calculateNextYatzyMove(yatzyTable);
 				YatzyMessage yMessage = null;
 				if (nextMoveMessage.getTitle() == MessageTitle.YATZY_SELECT_HAND) {

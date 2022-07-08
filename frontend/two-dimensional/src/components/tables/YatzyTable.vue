@@ -59,6 +59,9 @@ const props = defineProps(['watch'])
 
 onMounted(() => {
     startCountdownTimer(yatzyTable.value.secondsLeft)
+    if(yatzyTable.value.timeControlIndex <= 1){
+        gameOptions.value.animations = false
+    }
     setupCanvas()
     if (props.watch === "1") {
         const tableSnapshot: IYatzyTable = <IYatzyTable>store.getters.theTable

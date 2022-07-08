@@ -13,9 +13,9 @@ public class MultiplayerRankingCalculator {
 			throw new IllegalArgumentException("Cannot calculate ranking from nothing");
 		}
 		for (Player p : result.getRankingPlayers()) {
-			if (p.getId() == null) {
-				continue;
-			}
+//			if (p.getId() == null) {
+//				continue;
+//			}
 			List<Player> othersWithRanking = result.getOtherRankedPlayers(p.getId());
 			Double newRankingA = 0d;
 			for (Player other : othersWithRanking) {
