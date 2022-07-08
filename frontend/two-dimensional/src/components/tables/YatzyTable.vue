@@ -59,7 +59,7 @@ const props = defineProps(['watch'])
 
 onMounted(() => {
     startCountdownTimer(yatzyTable.value.secondsLeft)
-    if(yatzyTable.value.timeControlIndex <= 1){
+    if(yatzyTable.value.timeControlIndex < 2){
         gameOptions.value.animations = false
     }
     setupCanvas()

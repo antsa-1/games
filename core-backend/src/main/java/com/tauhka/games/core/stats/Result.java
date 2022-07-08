@@ -57,9 +57,6 @@ public class Result {
 		return playerOptional.get();
 	}
 
-	public void changeStatus(Player p, GameResultType type) {
-
-	}
 
 	public boolean containsFinalRankings() {
 		return this.players.stream().filter(player -> player.getId() != null && player.getFinalRanking() != null).collect(Collectors.toList()).size() > 0;

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.tauhka.games.core.util.Constants;
+
 /**
  * @author antsa-1 from GitHub 26 Jun 2022
  **/
@@ -18,6 +20,10 @@ public class Player implements Comparable<Player> {
 	private Status status;
 	private Integer finishPosition;
 	private int score; // yatzy game score
+
+	public boolean isComputerPlayer() {
+		return this.id != null && this.id.equals(Constants.OLAV_COMPUTER_UUID);
+	}
 
 	public Player() {
 	}

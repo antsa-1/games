@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import com.tauhka.games.core.stats.MultiplayerRankingCalculator;
 import com.tauhka.games.core.stats.Player;
 import com.tauhka.games.core.stats.Result;
+import com.tauhka.games.core.timer.TimeControlIndex;
 
 import jakarta.annotation.Resource;
 import jakarta.ejb.AccessTimeout;
@@ -104,6 +105,20 @@ public class YatzyGameEJB {
 
 	}
 
+	private String getTimeControlColumn(Result result) {
+		TimeControlIndex index = result.getTimeControlIndex();
+		if (index.getSeconds() == 10) {
+			return "yatzy_ten_seconds";
+		}
+		if (index.getSeconds() == 15) {
+			return "yatzy_fifteen_seconds";
+		}
+		if (index.getSeconds() == 20) {
+			return "yatzy_twenty_seconds";
+		}
+		return "yatzy";
+	}
+
 	private void updateLatestRankings(Result result) {
 		LOGGER.info("YatzyGameEJB Updating latest rankings");
 		if (result.getRankingPlayers().size() < 1) { // 2 at least at runtime
@@ -113,9 +128,10 @@ public class YatzyGameEJB {
 		PreparedStatement stmt = null;
 		Connection con = null;
 		try {
-			String sql = String.format("insert into rankings(player_id, player_name, yatzy) values (%s",
+			String column = result.getTimeControlIndex().getSeconds() > 20 ? "yatzy" : getTimeControlColumn(result);
+			String sql = String.format("insert into rankings(player_id, player_name," + column + ") values (%s",
 					result.getRankingPlayers().stream().filter(player -> player.getFinalRanking() != null).map(values -> "?,?,?)").collect(Collectors.joining(",(")));
-			sql += "ON DUPLICATE KEY UPDATE yatzy=values(yatzy)";
+			sql += "ON DUPLICATE KEY UPDATE " + column + " =values(" + column + ")";
 			con = yatzyDatasource.getConnection();
 			stmt = con.prepareStatement(sql);
 			// produces similar to
@@ -175,7 +191,8 @@ public class YatzyGameEJB {
 			}
 			playerStream = result.getPlayers().stream();
 			con = yatzyDatasource.getConnection();
-			String readRankingsSQL = String.format("select yatzy, player_id from rankings where player_id in (%s)", playerStream.filter(player -> player.getId() != null).map(values -> "?").collect(Collectors.joining(", ")));
+			String column = result.getTimeControlIndex().getSeconds() > 20 ? "yatzy" : getTimeControlColumn(result);
+			String readRankingsSQL = String.format("select " + column + ", player_id from rankings where player_id in (%s)", playerStream.filter(player -> player.getId() != null).map(values -> "?").collect(Collectors.joining(", ")));
 			stmt = con.prepareStatement(readRankingsSQL);
 			for (int i = 0; i < playersWithId.size(); i++) {
 				stmt.setString(i + 1, playersWithId.get(i).getId().toString());
@@ -186,6 +203,9 @@ public class YatzyGameEJB {
 				String id = rs.getString(2);
 				for (Player p : result.getPlayers()) {
 					if (p.getId() != null && p.getId().toString().equals(id)) {
+						if (ranking <= 0) {
+							ranking = 1000d;// losing all points leads back to 1000
+						}
 						p.setInitialRanking(ranking);
 					}
 				}

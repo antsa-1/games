@@ -2,6 +2,7 @@ package com.tauhka.games.core.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public final class Constants {
 	public static final int USER_NAME_MIN_LENGTH = 1;
@@ -17,6 +18,7 @@ public final class Constants {
 	public static final double OLAV_COMPUTER_CONNECT_FOUR_RANKING = 1205;
 	public static final double OLAV_COMPUTER_EIGHT_BALL_RANKING = 1299;
 	public static final String OLAV_COMPUTER_ID = "123e4567-e89b-12d3-a456-426652340000";
+	public static final UUID OLAV_COMPUTER_UUID = UUID.fromString(OLAV_COMPUTER_ID);
 	public static final String ENVIRONMENT_PRODUCTION = "PRODUCTION";
 	public static final String ENVIRONMENT_DEVELOPMENT = "DEVELOPMENT";
 	public static final String WEBSOCKET_PRODUCTION_ORIGIN = "http://35.217.7.146"; // TODO replace with real prod. URL
