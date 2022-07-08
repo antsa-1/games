@@ -1,5 +1,13 @@
 package com.tauhka.portal.ejb;
-import static com.tauhka.games.core.util.Constants.*;
+
+import static com.tauhka.games.core.util.Constants.FORBIDDEN_WORD_PARTS;
+import static com.tauhka.games.core.util.Constants.LOG_PREFIX_PORTAL;
+import static com.tauhka.games.core.util.Constants.NULL;
+import static com.tauhka.games.core.util.Constants.PASSWORD_MAX_LENGTH;
+import static com.tauhka.games.core.util.Constants.PASSWORD_MIN_LENGTH;
+import static com.tauhka.games.core.util.Constants.USER_NAME_MAX_LENGTH;
+import static com.tauhka.games.core.util.Constants.USER_NAME_MIN_LENGTH;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +43,10 @@ public class UserEJB {
 	private static final String REMOVE_ACTIVE_LOGIN = "delete from login where id= (?)";
 	private static final String TOP_TICTACTOE_PLAYERS_SQL = "SELECT DISTINCT name,ranking_tictactoe FROM user ORDER BY ranking_tictactoe DESC LIMIT 20;";
 	private static final String TOP_EIGHT_BALL_PLAYERS_SQL = "SELECT DISTINCT name,ranking_eightball FROM user ORDER BY ranking_eightball DESC LIMIT 20;";
+	private static final String TOP_YATZY_CLASSIC_SQL = "SELECT DISTINCT player_name,yatzy_classic FROM rankings ORDER BY yatzy_classic DESC LIMIT 20;";
+	private static final String TOP_YATZY_FAST_SQL = "SELECT DISTINCT player_name,yatzy_fast FROM rankings ORDER BY yatzy_fast DESC LIMIT 20;";
+	private static final String TOP_YATZY_SUPER_SQL = "SELECT DISTINCT player_name,yatzy_super FROM rankings ORDER BY yatzy_super DESC LIMIT 20;";
+	private static final String TOP_YATZY_HYPER_SQL = "SELECT DISTINCT player_name,yatzy_hyper FROM rankings ORDER BY yatzy_hyper DESC LIMIT 20;";
 	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT name,ranking_connectfour FROM user ORDER BY ranking_connectfour DESC LIMIT 20;";
 	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes,eightballs FROM game_counter";
 
@@ -166,10 +178,7 @@ public class UserEJB {
 		throw new RuntimeException("UserEJB runtimeException " + nickName);
 	}
 
-	// 3 different queries, TODO check optimizing possibilities, although max once
-	// per cache-timeout called
 	public TopLists getTopPlayers() {
-
 		PreparedStatement stmt = null;
 		Connection con = null;
 		try {
@@ -181,7 +190,7 @@ public class UserEJB {
 			while (rs.next()) {
 				TopPlayer t = new TopPlayer();
 				t.setNickname(rs.getString("name"));
-				t.setRankingTicTacToe((int) rs.getDouble("ranking_tictactoe"));
+				t.setRanking((int) rs.getDouble("ranking_tictactoe"));
 				topLists.addTicTacToePlayer(t);
 			}
 			rs.close();
@@ -192,7 +201,7 @@ public class UserEJB {
 			while (rs2.next()) {
 				TopPlayer t = new TopPlayer();
 				t.setNickname(rs2.getString("name"));
-				t.setRankingConnectFour((int) rs2.getDouble("ranking_connectfour"));
+				t.setRanking((int) rs2.getDouble("ranking_connectfour"));
 				topLists.addConnectFourPlayer(t);
 			}
 			rs2.close();
@@ -213,11 +222,51 @@ public class UserEJB {
 			while (rs4.next()) {
 				TopPlayer t = new TopPlayer();
 				t.setNickname(rs4.getString("name"));
-				t.setRankingEightBall((int) rs4.getDouble("ranking_eightball"));
-				t.setPlayedEightBalls(USER_NAME_MIN_LENGTH);
+				t.setRanking((int) rs4.getDouble("ranking_eightball"));
+				t.setPlayedGames(1);
 				topLists.addEightBallPlayer(t);
 			}
 			rs4.close();
+			stmt = con.prepareStatement(TOP_YATZY_CLASSIC_SQL);
+			ResultSet rs5 = stmt.executeQuery();
+			while (rs5.next()) {
+				TopPlayer t = new TopPlayer();
+				t.setNickname(rs5.getString("player_name"));
+				t.setRanking((int) rs5.getDouble(Constants.YATZY_CLASSIC));
+				t.setPlayedGames(1);
+				topLists.addYatzyClassicPlayer(t);
+			}
+			rs5.close();
+			stmt = con.prepareStatement(TOP_YATZY_FAST_SQL);
+			ResultSet rs6 = stmt.executeQuery();
+			while (rs6.next()) {
+				TopPlayer t = new TopPlayer();
+				t.setNickname(rs6.getString("player_name"));
+				t.setRanking((int) rs6.getDouble(Constants.YATZY_FAST));
+				t.setPlayedGames(1);
+				topLists.addYatzyFastPlayer(t);
+			}
+			rs6.close();
+			stmt = con.prepareStatement(TOP_YATZY_SUPER_SQL);
+			ResultSet rs7 = stmt.executeQuery();
+			while (rs7.next()) {
+				TopPlayer t = new TopPlayer();
+				t.setNickname(rs7.getString("player_name"));
+				t.setRanking((int) rs7.getDouble(Constants.YATZY_SUPER));
+				t.setPlayedGames(1);
+				topLists.addYatzySuperPlayer(t);
+			}
+			rs7.close();
+			stmt = con.prepareStatement(TOP_YATZY_HYPER_SQL);
+			ResultSet rs8 = stmt.executeQuery();
+			while (rs8.next()) {
+				TopPlayer t = new TopPlayer();
+				t.setNickname(rs8.getString("player_name"));
+				t.setRanking((int) rs8.getDouble(Constants.YATZY_HYPER));
+				t.setPlayedGames(1);
+				topLists.addYatzyHyperPlayer(t);
+			}
+			rs8.close();
 			return topLists;
 
 		} catch (SQLException e) {

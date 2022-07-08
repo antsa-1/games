@@ -13,18 +13,10 @@ public class TopPlayer implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@JsonbProperty("nickname")
 	private String nickname;
-	@JsonbProperty("rankingTicTacToe")
-	private int rankingTicTacToe;
-	@JsonbProperty("playedTicTacToes")
-	private int playedTicTacToes;
-	@JsonbProperty("rankingConnectFour")
-	private int rankingConnectFour;
-	@JsonbProperty("playedConnectFours")
-	private int playedConnectFours;
-	@JsonbProperty("rankingEightBall")
-	private int rankingEightBall;
-	@JsonbProperty("playedEightBalls")
-	private int playedEightBalls;
+	@JsonbProperty("ranking")
+	private int ranking;
+	@JsonbProperty("playedGames")
+	private int playedGames;
 
 	public String getNickname() {
 		return nickname;
@@ -34,52 +26,20 @@ public class TopPlayer implements Serializable {
 		this.nickname = nickname;
 	}
 
-	public int getRankingTicTacToe() {
-		return rankingTicTacToe;
+	public int getRanking() {
+		return ranking;
 	}
 
-	public void setRankingTicTacToe(int rankingTicTacToe) {
-		this.rankingTicTacToe = rankingTicTacToe;
+	public void setRanking(int ranking) {
+		this.ranking = ranking;
 	}
 
-	public int getPlayedTicTacToes() {
-		return playedTicTacToes;
+	public int getPlayedGames() {
+		return playedGames;
 	}
 
-	public void setPlayedTicTacToes(int playedTicTacToes) {
-		this.playedTicTacToes = playedTicTacToes;
-	}
-
-	public int getRankingConnectFour() {
-		return rankingConnectFour;
-	}
-
-	public void setRankingConnectFour(int rankingConnectFour) {
-		this.rankingConnectFour = rankingConnectFour;
-	}
-
-	public int getPlayedConnectFours() {
-		return playedConnectFours;
-	}
-
-	public void setPlayedConnectFours(int playedConnectFours) {
-		this.playedConnectFours = playedConnectFours;
-	}
-
-	public int getRankingEightBall() {
-		return rankingEightBall;
-	}
-
-	public void setRankingEightBall(int rankingEightBall) {
-		this.rankingEightBall = rankingEightBall;
-	}
-
-	public int getPlayedEightBalls() {
-		return playedEightBalls;
-	}
-
-	public void setPlayedEightBalls(int playedEightBalls) {
-		this.playedEightBalls = playedEightBalls;
+	public void setPlayedGames(int playedGames) {
+		this.playedGames = playedGames;
 	}
 
 }

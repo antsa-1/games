@@ -28,6 +28,10 @@ public final class Constants {
 	public static final String LOG_PREFIX = "TAUHKA_";
 	public static final String LOG_PREFIX_PORTAL = LOG_PREFIX + "PORTAL ";
 	public static final String LOG_PREFIX_GAMES = LOG_PREFIX + "GAMES ";
+	public static final String YATZY_CLASSIC = "yatzy_classic";
+	public static final String YATZY_FAST = "yatzy_fast"; // 20sec
+	public static final String YATZY_SUPER = "yatzy_super";// 15 sec
+	public static final String YATZY_HYPER = "yatzy_hyper"; // 10 sec
 
 	public static final List<String> FORBIDDEN_WORD_PARTS = new ArrayList<String>();
 	static {

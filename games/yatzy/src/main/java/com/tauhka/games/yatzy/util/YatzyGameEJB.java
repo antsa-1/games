@@ -19,6 +19,7 @@ import com.tauhka.games.core.stats.MultiplayerRankingCalculator;
 import com.tauhka.games.core.stats.Player;
 import com.tauhka.games.core.stats.Result;
 import com.tauhka.games.core.timer.TimeControlIndex;
+import com.tauhka.games.core.util.Constants;
 
 import jakarta.annotation.Resource;
 import jakarta.ejb.AccessTimeout;
@@ -105,18 +106,18 @@ public class YatzyGameEJB {
 
 	}
 
-	private String getTimeControlColumn(Result result) {
+	private String getDbColumName(Result result) {
 		TimeControlIndex index = result.getTimeControlIndex();
 		if (index.getSeconds() == 10) {
-			return "yatzy_ten_seconds";
+			return Constants.YATZY_HYPER;
 		}
 		if (index.getSeconds() == 15) {
-			return "yatzy_fifteen_seconds";
+			return Constants.YATZY_SUPER;
 		}
 		if (index.getSeconds() == 20) {
-			return "yatzy_twenty_seconds";
+			return Constants.YATZY_FAST;
 		}
-		return "yatzy";
+		return Constants.YATZY_CLASSIC;
 	}
 
 	private void updateLatestRankings(Result result) {
@@ -128,7 +129,7 @@ public class YatzyGameEJB {
 		PreparedStatement stmt = null;
 		Connection con = null;
 		try {
-			String column = result.getTimeControlIndex().getSeconds() > 20 ? "yatzy" : getTimeControlColumn(result);
+			String column = result.getTimeControlIndex().getSeconds() > 20 ? "yatzy" : getDbColumName(result);
 			String sql = String.format("insert into rankings(player_id, player_name," + column + ") values (%s",
 					result.getRankingPlayers().stream().filter(player -> player.getFinalRanking() != null).map(values -> "?,?,?)").collect(Collectors.joining(",(")));
 			sql += "ON DUPLICATE KEY UPDATE " + column + " =values(" + column + ")";
@@ -191,7 +192,7 @@ public class YatzyGameEJB {
 			}
 			playerStream = result.getPlayers().stream();
 			con = yatzyDatasource.getConnection();
-			String column = result.getTimeControlIndex().getSeconds() > 20 ? "yatzy" : getTimeControlColumn(result);
+			String column = result.getTimeControlIndex().getSeconds() > 20 ? "yatzy" : getDbColumName(result);
 			String readRankingsSQL = String.format("select " + column + ", player_id from rankings where player_id in (%s)", playerStream.filter(player -> player.getId() != null).map(values -> "?").collect(Collectors.joining(", ")));
 			stmt = con.prepareStatement(readRankingsSQL);
 			for (int i = 0; i < playersWithId.size(); i++) {

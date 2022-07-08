@@ -97,11 +97,19 @@ export interface ITopLists {
     connectFours: IPlayerStats[],
     tictactoes: IPlayerStats[],
     eightBalls: IPlayerStats[],
+    yatzyClassics: [],
+    yatzyFasts: [],
+    yatzySupers: [],
+    yatzyHypers: [],
     errorFlag: boolean,
     dateTime: string,
     totalTictactoes: number,
     totalConnectFours: number,
-    totalEightBalls: number
+    totalEightBalls: number,
+    totalYatzyClassics: number,
+    totalYatzyFast: number,
+    totalYatzySuper: number,
+    totalYatzyHyper: number
 }
 
 export interface IPlayerStats {

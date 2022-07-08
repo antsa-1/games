@@ -19,6 +19,14 @@ public class TopLists {
 	private List<TopPlayer> ticTacToeList;
 	@JsonbProperty("eightBalls")
 	private List<TopPlayer> eightBallsList;
+	@JsonbProperty("yatzyClassics")
+	private List<TopPlayer> yatzyClassicList;
+	@JsonbProperty("yatzyFasts")
+	private List<TopPlayer> yatzyFastList;
+	@JsonbProperty("yatzySupers")
+	private List<TopPlayer> yatzySuperList;
+	@JsonbProperty("yatzyHypers")
+	private List<TopPlayer> yatzyHyperList;
 	@JsonbProperty("instant")
 	private Instant fetchInstant;
 	@JsonbProperty("totalConnectFours")
@@ -50,6 +58,38 @@ public class TopLists {
 			this.eightBallsList = new ArrayList<TopPlayer>();
 		}
 		this.eightBallsList.add(topPlayer);
+	}
+
+	@JsonbTransient
+	public void addYatzyClassicPlayer(TopPlayer topPlayer) {
+		if (this.yatzyClassicList == null) {
+			this.yatzyClassicList = new ArrayList<TopPlayer>();
+		}
+		this.yatzyClassicList.add(topPlayer);
+	}
+
+	@JsonbTransient
+	public void addYatzySuperPlayer(TopPlayer topPlayer) {
+		if (this.yatzySuperList == null) {
+			this.yatzySuperList = new ArrayList<TopPlayer>();
+		}
+		this.yatzySuperList.add(topPlayer);
+	}
+
+	@JsonbTransient
+	public void addYatzyFastPlayer(TopPlayer topPlayer) {
+		if (this.yatzyFastList == null) {
+			this.yatzyFastList = new ArrayList<TopPlayer>();
+		}
+		this.yatzyFastList.add(topPlayer);
+	}
+
+	@JsonbTransient
+	public void addYatzyHyperPlayer(TopPlayer topPlayer) {
+		if (this.yatzyHyperList == null) {
+			this.yatzyHyperList = new ArrayList<TopPlayer>();
+		}
+		this.yatzyHyperList.add(topPlayer);
 	}
 
 	public List<TopPlayer> getConnectFourList() {

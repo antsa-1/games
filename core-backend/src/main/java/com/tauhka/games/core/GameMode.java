@@ -18,6 +18,7 @@ public final class GameMode {
 	public static final Integer CONNECT4 = 2;
 	public static final Integer POOL = 3;
 	public static final Integer YATZY = 4;
+
 	static {
 		// Constructor tells number meanings
 		GAMEMODES = new ArrayList<GameMode>();
@@ -32,7 +33,10 @@ public final class GameMode {
 		GameMode gm20 = new GameMode(CONNECT4, 20, 7, 7, 4);// ConnectFour 7x7 board
 		GameMode gm21 = new GameMode(CONNECT4, 21, 10, 10, 4);// ConnectFour 10x10 board
 		GameMode gm30 = new GameMode(POOL, 30, "8-ball");// 8-ball
-		GameMode gm40 = new GameMode(YATZY, 40, "Yatzy");// Yatzy
+		GameMode gm40 = new GameMode(YATZY, 40, "Yatzy_classic");// Yatzy-classic
+		GameMode gm41 = new GameMode(YATZY, 41, "Yatzy_fast");// Yatzy
+		GameMode gm42 = new GameMode(YATZY, 42, "Yatzy_super");// Yatzy
+		GameMode gm43 = new GameMode(YATZY, 43, "Yatzy_hyper");// Yatzy
 
 		GAMEMODES.add(gm);
 		GAMEMODES.add(gm2);
