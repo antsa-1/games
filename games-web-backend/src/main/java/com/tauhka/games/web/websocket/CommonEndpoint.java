@@ -298,10 +298,6 @@ public class CommonEndpoint {
 		}
 	}
 
-	private boolean isMultiplayerTableContinuing(Table table) {
-		return table != null && table.isMultiplayerTable() && !table.isGameOver();
-	}
-
 	private UUID removePlayerFromTable() {
 		Table userTable = user.getTable();
 		if (userTable == null) {
