@@ -58,6 +58,11 @@ public class YatzyTable extends Table {
 		if (playerAmount < 2 || playerAmount > 4) {
 			throw new IllegalArgumentException("incorrect amount of players" + playerAmount);
 		}
+		if (gameMode.getPredifinedTimeControl() != null) {
+			super.timeControlIndex = gameMode.getPredifinedTimeControl().getIndex();
+		} else if (gameMode.getId() == 40 && timeControlIndex < 3) {
+			super.timeControlIndex = 5;// classic yatzy default time control in case UI does not send the parameter
+		}
 		this.players = new ArrayList<YatzyPlayer>(playerAmount);
 		this.gameMode = gameMode;
 		this.randomizeStarter = randomizeStarter;

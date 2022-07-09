@@ -1,4 +1,4 @@
-import { IBaseTable, IMultiplayerTable } from "@/interfaces/commontypes";
+import { IBaseTable, IMultiplayerTable,ITimeControlOption } from "@/interfaces/commontypes";
 import { ITable, IPlayer } from "@/interfaces/interfaces";
 import { IYatzyTable } from "@/interfaces/yatzy";
 
@@ -122,8 +122,8 @@ export const tablesMixin = {
                 return "YatzyTable"
             }
         },
-        getTimeControls() {
-            return [{ id: 0, seconds: 10 }, { id: 1, seconds: 15 }, { id: 2, seconds: 20 }, { id: 3, seconds: 30 }, { id: 4, seconds: 45 }, { id: 5, seconds: 60 },{ id: 7, seconds: 90 },{ id: 7, seconds: 240 },{ id: 8, seconds: 300 }]
+        getAllTimeControls(): ITimeControlOption[] {
+            return [{ id: 0, seconds: 10 }, { id: 1, seconds: 15 }, { id: 2, seconds: 20 }, { id: 3, seconds: 30 }, { id: 4, seconds: 45 }, { id: 5, seconds: 60 },{ id: 6, seconds: 90 },{ id: 7, seconds: 240 },{ id: 8, seconds: 300 }]
         },
         isPlayerInTurn(userName: string) {
             return this.theTable.playerInTurn.name === userName

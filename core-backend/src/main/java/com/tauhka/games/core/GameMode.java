@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.tauhka.games.core.timer.TimeControlIndex;
+
 import jakarta.json.bind.annotation.JsonbTransient;
 
 public final class GameMode {
@@ -33,10 +35,10 @@ public final class GameMode {
 		GameMode gm20 = new GameMode(CONNECT4, 20, 7, 7, 4);// ConnectFour 7x7 board
 		GameMode gm21 = new GameMode(CONNECT4, 21, 10, 10, 4);// ConnectFour 10x10 board
 		GameMode gm30 = new GameMode(POOL, 30, "8-ball");// 8-ball
-		GameMode gm40 = new GameMode(YATZY, 40, "Yatzy_classic");// Yatzy-classic
-		GameMode gm41 = new GameMode(YATZY, 41, "Yatzy_fast");// Yatzy
-		GameMode gm42 = new GameMode(YATZY, 42, "Yatzy_super");// Yatzy
-		GameMode gm43 = new GameMode(YATZY, 43, "Yatzy_hyper");// Yatzy
+		GameMode gm40 = new GameMode(YATZY, 40, "Classic");// Yatzy-classic
+		GameMode gm41 = new GameMode(YATZY, 41, "Fast");// Yatzy
+		GameMode gm42 = new GameMode(YATZY, 42, "Super");// Yatzy
+		GameMode gm43 = new GameMode(YATZY, 43, "Hyper");// Yatzy
 
 		GAMEMODES.add(gm);
 		GAMEMODES.add(gm2);
@@ -50,6 +52,9 @@ public final class GameMode {
 		GAMEMODES.add(gm21);
 		GAMEMODES.add(gm30);
 		GAMEMODES.add(gm40);
+		GAMEMODES.add(gm41);
+		GAMEMODES.add(gm42);
+		GAMEMODES.add(gm43);
 	}
 
 	public GameMode(int gameNumber, int gameMode, String name) {
@@ -60,6 +65,17 @@ public final class GameMode {
 		this.name = name;
 		this.gameNumber = gameNumber;
 		requiredConnections = -1;
+	}
+
+	public TimeControlIndex getPredifinedTimeControl() {
+		if (this.id == 41) {
+			return TimeControlIndex.INDEX_2;
+		} else if (this.id == 42) {
+			return TimeControlIndex.INDEX_1;
+		} else if (this.id == 43) {
+			return TimeControlIndex.INDEX_0;
+		}
+		return null;
 	}
 
 	public GameMode(int gameNumber, int gameMode, int y, int x, int requiredConnectionsToWin) {

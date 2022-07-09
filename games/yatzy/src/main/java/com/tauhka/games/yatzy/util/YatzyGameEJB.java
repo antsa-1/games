@@ -57,7 +57,7 @@ public class YatzyGameEJB {
 			stmt.setTimestamp(1, Timestamp.from(result.getStartInstant()));
 			stmt.setTimestamp(2, Timestamp.from(result.getEndInstant()));
 			stmt.setString(3, result.getGameId().toString());
-			stmt.setInt(4, result.getGameMode().getGameNumber());
+			stmt.setInt(4, result.getGameMode().getId());
 			stmt.setString(5, result.getPlayers().get(0).getName());
 			stmt.setString(6, result.getPlayers().get(1).getName());
 			addPlayerIfExist(stmt, 7, result.getPlayers(), 2);
@@ -129,15 +129,12 @@ public class YatzyGameEJB {
 		PreparedStatement stmt = null;
 		Connection con = null;
 		try {
-			String column = result.getTimeControlIndex().getSeconds() > 20 ? "yatzy" : getDbColumName(result);
+			String column = getDbColumName(result);
 			String sql = String.format("insert into rankings(player_id, player_name," + column + ") values (%s",
 					result.getRankingPlayers().stream().filter(player -> player.getFinalRanking() != null).map(values -> "?,?,?)").collect(Collectors.joining(",(")));
 			sql += "ON DUPLICATE KEY UPDATE " + column + " =values(" + column + ")";
 			con = yatzyDatasource.getConnection();
 			stmt = con.prepareStatement(sql);
-			// produces similar to
-			// insert into rankings(player_id, player_name, yatzy) values ('6474132f-424e-4edb-b8de-e9f86c71d153','best',1000.0),('72a4d71f-e6b9-48aa-bc92-927741eae12b','test',1000.0),('41e62ede-0c56-44be-bb60-f4fa70036c5a','rest',1000.0)ON
-			// DUPLICATE KEY UPDATE yatzy=values(yatzy)
 			int playerIndex = 0;
 			for (int i = 1; i < result.getRankingPlayers().size() * 3; i = i + 3) {
 				stmt.setString(i, result.getRankingPlayers().get(playerIndex).getId().toString());

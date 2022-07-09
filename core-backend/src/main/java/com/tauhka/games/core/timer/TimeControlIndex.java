@@ -6,12 +6,18 @@ package com.tauhka.games.core.timer;
 
 //TODO from Database
 public enum TimeControlIndex {
-	INDEX_0(10), INDEX_1(15), INDEX_2(20), INDEX_3(30), INDEX_4(45), INDEX_5(60), INDEX_6(90), INDEX_7(240), INDEX_8(300);
+	INDEX_0(10, 0), INDEX_1(15, 1), INDEX_2(20, 2), INDEX_3(30, 3), INDEX_4(45, 4), INDEX_5(60, 5), INDEX_6(90, 6), INDEX_7(240, 7), INDEX_8(300, 8);
 
-	private int seconds;
+	private final int seconds;
+	private final int index;
 
-	private TimeControlIndex(int seconds) {
+	private TimeControlIndex(int seconds, int index) {
 		this.seconds = seconds;
+		this.index = index;
+	}
+
+	public int getIndex() {
+		return index;
 	}
 
 	public int getSeconds() {

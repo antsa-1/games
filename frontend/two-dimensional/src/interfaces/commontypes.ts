@@ -16,6 +16,10 @@ export interface IBaseTable {
     tableType: string,
     started: boolean,
 }
+export interface ITimeControlOption {
+    id: number,
+    seconds: number
+}
 export interface IMultiplayerTable extends IBaseTable {
     players: Array<IPlayer>
 }

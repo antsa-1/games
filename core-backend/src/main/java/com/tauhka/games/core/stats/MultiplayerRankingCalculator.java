@@ -12,6 +12,10 @@ public class MultiplayerRankingCalculator {
 		if (result == null) {
 			throw new IllegalArgumentException("Cannot calculate ranking from nothing");
 		}
+		if (result.getRankingPlayers().size() < 2) {
+			result.getRankingPlayers().forEach(rankingPlayer -> rankingPlayer.setFinalRanking(rankingPlayer.getInitialRanking()));
+			return;
+		}
 		for (Player p : result.getRankingPlayers()) {
 			List<Player> othersWithRanking = result.getOtherRankedPlayers(p.getId());
 			Double newRankingA = 0d;

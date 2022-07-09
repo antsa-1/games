@@ -72,7 +72,7 @@
 								{{table.randomizeStarter? "?": "fixed"}} 
 							</td>
 							<td>
-								{{getTimeControl(table)}}s
+								{{getTableTimeControl(table)}}s
 							</td>						
 							<td>
 								<section v-if="!hasCreatedUnStartedTable">
@@ -121,7 +121,7 @@
 						</div>
 						<div class=" ">
 							<div v-if="hasVariants" class="" id="v-model-select-dynamic">	
-								<select v-model="selectedGameMode" >
+								<select v-model="selectedGameMode" @change="onVariantChange" >
 									<option :value="'0'" :key="0">
 										Select variant
 									</option>
@@ -148,7 +148,7 @@
 								Time control
 								<div>				
 									<select v-model="selectedTimeControl" >
-										<option v-for="timeControl in getTimeControls()" :value="timeControl.id" :key="timeControl.id">
+										<option v-for="timeControl in getAvailableTimeControls()" :value="timeControl.id" :key="timeControl.id">
 											{{timeControl.seconds}} seconds
 										</option>
 									</select>
@@ -167,7 +167,7 @@
 				</div>
 				<div class="modal-footer justify-content-between">
 					<button type="button" class="btn btn-secondary " data-bs-dismiss="modal">Close</button>
-					<button :disabled="modalCreateTableDisabled" @click="createTable" type="button" data-bs-dismiss="modal" class="btn btn-primary">
+					<button :disabled="isCreateTableButtonInModalDisabled" @click="createTable" type="button" data-bs-dismiss="modal" class="btn btn-primary">
 						Create table
 					</button>
 				</div>
@@ -181,7 +181,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare,  IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces/interfaces";
-import { IBaseTable, IChatMessage, IMultiplayerTable } from "../interfaces/commontypes";
+import { IBaseTable, IChatMessage, ITimeControlOption } from "../interfaces/commontypes";
 import { loginMixin,GUEST } from "../mixins/mixins";
 import { utilsMixin } from "../mixins/utilsmixin";
 import { useRoute } from "vue-router";
@@ -227,9 +227,10 @@ export default defineComponent({
 				return this.$store.getters.games.filter(game => game.gameId === 1)[0].gameModes	
 			}else if(this.selectedGame === 2){
 				return this.$store.getters.games.filter(game => game.gameId === 2)[0].gameModes
-			}else if(this.selectedGame === 3){
-				
+			}else if(this.selectedGame === 3){				
 				return this.$store.getters.games.filter(game => game.gameId === 3)[0].gameModes
+			}else if(this.selectedGame === 4){				
+				return this.$store.getters.games.filter(game => game.gameId === 4)[0].gameModes
 			}
 		},
         isMainCreateTableButtonVisible(){
@@ -237,9 +238,9 @@ export default defineComponent({
            return  !this.hasCreatedUnStartedTable  && !this.user.tableId 
         },
         hasVariants(){
-            return this.selectedGame !== 0 && this.selectedGame !== 4
+            return this.selectedGame !== 0
         },
-		modalCreateTableDisabled(){			
+		isCreateTableButtonInModalDisabled(){			
 			return this.selectedGameMode === "0" && this.selectedGame !== 4	
 		},
 		tablesExist(){
@@ -257,7 +258,7 @@ export default defineComponent({
         },
         isTimeControlledGame(){
             //Pool = 3, Yatzy = 4
-            return this.selectedGame === 3 || this.selectedGame === 4
+            return this.selectedGame === 3 || this.selectedGame === 4 && this.selectedGameMode === 40
         },
         canSelectPlayerAmount(){
             return this.selectedGame === 4
@@ -489,13 +490,13 @@ export default defineComponent({
 	
 		createTable(){
 			let obj = null
-            const selectedGameMode = this.selectedGame === 4? 40: this.selectedGameMode
-			obj = {title: "CREATE_TABLE", message: selectedGameMode , computer:this.playAgainstComputerChecked, randomStarter:this.randomStarterChecked, onlyRegistered:this.onlyRegistered}
+            //const selectedGameMode = this.selectedGame === 4? 40: this.selectedGameMode
+			obj = {title: "CREATE_TABLE", message: this.selectedGameMode, computer:this.playAgainstComputerChecked, randomStarter:this.randomStarterChecked, onlyRegistered:this.onlyRegistered}
 		
 		 	if(this.isTimeControlledGame){ 
 				let index = this.selectedTimeControl
 				if(!index)
-					index = 0
+					index = this.getAllTimeControls[this.getAllTimeControls.length]
 				obj.timeControlIndex = index
 			}
             if(this.canSelectPlayerAmount){
@@ -509,6 +510,7 @@ export default defineComponent({
 			this.selectedTimeControl = null
 		},
 		getTableShortDesc(gameMode:number){
+            
 			if(gameMode < 20){
 				return "x.o"
 			}else if(gameMode < 30){
@@ -516,8 +518,18 @@ export default defineComponent({
             }
             else if(gameMode < 40){
 				return "Pool"
-			}
-            return "Yatzy"
+			}else if(gameMode === 40){
+                return "Classic Yatzy"
+            }else if(gameMode === 41){
+                return "Fast Yatzy"
+            }
+            else if(gameMode === 42){
+                return "Super Yatzy"
+            }
+            else if(gameMode === 43){
+                return "Hyper Yatzy"
+            }
+            return "err"
 		},
       
 		getBoardDesc(table:any){
@@ -540,9 +552,16 @@ export default defineComponent({
 			if(event.target.selectedIndex === 3){ // pool			
 				this.selectedGameMode = 30///8-ball is the only choice
 				return
-			}
+			} else if(event.target.selectedIndex === 4){ // Yatzy
+                this.selectedGameMode = 40
+                this.selectedTimeControl = 7
+                return
+            }
 			this.selectedGameMode = "0"
 		},
+        onVariantChange(event){
+        
+        },
 		removeTable(){
 			
 			const obj = { title: "REMOVE_TABLE",message:""};
@@ -589,9 +608,15 @@ export default defineComponent({
 			if(!selectedName.startsWith(GUEST)){
 				this.$router.push({ name: 'Profile', params: { selectedName: selectedName } })	
 			}
-		},	
-		getTimeControl(table:ITable){
-			return this.getTimeControls()[table.timeControlIndex].seconds
+		},
+        getAvailableTimeControls():ITimeControlOption[]{
+            if(this.selectedGameMode === 40){
+                return this.getAllTimeControls().filter(timeControl => timeControl.seconds > 20)
+            }
+            return this.getAllTimeControls()
+        },
+		getTableTimeControl(table:ITable){
+			return this.getAllTimeControls()[table.timeControlIndex].seconds
 		},
         getAllowedPlayerAmounts(){
 			return [2, 3, 4]
