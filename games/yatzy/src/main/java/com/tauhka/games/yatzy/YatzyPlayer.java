@@ -4,8 +4,10 @@ import java.io.Serializable;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.util.Constants;
 
 import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 
 /**
  * @author antsa-1 from GitHub 14 May 2022
@@ -24,6 +26,11 @@ public class YatzyPlayer extends User implements Serializable {
 	public YatzyPlayer() {
 		scoreCard = new ScoreCard();
 		enabled = true;
+	}
+
+	@JsonbTransient
+	public boolean isComputerPlayer() {
+		return this.getId() != null && this.getId().equals(Constants.OLAV_COMPUTER_UUID);
 	}
 
 	public ScoreCard getScoreCard() {

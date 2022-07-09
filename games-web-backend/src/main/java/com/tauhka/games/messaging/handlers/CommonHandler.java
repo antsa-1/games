@@ -68,6 +68,7 @@ public class CommonHandler {
 	protected void handleLeavingPlayerStatistics(Table table, CommonEndpoint endpoint) {
 		if (table.isGameOver()) {
 			// Statistics go another route since game ended "normally"
+			table.handleGameOver();
 			return;
 		}
 		if (table.getTableType() == TableType.BASE) {

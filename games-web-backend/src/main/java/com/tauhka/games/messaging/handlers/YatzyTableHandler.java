@@ -63,6 +63,9 @@ public class YatzyTableHandler extends CommonHandler {
 		if (table.isArtificialPlayerInTurn()) {
 			playComputerTurn(table);
 		}
+		if (table.isGameOver()) {
+			table.handleGameOver();
+		}
 	}
 
 	private YatzyMessage selectHand(User user, Message incomingMessage, YatzyTable table) {
@@ -98,10 +101,10 @@ public class YatzyTableHandler extends CommonHandler {
 		return table.getTimeControlIndex() > 1 ? 4000 : 50;
 	}
 
-	private void playComputerTurn(Table table) {
+	public void playComputerTurn(Table table) {
 		int finalExitCondition = 0; // 4 moves maximum
 		YatzyTable yatzyTable = (YatzyTable) table;
-		while (table.isArtificialPlayerInTurn() || finalExitCondition >= 4) {
+		while (table.isArtificialPlayerInTurn() && finalExitCondition <= 4) {
 			try {
 				finalExitCondition++;
 				Thread.sleep(getWaitTime(yatzyTable));

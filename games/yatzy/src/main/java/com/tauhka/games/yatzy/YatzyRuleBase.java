@@ -32,14 +32,15 @@ public class YatzyRuleBase {
 			yatzyTable.setPlayerInTurn(yatzyTable.getStartingPlayer());
 		}
 		yatzyTable.getPlayerInTurn().setRollsLeft(3);
-		yatzyTable.setDices(new ArrayList<Dice>(5));
-		for (int i = 0; i < ALL_DICES_COUNT; i++) {
-			Dice dice = new Dice();
-			dice.setDiceId(UUID.randomUUID());
-			dice.roll();
-			yatzyTable.getDices().add(dice);
+		if (yatzyTable.getDices() == null) {
+			yatzyTable.setDices(new ArrayList<Dice>(5));
+			for (int i = 0; i < ALL_DICES_COUNT; i++) {
+				Dice dice = new Dice();
+				dice.setDiceId(UUID.randomUUID());
+				dice.roll();
+				yatzyTable.getDices().add(dice);
+			}
 		}
-
 		yatzyTable.setGameResult(new Result());
 		for (YatzyPlayer y : yatzyTable.getPlayers()) {
 			// Players will now be in result of the game regardless of how the game ends

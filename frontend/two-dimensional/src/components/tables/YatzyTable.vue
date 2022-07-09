@@ -172,6 +172,7 @@ const initTable = (): IYatzyTable => {
     if (!props.watch) { // no scoreCard reseting for watchers 
         initialTable.players.forEach(player => {
             player.scoreCard = { bonus: undefined, subTotal: 0, total: 0, hands: [], lastAdded: null }
+            player.enabled = true
         })
     }
     initialTable.players = players
@@ -254,7 +255,7 @@ const consumeActions = () => {
             })
             unblockQueue()
             document.body.style.cursor = "default"
-            yatzyTable.value.playerInTurn = action.payload.table.playerInTurn
+            yatzyTable.value.playerInTurn = <IYatzyPlayer> action.payload.table.playerInTurn
             if (isMyTurn.value) {
                 yatzyTable.value.canvas.enabled = true
             }
@@ -262,6 +263,7 @@ const consumeActions = () => {
         })
     } else if (action.type === "timeout") {
         let yatzyPlayer = <IYatzyPlayer>yatzyTable.value.players.find(player => player.name === action.payload.table.timedOutPlayerName)
+        console.log("Handling timeout"+JSON.stringify(yatzyPlayer) +" myName:"+userName)
         yatzyPlayer.enabled = false
         if (userName.value === yatzyPlayer.name) {
             iTimedOut = true
@@ -607,19 +609,33 @@ const unsubscribe = store.subscribe((mutation, state) => {
     }
     if (mutation.type === "rematch") {
         console.log("rematch sub")
-        yatzyTable.value = initTable()
-        unblockQueue()
-        setupCanvas()
-        drawAll()
+
     }
     if (mutation.type === "resign") {
         console.log("resign sub")
     }
 })
 
+const startRematch = (action) => {
+    startCountdownTimer(action.payload.table.secondsLeft)
+    yatzyTable.value = initTable()
+    let playerInTurn:IYatzyPlayer = <IYatzyPlayer> action.payload.table.playerInTurn
+    playerInTurn.rollsLeft = action.payload.table.playerInTurn.rollsLeft
+    yatzyTable.value.playerInTurn = playerInTurn
+    console.log("asetettiin:"+yatzyTable.value.playerInTurn.name)
+    iTimedOut = false
+    unblockQueue()
+    setupCanvas()
+    drawAll()
+}
 const unsubscribeAction = store.subscribeAction((action, state) => {
     console.log("Action in:" + JSON.stringify(action))
     if (!isYatzyTableRelatedAction(action)) {
+        return
+    }
+    if(action.type === "rematch"){
+        startRematch(action)
+        gameSnapshot = action.payload
         return
     }
     if (action.type === "leaveTable") {
@@ -721,7 +737,6 @@ const repaintButtons = () => {
 const rollDicesText = "Click the roll button"
 const selectHandText = "Select a hand"
 const selectOrRollText = "Select a hand, lock dices or roll unlocked dices"
-let nowInTurn = playerInTurn.value.name + " is now in turn"
 let itYourTurn = "It's your turn " + userName.value
 const waitingTurnText = "Waiting your turn"
 const youHaveTimedOut = "You timed out"
