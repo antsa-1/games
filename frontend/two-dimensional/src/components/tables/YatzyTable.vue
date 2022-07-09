@@ -467,22 +467,20 @@ const isDocumentVisible = () => {
     return document.visibilityState === 'visible'
 }
 
+const markLastHands = () => {
+     yatzyTable.value.players.forEach(tablePlayer => {
+            let snapShotPlayer:IYatzyPlayer = gameSnapshot.table.players.find(snapShotPlayer => snapShotPlayer.name === tablePlayer.name)
+            if(snapShotPlayer.enabled === false){
+                tablePlayer.enabled = false
+            }
+    })
+}
 const createTableFromSnapShot = () => {
     if (gameSnapshot === null) {
         //No turns yet, coming back to board when nothing is played yet
         unblockQueue()
         return
     } 
-    if(gameSnapshot.table.gameOver){
-        yatzyTable.value.players.forEach(tablePlayer => {
-            let snapShotPlayer:IYatzyPlayer = gameSnapshot.table.players.find(snapShotPlayer => snapShotPlayer.name === tablePlayer.name)
-            if(snapShotPlayer.enabled === false){
-                tablePlayer.enabled = false
-            }
-        })
-        handleGameOver()
-        return
-    }   
     setDiceNumbers(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     gameSnapshot.table.players.forEach(snapshotPlayer => {
         const tablePlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
@@ -503,16 +501,16 @@ const createTableFromSnapShot = () => {
     actionQueue.value.actions = []
     let player: IYatzyPlayer = <IYatzyPlayer>gameSnapshot.table.playerInTurn
     if (playerInTurn.value) {
-        playerInTurn.value.rollsLeft = player.rollsLeft
+        playerInTurn.value.rollsLeft = player?.rollsLeft
     }
-    let me: IYatzyPlayer = gameSnapshot.table.players.find(player => !player.enabled && player.name === userName.value)
+    let me: IYatzyPlayer = gameSnapshot.table.players.find(player => !player?.enabled && player?.name === userName.value)
     if (me) {
         iTimedOut = true
     }
-    const action = { payload: gameSnapshot }
     if (gameSnapshot.table.gameOver) {
         return handleGameOver()
     }
+    const action = { payload: gameSnapshot }
     initNewTurnIfRequired(action)
     unblockQueue()
 }
@@ -610,6 +608,7 @@ const unsubscribe = store.subscribe((mutation, state) => {
     if (mutation.type === "rematch") {
         console.log("rematch sub")
         yatzyTable.value = initTable()
+        unblockQueue()
         setupCanvas()
         drawAll()
     }
