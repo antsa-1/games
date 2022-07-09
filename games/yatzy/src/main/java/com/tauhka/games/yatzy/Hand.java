@@ -62,7 +62,7 @@ public class Hand implements Serializable {
 	public Integer getTypeNumber() {
 		return handType.getAsInt();
 	}
-
+	@JsonbTransient
 	public boolean isYatzy() {
 		return this.handType == HandType.YATZY;
 	}
@@ -85,27 +85,27 @@ public class Hand implements Serializable {
 	public HandType getHandType() {
 		return handType;
 	}
-
+	@JsonbTransient
 	public boolean isStraight() {
 		return this.handType == HandType.SMALL_STRAIGHT || this.handType == HandType.LARGE_STRAIGHT;
 	}
-
+	@JsonbTransient
 	public boolean isSixes() {
 		return this.handType == HandType.SIXES;
 	}
-
+	@JsonbTransient
 	public boolean isFives() {
 		return this.handType == HandType.FIVES;
 	}
-
+	@JsonbTransient
 	public boolean isFullHouse() {
 		return this.handType == HandType.FULL_HOUSE;
 	}
-
+	@JsonbTransient
 	public boolean isFourOfKind() {
 		return this.handType == HandType.FOUR_OF_KIND;
 	}
-
+	@JsonbTransient
 	public boolean isPairOrTrips() {
 		return this.handType == HandType.PAIR || this.handType == HandType.THREE_OF_KIND;
 	}
