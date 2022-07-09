@@ -52,7 +52,7 @@ import { IYatzyPlayer, IYatzyMessage, IDice, ISection, IYatzySnapshot, IYatzyAct
 import Chat from "../Chat.vue"
 const CANVAS_ROWS = 22
 const router = useRouter()
-let gameSnapshot: IYatzySnapshot = undefined
+let gameSnapshot: IYatzySnapshot = null
 const store = useStore()
 const gameOptions = ref<IYatzyOptions>({ notificationSound: false, animations:true })
 const props = defineProps(['watch'])
@@ -280,6 +280,7 @@ const handleGameOver = () => {
     console.log("Handling gameOver")
     yatzyTable.value.playerInTurn = null
     actionQueue.value.blocked = true
+    actionQueue.value.actions = []
     yatzyTable.value.canvas.enabled = false
     const message: IChatMessage = { from: "System", text: "Game ended" }
     store.dispatch("chat", message)
@@ -466,15 +467,24 @@ const isDocumentVisible = () => {
     return document.visibilityState === 'visible'
 }
 const createTableFromSnapShot = () => {
-
-    if (!gameSnapshot?.table) {
+    if(gameSnapshot != null && gameSnapshot.table.gameOver){
+        yatzyTable.value.players.forEach(tablePlayer => {
+            let snapShotPlayer:IYatzyPlayer = gameSnapshot.table.players.find(snapShotPlayer => snapShotPlayer.name === tablePlayer.name)
+            if(snapShotPlayer.enabled === false){
+                tablePlayer.enabled = false
+            }
+        })
+        handleGameOver()
+        return
+    }
+    if (gameSnapshot === null) {
+        //No turns yet, coming back to board when nothing is played yet
         unblockQueue()
         return
     }
     setDiceNumbers(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     gameSnapshot.table.players.forEach(snapshotPlayer => {
         const tablePlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
-
         const snapshotPlayerHands: IHand[] = snapshotPlayer.scoreCard.hands
         tablePlayer.scoreCard.hands = []
         for (const [key, value] of Object.entries(snapshotPlayerHands)) {
@@ -500,7 +510,6 @@ const createTableFromSnapShot = () => {
     }
     initNewTurnIfRequired(action)
     unblockQueue()
-
 }
 const onVisibilityChange = () => {
     console.log("onVisiblityChange " + isDocumentVisible())
@@ -613,6 +622,7 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
         return handleLeavingPerson(action)
     }
     gameSnapshot = action.payload
+    console.log("SNAP:"+JSON.stringify(gameSnapshot))
     startCountdownTimer(action.payload.table.secondsLeft)
     actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)
     initNewTurnIfRequired(action)
