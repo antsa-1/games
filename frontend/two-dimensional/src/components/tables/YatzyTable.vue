@@ -466,7 +466,13 @@ const getDice = (cursorPoint: IVector2) => {
 const isDocumentVisible = () => {
     return document.visibilityState === 'visible'
 }
+
 const createTableFromSnapShot = () => {
+    if (gameSnapshot === null) {
+        //No turns yet, coming back to board when nothing is played yet
+        unblockQueue()
+        return
+    } 
     if(gameSnapshot != null && gameSnapshot.table.gameOver){
         yatzyTable.value.players.forEach(tablePlayer => {
             let snapShotPlayer:IYatzyPlayer = gameSnapshot.table.players.find(snapShotPlayer => snapShotPlayer.name === tablePlayer.name)
@@ -476,18 +482,17 @@ const createTableFromSnapShot = () => {
         })
         handleGameOver()
         return
-    }
-    if (gameSnapshot === null) {
-        //No turns yet, coming back to board when nothing is played yet
-        unblockQueue()
-        return
-    }
+    }   
     setDiceNumbers(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     gameSnapshot.table.players.forEach(snapshotPlayer => {
         const tablePlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
         const snapshotPlayerHands: IHand[] = snapshotPlayer.scoreCard.hands
         tablePlayer.scoreCard.hands = []
         for (const [key, value] of Object.entries(snapshotPlayerHands)) {
+            let hand:IHand = value
+            if(snapshotPlayer.scoreCard?.lastAdded?.handType === hand.handType){
+                hand.last = true
+            }
             tablePlayer.scoreCard.hands.push(value)
         }
         tablePlayer.scoreCard.bonus = snapshotPlayer.scoreCard.bonus
@@ -622,7 +627,6 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
         return handleLeavingPerson(action)
     }
     gameSnapshot = action.payload
-    console.log("SNAP:"+JSON.stringify(gameSnapshot))
     startCountdownTimer(action.payload.table.secondsLeft)
     actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)
     initNewTurnIfRequired(action)
@@ -912,7 +916,6 @@ const getPlayerHand = (handType: HandType, player: IYatzyPlayer): IHand => {
         hand = { handType: undefined, value: player.scoreCard.total, typeNumber: 18 }
     }
     return hand
-    return null
 }
 
 const repaintYatzyTable = () => {
