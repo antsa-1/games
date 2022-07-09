@@ -473,7 +473,7 @@ const createTableFromSnapShot = () => {
         unblockQueue()
         return
     } 
-    if(gameSnapshot != null && gameSnapshot.table.gameOver){
+    if(gameSnapshot.table.gameOver){
         yatzyTable.value.players.forEach(tablePlayer => {
             let snapShotPlayer:IYatzyPlayer = gameSnapshot.table.players.find(snapShotPlayer => snapShotPlayer.name === tablePlayer.name)
             if(snapShotPlayer.enabled === false){
