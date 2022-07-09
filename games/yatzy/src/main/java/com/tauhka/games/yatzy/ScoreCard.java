@@ -44,6 +44,7 @@ public class ScoreCard implements Serializable {
 		return calculateSubTotal() >= MIN_POINT_REQUIREMENT_FOR_BONUS ? BONUS : ZIP_NADA;
 	}
 
+	@JsonbTransient
 	public boolean isComplete() {
 		return this.hands.size() == 15;
 	}

@@ -67,6 +67,7 @@ public final class GameMode {
 		requiredConnections = -1;
 	}
 
+	@JsonbTransient
 	public TimeControlIndex getPredifinedTimeControl() {
 		if (this.id == 41) {
 			return TimeControlIndex.INDEX_2;
