@@ -155,7 +155,9 @@ public abstract class Table implements Serializable {
 			gameResult.setPlayerB(this.playerB);
 			gameResult.setResigner(player);
 			gameResult.setResultType(GameResultType.WIN_BY_RESIGNATION);
-
+			if (playerB instanceof AI) {
+				suggestRematch(playerB);
+			}
 			return gameResult;
 		}
 		throw new IllegalArgumentException("Resign not possible" + player);

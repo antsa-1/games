@@ -47,9 +47,9 @@ public class UserEJBC {
 				User user = new User();
 				user.setName(namee);
 				user.setId(id);
-				user.setRankingConnectFour(res.getDouble("ranking_connectfour"));
-				user.setRankingTictactoe(res.getDouble("ranking_tictactoe"));
-				user.setRankingEightBall(res.getDouble("ranking_eightball"));
+//				user.setRankingConnectFour(res.getDouble("ranking_connectfour"));
+//				user.setRankingTictactoe(res.getDouble("ranking_tictactoe"));
+//				user.setRankingEightBall(res.getDouble("ranking_eightball"));
 				return user;
 			}
 			// Note: ActiveLogin token is directly connected with error message in order

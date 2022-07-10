@@ -80,7 +80,7 @@ public class UserHandler {
 	private void cleanUpGhostTables() {
 		// If table without playerA exist -> clean
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
-		List<Table> tables = stream.filter(table -> table.getPlayerA() == null).collect(Collectors.toList());
+		List<Table> tables = stream.filter(table -> !table.isMultiplayerTable() && table.getPlayerA() == null || table.isMultiplayerTable() && table.isGameOver()).collect(Collectors.toList());
 		for (Table t : tables) {
 			LOGGER.fine("Cleaning table" + t);
 			CommonEndpoint.TABLES.remove(t.getTableId());

@@ -389,9 +389,12 @@ public class YatzyTable extends Table {
 			// Nobody was removed
 			return false;
 		}
-		if (playerInTurn != null && playerInTurn.equals(removedPlayer)) {
-			playerInTurn = setupNextTurn();
-		}
+//		if (playerInTurn != null && playerInTurn.equals(removedPlayer)) {
+//			playerInTurn = setupNextTurn();
+//		}
+//		if (isArtificialPlayerInTurn()) {
+//			CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
+//		}
 		return true;
 	}
 
@@ -401,7 +404,7 @@ public class YatzyTable extends Table {
 	}
 
 	private YatzyPlayer setupNextTurn() {
-		cancelTimer(); 
+		cancelTimer();
 		int currentPlayerIndex = players.indexOf(playerInTurn);
 		int breakoutCondition = 0;
 		while (breakoutCondition < 4) {
@@ -484,6 +487,9 @@ public class YatzyTable extends Table {
 			}
 			if (playerInTurn != null && playerInTurn.equals(user)) {
 				setupNextTurn();
+			}
+			if (isArtificialPlayerInTurn()) {
+				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
 			}
 		}
 	}

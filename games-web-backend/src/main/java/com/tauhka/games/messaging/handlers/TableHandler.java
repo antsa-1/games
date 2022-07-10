@@ -103,16 +103,23 @@ public class TableHandler extends CommonHandler {
 		if (table == null) {
 			return null;
 		}
+		if (table.isGameOver()) {
+			return removeTable(table);
+		}
 
 		if (table.isStarted() && !table.isSomebodyInTurn() || !table.isStarted() && table.getPlayerA() == null) {
-			CommonEndpoint.TABLES.remove(table.getTableId());
-			table.onClose();
-			Message message = new Message();
-			message.setTitle(MessageTitle.REMOVE_TABLE);
-			message.setTable(table);
-			return message;
+			return removeTable(table);
 		}
 		return null;
+	}
+
+	private Message removeTable(Table table) {
+		CommonEndpoint.TABLES.remove(table.getTableId());
+		table.onClose();
+		Message message = new Message();
+		message.setTitle(MessageTitle.REMOVE_TABLE);
+		message.setTable(table);
+		return message;
 	}
 
 	public Message removeEndpointOwnTable(CommonEndpoint endpoint) {
@@ -201,10 +208,6 @@ public class TableHandler extends CommonHandler {
 		}
 		Table table = tableOptional.get();
 		GameResult gameResult = table.resign(endpoint.getUser());
-		// For Artificial player set Rematch-state ready
-		if (table.getOpponent(endpoint.getUser()) instanceof AI) {
-			table.suggestRematch(table.getOpponent(endpoint.getUser()));
-		}
 		Message resultMessage = new Message();
 		resultMessage.setFrom(SYSTEM);
 		resultMessage.setTable(table);
