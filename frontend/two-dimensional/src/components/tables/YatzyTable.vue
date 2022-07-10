@@ -1,11 +1,11 @@
 <template>
     <div class="row">
         <div class="col">
-            <button v-if="true" :disabled="false" @click="" type="button"
+            <button v-if="true" :disabled="!isResignButtonEnabled" @click="resign(yatzyTable.tableId)" type="button"
                 class="btn btn-primary w-30 float-xs-start float-sm-end">
                 Resign
             </button>
-            <button v-if="true" @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
+            <button v-if="true" :disabled="!isRematchButtonEnabled" @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
                 Rematch
             </button>
         </div>
@@ -19,7 +19,7 @@
             </label>
             <input type="checkbox" id="notificationSound" v-model="gameOptions.notificationSound">
             <span class="ps-4">
-				<input class=""  type="checkbox" id="pointerLine" @click="onAnimationChange" v-model= "gameOptions.animations">
+				<input class="" type="checkbox" id="pointerLine" @click="onAnimationChange" v-model= "gameOptions.animations">
 				<label class="" for="pointerLine"> animate</label>
 			</span>
         </div>
@@ -45,7 +45,7 @@ import { IScoreCard, IYatzyComponent, IYatzyTable } from '@/interfaces/yatzy';
 import { ref, computed, onMounted, onBeforeMount, onUnmounted, watch, ComputedRef, } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-import { leaveTable, rematch } from '../composables/tableComposable'
+import { leaveTable, rematch, resign } from '../composables/tableComposable'
 
 import {Image, IVector2, IGameCanvas, FONT_SIZE, FONT, IChatMessage } from "../../interfaces/commontypes"
 import { IYatzyPlayer, IYatzyMessage, IDice, ISection, IYatzySnapshot, IYatzyAction, IYatzyActionQueue, HandType, IHand, IScoreCardRow, IYatzyOptions } from "../../interfaces/yatzy"
@@ -216,6 +216,12 @@ const isMouseEnabled = computed<boolean>(() =>
     yatzyTable.value.canvas.enabled && isMyTurn.value === true
 )
 
+const isResignButtonEnabled = computed<boolean> (() =>
+    yatzyTable.value.gameOver === false && yatzyTable.value.players.find(player => player.scoreCard.hands.length > 0) != null
+)
+const isRematchButtonEnabled = computed<boolean> (() =>
+    yatzyTable.value.gameOver === true
+)
 watch(() => queueLength, (newVal) => {
     if (newVal.value > 0) {
         consumeActions()
@@ -264,17 +270,24 @@ const consumeActions = () => {
     } else if (action.type === "timeout") {
         let yatzyPlayer = <IYatzyPlayer>yatzyTable.value.players.find(player => player.name === action.payload.table.timedOutPlayerName)
         console.log("Handling timeout"+JSON.stringify(yatzyPlayer) +" myName:"+userName)
-        yatzyPlayer.enabled = false
-        if (userName.value === yatzyPlayer.name) {
-            iTimedOut = true
-            yatzyTable.value.canvas.enabled = false
-        }
-        repaintScoreCard()
-        if (action.payload.table.gameOver) {
-            handleGameOver()
-        } else {
-            unblockQueue()
-        }
+        deactivatePlayer(yatzyPlayer, action, true)
+    }
+}
+
+const deactivatePlayer = (yatzyPlayer:IYatzyPlayer, action:any, timedOut:boolean) =>{
+    yatzyPlayer.enabled = false
+    if (userName.value === yatzyPlayer.name && timedOut === true) {
+           iTimedOut = true
+    }
+    if(userName.value === yatzyPlayer.name) {
+        yatzyTable.value.canvas.enabled = false
+    }
+    console.log("DEACTVING:"+yatzyPlayer.name)
+    repaintScoreCard()
+    if (action.payload.table.gameOver) {
+          handleGameOver()
+    } else {
+        unblockQueue()
     }
 }
 const handleGameOver = () => {
@@ -284,6 +297,7 @@ const handleGameOver = () => {
     actionQueue.value.blocked = true
     actionQueue.value.actions = []
     yatzyTable.value.canvas.enabled = false
+    yatzyTable.value.gameOver = true
     const message: IChatMessage = { from: "System", text: "Game ended" }
     store.dispatch("chat", message)
     drawAll()
@@ -622,8 +636,8 @@ const startRematch = (action) => {
     let playerInTurn:IYatzyPlayer = <IYatzyPlayer> action.payload.table.playerInTurn
     playerInTurn.rollsLeft = action.payload.table.playerInTurn.rollsLeft
     yatzyTable.value.playerInTurn = playerInTurn
-    console.log("asetettiin:"+yatzyTable.value.playerInTurn.name)
     iTimedOut = false
+    yatzyTable.value.gameOver = false
     unblockQueue()
     setupCanvas()
     drawAll()
@@ -641,39 +655,49 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
     if (action.type === "leaveTable") {
         return handleLeavingPerson(action)
     }
+    if(action.type === "multiplayerTableResign"){
+        gameSnapshot = action.payload
+        console.log("TEET:"+JSON.stringify(action))
+        let yatzyPlayer = <IYatzyPlayer>yatzyTable.value.players.find(player => player.name === action.payload.who.name)
+        deactivatePlayer(yatzyPlayer, action, false) 
+        const newTurnInited = initNewTurnIfRequired(action)
+        if(newTurnInited){
+            startCountdownTimer(action.payload.table.secondsLeft)
+        }
+        return
+    }
     gameSnapshot = action.payload
     startCountdownTimer(action.payload.table.secondsLeft)
     actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, action)
     initNewTurnIfRequired(action)
 })
 const isYatzyTableRelatedAction = (action: any) => {
-    return action.type === "yatzyRollDices" || action.type === "yatzySelectHand" || action.type === "leaveTable" || action.type === "timeout"|| action.type === "rematch"
+    return action.type === "yatzyRollDices" || action.type === "yatzySelectHand" || action.type === "leaveTable" || action.type === "timeout"|| action.type === "rematch" || action.type === "multiplayerTableResign"
 }
 const handleLeavingPerson = (action: any) => {
     let player: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
-
     if (!player) {
         // watcher left
         console.log("watcher left")
         return
     }
     player.enabled = false
-
     initNewTurnIfRequired(action)
     unblockQueue()
     drawAll()
 }
 
-const initNewTurnIfRequired = (action) => {
+const initNewTurnIfRequired = (action):boolean => {
     if (action.payload.table.gameOver) {
-        return
+        return false
     }
     //One person can play to the end if others timeouts or leaves
     if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name || yatzyTable.value.players.filter(player => player.enabled === true).length === 1) {
-
         let changeTurnAction = { type: "changeTurn", payload: action.payload }
         actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, changeTurnAction)
+        return true
     }
+    return false
 }
 
 const repaintComponent = (component: IYatzyComponent) => {

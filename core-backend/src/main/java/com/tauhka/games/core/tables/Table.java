@@ -290,7 +290,7 @@ public abstract class Table implements Serializable {
 		}
 		this.secondsLeft = TimeControlIndex.getWithIndex(timeControlIndex).getSeconds();
 		this.timer = new Timer();
-		TimerTask task = new ReduceTimeTask(this);
+		TimerTask task = new ReduceTimeTask(this, playerInTurn);
 		timer.schedule(task, 1800, 1000);
 	}
 
@@ -487,7 +487,7 @@ public abstract class Table implements Serializable {
 		return startTime;
 	}
 
-	public void onTimeout() {
+	public void onTimeout(User user) {
 		// TODO Auto-generated method stub
 
 	}

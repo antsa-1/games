@@ -153,7 +153,6 @@ public class YatzyTable extends Table {
 	}
 
 	public void onGameOver() {
-		System.out.println("HANDLE GAME OVER");
 		cancelTimer();
 		if (!gameResult.isComplete()) {
 			finalizeGameResult();
@@ -166,8 +165,6 @@ public class YatzyTable extends Table {
 			}
 		}
 		playerInTurn = null;
-//			startTime = null;
-
 	}
 
 	private void finalizeGameResult() {
@@ -232,10 +229,10 @@ public class YatzyTable extends Table {
 	}
 
 	@Override
-	public void onTimeout() {
+	public void onTimeout(User timedOut) {
 		synchronized (this) {
-			cancelTimer();
 			System.out.println("YatzyTable TIMEOUT+" + getPlayerInTurn());
+			cancelTimer();
 			YatzyPlayer playerInTurn = getPlayerInTurn();
 			if (playerInTurn != null) {
 				playerInTurn.setEnabled(false);
@@ -330,7 +327,7 @@ public class YatzyTable extends Table {
 		if (index < 0) {
 			return false;
 		}
-		return players.get(index).isEnabled();
+		return true;
 	}
 
 	@Override
@@ -382,11 +379,8 @@ public class YatzyTable extends Table {
 		int index = players.indexOf(user);
 		if (playerA != null && playerA.equals(user)) {
 			detachPlayer(playerA);
-//			removedPlayer = playerA;
-			// playerA = null;
 		}
 		if (index != -1) {
-			// removedPlayer = players.remove(index);
 			removedPlayer = players.get(index);
 			removedPlayer.setEnabled(false);
 			detachPlayer(removedPlayer);
@@ -407,6 +401,7 @@ public class YatzyTable extends Table {
 	}
 
 	private YatzyPlayer setupNextTurn() {
+		cancelTimer(); 
 		int currentPlayerIndex = players.indexOf(playerInTurn);
 		int breakoutCondition = 0;
 		while (breakoutCondition < 4) {
@@ -420,13 +415,11 @@ public class YatzyTable extends Table {
 				getDices().forEach(dice -> dice.unselect());
 				startTimer();
 				playerInTurn = y;
-				System.out.println("NEXT PLAYER:" + playerInTurn);
 				return y;
 			}
 			breakoutCondition++;
 		}
 		gameOver = true;
-		System.out.println("NO NEXT PLAYER_GAME OVER");
 		return null;
 	}
 
@@ -446,7 +439,6 @@ public class YatzyTable extends Table {
 
 	@Override
 	protected Table startRematch() {
-		System.out.println("START REMATCH");
 		this.yatzyRuleBase.startGame(this);
 		return this;
 	}
@@ -493,6 +485,29 @@ public class YatzyTable extends Table {
 			if (playerInTurn != null && playerInTurn.equals(user)) {
 				setupNextTurn();
 			}
+		}
+	}
+
+	@Override
+	public GameResult resign(User player) {
+		synchronized (this) {
+			if (this.isPlayer(player) && this.playerInTurn != null) {
+				int index = players.indexOf(player);
+				if (index < 0) {
+					LOGGER.info("YatzyTable: no resign player found");
+					return null;
+				}
+				players.get(index).setEnabled(false);
+				gameResult.findPlayer(player.getName()).setStatus(Status.RESIGNED);
+				if (playerInTurn.equals(player)) {
+					setupNextTurn();
+				}
+				if (isArtificialPlayerInTurn()) {
+					CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
+				}
+				return null;
+			}
+			throw new IllegalArgumentException("Resign not possible" + player);
 		}
 	}
 

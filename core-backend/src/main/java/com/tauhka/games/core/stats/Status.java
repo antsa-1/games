@@ -5,5 +5,5 @@ package com.tauhka.games.core.stats;
  **/
 
 public enum Status {
-	TIMED_OUT, LEFT, DISCONNECTED, FINISHED
+	TIMED_OUT, LEFT, DISCONNECTED, FINISHED, RESIGNED
 }

@@ -172,7 +172,7 @@ export const store = createStore<IStoreState>({
         },
         chat(state, message: IChatMessage) {
             if (state.theTable) {
-                state.theTable.chat.messages.unshift(message);
+                state.theTable.chat.messages.unshift(message)
             }
         },
         updateCommonChat(state, message: IChatMessage) {
@@ -275,17 +275,19 @@ export const store = createStore<IStoreState>({
             // PoolTable has subscribed to this action
         } ,
         yatzyRollDices(context, object) {
-           //YatzyTable has subscribe to this action
+           //YatzyTable has subscribed to this action
         },
         yatzySelectHand(context, object) {
-           //YatzyTable has subscribe to this action
+           //YatzyTable has subscribed to this action
         },
         timeout(context, object) {
-           //YatzyTable has subscribe to this action
-        },       
+           //YatzyTable has subscribed to this action
+        }, 
+        multiplayerTableResign(context, object){
+            //YatzyTable has subscribed to this action
+        }, 
         setUser(context, user: IUser) {
             context.commit('setUser', user)
-
         },
         setGames(context, games: string[]) {
 
@@ -343,6 +345,7 @@ export const store = createStore<IStoreState>({
         resign(context, message: IWinMessage) {
             context.commit('resign', message)
         },
+      
         updateScore(context, message: IWinMessage) {
             context.commit('updateScore', message)
         },

@@ -11,6 +11,11 @@ export function rematch() {
     store.getters.user?.webSocket.send(JSON.stringify(obj))
 }
 
+export function resign(tableId: string) {
+    const obj = { title: "RESIGN", message: tableId }
+    store.getters.user?.webSocket.send(JSON.stringify(obj))
+}
+
 export function isMyName(name: string) {
     store.getters.userName === name
 }

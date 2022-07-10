@@ -458,6 +458,10 @@ export default defineComponent({
 							}
 						break
 					case "RESIGN":
+                        if(data.table.multiplayerTable){
+                            this.$store.dispatch("multiplayerTableResign", data)
+                            return
+                        }
 						const winMessage:IWinMessage={
 							winner:data.who.name,
 							reason:data.reason,
