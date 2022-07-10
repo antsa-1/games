@@ -3,6 +3,7 @@ module tauhka.core {
 	exports com.tauhka.games.core;
 	exports com.tauhka.games.core.tables;
 	exports com.tauhka.games.core.stats;
+	exports com.tauhka.games.core.events;
 	exports com.tauhka.games.core.twodimen.ai;
 	exports com.tauhka.games.core.twodimen.util;
 	exports com.tauhka.games.core.timer;
