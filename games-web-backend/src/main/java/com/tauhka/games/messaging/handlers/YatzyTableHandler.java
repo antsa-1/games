@@ -3,11 +3,10 @@ package com.tauhka.games.messaging.handlers;
 import static com.tauhka.games.core.util.Constants.SYSTEM;
 
 import java.util.List;
-import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.User;
-import com.tauhka.games.core.stats.Result;
+import com.tauhka.games.core.events.AITurnEvent;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.db.YatzyEventEJB;
 import com.tauhka.games.db.dao.YatzyTurnDao;
@@ -20,6 +19,7 @@ import com.tauhka.games.yatzy.ScoreCard;
 import com.tauhka.games.yatzy.YatzyTable;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.event.ObservesAsync;
 import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 
@@ -64,7 +64,7 @@ public class YatzyTableHandler extends CommonHandler {
 			playComputerTurn(table);
 		}
 		if (table.isGameOver()) {
-			table.handleGameOver();
+			table.onGameOver();
 		}
 	}
 
@@ -101,7 +101,7 @@ public class YatzyTableHandler extends CommonHandler {
 		return table.getTimeControlIndex() > 1 ? 4000 : 50;
 	}
 
-	public void playComputerTurn(Table table) {
+	private void playComputerTurn(Table table) {
 		int finalExitCondition = 0; // 4 moves maximum
 		YatzyTable yatzyTable = (YatzyTable) table;
 		while (table.isArtificialPlayerInTurn() && finalExitCondition <= 4) {
@@ -125,6 +125,11 @@ public class YatzyTableHandler extends CommonHandler {
 				break;
 			}
 		}
+	}
+
+	public void observeTablesWhereAIActionIsRequired(@ObservesAsync AITurnEvent turnEvent) {
+		LOGGER.info("YatzyTableHandler received event");
+		playComputerTurn(turnEvent.getTable());
 	}
 
 	private void createTurnDAOForRolledDices(YatzyTable table, List<Dice> rolledDices) {

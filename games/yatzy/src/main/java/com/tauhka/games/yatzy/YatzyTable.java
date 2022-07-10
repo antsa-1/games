@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.events.AITurnEvent;
 import com.tauhka.games.core.stats.Player;
 import com.tauhka.games.core.stats.Status;
 import com.tauhka.games.core.tables.Table;
@@ -151,7 +152,7 @@ public class YatzyTable extends Table {
 		return gameOver;
 	}
 
-	public void handleGameOver() {
+	public void onGameOver() {
 		System.out.println("HANDLE GAME OVER");
 		cancelTimer();
 		if (!gameResult.isComplete()) {
@@ -223,7 +224,7 @@ public class YatzyTable extends Table {
 			throw new IllegalArgumentException("Player is not in turn:" + user + " table=" + this);
 		}
 		if (isGameOver()) {
-			handleGameOver();
+			onGameOver();
 			LOGGER.info("YatzyTable handSelection but gameOver " + this + " ** " + user);
 			throw new IllegalArgumentException("Game has ended");
 		}
@@ -244,14 +245,15 @@ public class YatzyTable extends Table {
 			}
 			setupNextTurn();
 			if (isGameOver()) {
-				handleGameOver();
-			} else if (playerInTurn.isComputerPlayer()) {
-				// TODO 4 player game, if computer player is next after timed out player then computer also timeouts
+				onGameOver();
 			}
 			String tableJson = jsonb.toJson(this);
 			String message = "{\"title\":\"TIMEOUT\", \"table\":" + tableJson + "}";
 			sendMessageToTable(message);
 			timedOutPlayerName = null;
+			if (isArtificialPlayerInTurn()) {
+				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
+			}
 		}
 	}
 
@@ -324,7 +326,11 @@ public class YatzyTable extends Table {
 
 	@Override
 	public boolean isPlayer(User user) {
-		return players.indexOf(user) != -1;
+		int index = players.indexOf(user);
+		if (index < 0) {
+			return false;
+		}
+		return players.get(index).isEnabled();
 	}
 
 	@Override
@@ -492,7 +498,6 @@ public class YatzyTable extends Table {
 
 	@Override
 	public boolean suggestRematch(User user) {
-		System.out.println("SUGGEST REMATCH:" + user);
 		if (!isPlayer(user)) {
 			return false;
 		}
@@ -502,7 +507,6 @@ public class YatzyTable extends Table {
 				LOGGER.info("Yatzy wrong rematch player, not in the game:" + user);
 				return false;
 			}
-			System.out.println("SUGGEST REMATCH THROUGH:" + user);
 			rematchPlayers.add(players.get(index));
 			if (rematchPlayers.size() == players.size()) {
 				// All players required to click "rematch"
@@ -511,7 +515,6 @@ public class YatzyTable extends Table {
 			}
 			return false;
 		}
-
 	}
 
 	public Set<YatzyPlayer> getRematchPlayers() {
