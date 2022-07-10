@@ -493,8 +493,8 @@ const markLastHands = () => {
 }
 const createTableFromSnapShot = () => {
     if (gameSnapshot === null) {
-        //No turns yet, coming back to board when nothing is played yet
         unblockQueue()
+        //No turns yet, coming back to board when nothing is played yet
         return
     } 
     setDiceNumbers(yatzyTable.value.dices, gameSnapshot.table.dices, false)
@@ -653,6 +653,7 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
         return
     }
     if (action.type === "leaveTable") {
+        gameSnapshot = action.payload
         return handleLeavingPerson(action)
     }
     if(action.type === "multiplayerTableResign"){
@@ -682,8 +683,8 @@ const handleLeavingPerson = (action: any) => {
         return
     }
     player.enabled = false
-    initNewTurnIfRequired(action)
     unblockQueue()
+    initNewTurnIfRequired(action)
     drawAll()
 }
 
