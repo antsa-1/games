@@ -492,7 +492,7 @@ public abstract class Table implements Serializable {
 
 	}
 
-	public void handleGameOver() {
+	public void onGameOver() {
 		// abstract, to interface?? all tables behind interface could be the thing. Next refactor iteration after yatzy?
 	}
 

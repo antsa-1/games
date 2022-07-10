@@ -209,7 +209,7 @@ public class TableHandler extends CommonHandler {
 		resultMessage.setFrom(SYSTEM);
 		resultMessage.setTable(table);
 		if (table.isGameOver()) {
-			table.handleGameOver();
+			table.onGameOver();
 			resultMessage.setGameResult(gameResult);
 		}
 		resultMessage.setWho(endpoint.getUser());
