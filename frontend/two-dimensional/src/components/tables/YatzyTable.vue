@@ -217,7 +217,7 @@ const isMouseEnabled = computed<boolean>(() =>
 )
 
 const isResignButtonEnabled = computed<boolean> (() =>
-    yatzyTable.value.gameOver === false && yatzyTable.value.players.find(player => player.scoreCard.hands.length > 0) != null
+    yatzyTable.value.gameOver === false && yatzyTable.value.players.find(player => player.scoreCard.hands.length > 0 && player.name === userName.value && player.enabled ===true) != null
 )
 const isRematchButtonEnabled = computed<boolean> (() =>
     yatzyTable.value.gameOver === true
