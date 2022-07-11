@@ -48,7 +48,7 @@ public class UserEJB {
 	private static final String TOP_YATZY_SUPER_SQL = "SELECT DISTINCT player_name,yatzy_super FROM rankings ORDER BY yatzy_super DESC LIMIT 20;";
 	private static final String TOP_YATZY_HYPER_SQL = "SELECT DISTINCT player_name,yatzy_hyper FROM rankings ORDER BY yatzy_hyper DESC LIMIT 20;";
 	private static final String TOP_CONNECT_FOUR_PLAYERS_SQL = "SELECT DISTINCT name,ranking_connectfour FROM user ORDER BY ranking_connectfour DESC LIMIT 20;";
-	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes,eightballs FROM game_counter";
+	private static final String SELECT_GAME_COUNTS_SQL = "SELECT connectfours,tictactoes,eightballs,yatzy_classic,yatzy_fast,yatzy_super,yatzy_hyper FROM game_counter";
 
 	public LoginOutput login(String name, String password) {
 		LOGGER.info(LOG_PREFIX_PORTAL + "UserEJB login:");
@@ -212,9 +212,18 @@ public class UserEJB {
 				int connectFours = rs3.getInt("connectfours");
 				int tictactoes = rs3.getInt("tictactoes");
 				int eightBalls = rs3.getInt("eightballs");
+				int yatzyClassics = rs3.getInt("yatzy_classic");
+				int yatzyFasts = rs3.getInt("yatzy_fast");
+				int yatzySupers = rs3.getInt("yatzy_super");
+				int yatzyHypers = rs3.getInt("yatzy_hyper");
+
 				topLists.setTotalConnectFours(connectFours);
 				topLists.setTotalTictactoes(tictactoes);
 				topLists.setTotalEightBalls(eightBalls);
+				topLists.setTotalYatzyClassics(yatzyClassics);
+				topLists.setTotalYatzySupers(yatzySupers);
+				topLists.setTotalYatzyFasts(yatzyFasts);
+				topLists.setTotalYatzyHypers(yatzyHypers);
 			}
 			rs3.close();
 			stmt = con.prepareStatement(TOP_EIGHT_BALL_PLAYERS_SQL);

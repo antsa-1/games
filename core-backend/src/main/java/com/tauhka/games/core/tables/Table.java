@@ -46,7 +46,7 @@ public abstract class Table implements Serializable {
 	@JsonbProperty("playerInTurn")
 	protected User playerInTurn;
 	@JsonbTransient
-	Set<User> rematchPlayers;
+	private Set<User> rematchPlayers;
 	@JsonbTransient
 	protected User startingPlayer;
 	@JsonbProperty("playerAmount")

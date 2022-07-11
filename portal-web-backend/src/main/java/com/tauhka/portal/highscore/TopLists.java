@@ -35,6 +35,14 @@ public class TopLists {
 	private int totalTictactoes;
 	@JsonbProperty("totalEightBalls")
 	private int totalEightBalls;
+	@JsonbProperty("totalYatzyClassics")
+	private int totalYatzyClassics;
+	@JsonbProperty("totalYatzyFasts")
+	private int totalYatzyFasts;
+	@JsonbProperty("totalYatzySupers")
+	private int totalYatzySupers;
+	@JsonbProperty("totalYatzyHypers")
+	private int totalYatzyHypers;
 
 	@JsonbTransient
 	public void addConnectFourPlayer(TopPlayer topPlayer) {
@@ -130,6 +138,70 @@ public class TopLists {
 
 	public Instant getFetchInstant() {
 		return fetchInstant;
+	}
+
+	public List<TopPlayer> getYatzyClassicList() {
+		return yatzyClassicList;
+	}
+
+	public void setYatzyClassicList(List<TopPlayer> yatzyClassicList) {
+		this.yatzyClassicList = yatzyClassicList;
+	}
+
+	public List<TopPlayer> getYatzyFastList() {
+		return yatzyFastList;
+	}
+
+	public void setYatzyFastList(List<TopPlayer> yatzyFastList) {
+		this.yatzyFastList = yatzyFastList;
+	}
+
+	public List<TopPlayer> getYatzySuperList() {
+		return yatzySuperList;
+	}
+
+	public void setYatzySuperList(List<TopPlayer> yatzySuperList) {
+		this.yatzySuperList = yatzySuperList;
+	}
+
+	public List<TopPlayer> getYatzyHyperList() {
+		return yatzyHyperList;
+	}
+
+	public void setYatzyHyperList(List<TopPlayer> yatzyHyperList) {
+		this.yatzyHyperList = yatzyHyperList;
+	}
+
+	public int getTotalYatzyClassics() {
+		return totalYatzyClassics;
+	}
+
+	public void setTotalYatzyClassics(int totalYatzyClassics) {
+		this.totalYatzyClassics = totalYatzyClassics;
+	}
+
+	public int getTotalYatzyFasts() {
+		return totalYatzyFasts;
+	}
+
+	public void setTotalYatzyFasts(int totalYatzyFasts) {
+		this.totalYatzyFasts = totalYatzyFasts;
+	}
+
+	public int getTotalYatzySupers() {
+		return totalYatzySupers;
+	}
+
+	public void setTotalYatzySupers(int totalYatzySupers) {
+		this.totalYatzySupers = totalYatzySupers;
+	}
+
+	public int getTotalYatzyHypers() {
+		return totalYatzyHypers;
+	}
+
+	public void setTotalYatzyHypers(int totalYatzyHypers) {
+		this.totalYatzyHypers = totalYatzyHypers;
 	}
 
 	public void setFetchInstant(Instant fetchInstant) {

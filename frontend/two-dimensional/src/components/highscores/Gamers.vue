@@ -22,7 +22,8 @@ export default {
     	games:Array,
     	title:String,
 		totalGames:Number,
-		gameNumber:Number
+		gameNumber:Number,
+        gameMode:Number
   	},
 	data() {
 		return {
@@ -38,16 +39,9 @@ export default {
 	},
 
 	methods: {
-		getRanking(topPlayer:IPlayerStats){			
-			if(this.gameNumber === 3){
-				return topPlayer.rankingEightBall
-			}
-			if(this.gameNumber === 2){
-				return topPlayer.rankingConnectFour
-			}
-			if(this.gameNumber === 1){
-				return topPlayer.rankingTicTacToe
-			}
+		getRanking(topPlayer:IPlayerStats){	
+            //Switch
+          return topPlayer.ranking
 		}
 	}
 

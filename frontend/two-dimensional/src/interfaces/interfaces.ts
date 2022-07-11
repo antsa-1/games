@@ -107,19 +107,14 @@ export interface ITopLists {
     totalConnectFours: number,
     totalEightBalls: number,
     totalYatzyClassics: number,
-    totalYatzyFast: number,
-    totalYatzySuper: number,
-    totalYatzyHyper: number
+    totalYatzyFasts: number,
+    totalYatzySupers: number,
+    totalYatzyHypers: number
 }
 
 export interface IPlayerStats {
     name: string,
-    playedConnectFours: number,
-    playedTicTacToesAgainstAI: number,
-    playedConnectFoursAgainstAI: number,
-    rankingConnectFour: number,
-    rankingTicTacToe: number,
-    rankingEightBall: number,
+    ranking: number
 }
 
 export interface IProfile extends IFetchResult {

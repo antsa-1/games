@@ -5,11 +5,11 @@
             <br>
             {{ dateTime }}
         </p>
-        <Gamers :games="yatzyClassics" :totalGames="-1" :gameNumber="4" title="Yatzy classic" />
-        <Gamers :games="yatzyFasts" :totalGames="-1" :gameNumber="4" title="Yatzy fast" />
-        <Gamers :games="yatzyClassics" :totalGames="-1" :gameNumber="4" title="Yatzy super" />
-        <Gamers :games="yatzyClassics" :totalGames="-1" :gameNumber="4" title="Yatzy hyper" />
-        <Gamers :games="eightBalls" :totalGames="totalEightBalls" :gameNumber="3" title="Eight ball" />
+        <Gamers :games="yatzyClassics" :totalGames="totalYatzyClassics" :gameNumber="4" :gameMode="40" title="Yatzy classic" />
+        <Gamers :games="yatzyFasts" :totalGames="totalYatzyFasts" :gameNumber="4" :gameMode="41" title="Yatzy fast" />
+        <Gamers :games="yatzySupers" :totalGames="totalYatzySupers" :gameNumber="4" :gameMode="42" title="Yatzy super" />
+        <Gamers :games="yatzyHypers" :totalGames="totalYatzyHypers" :gameNumber="4" :gameMode="43" title="Yatzy hyper" />
+        <Gamers :games="eightBalls" :totalGames="totalEightBalls" :gameNumber="3"  title="Eight ball" />
         <Gamers :games="connectFours" :totalGames="totalConnectFours" :gameNumber="2" title="ConnectFour" />
         <Gamers :games="tictactoes" :totalGames="totalTictactoes" :gameNumber="1" title="TicTacToe" />
 
@@ -40,9 +40,9 @@ export default defineComponent({
             totalTictactoes: 0,
             totalEightBalls: 0,
             totalYatzyClassics: 0,
-            totalYatzyFast: 0,
-            totalYatzyHyper: 0,
-            totalYatzySuper: 0
+            totalYatzyFasts: 0,
+            totalYatzyHypers: 0,
+            totalYatzySupers: 0
         };
     },
     computed: {
@@ -86,6 +86,10 @@ export default defineComponent({
                         this.totalConnectFours = data.totalConnectFours
                         this.totalTictactoes = data.totalTictactoes
                         this.totalEightBalls = data.totalEightBalls
+                        this.totalYatzyClassics = data.totalYatzyClassics
+                        this.totalYatzyFasts = data.totalYatzyFasts
+                        this.totalYatzySupers = data.totalYatzySupers
+                        this.totalYatzyHypers = data.totalYatzyHypers
                     },
                     (err) => {
                         this.errorFlag = true
