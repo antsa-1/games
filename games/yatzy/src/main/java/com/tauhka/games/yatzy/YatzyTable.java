@@ -231,7 +231,6 @@ public class YatzyTable extends Table {
 	@Override
 	public void onTimeout(User timedOut) {
 		synchronized (this) {
-			System.out.println("YatzyTable TIMEOUT+" + getPlayerInTurn());
 			cancelTimer();
 			YatzyPlayer playerInTurn = getPlayerInTurn();
 			if (playerInTurn != null) {

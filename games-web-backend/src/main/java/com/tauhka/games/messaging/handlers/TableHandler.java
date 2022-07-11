@@ -121,7 +121,6 @@ public class TableHandler extends CommonHandler {
 		endpoint.getUser().setTable(null);
 		removedTable.onClose();
 		Message message_ = new Message();
-		System.out.println("dd");
 		message_.setTitle(MessageTitle.REMOVE_TABLE);
 		message_.setMessage(tableId);
 		return message_;
