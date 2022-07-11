@@ -255,7 +255,7 @@ public class YatzyTable extends Table {
 	}
 
 	private void sendMessageToTable(String message) {
-		synchronized (this) {
+		synchronized (this) { // Double synch, but jvm checks this thread already holding a lock
 			for (User user : getUsers()) {
 				if (user.getWebsocketSession() != null && user.getWebsocketSession().isOpen()) {
 					try {
@@ -487,24 +487,24 @@ public class YatzyTable extends Table {
 
 	@Override
 	public GameResult resign(User player) {
+		if (!this.isPlayer(player) || this.playerInTurn == null) {
+			throw new IllegalArgumentException("Resign not possible" + player + " table:" + this);
+		}
 		synchronized (this) {
-			if (this.isPlayer(player) && this.playerInTurn != null) {
-				int index = players.indexOf(player);
-				if (index < 0) {
-					LOGGER.info("YatzyTable: no resign player found");
-					return null;
-				}
-				players.get(index).setEnabled(false);
-				gameResult.findPlayer(player.getName()).setStatus(Status.RESIGNED);
-				if (playerInTurn.equals(player)) {
-					setupNextTurn();
-				}
-				if (isArtificialPlayerInTurn()) {
-					CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
-				}
+			int index = players.indexOf(player);
+			if (index < 0) {
+				LOGGER.info("YatzyTable: no resign player found");
 				return null;
 			}
-			throw new IllegalArgumentException("Resign not possible" + player);
+			players.get(index).setEnabled(false);
+			gameResult.findPlayer(player.getName()).setStatus(Status.RESIGNED);
+			if (playerInTurn.equals(player)) {
+				setupNextTurn();
+			}
+			if (isArtificialPlayerInTurn()) {
+				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
+			}
+			return null;
 		}
 	}
 

@@ -176,7 +176,8 @@ public class CommonEndpoint {
 		} else if (!table.isStarted()) {
 			sendCommonMessage(gameMessage);// Table is gathering people to play, not started yet. One left before start.
 		} else {
-			sendMessageToTable(table, gameMessage); // Table players still playing
+			sendMessageToTable(table, gameMessage); // Table players still playing, -> info to them
+//			sendPrivateMessage(gameMessage); // Info to the player who left, UI removes this now automatically
 		}
 	}
 
