@@ -30,8 +30,8 @@ public class MultiplayerRankingCalculator {
 					p.getRankingsAfter().add(newRankingA);
 					continue;
 				} else if (other.isComputerPlayer() && p.getStatus() != Status.FINISHED) {
-					// But the player who did not finish the game gets two minus points
-					newRankingA = aRankingInitial - 2;
+					// But the player who did not finish the game gets minus ten
+					newRankingA = aRankingInitial - 10;
 					p.getRankingsAfter().add(newRankingA);
 					continue;
 				}
