@@ -121,7 +121,7 @@
 						</div>
 						<div class=" ">
 							<div v-if="hasVariants" class="" id="v-model-select-dynamic">	
-								<select v-model="selectedGameMode" @change="onVariantChange" >
+								<select v-model="selectedGameMode" >
 									<option :value="'0'" :key="0">
 										Select variant
 									</option>
@@ -549,10 +549,10 @@ export default defineComponent({
 			}
 		},		
         getAvailableTimeControls(): ITimeControlOption[] {
-            if (this.gameMode === 40) { //Yatzy classic
+            if (this.selectedGameMode === 40) { //Yatzy classic
                 return this.getAllTimeControls().filter(timeControl => timeControl.id > 2)
             }
-            if(this.gameNumber === 3){ // 8-ball
+            if(this.selectedGameMode === 30){ // 8-ball
                 return this.getAllTimeControls().filter(timeControl => timeControl.id > 2)
             }
             return this.getAllTimeControls()
@@ -568,9 +568,6 @@ export default defineComponent({
             }
 			this.selectedGameMode = "0"
 		},
-        onVariantChange(event){
-        
-        },
 		removeTable(){
 			
 			const obj = { title: "REMOVE_TABLE",message:""};
