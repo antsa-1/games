@@ -1,107 +1,135 @@
 {
-	"draws": 0,
-	"gameMode": {
-		"gameNumber": 4,
-		"id": 40,
-		"name": "Yatzy",
-		"requiredConnections": -1,
-		"x": -1,
-		"y": -1
-	},
-	"multiplayerTable": true,
-	"playerA": {
-		"guestPlayer": true,
-		"name": "Guest_63",
-		"rankingConnectFour": 0,
-		"rankingEightBall": 0,
-		"rankingTictactoe": 0,
-		"enabled": true,
-		"rollsLeft": 3,
-		"scoreCard": {
-			"hands": {}
-		}
-	},
-	"playerAmount": 2,
-	"registeredOnly": false,
-	"secondsLeft": 20,
-	"startTime": "2022-07-01T10:49:03.689730900Z",
-	"started": true,
-	"tableId": "a0f6e783-48a3-4926-994d-78bdf4029076",
-	"timeControlIndex": 0,
-	"watchers": [],
-	"dices": [
-		{
-			"diceId": "cb19bfc0-1ee2-44ad-bd2b-4c743f54f2b0",
-			"number": 3,
-			"selected": false
-		},
-		{
-			"diceId": "a34c5719-b6ee-4980-91f0-03abd5a840ec",
-			"number": 5,
-			"selected": false
-		},
-		{
-			"diceId": "93ac0912-9a6a-451a-83a2-02cae288c5f8",
-			"number": 1,
-			"selected": false
-		},
-		{
-			"diceId": "81a81567-fa4c-440f-80eb-dfca0f9b645e",
-			"number": 3,
-			"selected": false
-		},
-		{
-			"diceId": "bef5d7aa-6521-4c43-9d96-b1effdb2c19a",
-			"number": 5,
-			"selected": false
-		}
-	],
-	"gameOver": false,
-	"playerInTurn": {
-		"guestPlayer": true,
-		"name": "Guest_63",
-		"rankingConnectFour": 0,
-		"rankingEightBall": 0,
-		"rankingTictactoe": 0,
-		"enabled": true,
-		"rollsLeft": 3,
-		"scoreCard": {
-			"hands": {}
-		}
-	},
-	"players": [
-		{
-			"guestPlayer": true,
-			"name": "Guest_63",
-			"rankingConnectFour": 0,
-			"rankingEightBall": 0,
-			"rankingTictactoe": 0,
-			"enabled": true,
-			"rollsLeft": 3,
-			"scoreCard": {
-				"hands": {}
-			}
-		},
-		{
-			"guestPlayer": true,
-			"name": "Guest_64",
-			"rankingConnectFour": 0,
-			"rankingEightBall": 0,
-			"rankingTictactoe": 0,
-			"enabled": true,
-			"rollsLeft": 3,
-			"scoreCard": {
-				"hands": {}
-			}
-		}
-	],
-	"randomizeStarter": false,
-	"tableType": "MULTI",
-	"waitingOpponent": false,
-	"chat": {
-		"messages": [],
-		"message": {
-			"text": ""
+	"type": "timeout",
+	"payload": {
+		"title": "TIMEOUT",
+		"table": {
+			"draws": 0,
+			"gameMode": {
+				"gameNumber": 4,
+				"id": 43,
+				"name": "Hyper",
+				"requiredConnections": -1,
+				"x": -1,
+				"y": -1
+			},
+			"multiplayerTable": true,
+			"playerA": {
+				"guestPlayer": true,
+				"name": "Guest_25",
+				"rankingConnectFour": 0,
+				"rankingEightBall": 0,
+				"rankingTictactoe": 0,
+				"enabled": true,
+				"rollsLeft": 3,
+				"scoreCard": {
+					"hands": {}
+				}
+			},
+			"playerAmount": 4,
+			"registeredOnly": false,
+			"secondsLeft": 10,
+			"startTime": "2022-07-11T12:23:17.756225400Z",
+			"started": true,
+			"tableId": "606e0803-cfda-459e-a3d3-f61ef1d2f1f7",
+			"timeControlIndex": 0,
+			"watchers": [
+				{
+					"guestPlayer": true,
+					"name": "Guest_29",
+					"rankingConnectFour": 0,
+					"rankingEightBall": 0,
+					"rankingTictactoe": 0
+				}
+			],
+			"dices": [
+				{
+					"diceId": "5d8bb8af-7dc4-4075-b314-eca4f39a7568",
+					"number": 5
+				},
+				{
+					"diceId": "fe1dacea-c1a2-418b-be61-9a022386e565",
+					"number": 1
+				},
+				{
+					"diceId": "38b2f724-f3c6-4881-9173-ef33ca8d6207",
+					"number": 6
+				},
+				{
+					"diceId": "5b1ecbd7-bffe-45ee-a183-08f453966687",
+					"number": 1
+				},
+				{
+					"diceId": "657c8b32-85da-4f61-a25e-164442037608",
+					"number": 6
+				}
+			],
+			"enabledPlayersCount": 4,
+			"gameOver": false,
+			"playerInTurn": {
+				"guestPlayer": true,
+				"name": "Guest_25",
+				"rankingConnectFour": 0,
+				"rankingEightBall": 0,
+				"rankingTictactoe": 0,
+				"enabled": true,
+				"rollsLeft": 3,
+				"scoreCard": {
+					"hands": {}
+				}
+			},
+			"players": [
+				{
+					"guestPlayer": true,
+					"name": "Guest_25",
+					"rankingConnectFour": 0,
+					"rankingEightBall": 0,
+					"rankingTictactoe": 0,
+					"enabled": true,
+					"rollsLeft": 3,
+					"scoreCard": {
+						"hands": {}
+					}
+				},
+				{
+					"guestPlayer": false,
+					"name": "Olav_computer",
+					"rankingConnectFour": 0,
+					"rankingEightBall": 0,
+					"rankingTictactoe": 0,
+					"enabled": true,
+					"rollsLeft": 3,
+					"scoreCard": {
+						"hands": {}
+					}
+				},
+				{
+					"guestPlayer": true,
+					"name": "Guest_26",
+					"rankingConnectFour": 0,
+					"rankingEightBall": 0,
+					"rankingTictactoe": 0,
+					"enabled": true,
+					"rollsLeft": 3,
+					"scoreCard": {
+						"hands": {}
+					}
+				},
+				{
+					"guestPlayer": true,
+					"name": "Guest_27",
+					"rankingConnectFour": 0,
+					"rankingEightBall": 0,
+					"rankingTictactoe": 0,
+					"enabled": true,
+					"rollsLeft": 2,
+					"scoreCard": {
+						"hands": {}
+					}
+				}
+			],
+			"randomizeStarter": false,
+			"tableType": "MULTI",
+			"waitingOpponent": false
 		}
 	}
-} Yat
+}

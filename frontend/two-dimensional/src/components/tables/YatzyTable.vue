@@ -1,7 +1,7 @@
 <template>
     <div class="row">
         <div class="col">
-            <button v-if="imPlaying()" :disabled="!isResignButtonEnabled" @click="resign(yatzyTable.tableId)" type="button"
+            <button v-if="imPlaying()" :disabled="!isResignButtonEnabled" @click="resignButtonClick" type="button"
                 class="btn btn-primary w-30 float-xs-start float-sm-end">
                 Resign
             </button>
@@ -86,6 +86,9 @@ const setupCanvas = () => {
 const onAnimationChange = () =>{
     if(gameOptions.value.animations){ // v-model has not yet changed immediately after click
         yatzyTable.value.canvas.animating = false
+        if(isMyTurn.value){
+            
+        }
     }
 }
 const scoreCardSection = (): ISection => {
@@ -216,8 +219,16 @@ const isMouseEnabled = computed<boolean>(() =>
     yatzyTable.value.canvas.enabled && isMyTurn.value === true
 )
 
+const resignButtonClicked = ref<boolean>(false)
+
+const resignButtonClick = () =>{
+    resign(yatzyTable.value.tableId)
+    resignButtonClicked.value = true
+}
 const isResignButtonEnabled = computed<boolean> (() =>
-    yatzyTable.value.gameOver === false && yatzyTable.value.players.find(player => player.scoreCard.hands.length > 0 && player.name === userName.value && player.enabled ===true) != null
+    yatzyTable.value.gameOver === false && 
+    yatzyTable.value.players.find(player => player.scoreCard.hands.length > 0 && player.name === userName.value && player.enabled ===true) != null
+    && resignButtonClicked.value === false
 )
 const isRematchButtonEnabled = computed<boolean> (() =>
     yatzyTable.value.gameOver === true && yatzyTable.value.players.length > 1
@@ -234,6 +245,10 @@ const imPlaying = () =>{
 const consumeActions = () => {
     if (actionQueue.value.blocked || actionQueue.value.actions.length === 0) {
         console.log("actionQueue not consuming " + actionQueue.value.actions.length)
+        return
+    }
+    if(yatzyTable.value.playerInTurn === null){
+        console.log("consumeActions no playerInTurn, so game over")
         return
     }
     actionQueue.value.blocked = true
@@ -271,7 +286,7 @@ const consumeActions = () => {
         })
     } else if (action.type === "timeout") {
         let yatzyPlayer = <IYatzyPlayer>yatzyTable.value.players.find(player => player.name === action.payload.table.timedOutPlayerName)
-        console.log("Handling timeout"+JSON.stringify(yatzyPlayer) +" myName:"+userName)
+        console.log("Handling timeout"+JSON.stringify(yatzyPlayer) +" myName:"+userName +" timedOut "+action.payload.table.timedOutPlayerName)
         deactivatePlayer(yatzyPlayer, action, true)
     }
 }
@@ -499,6 +514,7 @@ const createTableFromSnapShot = () => {
         //No turns yet, coming back to board when nothing is played yet
         return
     } 
+    console.log("FROM SNAPSHOT")
     setDiceNumbers(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     gameSnapshot.table.players.forEach(snapshotPlayer => {
         const tablePlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
@@ -520,6 +536,7 @@ const createTableFromSnapShot = () => {
     let player: IYatzyPlayer = <IYatzyPlayer>gameSnapshot.table.playerInTurn
     if (playerInTurn.value) {
         playerInTurn.value.rollsLeft = player?.rollsLeft
+        console.log("ROLLS LEFT:"+playerInTurn.value.rollsLeft)
     }
     let me: IYatzyPlayer = gameSnapshot.table.players.find(player => !player?.enabled && player?.name === userName.value)
     if (me) {
@@ -637,11 +654,13 @@ const startRematch = (action) => {
     yatzyTable.value = initTable()
     let playerInTurn:IYatzyPlayer = <IYatzyPlayer> action.payload.table.playerInTurn
     playerInTurn.rollsLeft = action.payload.table.playerInTurn.rollsLeft
+    yatzyTable.value.players.forEach(player => player.enabled = true)
     yatzyTable.value.playerInTurn = playerInTurn
     iTimedOut = false
     yatzyTable.value.gameOver = false
     unblockQueue()
     setupCanvas()
+    resignButtonClicked.value = false
     drawAll()
 }
 const unsubscribeAction = store.subscribeAction((action, state) => {
@@ -704,7 +723,7 @@ const initNewTurnIfRequired = (action):boolean => {
         return false
     }
     //One person can play to the end if others timeouts or leaves
-    if (action.payload.table.playerInTurn.name !== yatzyTable.value.playerInTurn.name || yatzyTable.value.players.filter(player => player.enabled === true).length === 1) {
+    if (action.payload?.table?.playerInTurn?.name !== yatzyTable.value?.playerInTurn?.name || yatzyTable.value?.players.filter(player => player.enabled === true).length === 1) {
         let changeTurnAction = { type: "changeTurn", payload: action.payload }
         actionQueue.value.actions.splice(actionQueue.value.actions.length, 0, changeTurnAction)
         return true

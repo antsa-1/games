@@ -3,8 +3,10 @@ package com.tauhka.games.core.tables;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -44,7 +46,7 @@ public abstract class Table implements Serializable {
 	@JsonbProperty("playerInTurn")
 	protected User playerInTurn;
 	@JsonbTransient
-	protected User rematchPlayer;
+	Set<User> rematchPlayers;
 	@JsonbTransient
 	protected User startingPlayer;
 	@JsonbProperty("playerAmount")
@@ -96,6 +98,7 @@ public abstract class Table implements Serializable {
 		this.playerAmount = playerAmount;
 		this.registeredOnly = registeredOnly;
 		this.timeControlIndex = timeControlIndex;
+		rematchPlayers = new HashSet<User>();
 		secondsLeft = TimeControlIndex.getWithIndex(timeControlIndex).getSeconds();
 	}
 
@@ -110,6 +113,7 @@ public abstract class Table implements Serializable {
 		this.playerAmount = playerAmount;
 		this.registeredOnly = registeredOnly;
 		this.timeControlIndex = timeControlIndex;
+		rematchPlayers = new HashSet<User>();
 		secondsLeft = TimeControlIndex.getWithIndex(timeControlIndex).getSeconds();
 	}
 
@@ -141,7 +145,7 @@ public abstract class Table implements Serializable {
 		playerB = null;
 		playerInTurn = null;
 //		watchers = null;
-		rematchPlayer = null;
+		rematchPlayers = null;
 		gameOver = true;
 		closed = true;
 	}
@@ -474,27 +478,24 @@ public abstract class Table implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Table [tableId=" + tableId + ", playerA=" + playerA + ", playerB=" + playerB + ", playerInTurn=" + playerInTurn + ", rematchPlayer=" + rematchPlayer + ", startingPlayer=" + startingPlayer + ", randomizeStarter="
+		return "Table [tableId=" + tableId + ", playerA=" + playerA + ", playerB=" + playerB + ", playerInTurn=" + playerInTurn + ", rematchPlayer=" + rematchPlayers + ", startingPlayer=" + startingPlayer + ", randomizeStarter="
 				+ randomizeStarter + ", gameMode=" + gameMode + ", gameOver=" + gameOver + "]";
 	}
 
 	protected void resetRematchPlayer() {
-		rematchPlayer = null;
+		rematchPlayers = new HashSet<User>();
 	}
 
 	public boolean isRegisteredOnly() {
 		return registeredOnly;
 	}
 
-	public synchronized boolean suggestRematch(User user) {
+	public boolean suggestRematch(User user) {
 		if (!isPlayer(user)) {
 			throw new IllegalArgumentException("Rematchplayer is not a player in the table:" + user);
 		}
-		if (this.rematchPlayer == null) {
-			this.rematchPlayer = user;
-			return false;
-		}
-		if (this.rematchPlayer.equals(user)) {
+		rematchPlayers.add(user);
+		if (rematchPlayers.size() != playerAmount) {
 			return false;
 		}
 		if (this.startingPlayer.equals(playerA)) {

@@ -224,7 +224,7 @@ public class TableHandler extends CommonHandler {
 		}
 		Table table = tableOptional.get();
 		if (!table.isPlayer(endpoint.getUser()) || !table.isGameOver()) {
-			throw new IllegalArgumentException("Rematch not possible, user is not a player");
+			throw new IllegalArgumentException("Rematch not possible, user is not a player or game is not over");
 		}
 		boolean startRematch = table.suggestRematch(endpoint.getUser());
 		if (startRematch) {

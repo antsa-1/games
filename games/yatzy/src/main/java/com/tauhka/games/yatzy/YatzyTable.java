@@ -217,13 +217,13 @@ public class YatzyTable extends Table {
 	}
 
 	private void checkGuards(User user) {
-		if (!getPlayerInTurn().equals(user)) {
-			throw new IllegalArgumentException("Player is not in turn:" + user + " table=" + this);
-		}
 		if (isGameOver()) {
 			onGameOver();
 			LOGGER.info("YatzyTable handSelection but gameOver " + this + " ** " + user);
 			throw new IllegalArgumentException("Game has ended");
+		}
+		if (!getPlayerInTurn().equals(user)) {
+			throw new IllegalArgumentException("Player is not in turn:" + user + " table=" + this);
 		}
 
 	}
@@ -380,6 +380,9 @@ public class YatzyTable extends Table {
 	@Override
 	public void changePlayerInTurn() {
 		playerInTurn = setupNextTurn();
+		if (isGameOver()) {
+			onGameOver();
+		}
 	}
 
 	private YatzyPlayer setupNextTurn() {
@@ -508,26 +511,20 @@ public class YatzyTable extends Table {
 		}
 	}
 
-	@Override
-	public boolean suggestRematch(User user) {
-		if (!isPlayer(user)) {
-			return false;
-		}
-		synchronized (this) {
-			int index = players.indexOf(user);
-			if (index == -1) {
-				LOGGER.info("Yatzy wrong rematch player, not in the game:" + user);
-				return false;
-			}
-			rematchPlayers.add(players.get(index));
-			if (rematchPlayers.size() == players.size() && rematchPlayers.size() != 1) {
-				// All players required to click "rematch"
-				yatzyRuleBase.startGame(this);
-				return true;
-			}
-			return false;
-		}
-	}
+//	@Override
+//	public boolean suggestRematch(User user) {
+//		if (!isPlayer(user)) {
+//			return false;
+//		}
+//		int index = players.indexOf(user);
+//		rematchPlayers.add(players.get(index));
+//		if (rematchPlayers.size() == players.size() && rematchPlayers.size() != 1) {
+//			// All players required to click "rematch"
+//			yatzyRuleBase.startGame(this);
+//			return true;
+//		}
+//		return false;
+//	}
 
 	public Set<YatzyPlayer> getRematchPlayers() {
 		return rematchPlayers;

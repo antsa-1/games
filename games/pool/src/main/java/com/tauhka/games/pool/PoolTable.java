@@ -401,7 +401,7 @@ public class PoolTable extends Table implements PoolComponent {
 	}
 
 	@Override
-	public synchronized boolean suggestRematch(User user) {
+	public boolean suggestRematch(User user) {
 		return super.suggestRematch(user);
 	}
 
@@ -434,6 +434,5 @@ public class PoolTable extends Table implements PoolComponent {
 		// TODO Auto-generated method stub
 		return -1;
 	}
-
 
 }
