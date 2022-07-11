@@ -79,6 +79,9 @@ public abstract class Table implements Serializable {
 		return TableType.BASE;
 	}
 
+	@JsonbTransient
+	public boolean closed;
+
 	public Table() {
 		// Empty constr. for deserializing
 	}
@@ -114,13 +117,33 @@ public abstract class Table implements Serializable {
 
 	public abstract Object playTurn(User user, Object o);
 
-	public abstract void leaveTable(User user);
+	public void leaveTable(User user) {
+		if (isWatcher(user)) {
+			watchers.remove(user);
+			return;
+		}
+		this.gameOver = true;
+		closed = true;
+		removePlayerIfExist(user);
+	}
 
 	protected abstract Table startRematch();
 
 	public void onClose() {
-		// Default implementation
+		// Default implementation, not all variables are reset, some are needed still
+		if (timer != null) {
+			timer.cancel();
+		}
 		detachPlayers();
+		gameResult = null;
+		gameMode = null;
+		playerA = null;
+		playerB = null;
+		playerInTurn = null;
+//		watchers = null;
+		rematchPlayer = null;
+		gameOver = true;
+		closed = true;
 	}
 
 	@JsonbTransient
@@ -137,6 +160,14 @@ public abstract class Table implements Serializable {
 			return false;
 		}
 		return this.playerInTurn.equals(u);
+	}
+
+	public boolean isClosed() {
+		return closed;
+	}
+
+	public void setClosed(boolean closed) {
+		this.closed = closed;
 	}
 
 	public boolean isMultiplayerTable() {
@@ -164,14 +195,15 @@ public abstract class Table implements Serializable {
 	}
 
 	protected void detachPlayers() {
-		detachPlayer(playerA);
-		detachPlayer(playerB);
-		for (User u : watchers) {
-			detachPlayer(u);
-		}
+		detachUser(playerA);
+		detachUser(playerB);
+		if (watchers != null)
+			for (User u : watchers) {
+				detachUser(u);
+			}
 	}
 
-	protected void detachPlayer(User user) {
+	private void detachUser(User user) {
 		if (user == null) {
 			return;
 		}
@@ -316,12 +348,12 @@ public abstract class Table implements Serializable {
 
 	public boolean removePlayerIfExist(User user) {
 		if (playerA != null && playerA.equals(user)) {
-			detachPlayer(playerA);
+			detachUser(playerA);
 			playerA = null;
 			this.playerInTurn = null;
 			return true;
 		} else if (playerB != null && playerB.equals(user)) {
-			detachPlayer(playerB);
+			detachUser(playerB);
 			playerB = null;
 			this.playerInTurn = null;
 			return true;
@@ -351,8 +383,11 @@ public abstract class Table implements Serializable {
 	}
 
 	public boolean removeWatcherIfExist(User user) {
-		detachPlayer(user);
-		return watchers.remove(user);
+		detachUser(user);
+		if (watchers != null) {
+			return watchers.remove(user);
+		}
+		return false;
 	}
 
 	public User getPlayerA() {

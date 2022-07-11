@@ -59,7 +59,7 @@
 								{{getBoardDesc(table)}}									
 							</td>							
 							<td v-if="table.gameMode.gameNumber !==4">
-								{{table.playerA.name}} - {{table.playerB?.name}}
+								{{table.playerA?.name}} - {{table.playerB?.name}}
 							</td>
                             <td v-if="table.gameMode.gameNumber === 4">
 								<ul>
@@ -265,7 +265,6 @@ export default defineComponent({
         },
 		isRemoveTableButtonVisible(){
 			const firstTable:ITable = this.$store.getters.tables[0]
-            console.log("firstTable:"+JSON.stringify(firstTable))
  			if(firstTable && firstTable.playerA){
                 return firstTable.playerA.name === this.userName && !firstTable.started
 			}
@@ -322,11 +321,11 @@ export default defineComponent({
                             this.$store.dispatch("removePlayer", data.who)	
                         }
 						break;
-					case "REMOVE_TABLE":							
-						this.$store.dispatch("removeTable", data.table)
-						const tablesb:ITable=data.table
-						if(this.user.tableId === data.table.tableId){
-                            this.user.tableId = null
+					case "REMOVE_TABLE":
+						this.$store.dispatch("removeTable", data.message)
+						if(this.user.tableId === data.message){ // TableId is in message, table has been cleared from server already                               
+                            this.$store.dispatch("currentTableIsClosed", data)                     
+                            this.$store.dispatch("updateUserTableId", null)
                         }
 						break;
 					case "NEW_PLAYER":
@@ -336,8 +335,7 @@ export default defineComponent({
 					case "START_GAME":						
 						this.$store.dispatch("startGame", data.table).then(() => {							
 							const tableC:ITable = data.table
-							if (this.isOnTable(data.table)){				
-								
+							if (this.isOnTable(data.table)){								
 								this.$store.dispatch("selectTable", data.table).then(() => {
 								    this.openTable(data.table)
 							    })
@@ -350,9 +348,7 @@ export default defineComponent({
 						this.$store.dispatch("changeTurn", data.table.playerInTurn)
 						break
 					case "WATCH":
-
 						this.$store.dispatch("selectTable", data.table).then(() => {
-                            console.log("LOBBY TABLE:"+ JSON.stringify(this.$store.getters.theTable))
 							this.openWatcherTable(data.table)
 						})
 						break
@@ -552,6 +548,15 @@ export default defineComponent({
 				this.computerLevel="0";
 			}
 		},		
+        getAvailableTimeControls(): ITimeControlOption[] {
+            if (this.gameMode === 40) { //Yatzy classic
+                return this.getAllTimeControls().filter(timeControl => timeControl.id > 2)
+            }
+            if(this.gameNumber === 3){ // 8-ball
+                return this.getAllTimeControls().filter(timeControl => timeControl.id > 2)
+            }
+            return this.getAllTimeControls()
+        },
 		onSelectedGameChange(event){
 			if(event.target.selectedIndex === 3){ // pool			
 				this.selectedGameMode = 30///8-ball is the only choice
@@ -613,15 +618,7 @@ export default defineComponent({
 				this.$router.push({ name: 'Profile', params: { selectedName: selectedName } })	
 			}
 		},
-        getAvailableTimeControls():ITimeControlOption[]{
-            if(this.selectedGameMode === 40){
-                return this.getAllTimeControls().filter(timeControl => timeControl.seconds > 20)
-            }
-            return this.getAllTimeControls()
-        },
-		getTableTimeControl(table:ITable){
-			return this.getAllTimeControls()[table.timeControlIndex].seconds
-		},
+   
         getAllowedPlayerAmounts(){
 			return [2, 3, 4]
 		}

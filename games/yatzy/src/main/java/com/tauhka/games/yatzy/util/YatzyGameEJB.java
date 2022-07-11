@@ -58,8 +58,8 @@ public class YatzyGameEJB {
 			stmt.setTimestamp(2, Timestamp.from(result.getEndInstant()));
 			stmt.setString(3, result.getGameId().toString());
 			stmt.setInt(4, result.getGameMode().getId());
-			stmt.setString(5, result.getPlayers().get(0).getName());
-			stmt.setString(6, result.getPlayers().get(1).getName());
+			addPlayerIfExist(stmt, 5, result.getPlayers(), 0);
+			addPlayerIfExist(stmt, 6, result.getPlayers(), 1);
 			addPlayerIfExist(stmt, 7, result.getPlayers(), 2);
 			addPlayerIfExist(stmt, 8, result.getPlayers(), 3);
 			addInitialRanking(stmt, 9, result.getPlayers(), 0);

@@ -1,11 +1,11 @@
 <template>
     <div class="row">
         <div class="col">
-            <button v-if="true" :disabled="!isResignButtonEnabled" @click="resign(yatzyTable.tableId)" type="button"
+            <button v-if="imPlaying()" :disabled="!isResignButtonEnabled" @click="resign(yatzyTable.tableId)" type="button"
                 class="btn btn-primary w-30 float-xs-start float-sm-end">
                 Resign
             </button>
-            <button v-if="true" :disabled="!isRematchButtonEnabled" @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
+            <button v-if="imPlaying()" :disabled="!isRematchButtonEnabled" @click="rematch" type="button" class="btn btn-primary w-30 float-xs-start float-sm-end">
                 Rematch
             </button>
         </div>
@@ -19,8 +19,8 @@
             </label>
             <input type="checkbox" id="notificationSound" v-model="gameOptions.notificationSound">
             <span class="ps-4">
-				<input class="" type="checkbox" id="pointerLine" @click="onAnimationChange" v-model= "gameOptions.animations">
-				<label class="" for="pointerLine"> animate</label>
+				<input class="" type="checkbox" id="animate" @click="onAnimationChange" v-model= "gameOptions.animations">
+				<label class="" for="animate"> animate</label>
 			</span>
         </div>
     </div>
@@ -220,7 +220,7 @@ const isResignButtonEnabled = computed<boolean> (() =>
     yatzyTable.value.gameOver === false && yatzyTable.value.players.find(player => player.scoreCard.hands.length > 0 && player.name === userName.value && player.enabled ===true) != null
 )
 const isRematchButtonEnabled = computed<boolean> (() =>
-    yatzyTable.value.gameOver === true
+    yatzyTable.value.gameOver === true && yatzyTable.value.players.length > 1
 )
 watch(() => queueLength, (newVal) => {
     if (newVal.value > 0) {
@@ -228,7 +228,9 @@ watch(() => queueLength, (newVal) => {
     }
 }, { deep: true })
 
-
+const imPlaying = () =>{
+    return yatzyTable.value.players.find(player => player.name === userName.value) != null
+}
 const consumeActions = () => {
     if (actionQueue.value.blocked || actionQueue.value.actions.length === 0) {
         console.log("actionQueue not consuming " + actionQueue.value.actions.length)
@@ -647,6 +649,13 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
     if (!isYatzyTableRelatedAction(action)) {
         return
     }
+    if(action.type === "currentTableIsClosed"){
+        yatzyTable.value.players.forEach(player =>{
+            player.enabled = false
+        })
+        handleGameOver()
+        return // Only watchers can exist in table
+    }
     if(action.type === "rematch"){
         startRematch(action)
         gameSnapshot = action.payload
@@ -673,7 +682,8 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
     initNewTurnIfRequired(action)
 })
 const isYatzyTableRelatedAction = (action: any) => {
-    return action.type === "yatzyRollDices" || action.type === "yatzySelectHand" || action.type === "leaveTable" || action.type === "timeout"|| action.type === "rematch" || action.type === "multiplayerTableResign"
+    return action.type === "yatzyRollDices" || action.type === "yatzySelectHand" || action.type === "leaveTable" || action.type === "timeout"
+    || action.type === "rematch" || action.type === "multiplayerTableResign" || action.type ==="currentTableIsClosed"
 }
 const handleLeavingPerson = (action: any) => {
     let player: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
@@ -682,6 +692,7 @@ const handleLeavingPerson = (action: any) => {
         console.log("watcher left")
         return
     }
+    console.log("HANDLE LEAVING")
     player.enabled = false
     unblockQueue()
     initNewTurnIfRequired(action)

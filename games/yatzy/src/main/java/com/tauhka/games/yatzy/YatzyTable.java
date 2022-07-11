@@ -305,19 +305,23 @@ public class YatzyTable extends Table {
 	@Override
 	public void onClose() {
 		LOGGER.info("YatzyTable onClose" + this);
-		cancelTimer();
-		detachPlayers();
-		this.playerA = null;
-		gameOver = true;
-		this.playerInTurn = null;
-
+		super.onClose();
+		players = null;
+		timedOutPlayerName = null;
+		dices = null;
+		yatzyRuleBase = null;
+		rematchPlayers = null;
 	}
 
 	@Override
 	public void detachPlayers() {
 		super.detachPlayers();
-		for (User u : this.players) {
+		for (YatzyPlayer u : this.players) {
 			u.setTable(null);
+			u.setWebsocketSession(null);
+			u.setId(null);
+			u.setScoreCard(null);
+			u.setName(null);
 		}
 	}
 
@@ -371,31 +375,6 @@ public class YatzyTable extends Table {
 		yatzyRuleBase = new YatzyRuleBase();
 		yatzyRuleBase.startGame(this);
 		return gameShouldStartNow;
-	}
-
-	@Override
-	public boolean removePlayerIfExist(User user) {
-		YatzyPlayer removedPlayer = null;
-		int index = players.indexOf(user);
-		if (playerA != null && playerA.equals(user)) {
-			detachPlayer(playerA);
-		}
-		if (index != -1) {
-			removedPlayer = players.get(index);
-			removedPlayer.setEnabled(false);
-			detachPlayer(removedPlayer);
-		}
-		if (removedPlayer == null) {
-			// Nobody was removed
-			return false;
-		}
-//		if (playerInTurn != null && playerInTurn.equals(removedPlayer)) {
-//			playerInTurn = setupNextTurn();
-//		}
-//		if (isArtificialPlayerInTurn()) {
-//			CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
-//		}
-		return true;
 	}
 
 	@Override
@@ -469,20 +448,32 @@ public class YatzyTable extends Table {
 	}
 
 	@Override
+	public boolean removePlayerIfExist(User user) {
+		// leaveTable handles basically this
+		return false;
+	}
+
+	@Override
 	public void leaveTable(User user) {
+		if (isWatcher(user)) {
+			watchers.remove(user);
+			return;
+		}
 		synchronized (this) {
-			int index = players.indexOf(user);
-			if (index >= 0) {
-				YatzyPlayer y = players.get(index);
+			int playerIndex = players.indexOf(user);
+			if (playerIndex >= 0) {
+				YatzyPlayer y = players.get(playerIndex);
 				y.setEnabled(false);
 				updateResult(y);
-				detachPlayer(user);
-				if (!isStarted()) {
-					players.remove(index);
+				user.setTable(null);
+				players.remove(user);
+				if (playerA != null && user.equals(playerA)) {
+					playerA = null;
 				}
 			}
-			if (getEnabledPlayersCount() == 0) {
-				onClose();
+			if (isGameOver()) {
+				onGameOver();
+				onClose();// Last player left -> close table. Only computer might sit in this table
 				return;
 			}
 			if (playerInTurn != null && playerInTurn.equals(user)) {
@@ -529,7 +520,7 @@ public class YatzyTable extends Table {
 				return false;
 			}
 			rematchPlayers.add(players.get(index));
-			if (rematchPlayers.size() == players.size()) {
+			if (rematchPlayers.size() == players.size() && rematchPlayers.size() != 1) {
 				// All players required to click "rematch"
 				yatzyRuleBase.startGame(this);
 				return true;

@@ -76,6 +76,12 @@ export default defineComponent({
     };
   },
   created() {
+    this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
+		if(action.type === "currentTableIsClosed"){ 
+            this.stopReducer()
+            this.theTable.playerInTurn = null        
+        }
+    }),
     this.unsubscribe = this.$store.subscribe((mutation, state) => {
       if (mutation.type === "move") {
         const board: ISquare[] = state.theTable.board;
@@ -104,9 +110,9 @@ export default defineComponent({
           this.removeMouseListeners()
           this.drawWinningLine(win)
       }else if(mutation.type === "setDraw" || mutation.type === "resign"){
-				  this.stopReducer()
-          this.removeMouseListeners()
-			}
+			this.stopReducer()
+            this.removeMouseListeners()
+		}
     });
   },
   computed: {
@@ -122,33 +128,31 @@ export default defineComponent({
     resignButtonDisabled() {
       const table = this.$store.getters.theTable;
       if (this.watch) {
-        return true;
+        return true
       } else if (this.theTable && !this.theTable.playerInTurn) {
-        return true;
+        return true
       } else if (this.theTable.playerInTurn.name !== this.userName) {
-        return true;
-      } else if (this.theTable && this.theTable.board && this.theTable.board.length < 4
-      ) {
-        return true;
+        return true
+      } else if (this.theTable && this.theTable.board && this.theTable.board.length < 4 ) {
+        return true
       }
-
-      return false;
+      return false
     },
     rematchButtonEnabled() {
-      const table = this.$store.getters.theTable;
+      const table = this.$store.getters.theTable
       return !this.watch && table.playerInTurn === null;
     },
     resignButtonVisible() {
       return (
 		this.userName === this.theTable?.playerA?.name ||
         this.userName === this.theTable?.playerB?.name
-      );
+      )
     },
   },
   mounted() {
     if (!this.$store.getters.theTable) {
       this.$router.push("/error");
-      return;
+      return
     }
     this.initBoard()
 
@@ -158,6 +162,7 @@ export default defineComponent({
     }
   },
   beforeUnmount() {
+    this.unsubscribeAction()
     this.unsubscribe()
     this.stopReducer()
     this.leaveTable()

@@ -9,7 +9,6 @@ import com.tauhka.games.core.User;
 import com.tauhka.games.core.Vector2d;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.twodimen.GameResult;
-import com.tauhka.games.pool.debug.ServerGUI;
 import com.tauhka.games.pool.eightball.EightBallInitializer;
 import com.tauhka.games.pool.eightball.EightBallRuleBase;
 
@@ -436,10 +435,5 @@ public class PoolTable extends Table implements PoolComponent {
 		return -1;
 	}
 
-	@Override
-	public void leaveTable(User user) {
-		// TODO Auto-generated method stub
-		
-	}
 
 }

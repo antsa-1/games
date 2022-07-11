@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import com.tauhka.games.core.GameMode;
 import com.tauhka.games.core.User;
-import com.tauhka.games.core.ai.AI;
 import com.tauhka.games.core.tables.ConnectFourTable;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.core.tables.TableType;
@@ -76,70 +75,62 @@ public class TableHandler extends CommonHandler {
 
 	public Message leaveTable(Message mes, CommonEndpoint endpoint) {
 		UUID tableId = UUID.fromString(mes.getMessage());
+		User user = endpoint.getUser();
+		user.setTable(null);
 		Table table = CommonEndpoint.TABLES.get(tableId);
 		if (table == null) {
 			return null;
 		}
-		User user = endpoint.getUser();
-		user.setTable(null);
+
+		if (!table.isInTable(user)) {
+			return null;
+		}
+		table.leaveTable(user);
 		Message message = new Message();
 		message.setTitle(MessageTitle.LEAVE_TABLE);
 		message.setTable(table);
-		if (table.isPlayer(user) && table.getTableType() == TableType.MULTI) {
-			table.leaveTable(user);
-			message.setWho(endpoint.getUser());
-			return message;
-		} else if (table.isPlayer(user) && table.isStarted()) {
-			handleLeavingPlayerStatistics(table, endpoint);
-			if (table.removePlayerIfExist(user) || table.removeWatcherIfExist(user)) {
-				message.setWho(endpoint.getUser());
-				return message;
-			}
-		}
-		return null;
+		message.setWho(endpoint.getUser());
+		return message;
+////			handleLeavingPlayerStatistics(table, endpoint); in to table
 	}
 
-	public Message removeTableIfRequired(Table table, CommonEndpoint endpoint) {
-		if (table == null) {
-			return null;
-		}
-		if (table.isGameOver()) {
-			return removeTable(table);
-		}
-
-		if (table.isStarted() && !table.isSomebodyInTurn() || !table.isStarted() && table.getPlayerA() == null) {
-			return removeTable(table);
-		}
-		return null;
-	}
-
-	private Message removeTable(Table table) {
+	public Message removeTable(Table table, User user) {
 		CommonEndpoint.TABLES.remove(table.getTableId());
-		table.onClose();
+		String tableId = table.getTableId().toString();
 		Message message = new Message();
 		message.setTitle(MessageTitle.REMOVE_TABLE);
-		message.setTable(table);
+		message.setMessage(tableId);
+		if (user != null)
+			message.setWho(user);
 		return message;
 	}
 
 	public Message removeEndpointOwnTable(CommonEndpoint endpoint) {
-		// Using params would be faster...
-		Optional<Table> tableOptional = CommonEndpoint.TABLES.values().stream().filter(taabel -> taabel.getPlayerA() != null).filter(taabel -> taabel.getPlayerA().equals(endpoint.getUser())).findFirst();
-		if (tableOptional.isPresent()) {
-			Table removedTable = CommonEndpoint.TABLES.remove(tableOptional.get().getTableId());
-			removedTable.onClose();
-			Message message_ = new Message();
-			message_.setTitle(MessageTitle.REMOVE_TABLE);
-			message_.setTable(removedTable);
-			return message_;
+		Table table = endpoint.getUser().getTable();
+		if (table == null) {
+			throw new IllegalArgumentException("removeEndpointOwnTable User is not in any table, cannot remove table" + endpoint.getUser());
 		}
-		throw new IllegalArgumentException("No playerA found in tables:" + endpoint.getUser());
+		if (table.getPlayerA() == null || !table.getPlayerA().equals(table.getPlayerA())) {
+			throw new IllegalArgumentException("removeEndpointOwnTable User is not creator of the table " + table + " who:" + endpoint.getUser());
+		}
+//		if (!table.isRemovable()) {
+//			throw new IllegalArgumentException("removeEndpointOwnTable table not removable at the moment");
+//		}
+		Table removedTable = CommonEndpoint.TABLES.remove(table.getTableId());
+		String tableId = removedTable.getTableId().toString();
+		endpoint.getUser().setTable(null);
+		removedTable.onClose();
+		Message message_ = new Message();
+		System.out.println("dd");
+		message_.setTitle(MessageTitle.REMOVE_TABLE);
+		message_.setMessage(tableId);
+		return message_;
 	}
 
 	public Message joinTable(Message message, CommonEndpoint endpoint) {
 		if (endpoint.getUser().getTable() != null) {
 			LOGGER.severe("User is already in table:" + endpoint.getUser());
-			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser());
+			throw new IllegalArgumentException("User is already in table:" + endpoint.getUser() + " table:" + endpoint.getUser().getTable());
 		}
 		UUID tableID = UUID.fromString(message.getMessage());
 		Table table = CommonEndpoint.TABLES.get(tableID);
@@ -169,15 +160,16 @@ public class TableHandler extends CommonHandler {
 
 	}
 
-	public Message watch(Message message, CommonEndpoint CommonEndpoint) {
+	public Message watch(Message message, CommonEndpoint commonEndpoint) {
 		UUID tableID = UUID.fromString(message.getMessage());
-		Table table = CommonEndpoint.TABLES.get(tableID);
+		Table table = commonEndpoint.TABLES.get(tableID);
 		if (table == null) {
 			LOGGER.info("No Such Table to watch:" + tableID);
 		}
-		if (table.addWatcher(CommonEndpoint.getUser())) {
+		if (table.addWatcher(commonEndpoint.getUser())) {
 			Message message_ = new Message();
 			message_.setTitle(MessageTitle.WATCH);
+			commonEndpoint.getUser().setTable(table);
 			message_.setTable(table);
 			return message_;
 		}
@@ -231,6 +223,9 @@ public class TableHandler extends CommonHandler {
 
 		}
 		Table table = tableOptional.get();
+		if (!table.isPlayer(endpoint.getUser()) || !table.isGameOver()) {
+			throw new IllegalArgumentException("Rematch not possible, user is not a player");
+		}
 		boolean startRematch = table.suggestRematch(endpoint.getUser());
 		if (startRematch) {
 			Message rematchMessage = new Message();

@@ -71,7 +71,12 @@ export default defineComponent({
 		}
 	},
 	created() {
-		
+		this.unsubscribeAction = this.$store.subscribeAction((action, state) => {
+			if(action.type === "currentTableIsClosed"){ 
+                this.stopReducer()
+                this.theTable.playerInTurn = null        
+            }
+        }),
 		this.unsubscribe = this.$store.subscribe((mutation, state) => {
 			if (mutation.type === "move") {
 				const f : ISquare[]= state.theTable.board

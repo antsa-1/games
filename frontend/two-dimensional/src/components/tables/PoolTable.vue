@@ -151,7 +151,14 @@ export default defineComponent({
 				this.draw()
 				return
 			}
-			
+			if(action.type === "currentTableIsClosed"){ 
+                let winnerName = this?.theTable?.playerA?.name
+                if(this?.theTable?.playerA?.name === action?.payload?.who?.name ) {
+                    winnerName = this?.theTable?.playerB?.name 
+                }
+                let turn:ITurn = {winner:winnerName, winReason:"opponent disconnected", whoPlayed:null}
+                this.handleGameEnd(turn)
+            }
 			if(action.type !== "poolPlayTurn" && action.type !== "poolSetHandBall" && action.type !== "poolSelectPocket" 
 				&& action.type !== "poolSetHandBallFail" && action.type !== "poolGameEnded"){					
 				return
@@ -723,7 +730,7 @@ export default defineComponent({
 			if(reducerInterval){
 				this.stopReducerInterval()
 			}		
-			this.theTable.secondsLeft = this.getTimeControls()[this.theTable.timeControlIndex].seconds		
+			this.theTable.secondsLeft = this.getAllTimeControls()[this.theTable.timeControlIndex].seconds		
 			reducerInterval = setInterval(() => {
 				this.theTable.secondsLeft --               
 				if(this.gameOptions.notificationSound && this.theTable.secondsLeft < 15){

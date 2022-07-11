@@ -156,9 +156,4 @@ public class TicTacToeTable extends Table {
 		this.board = board;
 	}
 
-	@Override
-	public void leaveTable(User user) {
-		// TODO Auto-generated method stub
-		
-	}
 }

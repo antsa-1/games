@@ -33,7 +33,7 @@ public class UserHandler {
 	private UserEJBC userEJB;
 
 	public Message handleLogin(Message message, Session session, CommonEndpoint endpoint) {
-		cleanUpGhostTables();
+		cleanUpClosedTables();
 		String name = null;
 		User user = null;
 		Message loginMessage = new Message();
@@ -77,10 +77,10 @@ public class UserHandler {
 		return message.getMessage() == null || message.getMessage().equals(NULL) || message.getMessage().trim().length() < 1 || message.getMessage().startsWith(GUEST_LOGIN_TOKEN_START);
 	}
 
-	private void cleanUpGhostTables() {
+	private void cleanUpClosedTables() {
 		// If table without playerA exist -> clean
 		Stream<Table> stream = CommonEndpoint.TABLES.values().stream();
-		List<Table> tables = stream.filter(table -> !table.isMultiplayerTable() && table.getPlayerA() == null || table.isMultiplayerTable() && table.isGameOver()).collect(Collectors.toList());
+		List<Table> tables = stream.filter(table -> table.isClosed()).collect(Collectors.toList());
 		for (Table t : tables) {
 			LOGGER.fine("Cleaning table" + t);
 			CommonEndpoint.TABLES.remove(t.getTableId());

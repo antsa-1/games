@@ -88,7 +88,9 @@ const routes: RouteRecordRaw[] = [
                     next()
                 })
             } else {
-                next()
+                store.dispatch("updateUserTableId", null).then(() =>{
+                    next()
+                }) 
             }
         }
     },
@@ -108,7 +110,8 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/portal/connectfour/:watch?',
         component: TableConnectFour,
-        name: "TableConnectFour",        
+        name: "TableConnectFour", 
+        props:true,
         beforeEnter: (to, from, next) => {
             if (!store.state.user || !store.state.theTable) {
                 next('/');

@@ -1,4 +1,6 @@
+import { ITimeControlOption } from "@/interfaces/commontypes"
 import { store } from "@/store"
+import { ITable } from "@/interfaces/interfaces"
 
 export function leaveTable(tableId: string) {
     const obj = { title: "LEAVE_TABLE", message: tableId }
@@ -19,3 +21,4 @@ export function resign(tableId: string) {
 export function isMyName(name: string) {
     store.getters.userName === name
 }
+

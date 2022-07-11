@@ -125,6 +125,10 @@ export const tablesMixin = {
         getAllTimeControls(): ITimeControlOption[] {
             return [{ id: 0, seconds: 10 }, { id: 1, seconds: 15 }, { id: 2, seconds: 20 }, { id: 3, seconds: 30 }, { id: 4, seconds: 45 }, { id: 5, seconds: 60 },{ id: 6, seconds: 90 },{ id: 7, seconds: 240 },{ id: 8, seconds: 300 }]
         },
+  
+        getTableTimeControl(table: ITable) {
+            return this.getAllTimeControls()[table.timeControlIndex].seconds
+        },
         isPlayerInTurn(userName: string) {
             return this.theTable.playerInTurn.name === userName
         },

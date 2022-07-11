@@ -94,7 +94,7 @@ public class CommonEndpoint {
 				}
 
 			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) {
-				handleLeavingPlayer(message);
+				handleLeavingUser(message);
 			} else if (message.getTitle() == MessageTitle.JOIN_TABLE) {
 				gameMessage = tableHandler.joinTable(message, this);
 				sendCommonMessage(gameMessage);
@@ -161,18 +161,23 @@ public class CommonEndpoint {
 		}
 	}
 
-	private void handleLeavingPlayer(Message message) {
+	private void handleLeavingUser(Message message) {
 		Message gameMessage;
 		gameMessage = tableHandler.leaveTable(message, this);
 		if (gameMessage == null) {
 			return;
 		}
-		if (gameMessage.getTable().isStarted()) {
-			sendMessageToTable(gameMessage.getTable(), gameMessage);
+		Table table = gameMessage.getTable();
+		if (table.isClosed()) { // Last person left, table is closed.
+			message.setMessage(table.getTableId().toString());
+			sendCommonMessage(tableHandler.removeTable(gameMessage.getTable(), user));
+			gameMessage.setTable(null);
+			sendPrivateMessage(gameMessage);
+		} else if (!table.isStarted()) {
+			sendCommonMessage(gameMessage);// Table is gathering people to play, not started yet. One left before start.
 		} else {
-			sendCommonMessage(gameMessage);
+			sendMessageToTable(table, gameMessage); // Table players still playing
 		}
-		sendCommonMessage(tableHandler.removeTableIfRequired(gameMessage.getTable(), this));
 	}
 
 	private void playPoolAITurns(Message gameMessage) throws InterruptedException {
@@ -280,17 +285,15 @@ public class CommonEndpoint {
 		if (session != null) {
 			try {
 				if (this.user != null) {
-					CommonEndpoint.ENDPOINTS.remove(this.user);
+					CommonEndpoint.ENDPOINTS.remove(user);
 				}
 				session.close();
-				UUID tableId = removePlayerFromTable();
-				Table table = null;
-				if (tableId != null) {
-					table = TABLES.get(tableId);
-					sendCommonMessage(tableHandler.removeTableIfRequired(table, null));
+				if (user != null && user.getTable() != null) {
+					Message m = new Message();
+					m.setMessage(user.getTable().getTableId().toString());
+					handleLeavingUser(m);
 				}
-
-				Message disconnectMessage = userHandler.getUserDisconnectedMessage(this, table);
+				Message disconnectMessage = userHandler.getUserDisconnectedMessage(this, null);
 				sendCommonMessage(disconnectMessage);
 			} catch (IOException e) {
 				LOGGER.log(Level.SEVERE, "CommonEndpoint onClose virhe", e);

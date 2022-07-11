@@ -135,10 +135,9 @@ export const store = createStore<IStoreState>({
             })
 
         },        
-        removeTable(state, data: ITable) {
-            state.tables = state.tables.filter((table) => {
-
-                return table.tableId !== data.tableId;
+        removeTable(state, tableId:string) {
+            state.tables = state.tables.filter(table => {
+                return table.tableId !== tableId;
             })
         },
         addPlayer(state, user: IUser) {
@@ -154,7 +153,8 @@ export const store = createStore<IStoreState>({
             table.chat = chat
             const board = table.board
             table.board = board
-            state.theTable = table;
+            state.theTable = table
+            state.user.tableId = table.tableId
         },
         addWatcher(state, player: IPlayer) {
             if (state.theTable) {
@@ -286,6 +286,9 @@ export const store = createStore<IStoreState>({
         multiplayerTableResign(context, object){
             //YatzyTable has subscribed to this action
         }, 
+        currentTableIsClosed(context, object){
+            //YatzyTable has subscribed to this action
+        }, 
         setUser(context, user: IUser) {
             context.commit('setUser', user)
         },
@@ -309,9 +312,9 @@ export const store = createStore<IStoreState>({
             context.commit('removeFromPlayerList', user)
 
         },
-        removeTable(context, table: ITable) {
+        removeTable(context, tableId:string) {
 
-            context.commit('removeTable', table)
+            context.commit('removeTable', tableId)
 
         },
         addPlayer(context, user: IUser) {
