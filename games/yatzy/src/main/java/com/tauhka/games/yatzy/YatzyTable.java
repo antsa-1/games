@@ -149,10 +149,12 @@ public class YatzyTable extends Table {
 		if (!gameOver && hasEnabledPlayersPlayedAllHands(enabledPlayers)) {
 			gameOver = true;
 		}
+	
 		return gameOver;
 	}
 
 	public void onGameOver() {
+
 		cancelTimer();
 		if (!gameResult.isComplete()) {
 			finalizeGameResult();
@@ -386,6 +388,9 @@ public class YatzyTable extends Table {
 
 	private YatzyPlayer setupNextTurn() {
 		cancelTimer();
+		if (gameOver) {
+			return null;
+		}
 		int currentPlayerIndex = players.indexOf(playerInTurn);
 		int breakoutCondition = 0;
 		while (breakoutCondition < 4) {
