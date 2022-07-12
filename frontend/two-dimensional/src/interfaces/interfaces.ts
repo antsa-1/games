@@ -53,8 +53,11 @@ export interface IWinSquares {
 }
 export interface IGame {
     gameId: number,
-    name: string
-    gameModes: IGameMode[]
+    name: string,
+    gameType: number,
+    winner?: string,
+    description?: string,
+
 }
 export interface IGameMode extends ICommonGameMode {
     requiredConnections: number,
@@ -123,25 +126,32 @@ export interface IProfile extends IFetchResult {
     memberSince: string,
     tictactoes: IGame[],
     connectFours: IGame[],
-    eightBalls: IGame[]
+    eightBalls: IGame[],
+    yatzyHypers: IGame[],
+    yatzyClassics: IGame[],
+    yatzyFasts: IGame[],
+    yatzySupers: IGame[],
 }
 export interface IFetchResult {
     status: number,
     fetchText: string
+}
+export interface IResultPlayer {
+    name: string,
+    initialRanking: number,
+    finalRanking: number,
+    position?: number,
+    score: number
 }
 export interface IGame {
     startInstant: string,
     endInstant: string,
     gameType: number,
     result: number,
-    playerAName: string,
-    playerBUName: string,
-    playerAStartRanking: number,
-    playerBStartRanking: number,
-    playerAEndRanking: number,
-    playerBEndRanking: number,
+    players: IResultPlayer[],
+    finishStatus?: FinishStatus,
+    timeControlSeconds?: number
 }
-
 
 export interface ISettings {
     newPlayerSound: boolean,
@@ -155,5 +165,10 @@ export enum GameResult {
     WIN_BY_RESIGNATION,
     WIN_BY_DISCONNECT,
     DRAW,
-    LEFT_TABLE
+    LEFT_TABLE,
+}
+
+export enum FinishStatus {
+    ALL_FINISHED,
+    NOT_ALL_FINISHED
 }

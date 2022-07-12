@@ -1,88 +1,48 @@
 package com.tauhka.portal.profile;
 
-import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
+
+import com.tauhka.games.core.stats.Player;
 
 import jakarta.json.bind.annotation.JsonbProperty;
-import jakarta.json.bind.annotation.JsonbTransient;
-import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 /**
- * @author antsa-1 from GitHub 24 Feb 2022
+ * @author antsa-1 from GitHub 12 Jul 2022
  **/
-@Entity
-@Table(name = "game")
-public class Game implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	@Id
-	@Column(name = "game_id")
+public class Game {
 	@JsonbProperty("gameId")
 	private String gameId;
 
-	@JsonbTransient
-	@Column(name = "playera_id")
-	private String playerAId;
-
-	@JsonbTransient
-	@Column(name = "playerb_id")
-	private String playerBId;
-
-	@Column(name = "playera_start_ranking")
-	@JsonbProperty("playerAStartRanking")
-	private Integer playerAStartRanking;
-
-	@Column(name = "winner_username")
-	@JsonbProperty("winnerUsername")
-	private String winnerUsername;
-
-	@Column(name = "playerb_start_ranking")
-	@JsonbProperty("playerBStartRanking")
-	private Integer playerBStartRanking;
-
-	@Column(name = "playera_end_ranking")
-	@JsonbProperty("playerAEndRanking")
-	private Integer playerAEndRanking;
-
-	@Column(name = "playerb_end_ranking")
-	@JsonbProperty("playerBEndRanking")
-	private Integer playerBEndRanking;
-
-	@Column(name = "playera_username")
-	@JsonbProperty("playerAName")
-	private String playerAName;
-
-	@Column(name = "playerb_username")
-	@JsonbProperty("playerBName")
-	private String playerBName;
-
-	@Column(name = "game_type")
 	@JsonbProperty("gameType")
 	private Integer gameType;
 
-	@Column(name = "result")
-	@JsonbProperty("result")
-	private Integer result;
+	private List<Player> players;
 
-	@Column(name = "start_time")
 	@Convert(converter = InstantConverter.class)
 	@JsonbProperty("startInstant")
 	private Instant startInstant;
 
 	@Convert(converter = InstantConverter.class)
-	@Column(name = "end_time")
 	@JsonbProperty("endInstant")
 	private Instant endInstant;
 
-	@Convert(converter = BoardToTextConverter.class)
-	@Column(name = "game_type", insertable=false, updatable=false)
-	@JsonbProperty("boardDescription")
-	private String boardDescription;
-	
+	@JsonbProperty("winner")
+	private String winner;
+
+	@JsonbProperty("result")
+	private Integer result;
+
+	@JsonbProperty("description")
+	private String description;
+	@JsonbProperty("finishStatus")
+	private String finishStatus;
+
+	@JsonbProperty("timeControlSeconds")
+	private int timeControlSeconds;
+
 	public String getGameId() {
 		return gameId;
 	}
@@ -91,48 +51,44 @@ public class Game implements Serializable {
 		this.gameId = gameId;
 	}
 
-	public String getPlayerAId() {
-		return playerAId;
+	public String getDescription() {
+		return description;
 	}
 
-	public String getWinnerUsername() {
-		return winnerUsername;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
-	public void setWinnerUsername(String winnerUsername) {
-		this.winnerUsername = winnerUsername;
+	public Integer getGameType() {
+		return gameType;
 	}
 
-	public void setPlayerAId(String playerAId) {
-		this.playerAId = playerAId;
+	public void setGameType(Integer gameType) {
+		this.gameType = gameType;
 	}
 
-	public String getPlayerBId() {
-		return playerBId;
+	public List<com.tauhka.games.core.stats.Player> getPlayers() {
+		return players;
 	}
 
-	public void setPlayerBId(String playerBId) {
-		this.playerBId = playerBId;
+	public void setPlayers(List<com.tauhka.games.core.stats.Player> players) {
+		this.players = players;
 	}
 
-	public Integer getPlayerAStartRanking() {
-		return playerAStartRanking;
+	public String getFinishStatus() {
+		return finishStatus;
 	}
 
-	public void setPlayerAStartRanking(Integer playerAStartRanking) {
-		this.playerAStartRanking = playerAStartRanking;
+	public void setFinishStatus(String finishStatus) {
+		this.finishStatus = finishStatus;
 	}
 
-	public Integer getPlayerBStartRanking() {
-		return playerBStartRanking;
+	public int getTimeControlSeconds() {
+		return timeControlSeconds;
 	}
 
-	public void setPlayerBStartRanking(Integer playerBStartRanking) {
-		this.playerBStartRanking = playerBStartRanking;
-	}
-
-	public Integer getPlayerAEndRanking() {
-		return playerAEndRanking;
+	public void setTimeControlSeconds(int timeControlSeconds) {
+		this.timeControlSeconds = timeControlSeconds;
 	}
 
 	public Instant getStartInstant() {
@@ -147,44 +103,12 @@ public class Game implements Serializable {
 		return endInstant;
 	}
 
-	public void setEndInstant(Instant endInstant) {
-		this.endInstant = endInstant;
+	public String getWinner() {
+		return winner;
 	}
 
-	public void setPlayerAEndRanking(Integer playerAEndRanking) {
-		this.playerAEndRanking = playerAEndRanking;
-	}
-
-	public Integer getPlayerBEndRanking() {
-		return playerBEndRanking;
-	}
-
-	public void setPlayerBEndRanking(Integer playerBEndRanking) {
-		this.playerBEndRanking = playerBEndRanking;
-	}
-
-	public String getPlayerAName() {
-		return playerAName;
-	}
-
-	public void setPlayerAName(String playerAName) {
-		this.playerAName = playerAName;
-	}
-
-	public String getPlayerBName() {
-		return playerBName;
-	}
-
-	public void setPlayerBName(String playerBName) {
-		this.playerBName = playerBName;
-	}
-
-	public Integer getGameType() {
-		return gameType;
-	}
-
-	public void setGameType(Integer gameType) {
-		this.gameType = gameType;
+	public void setWinner(String winner) {
+		this.winner = winner;
 	}
 
 	public Integer getResult() {
@@ -193,6 +117,10 @@ public class Game implements Serializable {
 
 	public void setResult(Integer result) {
 		this.result = result;
+	}
+
+	public void setEndInstant(Instant endInstant) {
+		this.endInstant = endInstant;
 	}
 
 }

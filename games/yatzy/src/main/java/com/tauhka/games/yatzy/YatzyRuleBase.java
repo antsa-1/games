@@ -46,7 +46,7 @@ public class YatzyRuleBase {
 			// Players will now be in result of the game regardless of how the game ends
 			Player p = new Player(y.getId());
 			p.setName(y.getName());
-			p.setInitialRanking(1000); // This will be overriden when saving to database
+			p.setInitialRanking(1000d); // This will be overriden when saving to database
 			yatzyTable.getGameResult().addPlayer(p);
 			y.setScoreCard(new ScoreCard());
 			y.setEnabled(true);

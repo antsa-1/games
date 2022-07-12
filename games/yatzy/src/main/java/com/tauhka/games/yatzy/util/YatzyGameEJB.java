@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 import com.tauhka.games.core.stats.MultiplayerRankingCalculator;
 import com.tauhka.games.core.stats.Player;
 import com.tauhka.games.core.stats.Result;
+import com.tauhka.games.core.stats.Status;
 import com.tauhka.games.core.timer.TimeControlIndex;
 import com.tauhka.games.core.util.Constants;
 
@@ -34,7 +35,7 @@ import jakarta.ejb.Stateless;
 public class YatzyGameEJB {
 	@Resource(name = "jdbc/MariaDb")
 	private DataSource yatzyDatasource;
-	private static final String INSERT_GAME_SQL = "INSERT INTO yatzy_game (start_time,end_time, game_id, game_type,player1_name,player2_name,player3_name,player4_name,player1_start_ranking,player1_end_ranking,player2_start_ranking,player2_end_ranking,player3_start_ranking,player3_end_ranking,player4_start_ranking,player4_end_ranking,player1_score,player2_score,player3_score,player4_score,player1_id,player2_id,player3_id,player4_id, timecontrol_seconds) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+	private static final String INSERT_GAME_SQL = "INSERT INTO yatzy_game (start_time,end_time, game_id, game_type,player1_name,player2_name,player3_name,player4_name,player1_start_ranking,player1_end_ranking,player2_start_ranking,player2_end_ranking,player3_start_ranking,player3_end_ranking,player4_start_ranking,player4_end_ranking,player1_score,player2_score,player3_score,player4_score,player1_id,player2_id,player3_id,player4_id, timecontrol_seconds, finish_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 	private static final Logger LOGGER = Logger.getLogger(YatzyGameEJB.class.getName());
 
@@ -79,6 +80,7 @@ public class YatzyGameEJB {
 			addPlayerId(stmt, 23, result.getPlayers(), 2);
 			addPlayerId(stmt, 24, result.getPlayers(), 3);
 			stmt.setInt(25, result.getTimeControlIndex().getSeconds());
+			stmt.setString(26, getFinishStatus(result));
 			int dbRes = stmt.executeUpdate();
 			if (dbRes > 0) {
 				updateLatestRankings(result);
@@ -104,6 +106,15 @@ public class YatzyGameEJB {
 			}
 		}
 
+	}
+
+	private String getFinishStatus(Result result) {
+		for (Player p : result.getPlayers()) {
+			if (p.getStatus() != Status.FINISHED) {
+				return "NOT_ALL_FINISHED";
+			}
+		}
+		return "ALL_FINISHED";
 	}
 
 	private String getDbColumName(Result result) {
@@ -201,7 +212,7 @@ public class YatzyGameEJB {
 				String id = rs.getString(2);
 				for (Player p : result.getPlayers()) {
 					if (p.getId() != null && p.getId().toString().equals(id)) {
-						if (ranking <= 0) {
+						if (ranking == null || ranking <= 0) {
 							ranking = 1000d;// losing all points leads back to 1000
 						}
 						p.setInitialRanking(ranking);

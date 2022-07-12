@@ -27,7 +27,13 @@ public class RankingCalculator {
 		User winner = result.getWinner();
 //		boolean connectFour = result.getGameMode().isConnectFour();
 		Double aRankingInitial = playerA.getRanking(result.getGameMode());
+		if (aRankingInitial == null || aRankingInitial <= 0) {
+			aRankingInitial = 1000d;
+		}
 		Double bRankingInitial = playerB.getRanking(result.getGameMode());
+		if (bRankingInitial == null || bRankingInitial <= 0) {
+			bRankingInitial = 1000d;
+		}
 		playerA.setInitialCalculationsRank(aRankingInitial);
 		playerB.setInitialCalculationsRank(bRankingInitial);
 		Double aExpectedPercentage = 1 / (1 + Math.pow(10, (bRankingInitial - aRankingInitial) / 400d));

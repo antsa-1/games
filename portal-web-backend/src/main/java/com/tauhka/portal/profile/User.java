@@ -50,6 +50,22 @@ public class User implements Serializable {
 	private List<Game> ticatactoes;
 
 	@Transient
+	@JsonbProperty("yatzyClassics")
+	private List<Game> yatzyClassics;
+
+	@Transient
+	@JsonbProperty("yatzyFasts")
+	private List<Game> yatzyFasts;
+
+	@Transient
+	@JsonbProperty("yatzySupers")
+	private List<Game> yatzySupers;
+
+	@Transient
+	@JsonbProperty("yatzyHypers")
+	private List<Game> yatzyHypers;
+
+	@Transient
 	@JsonbProperty("eightBalls")
 	private List<Game> eightBalls;
 
@@ -77,16 +93,16 @@ public class User implements Serializable {
 		this.name = name;
 	}
 
-	public List<Game> getConnectFours() {
-		return connectFours;
-	}
-
 	public Instant getMemberSince() {
 		return memberSince;
 	}
 
 	public void setMemberSince(Instant memberSince) {
 		this.memberSince = memberSince;
+	}
+
+	public List<Game> getConnectFours() {
+		return connectFours;
 	}
 
 	public void setConnectFours(List<Game> connectFours) {
@@ -99,6 +115,38 @@ public class User implements Serializable {
 
 	public void setTicatactoes(List<Game> ticatactoes) {
 		this.ticatactoes = ticatactoes;
+	}
+
+	public List<Game> getYatzyClassics() {
+		return yatzyClassics;
+	}
+
+	public void setYatzyClassics(List<Game> yatzyClassics) {
+		this.yatzyClassics = yatzyClassics;
+	}
+
+	public List<Game> getYatzyFasts() {
+		return yatzyFasts;
+	}
+
+	public void setYatzyFasts(List<Game> yatzyFasts) {
+		this.yatzyFasts = yatzyFasts;
+	}
+
+	public List<Game> getYatzySupers() {
+		return yatzySupers;
+	}
+
+	public void setYatzySupers(List<Game> yatzySupers) {
+		this.yatzySupers = yatzySupers;
+	}
+
+	public List<Game> getYatzyHypers() {
+		return yatzyHypers;
+	}
+
+	public void setYatzyHypers(List<Game> yatzyHypers) {
+		this.yatzyHypers = yatzyHypers;
 	}
 
 	public List<Game> getEightBalls() {

@@ -7,20 +7,32 @@ import java.util.UUID;
 
 import com.tauhka.games.core.util.Constants;
 
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
+
 /**
  * @author antsa-1 from GitHub 26 Jun 2022
  **/
 
 public class Player implements Comparable<Player> {
+	@JsonbTransient
 	private UUID id;
+	@JsonbProperty(value = "name")
 	private String name;
+	@JsonbProperty(value = "initialRanking")
 	private Double initialRanking;
+	@JsonbProperty(value = "finalRanking")
 	private Double finalRanking; // average from rankingsAfter list
+	@JsonbTransient
 	private List<Double> rankingsAfter; // multiplayer tables compare rankings against each player
+	@JsonbTransient
 	private Status status;
+	@JsonbProperty(value = "finishPosition")
 	private Integer finishPosition;
-	private int score; // yatzy game score
+	@JsonbProperty(value = "score")
+	private Integer score; // yatzy game score
 
+	@JsonbTransient
 	public boolean isComputerPlayer() {
 		return this.id != null && this.id.equals(Constants.OLAV_COMPUTER_UUID);
 	}
@@ -46,6 +58,10 @@ public class Player implements Comparable<Player> {
 		this.name = name;
 	}
 
+	public boolean isGuest() {
+		return this.id == null;
+	}
+
 	public void setFinishPosition(Integer finishPosition) {
 		this.finishPosition = finishPosition;
 	}
@@ -54,7 +70,7 @@ public class Player implements Comparable<Player> {
 		return initialRanking;
 	}
 
-	public int getScore() {
+	public Integer getScore() {
 		return score;
 	}
 
@@ -75,7 +91,7 @@ public class Player implements Comparable<Player> {
 		return Objects.equals(id, other.id);
 	}
 
-	public void setScore(int score) {
+	public void setScore(Integer score) {
 		this.score = score;
 	}
 
@@ -97,10 +113,6 @@ public class Player implements Comparable<Player> {
 
 	public Integer getFinishPosition() {
 		return finishPosition;
-	}
-
-	public void setInitialRanking(double initialRanking) {
-		this.initialRanking = initialRanking;
 	}
 
 	public Status getStatus() {

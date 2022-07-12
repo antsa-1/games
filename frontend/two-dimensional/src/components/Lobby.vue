@@ -183,7 +183,7 @@ import { defineComponent } from "vue";
 import { IGameMode,IGame, IGameToken, ITable, IUser,ISquare,  IWinMessage,IWinTitle,IWin, IGameResult } from "../interfaces/interfaces";
 import { IBaseTable, IChatMessage, ITimeControlOption } from "../interfaces/commontypes";
 import { loginMixin,GUEST } from "../mixins/mixins";
-import { utilsMixin } from "../mixins/utilsmixin";
+import {  fixVal} from "../components/composables/utilsComposable";
 import { useRoute } from "vue-router";
 import { Tooltip } from 'bootstrap/dist/js/bootstrap.esm.min.js'
 //import * as bootstrap from 'bootstrap';
@@ -196,10 +196,9 @@ import { store } from "@/store";
 export default defineComponent({
 	
 	name: "Lobby",
-	mixins: [loginMixin, utilsMixin, tablesMixin, poolMixin],
+	mixins: [loginMixin, tablesMixin, poolMixin],
 	data() {
 		return {		
-			
 			selectedGame:0,
 			selectedGameMode:"0",
 			selectedTimeControl:0,
@@ -208,7 +207,8 @@ export default defineComponent({
 			randomStarterChecked:false,
 			onlyRegistered:false,
 			computerLevel:"0",
-            GUEST:GUEST
+            GUEST:GUEST,
+            fixVal:fixVal
 		}
 	},
 	computed:{
