@@ -109,7 +109,7 @@ public class YatzyGameEJB {
 	}
 
 	private boolean hasSomebodyPoints(Result result) {
-		long playersWithPoints = result.getPlayers().stream().filter(player -> player.getScore() > 0).count();
+		long playersWithPoints = result.getPlayers().stream().filter(player -> player.getScore() != null && player.getScore() > 0).count();
 		return playersWithPoints > 0 ? true : false;
 	}
 
