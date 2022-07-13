@@ -167,7 +167,7 @@ public class YatzyTable extends Table {
 	public void onGameOver() {
 
 		cancelTimer();
-		if (!gameResult.isComplete()) {
+		if (gameResult != null && !gameResult.isComplete()) {
 			finalizeGameResult();
 			YatzyGameEJB yatzyGameEjb = CDI.current().select(YatzyGameEJB.class).get();
 			yatzyGameEjb.saveYatzyGame(gameResult);
@@ -230,7 +230,7 @@ public class YatzyTable extends Table {
 	}
 
 	private void checkGuards(User user) {
-		if (isGameOver()) {
+		if (shouldCloseTable()) {
 			onGameOver();
 			LOGGER.info("YatzyTable handSelection but gameOver " + this + " ** " + user);
 			throw new IllegalArgumentException("Game has ended");
@@ -253,7 +253,7 @@ public class YatzyTable extends Table {
 				getGameResult().changeStatus(playerInTurn.getName(), playerInTurn.getId(), Status.TIMED_OUT);
 			}
 			setupNextTurn();
-			if (isGameOver()) {
+			if (shouldCloseTable()) {
 				onGameOver();
 			}
 			// Game over info goes with timeout info
@@ -396,7 +396,7 @@ public class YatzyTable extends Table {
 	@Override
 	public void changePlayerInTurn() {
 		playerInTurn = setupNextTurn();
-		if (isGameOver()) {
+		if (shouldCloseTable()) {
 			onGameOver();
 		}
 	}
@@ -497,7 +497,7 @@ public class YatzyTable extends Table {
 					playerA = null;
 				}
 			}
-			if (isGameOver()) {
+			if (shouldCloseTable()) {
 				onGameOver();
 				onClose();// Last player left -> close table. Only computer might sit in this table
 				return;
@@ -509,6 +509,10 @@ public class YatzyTable extends Table {
 				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 0));
 			}
 		}
+	}
+
+	private boolean shouldCloseTable() {
+		return isGameOver() || startTime == null && playerA == null;
 	}
 
 	@Override
