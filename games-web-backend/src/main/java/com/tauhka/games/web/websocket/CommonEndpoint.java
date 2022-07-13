@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.User;
+import com.tauhka.games.core.events.AITurnEvent;
 import com.tauhka.games.core.tables.Table;
 import com.tauhka.games.messaging.Message;
 import com.tauhka.games.messaging.MessageDecoder;
@@ -21,6 +22,7 @@ import com.tauhka.games.messaging.handlers.YatzyTableHandler;
 import com.tauhka.games.pool.PoolTable;
 import com.tauhka.games.pool.TurnResult;
 
+import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.EncodeException;
@@ -83,14 +85,7 @@ public class CommonEndpoint {
 				gameMessage = tableHandler.createTable(message, this);
 				sendCommonMessage(gameMessage);
 				if (gameMessage.getTable().isArtificialPlayerInTurn()) {
-					Thread.sleep(3000);
-					Message artMoveMessage = null;
-					if (gameMessage.getTable() instanceof PoolTable) {
-						playPoolAITurns(gameMessage);
-					} else {
-						artMoveMessage = aiHandler.makeGridTableMove(gameMessage.getTable());
-					}
-					sendMessageToTable(gameMessage.getTable(), artMoveMessage);
+					handleComputerTurnsOnCreateTable(gameMessage);
 				}
 
 			} else if (message.getTitle() == MessageTitle.LEAVE_TABLE) {
@@ -121,13 +116,7 @@ public class CommonEndpoint {
 				if (gameMessage != null) {
 					sendMessageToTable(gameMessage.getTable(), gameMessage);
 					if (gameMessage.getTable().isArtificialPlayerInTurn()) {
-						Message artMoveMessage = null;
-						if (gameMessage.getTable() instanceof PoolTable) {
-							playPoolAITurns(gameMessage);
-						} else {
-							artMoveMessage = aiHandler.makeGridTableMove(gameMessage.getTable());
-						}
-						sendMessageToTable(gameMessage.getTable(), artMoveMessage);
+						playComputerTurns(gameMessage);
 					}
 				}
 			} else if (message.getTitle() == MessageTitle.POOL_UPDATE) {
@@ -159,6 +148,23 @@ public class CommonEndpoint {
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, "CommonEndpoint onMessagessa virhe", e);
 		}
+	}
+
+	private void playComputerTurns(Message gameMessage) throws InterruptedException {
+		Message artMoveMessage = null;
+		if (gameMessage.getTable().getGameMode().isEightBall()) {
+			playPoolAITurns(gameMessage);
+		} else if (gameMessage.getTable().getGameMode().isYatzy()) {
+			yatzyTableHandler.playComputerTurn(gameMessage.getTable());
+		} else {
+			artMoveMessage = aiHandler.makeGridTableMove(gameMessage.getTable());
+		}
+		sendMessageToTable(gameMessage.getTable(), artMoveMessage);
+	}
+
+	private void handleComputerTurnsOnCreateTable(Message gameMessage) throws InterruptedException {
+		Thread.sleep(3000);
+		playComputerTurns(gameMessage);
 	}
 
 	private void handleLeavingUser(Message message) {

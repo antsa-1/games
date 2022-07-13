@@ -24,8 +24,8 @@ public class YatzyRuleBase {
 	public void startGame(YatzyTable yatzyTable) {
 		yatzyTable.setStartTime(Instant.now());
 		if (yatzyTable.getRandomizeStarter()) {
-			int i = ThreadLocalRandom.current().nextInt(1, yatzyTable.getPlayers().size());
-			yatzyTable.setStartingPlayer(yatzyTable.getPlayers().get(i - 1));
+			int i = ThreadLocalRandom.current().nextInt(0, yatzyTable.getPlayers().size());
+			yatzyTable.setStartingPlayer(yatzyTable.getPlayers().get(i));
 			yatzyTable.setPlayerInTurn(yatzyTable.getStartingPlayer());
 		} else {
 			yatzyTable.setStartingPlayer(yatzyTable.getPlayers().get(0));

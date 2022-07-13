@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,8 +47,7 @@ public class YatzyTable extends Table {
 	private String timedOutPlayerName;
 	@JsonbTransient
 	private UUID gameId;
-	@JsonbTransient
-	private Set<YatzyPlayer> rematchPlayers;
+
 	@JsonbProperty("secondsLeft")
 	private int secondsLeft;
 
@@ -133,24 +130,38 @@ public class YatzyTable extends Table {
 		if (startTime == null) {
 			return false;
 		}
-		if (gameOver && gameResult.isComplete()) {
+		if (gameOver) {
 			return true;
+		}
+		if (playerInTurn == null) {
+			gameOver = true;
+			return gameOver;
 		}
 		// Players can disconnect/leave table anytime. Last player can play the game to the end. if (this.players.size() < 1) { gameOver = true; }
 		List<YatzyPlayer> enabledPlayers = this.players.stream().filter(player -> player.isEnabled()).collect(Collectors.toList());
-		if (enabledPlayers.size() == 1) {
-			if (enabledPlayers.get(0) instanceof YatzyAI) {
-				gameOver = true;
-			}
+		if (isOnlyComputerLeftToPlay(enabledPlayers)) {
+			gameOver = true;
+			return gameOver;
 		}
 		if (!gameOver && this.players.size() - enabledPlayers.size() == this.players.size()) {
 			gameOver = true;
+			return gameOver;
 		}
 		if (!gameOver && hasEnabledPlayersPlayedAllHands(enabledPlayers)) {
 			gameOver = true;
+			return gameOver;
 		}
-	
+
 		return gameOver;
+	}
+
+	private boolean isOnlyComputerLeftToPlay(List<YatzyPlayer> enabledPlayers) {
+		if (enabledPlayers.size() == 1) {
+			if (enabledPlayers.get(0).isComputerPlayer()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void onGameOver() {
@@ -245,12 +256,13 @@ public class YatzyTable extends Table {
 			if (isGameOver()) {
 				onGameOver();
 			}
+			// Game over info goes with timeout info
 			String tableJson = jsonb.toJson(this);
 			String message = "{\"title\":\"TIMEOUT\", \"table\":" + tableJson + "}";
 			sendMessageToTable(message);
 			timedOutPlayerName = null;
 			if (isArtificialPlayerInTurn()) {
-				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
+				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 0));
 			}
 		}
 	}
@@ -311,7 +323,7 @@ public class YatzyTable extends Table {
 		timedOutPlayerName = null;
 		dices = null;
 		yatzyRuleBase = null;
-		rematchPlayers = null;
+		super.resetRematchPlayers();
 	}
 
 	@Override
@@ -375,6 +387,9 @@ public class YatzyTable extends Table {
 		// Table full
 		yatzyRuleBase = new YatzyRuleBase();
 		yatzyRuleBase.startGame(this);
+		if (isArtificialPlayerInTurn()) {
+			CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 3000));
+		}
 		return gameShouldStartNow;
 	}
 
@@ -389,6 +404,10 @@ public class YatzyTable extends Table {
 	private YatzyPlayer setupNextTurn() {
 		cancelTimer();
 		if (gameOver) {
+			return null;
+		}
+		List<YatzyPlayer> enabledPlayers = this.players.stream().filter(player -> player.isEnabled()).collect(Collectors.toList());
+		if (isOnlyComputerLeftToPlay(enabledPlayers)) {
 			return null;
 		}
 		int currentPlayerIndex = players.indexOf(playerInTurn);
@@ -487,7 +506,7 @@ public class YatzyTable extends Table {
 				setupNextTurn();
 			}
 			if (isArtificialPlayerInTurn()) {
-				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
+				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 0));
 			}
 		}
 	}
@@ -509,29 +528,10 @@ public class YatzyTable extends Table {
 				setupNextTurn();
 			}
 			if (isArtificialPlayerInTurn()) {
-				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this));
+				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 0));
 			}
 			return null;
 		}
-	}
-
-//	@Override
-//	public boolean suggestRematch(User user) {
-//		if (!isPlayer(user)) {
-//			return false;
-//		}
-//		int index = players.indexOf(user);
-//		rematchPlayers.add(players.get(index));
-//		if (rematchPlayers.size() == players.size() && rematchPlayers.size() != 1) {
-//			// All players required to click "rematch"
-//			yatzyRuleBase.startGame(this);
-//			return true;
-//		}
-//		return false;
-//	}
-
-	public Set<YatzyPlayer> getRematchPlayers() {
-		return rematchPlayers;
 	}
 
 	private void updateResult(YatzyPlayer y) {
@@ -543,10 +543,6 @@ public class YatzyTable extends Table {
 		} else {
 			getGameResult().findPlayer(y.getId()).setStatus(Status.LEFT);
 		}
-	}
-
-	public void resetRematchPlayers() {
-		this.rematchPlayers = new HashSet<YatzyPlayer>();
 	}
 
 }

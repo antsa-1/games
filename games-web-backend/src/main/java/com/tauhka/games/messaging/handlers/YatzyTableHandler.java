@@ -3,6 +3,7 @@ package com.tauhka.games.messaging.handlers;
 import static com.tauhka.games.core.util.Constants.SYSTEM;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.tauhka.games.core.User;
@@ -101,7 +102,7 @@ public class YatzyTableHandler extends CommonHandler {
 		return table.getTimeControlIndex() > 1 ? 4000 : 50;
 	}
 
-	private void playComputerTurn(Table table) {
+	public void playComputerTurn(Table table) {
 		int finalExitCondition = 0; // 4 moves maximum
 		YatzyTable yatzyTable = (YatzyTable) table;
 		while (table.isArtificialPlayerInTurn() && finalExitCondition <= 4) {
@@ -127,9 +128,17 @@ public class YatzyTableHandler extends CommonHandler {
 		}
 	}
 
-	public void observeTablesWhereAIActionIsRequired(@ObservesAsync AITurnEvent turnEvent) {
+	@SuppressWarnings("unused")
+	private void observeTablesWhereAIActionIsRequired(@ObservesAsync AITurnEvent turnEvent) {
 		LOGGER.info("YatzyTableHandler received event");
-		playComputerTurn(turnEvent.getTable());
+		if (turnEvent.getDelay() > 0) {
+			try {
+				Thread.sleep(turnEvent.getDelay());
+				playComputerTurn(turnEvent.getTable());// Computer timesout if wait time is interrupted which should be better that other players would timeout
+			} catch (InterruptedException e) {
+				LOGGER.log(Level.SEVERE, "YatzyTableHandler: wait before computer turn was interruped.", e);
+			}
+		}
 	}
 
 	private void createTurnDAOForRolledDices(YatzyTable table, List<Dice> rolledDices) {
