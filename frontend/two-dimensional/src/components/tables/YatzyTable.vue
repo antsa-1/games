@@ -998,7 +998,7 @@ const repaintYatzyTable = () => {
     repaintInfoTexts()
 }
 
-const magic: number = 120
+const nameColumnLength: number = 120
 const fillPlayerScore = (player: IYatzyPlayer, hand: IHand, startPoint: IVector2) => {
     const ctx = yatzyTable.value.canvas.ctx
     if (hand && hand.value > -1) {
@@ -1009,7 +1009,7 @@ const fillPlayerScore = (player: IYatzyPlayer, hand: IHand, startPoint: IVector2
     ctx.fillStyle = "black"
 }
 const scorecardRowStart = 25
-const scoreCardTextEnd = 200
+const scoreCardHandTextsEnd = 200
 const gapBetweenScoreCardRowTitleAndLine = 15
 
 const drawScoreCardRow = (row: IScoreCardRow, rowHeight: number) => {
@@ -1032,7 +1032,7 @@ const drawScoreCardRow = (row: IScoreCardRow, rowHeight: number) => {
 const fillPlayersPointsOnRow = (row: IScoreCardRow, rowHeight: number) => {
     for (let i = 0; i < yatzyTable.value.players.length; i++) {
         const hand: IHand = getPlayerHand(row.handType, yatzyTable.value.players[i])
-        const startPoint: IVector2 = { x: scoreCardTextEnd + 50 + magic * i, y: rowHeight * (row.nth + 1) - 5 }
+        const startPoint: IVector2 = { x: scoreCardHandTextsEnd + 50 + nameColumnLength * i, y: rowHeight * (row.nth + 1) - 5 }
         fillPlayerScore(yatzyTable.value.players[i], hand, startPoint)
         if (hand && hand.last) {
             const ctx = yatzyTable.value.canvas.ctx
@@ -1072,9 +1072,19 @@ const repaintScoreCard = () => {
     //Vertical lines
     for (let i = 0; i < yatzyTable.value.players.length; i++) {
         ctx.fillStyle = yatzyTable.value.players[i].enabled ? "black" : "gray"
-        ctx.fillText(yatzyTable.value.players[i].name, scoreCardTextEnd + 20 + i * magic, rowHeight * 3)
-        ctx.moveTo(scoreCardTextEnd + i * magic, rowHeight * 3)
-        ctx.lineTo(scoreCardTextEnd + i * magic, rowHeight * 21)
+        let playerName:string = yatzyTable.value.players[i].name
+        if(playerName.length > 10){
+            let playerNamePart1:string = playerName.substring(0, 10)
+            let playerNamePart2:string = playerName.substring(10)
+            ctx.fillText(playerNamePart1, scoreCardHandTextsEnd + 8 + i * nameColumnLength, rowHeight * 2.5)
+            ctx.fillText(playerNamePart2, scoreCardHandTextsEnd + 8 + i * nameColumnLength, rowHeight * 3)
+        }
+        else {
+            ctx.fillText(playerName, scoreCardHandTextsEnd + 5 + i * nameColumnLength, rowHeight * 3)
+        }
+
+        ctx.moveTo(scoreCardHandTextsEnd + i * nameColumnLength, rowHeight * 3)
+        ctx.lineTo(scoreCardHandTextsEnd + i * nameColumnLength, rowHeight * 21)
         ctx.stroke()
     }
     ctx.fillStyle = "black"
