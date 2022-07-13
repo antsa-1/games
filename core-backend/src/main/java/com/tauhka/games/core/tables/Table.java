@@ -482,7 +482,7 @@ public abstract class Table implements Serializable {
 				+ randomizeStarter + ", gameMode=" + gameMode + ", gameOver=" + gameOver + "]";
 	}
 
-	protected void resetRematchPlayer() {
+	public void resetRematchPlayers() {
 		rematchPlayers = new HashSet<User>();
 	}
 

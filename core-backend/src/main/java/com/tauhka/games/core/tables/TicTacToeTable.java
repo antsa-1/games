@@ -47,7 +47,7 @@ public class TicTacToeTable extends Table {
 	@Override
 	protected Table startRematch() {
 		board = new GameToken[super.getGameMode().getX()][super.getGameMode().getY()];
-		super.resetRematchPlayer();
+		super.resetRematchPlayers();
 		if (startingPlayer.equals(playerA)) {
 			playerA.setGameToken(GameToken.X);
 			playerB.setGameToken(GameToken.O);
