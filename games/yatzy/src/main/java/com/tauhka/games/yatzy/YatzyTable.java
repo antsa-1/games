@@ -363,7 +363,7 @@ public class YatzyTable extends Table {
 		users.addAll(watchers);
 		return users;
 	}
-
+	@JsonbTransient
 	public int getEnabledPlayersCount() {
 		return (int) this.players.stream().filter(player -> player.isEnabled()).count();
 	}
