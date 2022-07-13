@@ -100,14 +100,18 @@ public class ProfileService {
 			com.tauhka.games.core.stats.Player p = new com.tauhka.games.core.stats.Player();
 			p.setName(row.getPlayer1Name());
 			p.setInitialRanking(row.getPlayer1StartRanking());
-			p.setFinalRanking(row.getPlayer1EndRanking());
+			if (!p.isGuest()) {
+				p.setFinalRanking(row.getPlayer1EndRanking());
+			}
 			p.setFinishPosition(1);
 			p.setScore(row.getPlayer1Score());
 			players.add(p);
 
 			Player p2 = new Player();
 			p2.setName(row.getPlayer2Name());
-			p2.setInitialRanking(row.getPlayer2StartRanking());
+			if (!p2.isGuest()) {
+				p2.setInitialRanking(row.getPlayer2StartRanking());
+			}
 			p2.setFinalRanking(row.getPlayer2EndRanking());
 			p2.setFinishPosition(2);
 			p2.setScore(row.getPlayer2Score());
@@ -116,7 +120,9 @@ public class ProfileService {
 			if (row.getPlayer3Name() != null) {
 				Player p3 = new Player();
 				p3.setName(row.getPlayer3Name());
-				p3.setInitialRanking(row.getPlayer3StartRanking());
+				if (!p3.isGuest()) {
+					p3.setInitialRanking(row.getPlayer3StartRanking());
+				}
 				p3.setFinalRanking(row.getPlayer3EndRanking());
 				p3.setFinishPosition(3);
 				p3.setScore(row.getPlayer3Score());
@@ -125,7 +131,9 @@ public class ProfileService {
 			if (row.getPlayer4Name() != null) {
 				Player p4 = new Player();
 				p4.setName(row.getPlayer4Name());
-				p4.setInitialRanking(row.getPlayer4StartRanking());
+				if (!p4.isGuest()) {
+					p4.setInitialRanking(row.getPlayer4StartRanking());
+				}
 				p4.setFinalRanking(row.getPlayer4EndRanking());
 				p4.setFinishPosition(4);
 				p4.setScore(row.getPlayer4Score());

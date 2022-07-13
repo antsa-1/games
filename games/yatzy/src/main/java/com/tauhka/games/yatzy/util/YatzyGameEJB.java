@@ -42,7 +42,7 @@ public class YatzyGameEJB {
 	@AccessTimeout(15000)
 	@Asynchronous
 	public void saveYatzyGame(Result result) {
-		if (result.isComplete()) {
+		if (result.isComplete() || !hasSomebodyPoints(result)) {
 			return;
 		}
 		PreparedStatement stmt = null;
@@ -108,13 +108,18 @@ public class YatzyGameEJB {
 
 	}
 
+	private boolean hasSomebodyPoints(Result result) {
+		long playersWithPoints = result.getPlayers().stream().filter(player -> player.getScore() > 0).count();
+		return playersWithPoints > 0 ? true : false;
+	}
+
 	private String getFinishStatus(Result result) {
 		for (Player p : result.getPlayers()) {
 			if (p.getStatus() != Status.FINISHED) {
-				return "NOT_ALL_FINISHED";
+				return Constants.NOT_ALL_FINISHED;
 			}
 		}
-		return "ALL_FINISHED";
+		return Constants.ALL_FINISHED;
 	}
 
 	private String getDbColumName(Result result) {

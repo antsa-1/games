@@ -40,9 +40,9 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { loginMixin } from "../mixins/mixins";
+import { loginMixin } from "../../mixins/mixins";
 import GameHistory from "./GameHistory.vue";
-import { IProfile, IResultPlayer, GameResult } from "../interfaces/interfaces";
+import { IProfile, IResultPlayer, GameResult } from "../../interfaces/interfaces";
 export default defineComponent({
     name: "Profile",
     mixins: [loginMixin],

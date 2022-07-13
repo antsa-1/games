@@ -59,7 +59,7 @@ public class Player implements Comparable<Player> {
 	}
 
 	public boolean isGuest() {
-		return this.id == null;
+		return this.name.startsWith(Constants.GUEST_LOGIN_NAME);
 	}
 
 	public void setFinishPosition(Integer finishPosition) {
@@ -133,6 +133,13 @@ public class Player implements Comparable<Player> {
 
 	@Override
 	public int compareTo(Player other) {
+		// Any of the players might not have played any hand
+		if (this.score == null) {
+			return other.score == null ? 0 : 1;
+		}
+		if (other.score == null) {
+			return this.score == null ? 0 : -1;
+		}
 		int otherScore = other.score;
 		if (score > otherScore) {
 			return -1;

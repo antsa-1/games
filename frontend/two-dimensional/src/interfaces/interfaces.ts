@@ -149,7 +149,7 @@ export interface IGame {
     gameType: number,
     result: number,
     players: IResultPlayer[],
-    finishStatus?: FinishStatus,
+    finishStatus?: string,
     timeControlSeconds?: number
 }
 
@@ -168,7 +168,7 @@ export enum GameResult {
     LEFT_TABLE,
 }
 
-export enum FinishStatus {
+export enum GameStatus {
     ALL_FINISHED,
     NOT_ALL_FINISHED
 }

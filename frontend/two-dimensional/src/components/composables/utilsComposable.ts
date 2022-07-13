@@ -13,7 +13,7 @@ export function getRankingChange(player: IResultPlayer): string {
         const sign = player.finalRanking >= player.initialRanking ? "+" : "-"
         const amount = Math.abs(player.initialRanking - player.finalRanking)
         const result = sign.concat(amount.toFixed())
-        return result
+        return "(" + result + ")"
     }
 }
 
@@ -21,7 +21,6 @@ export function fixVal(val: number) {
     return val?.toFixed()
 }
 
-export function convertGameResultToText(result: number) {
-    const val = GameResult[result]
-    return val.toLowerCase()
-}
+/*
+ * 	@author antsa-1 from GitHub 
+*/

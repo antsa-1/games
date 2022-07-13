@@ -9,7 +9,7 @@ import Home from './components/Home.vue'
 import TableTicTacToe from './components/tables/TableTicTacToe.vue'
 import { IGameToken, IPlayer, ITable } from "./interfaces/interfaces";
 
-import Profile from './components/Profile.vue'
+import Profile from './components/profile/Profile.vue'
 import TopLists from './components/highscores/TopLists.vue'
 import TableConnectFour from './components/tables/TableConnectFour.vue'
 import PoolTable from './components/tables/PoolTable.vue'
