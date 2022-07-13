@@ -380,7 +380,7 @@ public class PoolTable extends Table implements PoolComponent {
 		expectingHandBallUpdate = true;
 		gameOver = false;
 		super.setGameResult(null);
-		super.resetRematchPlayer();
+		super.resetRematchPlayers();
 		return this;
 	}
 
