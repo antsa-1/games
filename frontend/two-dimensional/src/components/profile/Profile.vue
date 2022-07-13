@@ -117,7 +117,6 @@ export default defineComponent({
                         this.yatzyFasts = data.user.yatzyFasts
                         this.yatzySupers = data.user.yatzySupers
                         this.yatzyHypers = data.user.yatzyHypers
-                       console.log("HYPERS:"+this.yatzyHypers)
                     },
                     (err) => {
                         console.error("error in profile fetch " + err)
