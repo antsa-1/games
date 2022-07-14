@@ -2,6 +2,7 @@ package com.tauhka.portal.profile;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.json.bind.annotation.JsonbTransient;
@@ -329,6 +330,23 @@ public class YatzyGameRow implements Serializable {
 
 	public void setEndInstant(Instant endInstant) {
 		this.endInstant = endInstant;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(gameId);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		YatzyGameRow other = (YatzyGameRow) obj;
+		return Objects.equals(gameId, other.gameId);
 	}
 
 }
