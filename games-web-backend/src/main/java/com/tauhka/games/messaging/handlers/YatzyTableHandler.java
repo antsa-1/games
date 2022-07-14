@@ -134,16 +134,21 @@ public class YatzyTableHandler extends CommonHandler {
 		if (turnEvent.getDelay() > 0) {
 			try {
 				Thread.sleep(turnEvent.getDelay());
-				playComputerTurn(turnEvent.getTable());// Computer timesout if wait time is interrupted which should be better that other players would timeout
+				playComputerTurn(turnEvent.getTable());// Computer timesout if wait time is interrupted which should be better that
+														// other players would timeout
 			} catch (InterruptedException e) {
 				LOGGER.log(Level.SEVERE, "YatzyTableHandler: wait before computer turn was interruped.", e);
 			}
+		} else {
+			playComputerTurn(turnEvent.getTable());// Computer timesout if wait time is interrupted which should be better that
+													// other players would timeout
 		}
 	}
 
 	private void createTurnDAOForRolledDices(YatzyTable table, List<Dice> rolledDices) {
 
-		// Set diceValue in current position with a new value if it has been rolled, otherwise null
+		// Set diceValue in current position with a new value if it has been rolled,
+		// otherwise null
 		Integer diceValue1 = rolledDices.stream().filter(dice -> table.getDices().get(0).getDiceId().equals(dice.getDiceId())).findFirst().isPresent() ? table.getDices().get(0).getNumber() : null;
 		Integer diceValue2 = rolledDices.stream().filter(dice -> table.getDices().get(1).getDiceId().equals(dice.getDiceId())).findFirst().isPresent() ? table.getDices().get(1).getNumber() : null;
 		Integer diceValue3 = rolledDices.stream().filter(dice -> table.getDices().get(2).getDiceId().equals(dice.getDiceId())).findFirst().isPresent() ? table.getDices().get(2).getNumber() : null;

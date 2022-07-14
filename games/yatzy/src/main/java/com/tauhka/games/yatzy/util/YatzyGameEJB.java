@@ -282,7 +282,7 @@ public class YatzyGameEJB {
 			setNullOrInteger(stmt, index, null);
 			return;
 		}
-		int score = players.get(nthPlayer).getScore();
+		Integer score = players.get(nthPlayer).getScore();
 		setNullOrInteger(stmt, index, score);
 	}
 }
