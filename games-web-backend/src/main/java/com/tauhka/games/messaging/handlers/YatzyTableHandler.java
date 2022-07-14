@@ -106,6 +106,7 @@ public class YatzyTableHandler extends CommonHandler {
 		int finalExitCondition = 0; // 4 moves maximum
 		YatzyTable yatzyTable = (YatzyTable) table;
 		while (table.isArtificialPlayerInTurn() && finalExitCondition <= 4) {
+			System.out.println("COMPUTER ALKAA PELAAMAAN");
 			try {
 				finalExitCondition++;
 				Thread.sleep(getWaitTime(yatzyTable));
@@ -130,18 +131,16 @@ public class YatzyTableHandler extends CommonHandler {
 
 	@SuppressWarnings("unused")
 	private void observeTablesWhereAIActionIsRequired(@ObservesAsync AITurnEvent turnEvent) {
-		LOGGER.info("YatzyTableHandler received event");
+		LOGGER.fine("YatzyTableHandler received event, computer is expected to play now in table" + turnEvent.getTable());
 		if (turnEvent.getDelay() > 0) {
 			try {
 				Thread.sleep(turnEvent.getDelay());
-				playComputerTurn(turnEvent.getTable());// Computer timesout if wait time is interrupted which should be better that
-														// other players would timeout
+				playComputerTurn(turnEvent.getTable());
 			} catch (InterruptedException e) {
 				LOGGER.log(Level.SEVERE, "YatzyTableHandler: wait before computer turn was interruped.", e);
 			}
 		} else {
-			playComputerTurn(turnEvent.getTable());// Computer timesout if wait time is interrupted which should be better that
-													// other players would timeout
+			playComputerTurn(turnEvent.getTable());
 		}
 	}
 

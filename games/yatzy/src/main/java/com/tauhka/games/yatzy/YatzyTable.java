@@ -35,7 +35,8 @@ import jakarta.json.bind.annotation.JsonbTransient;
 public class YatzyTable extends Table {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(YatzyTable.class.getName());
-	private static final Jsonb jsonb = JsonbBuilder.create(); // All the methods in Jsonb class are safe for use by multiple concurrent threads.
+	private static final Jsonb jsonb = JsonbBuilder.create(); // All the methods in Jsonb class are safe for use by multiple concurrent
+																// threads.
 
 	@JsonbTransient
 	private YatzyRuleBase yatzyRuleBase;
@@ -137,7 +138,8 @@ public class YatzyTable extends Table {
 			gameOver = true;
 			return gameOver;
 		}
-		// Players can disconnect/leave table anytime. Last player can play the game to the end. if (this.players.size() < 1) { gameOver = true; }
+		// Players can disconnect/leave table anytime. Last player can play the game to
+		// the end. if (this.players.size() < 1) { gameOver = true; }
 		List<YatzyPlayer> enabledPlayers = this.players.stream().filter(player -> player.isEnabled()).collect(Collectors.toList());
 		if (isOnlyComputerLeftToPlay(enabledPlayers)) {
 			gameOver = true;
@@ -363,6 +365,7 @@ public class YatzyTable extends Table {
 		users.addAll(watchers);
 		return users;
 	}
+
 	@JsonbTransient
 	public int getEnabledPlayersCount() {
 		return (int) this.players.stream().filter(player -> player.isEnabled()).count();
@@ -431,10 +434,12 @@ public class YatzyTable extends Table {
 		return null;
 	}
 
-	/* private void determineNextPlayerInTurn(int removedIndex) { if (players.size() == 0) { playerInTurn = null; return; } if (removedIndex == players.size() - 1) { playerInTurn = players.get(0); } else { playerInTurn =
+	/*
+	 * private void determineNextPlayerInTurn(int removedIndex) { if (players.size() == 0) { playerInTurn = null; return; } if (removedIndex == players.size() - 1) { playerInTurn = players.get(0); } else { playerInTurn =
 	 * players.get(removedIndex); }
 	 * 
-	 * } */
+	 * }
+	 */
 	@Override
 	public YatzyPlayer getPlayerInTurn() {
 		return (YatzyPlayer) playerInTurn;
@@ -504,9 +509,10 @@ public class YatzyTable extends Table {
 			}
 			if (playerInTurn != null && playerInTurn.equals(user)) {
 				setupNextTurn();
-			}
-			if (isArtificialPlayerInTurn()) {
-				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 0));
+				// Check computerTurn only after the turn has changed. Computer might be playing already
+				if (isArtificialPlayerInTurn()) {
+					CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 0));
+				}
 			}
 		}
 	}
@@ -530,9 +536,9 @@ public class YatzyTable extends Table {
 			gameResult.findPlayer(player.getName()).setStatus(Status.RESIGNED);
 			if (playerInTurn.equals(player)) {
 				setupNextTurn();
-			}
-			if (isArtificialPlayerInTurn()) {
-				CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 0));
+				if (isArtificialPlayerInTurn()) {
+					CDI.current().getBeanManager().getEvent().fireAsync(new AITurnEvent(this, 0));
+				}
 			}
 			return null;
 		}

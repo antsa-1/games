@@ -55,7 +55,7 @@ public class AIHandler {
 
 	public Message calculateNextYatzyMove(YatzyTable table) {
 		if (!(table.isArtificialPlayerInTurn())) {
-			LOGGER.info("Olav_Computer has timed out while thread was sleeping. TimeControlIndex:" + table.getTimeControlIndex());
+			LOGGER.info("Computer trying to play out of turn. TimeControlIndex:" + table);
 			throw new IllegalStateException("Not computer turn");
 		}
 		YatzyAI yatzyAI = (YatzyAI) table.getPlayerInTurn();
