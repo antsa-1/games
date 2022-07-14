@@ -78,7 +78,7 @@ const setupCanvas = () => {
     let canvasElement = <HTMLCanvasElement>document.getElementById("canvas")
     yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, ctx: canvasElement.getContext("2d") }
     yatzyTable.value.canvas.ctx.imageSmoothingEnabled = true
-    yatzyTable.value.scoreCardRows = initScoreCardRows()
+   // yatzyTable.value.scoreCardRows = initScoreCardRows()
     if (isMyTurn.value) {
         yatzyTable.value.canvas.enabled = true
     }
@@ -94,6 +94,7 @@ const onAnimationChange = () =>{
 const scoreCardSection = (): ISection => {
 
     const canvasWidth = yatzyTable.value.canvas.element.width
+    const canvasHeight = yatzyTable.value.canvas.element.height
     const start: IVector2 = { x: 0, y: 0 }
     let end: IVector2 = undefined
     if(yatzyTable.value.players.length === 4 && canvasWidth >=1100){
@@ -114,21 +115,9 @@ const scoreCardSection = (): ISection => {
         end = { x: x, y: y }
         return { start, end }
     }
-    if (canvasWidth >= 1000 && yatzyTable.value.players.length === 4) {
-        let x = screen.width * 0.95
-        let y = screen.height * 0.5
-        end = { x: x, y: y }
-        return { start, end }
-    }
     if (canvasWidth >= 768 && yatzyTable.value.players.length <= 3) {
-        let x = screen.width * 0.99 / 2
+        let x = canvasWidth * 0.55
         let y = x
-        end = { x: x, y: y }
-        return { start, end }
-    }
-    if (canvasWidth >= 768 && yatzyTable.value.players.length === 4) {
-        let x = screen.width * 0.90
-        let y = screen.height * 0.5
         end = { x: x, y: y }
         return { start, end }
     }
@@ -149,7 +138,6 @@ const initScoreCardRows = (): IScoreCardRow[] => {
     if (yatzyTable.value.canvas.element.width < 768) {
         initialRowHeight = yatzyTable.value.canvas.element.height * 0.5 / CANVAS_ROWS
     }
-    //Wrapper object with section and height..?
     rows.push(createScoreCardRow("Ones [5]", 4, HandType.ONES, initialRowHeight))
     rows.push(createScoreCardRow("Twos [10]", 5, HandType.TWOS, initialRowHeight))
     rows.push(createScoreCardRow("Threes [15]", 6, HandType.THREES, initialRowHeight))
@@ -382,6 +370,7 @@ const resizeDocument = () => {
     //Resizes canvas size and sets position
     console.log("resizeEvent screenWidth" + screen.width)
     setTableLayout()
+    setupCanvas()
     drawAll()
 }
 
@@ -527,6 +516,7 @@ const createTableFromSnapShot = () => {
         return
     } 
     console.log("FROM SNAPSHOT")
+
     setDiceNumbers(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     gameSnapshot.table.players.forEach(snapshotPlayer => {
         const tablePlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
@@ -544,7 +534,7 @@ const createTableFromSnapShot = () => {
         tablePlayer.scoreCard.subTotal = snapshotPlayer.scoreCard.subTotal
         tablePlayer.enabled = snapshotPlayer.enabled
     })
-    actionQueue.value.actions = []
+    
     let player: IYatzyPlayer = <IYatzyPlayer>gameSnapshot.table.playerInTurn
     if (playerInTurn.value) {
         playerInTurn.value.rollsLeft = player?.rollsLeft
@@ -560,14 +550,14 @@ const createTableFromSnapShot = () => {
     }
     const action = { payload: gameSnapshot }
     initNewTurnIfRequired(action)
-    unblockQueue()
+
 }
 const onVisibilityChange = () => {
     console.log("onVisiblityChange " + isDocumentVisible())
     if (isDocumentVisible()) {
         createTableFromSnapShot()
         drawAll()
-        actionQueue.value.blocked = false
+        unblockQueue()
     } else {
         actionQueue.value.blocked = true
     }
@@ -695,11 +685,10 @@ const unsubscribeAction = store.subscribeAction((action, state) => {
     }
     if (action.type === "leaveTable") {
         gameSnapshot = action.payload
-        return handleLeavingPerson(action)
+        return handleLeavingPlayer(action)
     }
     if(action.type === "multiplayerTableResign"){
         gameSnapshot = action.payload
-        console.log("TEET:"+JSON.stringify(action))
         let yatzyPlayer = <IYatzyPlayer>yatzyTable.value.players.find(player => player.name === action.payload.who.name)
         deactivatePlayer(yatzyPlayer, action, false) 
         const newTurnInited = initNewTurnIfRequired(action)
@@ -717,14 +706,14 @@ const isYatzyTableRelatedAction = (action: any) => {
     return action.type === "yatzyRollDices" || action.type === "yatzySelectHand" || action.type === "leaveTable" || action.type === "timeout"
     || action.type === "rematch" || action.type === "multiplayerTableResign" || action.type ==="currentTableIsClosed"
 }
-const handleLeavingPerson = (action: any) => {
+const handleLeavingPlayer = (action: any) => {
     let player: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === action.payload.who.name)
     if (!player) {
         // watcher left
         console.log("watcher left")
         return
     }
-    console.log("HANDLE LEAVING")
+    console.log("handle leaving player")
     player.enabled = false
     unblockQueue()
     initNewTurnIfRequired(action)
@@ -880,17 +869,17 @@ const diceSection = (): ISection => {
 const buttonSection = (): ISection => {
     const dices: ISection = diceSection()
     const dSize = diceSize()
-    console.log("GG:"+JSON.stringify(dices))
+ 
     if(dices.end.y < yatzyTable.value.canvas.element.height /2) {
         const buttonSectionStart: IVector2 = { x: dices.start.x, y: dices.end.y  }
         const buttonSectionEnd: IVector2 = { x: dices.end.x -10, y: dices.end.y + 75 }
-         console.log("BB:"+JSON.stringify({ start: buttonSectionStart, end: buttonSectionEnd }))
+
         return { start: buttonSectionStart, end: buttonSectionEnd }
     }
  
     const buttonSectionStart: IVector2 = { x: dices.end.x +50, y: dices.start.y }
     const buttonSectionEnd: IVector2 = { x: dices.end.x+150, y: dices.start.y +50 }
-    console.log("BB2:"+JSON.stringify({ start: buttonSectionStart, end: buttonSectionEnd }))
+
     return { start: buttonSectionStart, end: buttonSectionEnd }  
 }
 
@@ -1036,8 +1025,10 @@ const drawScoreCardRow = (row: IScoreCardRow, rowHeight: number) => {
 
     ctx.fillText(row.title, row.section.start.x, rowHeight * row.nth + gapBetweenScoreCardRowTitleAndLine)
     fillPlayersPointsOnRow(row, rowHeight)
-    ctx.moveTo(row.section.start.x, row.section.start.y)
-    ctx.lineTo(row.section.end.x, row.section.end.y)
+   // ctx.moveTo(row.section.start.x, row.section.start.y)
+    //ctx.lineTo(row.section.end.x, row.section.end.y)
+    ctx.moveTo(row.section.start.x,  rowHeight * row.nth) 
+    ctx.lineTo(row.section.end.x,  rowHeight * row.nth)
     ctx.stroke()
     if (highlightedRow?.handType === row.handType) {
 
@@ -1074,19 +1065,16 @@ const repaintScoreCard = () => {
     const canvas = yatzyTable.value.canvas
     const cardSection = scoreCardSection()
     let rowHeight = scoreCardHeight() / CANVAS_ROWS
-    const width = canvas.element.width
+        const width = canvas.element.width
     const ctx = canvas.ctx
     ctx.font = "bolder " + FONT_SIZE.LARGEST + " Arial"
 
     ctx.beginPath()
     ctx.fillText("Scorecards", 150, 35)
     ctx.font = "bold " + FONT_SIZE.DEFAULT + " Arial"
-   /* if (canvas.element.width < 768 || yatzyTable.value.players.length === 4) {
-        rowHeight = canvas.element.height * 0.5 / CANVAS_ROWS
-        console.log("ROW height kun näyttö alle 768")
+    if (canvas.element.width < 768 ) {
         ctx.font = FONT_SIZE.DEFAULT + " Arial"
     }
-    */
     yatzyTable.value.scoreCardRows.forEach(row => {
         drawScoreCardRow(row, rowHeight)
     })
