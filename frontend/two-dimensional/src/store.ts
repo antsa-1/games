@@ -189,19 +189,17 @@ export const store = createStore<IStoreState>({
         },
         leaveStartedTable(state, userName: string) {
             if (state.theTable) {
+                let text = userName.concat(" left table")
+                const chatMessage: IChatMessage = { from: "System", text: text }
+                state.theTable.chat.messages.unshift(chatMessage)
                 if(state.theTable.gameMode.gameNumber === 4){
-                    //TODO something for multiplayer tables??
                     return
                 }
                 if (state.theTable.playerA.name === userName) {
                     state.theTable.playerInTurn = null
                 } else if (state.theTable.playerB.name === userName) {
                     state.theTable.playerInTurn = null
-
-                }               
-                let text = userName.concat(" left table")
-                const chatMessage: IChatMessage = { from: "System", text: text }
-                state.theTable.chat.messages.unshift(chatMessage)
+                } 
             }
         },
         leaveStartingTable(state, data:any) {

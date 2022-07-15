@@ -35,7 +35,7 @@
     <div>
         <canvas id="canvas" width="1200" height="600" style="border:1px solid"></canvas>
     </div>
-    <!-- <chat :id="yatzyTable.tableId"> </chat>  -->
+    <chat :id="yatzyTable.tableId"> </chat>
 </template>
 
 <script setup lang="ts">
@@ -46,7 +46,6 @@ import { ref, computed, onMounted, onBeforeMount, onUnmounted, watch, ComputedRe
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { leaveTable, rematch, resign } from '../composables/tableComposable'
-
 import {Image, IVector2, IGameCanvas, FONT_SIZE, FONT, IChatMessage } from "../../interfaces/commontypes"
 import { IYatzyPlayer, IYatzyMessage, IDice, ISection, IYatzySnapshot, IYatzyAction, IYatzyActionQueue, HandType, IHand, IScoreCardRow, IYatzyOptions } from "../../interfaces/yatzy"
 import Chat from "../Chat.vue"
