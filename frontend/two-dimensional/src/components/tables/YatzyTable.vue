@@ -515,7 +515,7 @@ const createTableFromSnapShot = () => {
         return
     } 
     console.log("FROM SNAPSHOT")
-
+    actionQueue.value.actions = []
     setDiceNumbers(yatzyTable.value.dices, gameSnapshot.table.dices, false)
     gameSnapshot.table.players.forEach(snapshotPlayer => {
         const tablePlayer: IYatzyPlayer = yatzyTable.value.players.find(player => player.name === snapshotPlayer.name)
@@ -896,8 +896,7 @@ let animationRun = 0
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis))
 
 const drawAll = () => {
-    console.log("DRAW all")
-    requestAnimationFrame(repaintYatzyTable)
+   repaintYatzyTable()
 }
 const animateDices = async (tableDices: IDice[], resultDices: IDice[]) => {
     if(gameOptions.value.animations ===false){
@@ -906,7 +905,7 @@ const animateDices = async (tableDices: IDice[], resultDices: IDice[]) => {
     yatzyTable.value.canvas.animating = true
     if (animationRun !== 0) {
         randomizeDices(yatzyTable.value.dices)
-        requestAnimationFrame(repaintDices)
+        repaintDices()
     } else {
         prepareDicesForRoll(tableDices, resultDices)
         randomizeDices(yatzyTable.value.dices)
