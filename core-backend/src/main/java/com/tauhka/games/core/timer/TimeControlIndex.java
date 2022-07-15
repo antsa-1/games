@@ -6,7 +6,7 @@ package com.tauhka.games.core.timer;
 
 //TODO from Database
 public enum TimeControlIndex {
-	INDEX_0(10, 0), INDEX_1(15, 1), INDEX_2(20, 2), INDEX_3(30, 3), INDEX_4(45, 4), INDEX_5(60, 5), INDEX_6(90, 6), INDEX_7(240, 7), INDEX_8(300, 8);
+	INDEX_0(10, 0), INDEX_1(15, 1), INDEX_2(20, 2), INDEX_3(30, 3), INDEX_4(45, 4), INDEX_5(60, 5), INDEX_6(90, 6), INDEX_7(120, 7), INDEX_8(240, 8), INDEX_9(300, 9);
 
 	private final int seconds;
 	private final int index;
