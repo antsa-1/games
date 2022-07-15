@@ -105,6 +105,8 @@ export default defineComponent({
 						data => {
 							//	this.setUser(data.name , data.activeLoginId)
 							let user: IUser = { name: data.name, token: data.activeLoginId };
+                            this.usrPwTemp = ""
+                            this.usrNameTemp = ""
 							this.$store.dispatch("setUser", user);
 						},
 						() => {
