@@ -48,6 +48,8 @@ public enum TimeControlIndex {
 			return INDEX_7;
 		case 8:
 			return INDEX_8;
+		case 9:
+			return INDEX_9;
 		default:
 			throw new IllegalArgumentException("no such timeControlIndex:" + index);
 		}
