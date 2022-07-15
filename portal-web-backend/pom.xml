@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>portal-web</artifactId>
-	<version>1.0.20</version>
+	<version>1.1.0</version>
 	<packaging>war</packaging>
 	<name>portal</name>
 	<parent>
 		<groupId>com.tauhka</groupId>
 		<artifactId>games</artifactId>
-		<version>1.0.4</version>
+		<version>1.0.5</version>
 		<relativePath>../games</relativePath>
 	</parent>
 	<properties>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>com.tauhka</groupId>
 			<artifactId>games-core</artifactId>
-			<version>1.2.0</version>
+			<version>1.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
