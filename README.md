@@ -6,6 +6,7 @@ Site is currently running @ http://35.217.7.146/portal/index.html with three gam
 <br>
 Yatzy now in beta testing. Welcomes!
 Known issues: Jumping between tabs might cause UI not to change turn correctly -> No roll button visible when animation is selected.
+Mobile users can (should be able to) select correct scorecard row by first touching the mobile screen longer as UI shows red rectangle around selected row, then clicking the row again should send the selection.
 
 ![tictactoe](./workspace-setup/Yatzy_15_07_2022.png)
 
