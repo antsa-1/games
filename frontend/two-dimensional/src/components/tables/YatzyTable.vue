@@ -35,7 +35,7 @@
     <div>
         <canvas id="canvas" width="1200" height="600" style="border:1px solid"></canvas>
     </div>
-    <chat :id="yatzyTable.tableId"> </chat>
+    <chat v-if="isChatVisible" :id="yatzyTable.tableId"> </chat>
 </template>
 
 <script setup lang="ts">
@@ -55,6 +55,7 @@ let gameSnapshot: IYatzySnapshot = null
 const store = useStore()
 const gameOptions = ref<IYatzyOptions>({ notificationSound: false, animations:true })
 const props = defineProps(['watch'])
+
 
 onMounted(() => {
     startCountdownTimer(yatzyTable.value.secondsLeft)
@@ -76,8 +77,12 @@ onMounted(() => {
 const setupCanvas = () => {
     let canvasElement = <HTMLCanvasElement>document.getElementById("canvas")
     yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, ctx: canvasElement.getContext("2d") }
+   // yatzyTable.value.canvas.element.width = window.innerWidth> 1200? 1195:window.innerWidth -10
+   // yatzyTable.value.canvas.element.height = window.innerWidth> 1200? 1195:window.innerWidth -10
     yatzyTable.value.canvas.ctx.imageSmoothingEnabled = true
     yatzyTable.value.scoreCardRows = initScoreCardRows()
+    
+    buttonSection()
     if (isMyTurn.value) {
         yatzyTable.value.canvas.enabled = true
     }
@@ -90,43 +95,7 @@ const onAnimationChange = () =>{
         }
     }
 }
-const scoreCardSection = (): ISection => {
 
-    const canvasWidth = yatzyTable.value.canvas.element.width
-    const canvasHeight = yatzyTable.value.canvas.element.height
-    const start: IVector2 = { x: 0, y: 0 }
-    let end: IVector2 = undefined
-    if(yatzyTable.value.players.length === 4 && canvasWidth >=1100){
-        let x = screen.width * 0.90
-        let y = screen.height * 0.5
-        end = { x: x, y: y }
-        return { start, end }
-    }
-    if(yatzyTable.value.players.length === 4){
-        let x = screen.width 
-        let y = screen.height * 0.65
-        end = { x: x, y: y }
-        return { start, end }
-    }
-    if (canvasWidth >= 1200 || canvasWidth >= 1000 && yatzyTable.value.players.length <= 3) {
-        let x = canvasWidth * 0.95 / 2
-        let y = x
-        end = { x: x, y: y }
-        return { start, end }
-    }
-    if (canvasWidth >= 768 && yatzyTable.value.players.length <= 3) {
-        let x = canvasWidth * 0.55
-        let y = x
-        end = { x: x, y: y }
-        return { start, end }
-    }
-    const x = canvasWidth
-    const y = yatzyTable.value.canvas.element.height * 0.75
-    end = { x: x, y: screen.height * 0.75 }
-    // yatzyTable.value.image.canvasDimension = {x:x, y:y}
-    return { start, end }
-
-}
 const scoreCardHeight = () => {
     const s = scoreCardSection()
     return s.end.y - s.start.y
@@ -203,10 +172,12 @@ const initTable = (): IYatzyTable => {
     initialTable.position = <IVector2>{ x: 0, y: 0 }
     return initialTable
 }
+
 const yatzyTable = ref<IYatzyTable>(initTable())
 const actionQueue = ref<IYatzyActionQueue>({ actions: [], blocked: false })
 const userName = computed<string>(() => store.getters.user?.name)
 const user = computed<IUser>(() => store.getters.user)
+const isChatVisible = computed<boolean>(() =>{ return verticalLayout.value === true && screen.width >= 1200 })
 const queueLength = computed<number>(() => actionQueue.value.actions.length)
 const playerInTurn = computed<IYatzyPlayer>(() => <IYatzyPlayer>yatzyTable.value.playerInTurn)
 const isAllowedToSelectDice = computed<boolean>(() => playerInTurn.value.rollsLeft > 0 && playerInTurn.value.rollsLeft < 3 && yatzyTable.value.canvas.animating === false)
@@ -217,7 +188,7 @@ const isAllDicesSelected = computed<boolean>(() => yatzyTable.value.dices.filter
 const isMouseEnabled = computed<boolean>(() =>
     yatzyTable.value.canvas.enabled && isMyTurn.value === true
 )
-
+const verticalLayout =ref<boolean>(true)
 const resignButtonClicked = ref<boolean>(false)
 
 const resignButtonClick = () =>{
@@ -360,7 +331,7 @@ const setCanvasPositionToLeft = () => {
     yatzyTable.value.canvas.element.style.left = '0px'
 }
 
-const resetCanvasPosition = () => {
+const setDefaultCanvasPosition = () => {
     yatzyTable.value.canvas.element.style.position = 'relative '
     yatzyTable.value.canvas.element.style.left = ''
 }
@@ -373,31 +344,35 @@ const resizeDocument = () => {
     drawAll()
 }
 
-let verticalLayout: boolean = true
 
-const setTableLayout = (): boolean => {
-    verticalLayout = true
+
+const setTableLayout = () => {
+    verticalLayout.value = true
+    if(yatzyTable.value.players.length ===4 ){
+        verticalLayout.value = false
+    }
     if (window.innerWidth >= 1200) {
-        resetCanvasPosition()
         yatzyTable.value.canvas.element.width = 1100
-        yatzyTable.value.canvas.element.height = window.innerHeight
-    } else if (window.innerWidth >= 1000 && yatzyTable.value.players.length > 2) {
-        yatzyTable.value.canvas.element.width = window.innerWidth * 0.9
-        yatzyTable.value.canvas.element.height = 1000
+        yatzyTable.value.canvas.element.height = window.innerHeight >= 1100 ? 1100: window.innerHeight
+        setDefaultCanvasPosition()
+    } else if (window.innerWidth  >= 1000 && yatzyTable.value.players.length > 2) {
+        yatzyTable.value.canvas.element.width = 900
+        yatzyTable.value.canvas.element.height = window.innerHeight >= 1100 ? 1100: window.innerHeight
+        setDefaultCanvasPosition()
     }
     else if (window.innerWidth >= 940) {
         if (yatzyTable.value.playerAmount >= 3) {
-            verticalLayout = false
+             verticalLayout.value = false
         }
         setCanvasPositionToLeft()
         yatzyTable.value.canvas.element.width = window.innerWidth
-        yatzyTable.value.canvas.element.height = window.innerHeight
+        yatzyTable.value.canvas.element.height = window.innerHeight >= 1100 ? 1100: window.innerHeight
     }
     else {
-        verticalLayout = false
+        verticalLayout.value = false
+        yatzyTable.value.canvas.element.width = window.innerWidth -10
+        yatzyTable.value.canvas.element.height = window.innerHeight -10
         setCanvasPositionToLeft()
-        yatzyTable.value.canvas.element.width = screen.width
-        yatzyTable.value.canvas.element.height = window.innerHeight
     }
     yatzyTable.value.scoreCardRows = initScoreCardRows()
     const size = diceSize()
@@ -405,7 +380,6 @@ const setTableLayout = (): boolean => {
         dice.image.canvasDimension.x = size.x
         dice.image.canvasDimension.y = size.y
     })
-    return verticalLayout
 }
 
 let expectingServerResponse: boolean = false
@@ -749,19 +723,41 @@ const repaintComponent = (component: IYatzyComponent) => {
     ctx.drawImage(component.image.image, 0, 0, component.image.realDimension.x, component.image.realDimension.y, component.image.canvasDestination.x, component.image.canvasDestination.y, component.image.canvasDimension.x, component.image.canvasDimension.y)
 }
 
+const getDiceHorizontalGapFromDiceSectionStart = () =>{
+    const width = yatzyTable.value.canvas.element.width
+    if(width < 480){
+        return 1
+    }
+    if(width <500) {
+        return 10
+    }
+    return yatzyTable.value.canvas.element.width <550? 20:60
+}
+
+const dicesPixelsDown = ():number => {
+    const size: IVector2 = diceSize()
+    return yatzyTable.value.canvas.element.width <550 ?size.y /2: size.y
+}
 const repaintDices = () => {
     const section = diceSection()
+   // yatzyTable.value.canvas.ctx.rect(section.start.x,section.start.y, section.end.x,section.end.y)
+   // yatzyTable.value.canvas.ctx.stroke()
+    const size: IVector2 = diceSize()
+    const diceGapFromDiceSectionStart = getDiceHorizontalGapFromDiceSectionStart()
+
+    const pixelsDown = dicesPixelsDown()
+ 
     for (let i = 0; i < 5; i++) {
         const dice = yatzyTable.value.dices[i]
         const size: IVector2 = diceSize()
         if (dice.selected) {
             //position down size of one dice
-            dice.position = { x: section.start.x + i * size.x + 60, y: section.start.y + size.y }
+            dice.position = { x: section.start.x + i * size.x + diceGapFromDiceSectionStart, y: section.start.y + pixelsDown }
         } else if (playerInTurn?.value?.rollsLeft === 0 && dice.selected === false) {
-            dice.position = { x: section.start.x + i * size.x + 60, y: section.start.y + (dice.position.y - section.start.y) }
+            dice.position = { x: section.start.x + i * size.x + diceGapFromDiceSectionStart, y: section.start.y + (dice.position.y - section.start.y) }
         } else {
             //basic position
-            dice.position = { x: section.start.x + i * size.x + 60, y: section.start.y }
+            dice.position = { x: section.start.x + i * size.x + diceGapFromDiceSectionStart, y: section.start.y }
         }
         dice.image.canvasDestination = dice.position
         dice.image.canvasDimension.x = size.x
@@ -771,7 +767,8 @@ const repaintDices = () => {
 }
 
 const repaintButtons = () => {
-
+    //yatzyTable.value.canvas.ctx.rect(buttonSection().start.x,buttonSection().start.y, buttonSection().end.x,buttonSection().end.y)
+     //yatzyTable.value.canvas.ctx.stroke()
     if (isRollButtonVisible.value === true) {
         const button = yatzyTable.value.playButton
         const section: ISection = buttonSection()
@@ -818,7 +815,7 @@ const optionsText = (): string => {
     return selectOrRollText
 }
 const repaintInfoTexts = () => {
-    const x = diceSection().start.x + 75
+    const x = diceSection().start.x + getDiceHorizontalGapFromDiceSectionStart()
     const turnInfoY = diceSection().start.y - 30
     const y = diceSection().start.y - 10
     const ctx = yatzyTable.value.canvas.ctx
@@ -835,62 +832,99 @@ const repaintInfoTexts = () => {
     ctx.fillText(optionsText(), x, y)
     ctx.closePath()
 }
+
+const scoreCardSection = (): ISection => {
+
+    const canvasWidth = yatzyTable.value.canvas.element.width
+    const canvasHeight = yatzyTable.value.canvas.element.height
+    const start: IVector2 = { x: 0, y: 0 }
+    let end: IVector2 = undefined
+    if(yatzyTable.value.players.length === 4 && canvasWidth >=1100){
+        let x = canvasWidth * 0.90
+        let y = canvasHeight * 0.5
+        end = { x: x, y: y }
+        return { start, end }
+    }
+    if(yatzyTable.value.players.length === 4){
+        let x = canvasWidth 
+        let y = canvasHeight * 0.65
+        end = { x: x, y: y }
+        return { start, end }
+    }
+    if (canvasWidth >= 1200 || canvasWidth >= 1000 && yatzyTable.value.players.length <= 3) {
+        let x = canvasWidth * 0.95 / 2
+        let y = x
+        end = { x: x, y: y }
+        return { start, end }
+    }
+    if (canvasWidth >= 768 && yatzyTable.value.players.length <= 3) {
+        let x = canvasWidth * 0.55
+        let y = x
+        end = { x: x, y: y }
+        return { start, end }
+    }
+    const x = canvasWidth
+    const y = yatzyTable.value.canvas.element.height * 0.75
+    end = { x: x, y: canvasHeight * 0.75 }
+    // yatzyTable.value.image.canvasDimension = {x:x, y:y}
+    return { start, end }
+
+}
 const diceSection = (): ISection => {
     const dSize: IVector2 = diceSize()
     const canvasWidth = yatzyTable.value.canvas.element.width
-    
-    if(yatzyTable.value.players.length === 4 && canvasWidth >=1000){
-        const x = yatzyTable.value.canvas.element.width 
-        const y = yatzyTable.value.canvas.element.height * 0.75
-        return { start: { x: 20, y: y }, end: { x: 20 + 6 * dSize.x, y: y + (dSize.y * 2) } }
-    }
-    if(yatzyTable.value.players.length === 4){
-        const x = yatzyTable.value.canvas.element.width 
-        const y = yatzyTable.value.canvas.element.height * 0.75
-        return { start: { x: 20, y: y }, end: { x: 20 + 6 * dSize.x, y: y + (dSize.y * 2) } }
-    }
-    if (verticalLayout && canvasWidth >= 1000) {
-
-        const y = yatzyTable.value.canvas.element.height / 10
-        const x = yatzyTable.value.canvas.element.width * 0.50
+    scoreCardSection().end
+ 
+    if(verticalLayout.value){
+        const x = scoreCardSection().end.x
+        const y = yatzyTable.value.canvas.element.height *0.12
         return { start: { x: x, y: y }, end: { x: x + 6 * dSize.x, y: y + (dSize.y * 2) } }
     }
-    if (verticalLayout && window.innerWidth < 1000) {
-
-        const y = yatzyTable.value.canvas.element.height / 10
-        const x = yatzyTable.value.canvas.element.width * 0.50
-        return { start: { x: x, y: y }, end: { x: x + 6 * dSize.x, y: y + (dSize.y * 2) } }
-    }
-
-    return { start: { x: 0, y: yatzyTable.value.canvas.element.height * 0.75 }, end: { x: 20 + 6 * dSize.x, y: yatzyTable.value.canvas.element.height * 0.95 } }
+    const spaceBetweenScoreCardAndDiceSection = 50 //canvasWidth>=600 ?75:5
+    const x = 20
+    const y= scoreCardSection().end.y +spaceBetweenScoreCardAndDiceSection
+   
+    return { start: { x: x, y: y }, end: { x: 20 + 6 * dSize.x, y: y+ dSize.y *2} }
 }
 
 const buttonSection = (): ISection => {
     const dices: ISection = diceSection()
     const dSize = diceSize()
- 
-    if(dices.end.y < yatzyTable.value.canvas.element.height /2) {
-        const buttonSectionStart: IVector2 = { x: dices.start.x, y: dices.end.y  }
-        const buttonSectionEnd: IVector2 = { x: dices.end.x -10, y: dices.end.y + 75 }
-
+    const canvasWidth = yatzyTable.value.canvas.element.width
+    const canvasHeight = yatzyTable.value.canvas.element.height
+    if(!verticalLayout.value && canvasWidth < 440){ // TODO
+        const buttonSectionStart: IVector2 = { x: dices.end.x -100, y: dices.start.y-30 }
+        const buttonSectionEnd: IVector2 = {x: dices.end.x, y: dices.start.y}
         return { start: buttonSectionStart, end: buttonSectionEnd }
-    }
- 
-    const buttonSectionStart: IVector2 = { x: dices.end.x +50, y: dices.start.y }
-    const buttonSectionEnd: IVector2 = { x: dices.end.x+150, y: dices.start.y +50 }
+    } 
+    if(!verticalLayout.value && canvasWidth < 530){
+        const buttonSectionStart: IVector2 = { x: dices.end.x -80, y: dices.start.y-30 }
+        const buttonSectionEnd: IVector2 = {x: dices.end.x +20, y: dices.start.y}
+        return { start: buttonSectionStart, end: buttonSectionEnd }
+    } 
+    if(!verticalLayout.value){
+        const buttonSectionStart: IVector2 = { x: dices.end.x , y: dices.start.y }
+        const buttonSectionEnd: IVector2 = { x: canvasWidth, y: dices.start.y+75 }
+        return { start: buttonSectionStart, end: buttonSectionEnd }
+    } 
+    const buttonSectionStart: IVector2 = { x: dices.start.x +50, y: dices.end.y+20 }
+    const buttonSectionEnd: IVector2 = { x: dices.start.x +150, y: dices.end.y +75 }
 
     return { start: buttonSectionStart, end: buttonSectionEnd }  
 }
 
 const diceSize = (): IVector2 => {
     const canvasWidth = yatzyTable.value.canvas.element.width
-    if (verticalLayout && screen.width >= 1000) {
+    if (verticalLayout.value && screen.width >= 1000) {
         return { x: 85, y: 85 }
     }
-    if (verticalLayout && window.innerWidth < 1000) {
+    if (verticalLayout.value && window.innerWidth < 1000) {
         return { x: 70, y: 70 }
     }
-    return window.innerWidth < 500 ? { x: 60, y: 60 } : { x: 80, y: 80 }
+    if(canvasWidth < 600){
+        return { x: 65, y: 65 }
+    }
+    return window.innerWidth < 550 ? { x: 54, y: 54 } : { x: 80, y: 80 }
 }
 let animationRun = 0
 const delay = millis => new Promise(resolve => setTimeout(resolve, millis))
@@ -944,10 +978,11 @@ const setDiceNumbers = async (tableDices: IDice[], resultDices: IDice[], animate
     const finalDices: IDice[] = tableDices.filter(tableDice => !tableDice.selected)
     const size: IVector2 = diceSize()
     yatzyTable.value.canvas.animating = true
+    const pixelsDown = dicesPixelsDown()
     while (counter < 16) {
         for (let i = 0; i < finalDices.length; i++) {
             let finalDice = finalDices[i]
-            finalDice.position.y += size.y / 16
+            finalDice.position.y += pixelsDown / 16
         }
         drawAll()
         await delay(50)
