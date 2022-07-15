@@ -2,6 +2,11 @@
 Site is currently running @ http://35.217.7.146/portal/index.html with three games, 8-ball (under test), tic-tac-toe and connect four.
 <br>
 
+### Technical dev setup 15.07.2022
+Yatzy into beta testing. Welcomes!
+Known issues: Jumping between tabs might cause UI not to change turn correctly -> No roll button visible when animation is selected.
+![tictactoe](./workspace-setup/Yatzy_15_07_2022.png)
+
 ### Overall architechture image:
 ![tictactoe](./workspace-setup/architecture_.png)
 <br>
