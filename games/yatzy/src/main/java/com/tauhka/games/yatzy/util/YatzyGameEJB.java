@@ -116,10 +116,10 @@ public class YatzyGameEJB {
 	private String getFinishStatus(Result result) {
 		for (Player p : result.getPlayers()) {
 			if (p.getStatus() != Status.FINISHED) {
-				return Constants.NOT_ALL_FINISHED;
+				return Constants.NOT_FULLY_COMPLETED;
 			}
 		}
-		return Constants.ALL_FINISHED;
+		return Constants.COMPLETED;
 	}
 
 	private String getDbColumName(Result result) {

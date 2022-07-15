@@ -32,8 +32,8 @@ public final class Constants {
 	public static final String YATZY_FAST = "yatzy_fast"; // 20sec
 	public static final String YATZY_SUPER = "yatzy_super";// 15 sec
 	public static final String YATZY_HYPER = "yatzy_hyper"; // 10 sec
-	public static final String NOT_ALL_FINISHED = "NOT_ALL_FINISHED";
-	public static final String ALL_FINISHED = "ALL_FINISHED";
+	public static final String NOT_FULLY_COMPLETED = "NOT_FULLY_COMPLETED";
+	public static final String COMPLETED = "COMPLETED";
 	public static final List<String> FORBIDDEN_WORD_PARTS = new ArrayList<String>();
 	static {
 		FORBIDDEN_WORD_PARTS.add("http");
