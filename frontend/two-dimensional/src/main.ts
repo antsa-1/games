@@ -170,6 +170,11 @@ const routes: RouteRecordRaw[] = [
         name: "Home",
     },
     {
+        path: "/portal/error",
+        component: Error,
+        name: "Error", 
+    },
+    {
         path: "/portal/:catchAll(.*)",
         component: Error,
         name: "Error",

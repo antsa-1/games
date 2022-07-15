@@ -479,13 +479,12 @@ export default defineComponent({
 			websocket.onerror = event => {
 				
 			};
-			websocket.onclose = event => {
-				
+			websocket.onclose = event => {				
 				if(this.user){
-					this.user.webSocket=null
+					this.user.webSocket = null
 				}
-			//	this.logout();
-			};
+                this.$router.push({ path: '/portal/error' })
+			}
 		},
 	
 		createTable(){

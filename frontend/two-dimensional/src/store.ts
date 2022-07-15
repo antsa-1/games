@@ -387,6 +387,7 @@ export const store = createStore<IStoreState>({
 
             context.commit("setTables", [])
             context.commit("setUsers", [])
+            context.commit("updateUserTableId", null)
             if (user && user.webSocket) {
 
                 user.webSocket.close();

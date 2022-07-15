@@ -1,27 +1,21 @@
 <template>
-<div class="row">
-	<div class="col text-danger">
-    	An error occured. Try navigating to
-		 <router-link :to="{ name: 'Home' }">main page</router-link>
-	</div>
-</div>
+    <div class="row">
+        <div class="col text-danger">
+            Timeout or an error occured.
+        </div>
+    </div>
 </template>  
 
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import { useStore } from 'vuex';
 
-export default defineComponent({
-	name: "Error",
-	methods: {
-		toMainPage(){
-			this.$router.push('/')
-		},
-	
-	},
-	created(){
-		
-	}
-});
+const store = useStore()
+
+onMounted(() => {
+    store.dispatch("logout")
+})
+
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
