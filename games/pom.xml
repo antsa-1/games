@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.tauhka</groupId>
 	<artifactId>games</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4</version>
 	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +20,7 @@
 		<dependency>
 			<groupId>com.tauhka</groupId>
 			<artifactId>games-core</artifactId>
-			<version>1.1.11</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.json</groupId>

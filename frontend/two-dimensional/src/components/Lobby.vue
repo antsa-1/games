@@ -325,7 +325,7 @@ export default defineComponent({
 						this.$store.dispatch("removeTable", data.message)
 						if(this.user.tableId === data.message){ // TableId is in message, table has been cleared from server already                               
                             this.$store.dispatch("currentTableIsClosed", data)                     
-                            this.$store.dispatch("updateUserTableId", null)
+                            this.$store.dispatch("updateUserTableId", null) // this fails as a watcher TODO
                         }
 						break;
 					case "NEW_PLAYER":

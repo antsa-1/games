@@ -23,7 +23,7 @@ public class FeedbackEJB {
 	// Developer machine path windows system
 	private final String fileNameLocal = "C:\\Users\\path-to\\projects\\TicTacToe\\BackEndJava\\feedbak.txt";
 	// Prod machine path with Linux
-	private final String fileNameProd = "/opt/tomee/feedbak/feedbak.txt";
+	private final String fileNameProd = "/opt/apache-tomee-plume-9.0.0-M8/feedbak/feedbak.txt"; 
 	private static final Logger LOGGER = Logger.getLogger(FeedbackEJB.class.getName());
 	private static final String ddMMyyyy = "dd.MM.yyyy HH:mm:ss";
 

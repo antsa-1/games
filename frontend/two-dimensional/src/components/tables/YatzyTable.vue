@@ -78,7 +78,7 @@ const setupCanvas = () => {
     let canvasElement = <HTMLCanvasElement>document.getElementById("canvas")
     yatzyTable.value.canvas = <IGameCanvas>{ element: canvasElement, animating: false, ctx: canvasElement.getContext("2d") }
     yatzyTable.value.canvas.ctx.imageSmoothingEnabled = true
-   // yatzyTable.value.scoreCardRows = initScoreCardRows()
+    yatzyTable.value.scoreCardRows = initScoreCardRows()
     if (isMyTurn.value) {
         yatzyTable.value.canvas.enabled = true
     }

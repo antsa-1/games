@@ -19,7 +19,7 @@ import Instructions from './components/Instructions.vue'
 import Feedback from './components/Feedback.vue'
 import Registration from './components/Registration.vue'
 import Error from './components/Error.vue'
-import VueRouter, { RouteRecordRaw } from 'vue-router'
+import VueRouter, { createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { store } from './store'
 import { IUser } from "./interfaces/interfaces";
 import { createWebHistory, createRouter } from "vue-router";
@@ -178,7 +178,7 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(), 
     routes,
 });
 const app = createApp(Games)

@@ -106,7 +106,6 @@ public class YatzyTableHandler extends CommonHandler {
 		int finalExitCondition = 0; // 4 moves maximum
 		YatzyTable yatzyTable = (YatzyTable) table;
 		while (table.isArtificialPlayerInTurn() && finalExitCondition <= 4) {
-			System.out.println("COMPUTER ALKAA PELAAMAAN");
 			try {
 				finalExitCondition++;
 				Thread.sleep(getWaitTime(yatzyTable));
